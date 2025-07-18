@@ -24,6 +24,16 @@ const menuItems = [
     label: "Inventory",
     href: "/dashboard/inventory",
   },
+  {
+    icon: "lineicons:folder-1",
+    label: "Category",
+    href: "/dashboard/category",
+  },
+  {
+    icon: "lineicons:buildings-1",
+    label: "Warehouse",
+    href: "/dashboard/warehouse",
+  },  
 ];
 
 export default function DashboardSidebar({}: Props) {

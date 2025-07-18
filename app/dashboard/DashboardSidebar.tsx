@@ -15,6 +15,11 @@ const menuItems = [
     href: "/dashboard",
   },
   {
+    icon: "lineicons:dollar-circle",
+    label: "Point of Sale",
+    href: "/dashboard/pos",
+  },
+  {
     icon: "lsicon:management-stockout-outline",
     label: "Inventory",
     href: "/dashboard/inventory",

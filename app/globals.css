@@ -5,3 +5,44 @@
   --color-secondary: #f3f5ed;
   --font-montserrat: var(--font-montserrat);
 }
+
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 8px;
+}
+.inventory-table .ant-table-thead > tr > th {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+.inventory-table .ant-table-tbody > tr:hover > td {
+  background: #f0f6ff !important;
+  transition: background 0.2s;
+}
+.custom-pagination {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 24px 16px 0;
+  background: #fff;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.03);
+}
+@media (max-width: 900px) {
+  .inventory-table {
+    min-width: 500px;
+  }
+}

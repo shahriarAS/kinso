@@ -3,6 +3,8 @@ import { Montserrat } from "next/font/google";
 import "./globals.css";
 import StoreProvider from "@/components/StoreProvider";
 import AppProvider from "@/components/AppProvider";
+import "@ant-design/v5-patch-for-react-19";
+import { Toaster } from "react-hot-toast";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -21,11 +23,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${montserrat.className} antialiased`}
-      >
+      <body className={`${montserrat.className} antialiased`}>
         <StoreProvider>
-        <AppProvider>{children}</AppProvider>
+          <AppProvider>
+            {children}
+            <Toaster />
+          </AppProvider>
         </StoreProvider>
       </body>
     </html>

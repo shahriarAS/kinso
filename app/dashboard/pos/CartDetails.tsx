@@ -208,10 +208,10 @@ export default function CartDetails({
                 key={item._id}
                 className="flex items-center justify-between border-b border-gray-100 py-4 last:border-b-0 gap-4 bg-white/80 rounded-xl px-2"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-lg font-bold text-primary/60 border border-gray-200">
+                <div className="flex items-center gap-3 w-1/3">
+                  {/* <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-lg font-bold text-primary/60 border border-gray-200">
                     {getInitials(item.name)}
-                  </div>
+                  </div> */}
                   <div>
                     <div className="font-medium text-primary text-sm line-clamp-2">
                       {item.name}
@@ -219,6 +219,7 @@ export default function CartDetails({
                     <div className="text-xs font-bold text-gray-600">UPC: {item.upc}</div>
                   </div>
                 </div>
+                <div className="flex items-center gap-3 w-2/3">
                 <div className="flex items-center gap-2">
                   <Button
                     size="small"
@@ -263,6 +264,7 @@ export default function CartDetails({
                     icon={<Icon icon="lineicons:close" />}
                   />
                 </Tooltip>
+                </div>
               </div>
             ))
           )}

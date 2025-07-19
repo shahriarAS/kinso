@@ -8,6 +8,20 @@ import { CartItem, CustomerOption } from "./types";
 import { getInitials } from "./page";
 import type { InvoiceData } from "./InvoiceTemplate";
 
+interface OrderCreatePayload {
+  customerId: string;
+  customerName: string;
+  items: {
+    product: string;
+    quantity: number;
+    unitPrice: number;
+    totalPrice: number;
+  }[];
+  totalAmount: number;
+  discount?: number;
+  notes?: string;
+}
+
 interface CartDetailsProps {
   cart: CartItem[];
   onQty: (_id: string, qty: number) => void;
@@ -69,19 +83,46 @@ export default function CartDetails({
   const confirmCheckout = async () => {
     try {
       const selectedCustomer = customers.find((c) => c.value === customer);
-      const now = new Date();
-      const invoiceNumber = `${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}-${now.getTime()}`;
-      // Build InvoiceData
-      const invoiceData: InvoiceData = {
-        invoiceNumber,
-        date: now.toLocaleDateString(),
+      // Prepare payload for backend (product: string)
+      const orderPayload: OrderCreatePayload = {
         customerId: customer,
+        customerName: selectedCustomer?.label || "Unknown Customer",
+        items: cart.map((item) => ({
+          product: item._id, // string ID for backend
+          quantity: item.quantity,
+          unitPrice: item.price,
+          totalPrice: item.price * item.quantity,
+        })),
+        totalAmount: total,
+        discount,
+        notes: discount > 0 ? `Discount applied: $${discount}` : undefined,
+      };
+      // The API slice expects the wrong type for createOrder, but our payload matches the backend expectation.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const response = await createOrder(orderPayload as any).unwrap();
+      const order = response.data;
+
+      // Handle customerId (string or object)
+      let customerObj: any;
+      if (typeof order.customerId === "object" && order.customerId !== null) {
+        customerObj = order.customerId;
+      } else {
+        customerObj = { _id: order.customerId, name: order.customerName, email: undefined, phone: undefined };
+      }
+
+      // Build InvoiceData from server order
+      const invoiceData: InvoiceData = {
+        invoiceNumber: order.orderNumber,
+        date: order.createdAt
+          ? new Date(order.createdAt).toLocaleDateString()
+          : new Date().toLocaleDateString(),
+        customerId: customerObj._id,
         customer: {
-          name: selectedCustomer?.label || "Unknown Customer",
+          name: customerObj.name,
           location: "",
-          id: customer,
-          email: (selectedCustomer as any)?.email || undefined,
-          phone: (selectedCustomer as any)?.phone || undefined,
+          id: customerObj._id,
+          email: typeof customerObj.email === "string" ? customerObj.email : undefined,
+          phone: typeof customerObj.phone === "string" ? customerObj.phone : undefined,
         },
         company: {
           name: "EZ POS",
@@ -92,34 +133,28 @@ export default function CartDetails({
           website: "www.ezpos.com",
           logo: "EZ",
         },
-        items: cart.map((item) => ({
-          description: item.name,
-          details: `UPC: ${item.upc}`,
-          quantity: item.quantity,
-          rate: item.price,
-          price: item.price * item.quantity,
-        })),
-        subtotal: subtotal,
-        discount,
-        total: total,
+        items: order.items.map((item: any) => {
+          // Handle product (string or object)
+          const productObj =
+            typeof item.product === "object" && item.product !== null
+              ? item.product
+              : { name: "Unknown", upc: "" };
+          return {
+            description: productObj.name,
+            details: `UPC: ${productObj.upc}`,
+            quantity: item.quantity,
+            rate: item.unitPrice,
+            price: item.totalPrice,
+          };
+        }),
+        subtotal: (order.totalAmount || 0) + (order.discount || 0),
+        discount: order.discount || 0,
+        total: order.totalAmount,
         signatory: {
           name: "EZ POS",
           title: "Cashier",
         },
       };
-      await createOrder({
-        customerId: customer,
-        customerName: selectedCustomer?.label || "Unknown Customer",
-        items: cart.map((item) => ({
-          product: item,
-          quantity: item.quantity,
-          unitPrice: item.price,
-          totalPrice: item.price * item.quantity,
-        })),
-        totalAmount: total,
-        discount, // Send discount to backend
-        notes: discount > 0 ? `Discount applied: $${discount}` : undefined,
-      }).unwrap();
       message.success("Order created successfully!");
       setCheckoutModalOpen(false);
       if (onOrderCompleted) onOrderCompleted(invoiceData);

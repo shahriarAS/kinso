@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/database';
 import { Order, Customer, Product } from '@/models';
 import { authorizeRequest, AuthenticatedRequest } from '@/lib/auth';
+import OrderCounter from '@/models/OrderCounter';
 
 // GET /api/orders - List all orders with pagination and search
 export async function GET(request: NextRequest) {
@@ -174,8 +175,21 @@ export async function POST(request: NextRequest) {
     // Apply discount
     const finalTotal = Math.max(0, totalAmount - discount);
     
-    // Generate order number (you might want to implement a more sophisticated numbering system)
-    const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    // Generate order number (date + daily sequence)
+    const now = new Date();
+    const yy = String(now.getFullYear()).slice(-2);
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const dateStr = `${yy}${mm}${dd}`;
+
+    // Atomically increment the sequence for today
+    const counter = await OrderCounter.findOneAndUpdate(
+      { date: dateStr },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+    const seqNum = String(counter.seq).padStart(4, '0');
+    const orderNumber = `ORD-${dateStr}-${seqNum}`;
     
     // Create order
     const order = await Order.create({

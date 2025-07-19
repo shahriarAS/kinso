@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Card, Row, Col, Statistic, Table, Tag, Space, Spin, Alert } from 'antd';
+import { Card, Row, Col, Statistic, Table, Tag, Space, Spin, Alert, Empty } from 'antd';
 import { 
   ShoppingCartOutlined, 
   UserOutlined, 
@@ -12,19 +12,65 @@ import {
   ClockCircleOutlined
 } from '@ant-design/icons';
 import { useGetDashboardStatsQuery, useGetInventoryAlertsQuery } from '@/store/api/dashboard';
-import { useGetOrdersQuery } from '@/store/api/orders';
-import { useGetCustomersQuery } from '@/store/api/customers';
-import { useGetProductsQuery } from '@/store/api/products';
+
+// Types for API responses
+interface RecentOrder {
+  _id: string;
+  orderNumber: string;
+  customerName: string;
+  totalAmount: number;
+  status: string;
+}
+interface TopProduct {
+  _id: string;
+  name: string;
+  totalSold: number;
+  revenue: number;
+}
+interface RevenueChartPoint {
+  date: string;
+  revenue: number;
+  orders: number;
+}
+interface DashboardStats {
+  totalRevenue: number;
+  totalOrders: number;
+  totalCustomers: number;
+  totalProducts: number;
+  pendingOrders: number;
+  lowStockProducts: number;
+  recentOrders: RecentOrder[];
+  topProducts: TopProduct[];
+  revenueChart: RevenueChartPoint[];
+}
+interface LowStockProduct {
+  _id: string;
+  name: string;
+  currentStock: number;
+  minStock: number;
+  warehouse: string;
+}
+interface OutOfStockProduct {
+  _id: string;
+  name: string;
+  warehouse: string;
+}
+interface ExpiringProduct {
+  _id: string;
+  name: string;
+  expiryDate: string;
+  quantity: number;
+}
+interface InventoryAlerts {
+  lowStockProducts: LowStockProduct[];
+  outOfStockProducts: OutOfStockProduct[];
+  expiringProducts: ExpiringProduct[];
+}
 
 const Dashboard: React.FC = () => {
   // Fetch dashboard data
   const { data: dashboardStats, isLoading: statsLoading, error: statsError } = useGetDashboardStatsQuery({});
-  const { data: inventoryAlerts, isLoading: alertsLoading } = useGetInventoryAlertsQuery();
-  
-  // Fetch recent data for tables
-  const { data: recentOrders } = useGetOrdersQuery({ page: 1, limit: 5 });
-  const { data: customers } = useGetCustomersQuery({ page: 1, limit: 5 });
-  const { data: products } = useGetProductsQuery({ page: 1, limit: 5 });
+  const { data: inventoryAlerts, isLoading: alertsLoading, error: alertsError } = useGetInventoryAlertsQuery();
 
   if (statsLoading) {
     return (
@@ -47,7 +93,7 @@ const Dashboard: React.FC = () => {
     );
   }
 
-  const stats = dashboardStats || {
+  const stats: DashboardStats = dashboardStats || {
     totalRevenue: 0,
     totalOrders: 0,
     totalCustomers: 0,
@@ -59,11 +105,12 @@ const Dashboard: React.FC = () => {
     revenueChart: []
   };
 
-  const alerts = inventoryAlerts || {
+  let alerts: InventoryAlerts = {
     lowStockProducts: [],
     outOfStockProducts: [],
     expiringProducts: []
   };
+  if (inventoryAlerts) alerts = inventoryAlerts;
 
   // Recent orders table columns
   const recentOrdersColumns = [
@@ -125,51 +172,72 @@ const Dashboard: React.FC = () => {
       {/* Statistics Cards */}
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} lg={6}>
-          <Card>
+          <Card
+            className="bg-white border rounded-2xl shadow-sm"
+            bodyStyle={{ padding: 20 }}
+          >
             <Statistic
-              title="Total Revenue"
+              title={<span className="text-primary font-medium">Total Revenue</span>}
               value={stats.totalRevenue}
               precision={2}
-              valueStyle={{ color: '#3f8600' }}
-              prefix={<DollarOutlined />}
-              suffix="$"
+              valueStyle={{ color: '#181818', fontWeight: 600, fontSize: 24 }}
+              prefix={<DollarOutlined className="mr-1 text-lg align-middle" />}
+              suffix={<span className="text-base font-semibold">$</span>}
             />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card>
+          <Card
+            className="bg-white border rounded-2xl shadow-sm"
+            bodyStyle={{ padding: 20 }}
+          >
             <Statistic
-              title="Total Orders"
+              title={<span className="text-primary font-medium">Total Orders</span>}
               value={stats.totalOrders}
-              valueStyle={{ color: '#1890ff' }}
-              prefix={<ShoppingCartOutlined />}
+              valueStyle={{ color: '#181818', fontWeight: 600, fontSize: 24 }}
+              prefix={<ShoppingCartOutlined className="mr-1 text-lg align-middle" />}
             />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card>
+          <Card
+            className="bg-white border rounded-2xl shadow-sm"
+            bodyStyle={{ padding: 20 }}
+          >
             <Statistic
-              title="Total Customers"
+              title={<span className="text-primary font-medium">Total Customers</span>}
               value={stats.totalCustomers}
-              valueStyle={{ color: '#722ed1' }}
-              prefix={<UserOutlined />}
+              valueStyle={{ color: '#181818', fontWeight: 600, fontSize: 24 }}
+              prefix={<UserOutlined className="mr-1 text-lg align-middle" />}
             />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card>
+          <Card
+            className="bg-white border rounded-2xl shadow-sm"
+            bodyStyle={{ padding: 20 }}
+          >
             <Statistic
-              title="Total Products"
+              title={<span className="text-primary font-medium">Total Products</span>}
               value={stats.totalProducts}
-              valueStyle={{ color: '#13c2c2' }}
-              prefix={<InboxOutlined />}
+              valueStyle={{ color: '#181818', fontWeight: 600, fontSize: 24 }}
+              prefix={<InboxOutlined className="mr-1 text-lg align-middle" />}
             />
           </Card>
         </Col>
       </Row>
 
       {/* Alerts Section */}
-      {(alerts.lowStockProducts.length > 0 || alerts.outOfStockProducts.length > 0) && (
+      {(alertsLoading || alertsError) ? (
+        <Row gutter={[16, 16]}>
+          <Col span={24}>
+            <Card title={<Space><ExclamationCircleOutlined className="text-orange-500" />Inventory Alerts</Space>} className="border-orange-200">
+              {alertsLoading && <Spin />}
+              {/* {alertsError && <Alert message="Error" description="Failed to load inventory alerts." type="error" showIcon />} */}
+            </Card>
+          </Col>
+        </Row>
+      ) : (alerts.lowStockProducts.length > 0 || alerts.outOfStockProducts.length > 0) && (
         <Row gutter={[16, 16]}>
           <Col span={24}>
             <Card 
@@ -182,7 +250,7 @@ const Dashboard: React.FC = () => {
               className="border-orange-200"
             >
               <Row gutter={[16, 16]}>
-                {alerts.lowStockProducts.length > 0 && (
+                {alerts.lowStockProducts.length > 0 ? (
                   <Col xs={24} md={12}>
                     <div className="mb-4">
                       <h4 className="font-semibold text-orange-600 mb-2">
@@ -193,12 +261,13 @@ const Dashboard: React.FC = () => {
                         columns={lowStockColumns}
                         pagination={false}
                         size="small"
-                        rowKey="id"
+                        rowKey="_id"
+                        locale={{ emptyText: 'No low stock products' }}
                       />
                     </div>
                   </Col>
-                )}
-                {alerts.outOfStockProducts.length > 0 && (
+                ) : null}
+                {alerts.outOfStockProducts.length > 0 ? (
                   <Col xs={24} md={12}>
                     <div className="mb-4">
                       <h4 className="font-semibold text-red-600 mb-2">
@@ -212,11 +281,12 @@ const Dashboard: React.FC = () => {
                         ]}
                         pagination={false}
                         size="small"
-                        rowKey="id"
+                        rowKey="_id"
+                        locale={{ emptyText: 'No out of stock products' }}
                       />
                     </div>
                   </Col>
-                )}
+                ) : null}
               </Row>
             </Card>
           </Col>
@@ -229,17 +299,21 @@ const Dashboard: React.FC = () => {
           <Card 
             title={
               <Space>
-                <ClockCircleOutlined />
-                Recent Orders
+                <ClockCircleOutlined className="text-primary" />
+                <span className="text-primary font-semibold">Recent Orders</span>
               </Space>
             }
+            className="bg-white border rounded-2xl shadow-sm"
+            bodyStyle={{ padding: 20 }}
           >
             <Table
               dataSource={stats.recentOrders}
               columns={recentOrdersColumns}
               pagination={false}
               size="small"
-              rowKey="id"
+              rowKey="_id"
+              locale={{ emptyText: 'No recent orders' }}
+              className="custom-table"
             />
           </Card>
         </Col>
@@ -247,10 +321,12 @@ const Dashboard: React.FC = () => {
           <Card 
             title={
               <Space>
-                <RiseOutlined />
-                Top Products
+                <RiseOutlined className="text-primary" />
+                <span className="text-primary font-semibold">Top Products</span>
               </Space>
             }
+            className="bg-white border rounded-2xl shadow-sm"
+            bodyStyle={{ padding: 20 }}
           >
             <Table
               dataSource={stats.topProducts}
@@ -266,14 +342,16 @@ const Dashboard: React.FC = () => {
               ]}
               pagination={false}
               size="small"
-              rowKey="id"
+              rowKey="_id"
+              locale={{ emptyText: 'No top products' }}
+              className="custom-table"
             />
           </Card>
         </Col>
       </Row>
 
       {/* Revenue Chart Placeholder */}
-      {stats.revenueChart.length > 0 && (
+      {/* {stats.revenueChart.length > 0 && (
         <Row gutter={[16, 16]}>
           <Col span={24}>
             <Card title="Revenue Trend">
@@ -285,7 +363,7 @@ const Dashboard: React.FC = () => {
             </Card>
           </Col>
         </Row>
-      )}
+      )} */}
     </div>
   );
 };

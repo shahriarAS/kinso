@@ -15,7 +15,7 @@ const menuItems = [
     href: "/dashboard",
   },
   {
-    icon: "lineicons:dollar-circle",
+    icon: "lineicons:cart-1",
     label: "Point of Sale",
     href: "/dashboard/pos",
   },
@@ -33,7 +33,17 @@ const menuItems = [
     icon: "lineicons:buildings-1",
     label: "Warehouse",
     href: "/dashboard/warehouse",
-  },  
+  },
+  {
+    icon: "lineicons:dollar-circle",
+    label: "Orders",
+    href: "/dashboard/orders",
+  },
+  {
+    icon: "lineicons:users",
+    label: "Customers",
+    href: "/dashboard/customers",
+  },
 ];
 
 export default function DashboardSidebar({}: Props) {

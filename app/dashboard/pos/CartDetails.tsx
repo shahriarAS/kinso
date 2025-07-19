@@ -7,9 +7,9 @@ import { getInitials } from "./page";
 
 interface CartDetailsProps {
   cart: CartItem[];
-  onQty: (id: string, qty: number) => void;
-  onRemove: (id: string) => void;
-  onPrice: (id: string, price: number) => void;
+  onQty: (_id: string, qty: number) => void;
+  onRemove: (_id: string) => void;
+  onPrice: (_id: string, price: number) => void;
   customer: string;
   setCustomer: (v: string) => void;
   discount: number;

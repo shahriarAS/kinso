@@ -1,12 +1,26 @@
-"use client";
-
+"use client";;
 import { Form, Input, Select } from "antd";
-import React from "react";
 
-type Props = {};
+interface CustomerFiltersProps {
+  onFiltersChange?: (filters: {
+    search?: string;
+    status?: "active" | "inactive";
+    email?: string;
+  }) => void;
+}
 
-export default function CustomerFilters({}: Props) {
+export default function CustomerFilters({ onFiltersChange }: CustomerFiltersProps) {
   const [form] = Form.useForm();
+
+  const handleValuesChange = (changedValues: Record<string, unknown>, allValues: Record<string, unknown>) => {
+    // Convert "all" status to undefined
+    const filters = {
+      ...allValues,
+      status: allValues.status === "all" ? undefined : allValues.status as "active" | "inactive" | undefined,
+    };
+    onFiltersChange?.(filters);
+  };
+
   return (
     <Form
       form={form}
@@ -14,6 +28,7 @@ export default function CustomerFilters({}: Props) {
       layout="vertical"
       requiredMark={false}
       className="border border-gray-300 rounded-3xl p-4 bg-white grid grid-cols-4 gap-8"
+      onValuesChange={handleValuesChange}
     >
       <Form.Item
         name="status"
@@ -28,17 +43,6 @@ export default function CustomerFilters({}: Props) {
             { label: "Active", value: "active" },
             { label: "Inactive", value: "inactive" },
           ]}
-          className="w-full"
-        />
-      </Form.Item>
-      <Form.Item
-        name="city"
-        label="City"
-        className="font-medium"
-      >
-        <Input
-          size="large"
-          placeholder="Search by city..."
           className="w-full"
         />
       </Form.Item>

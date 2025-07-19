@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
 function Login() {
+  const [form] = Form.useForm();
   const searchParams = useSearchParams();
   const redirectURL = searchParams.get("redirect");
   const router = useRouter();
@@ -72,6 +73,7 @@ function Login() {
 
           {/* Form */}
           <Form
+          form={form}
             name="login"
             onFinish={onFinish}
             className="space-y-6"

@@ -2,10 +2,10 @@ import { Warehouse } from "./warehouse";
 
 
 export interface Product {
-    id: string;
+    _id: string;
     name: string;
     upc: string;
-    category: string;
+    category: string | { _id: string; name: string };
     stock: {
         warehouse: Warehouse;
         unit: number;
@@ -14,4 +14,14 @@ export interface Product {
     }[]
 }
 
-export interface ProductInput extends Omit<Product, "_id"> { }
+export interface ProductInput {
+    name: string;
+    upc: string;
+    category: string;
+    stock: {
+        warehouse: string; // API expects warehouse ID as string
+        unit: number;
+        dp: number;
+        mrp: number;
+    }[];
+}

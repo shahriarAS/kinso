@@ -1,27 +1,74 @@
 "use client";
 import { Icon } from "@iconify/react";
-import { Button, Drawer, Form, Input, Select } from "antd";
-import { useState } from "react";
-import { CustomerInput } from "@/types/customer";
+import { Button, Drawer, Form, Input, Select, Spin } from "antd";
+import { useEffect } from "react";
+import { CustomerInput, Customer } from "@/types/customer";
+import { useCreateCustomerMutation, useUpdateCustomerMutation } from "@/store/api/customers";
+import { useNotification } from "@/hooks/useNotification";
 
-type Props = {};
+interface Props {
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  customer?: Customer | null;
+  onSuccess?: () => void;
+}
 
-export default function AddEditCustomerDrawer({}: Props) {
-  const [open, setOpen] = useState(false);
+export default function AddEditCustomerDrawer({ open, setOpen, customer, onSuccess }: Props) {
   const [form] = Form.useForm<CustomerInput>();
+  const isEditing = !!customer;
+
+  const [createCustomer, { isLoading: isCreating }] = useCreateCustomerMutation();
+  const [updateCustomer, { isLoading: isUpdating }] = useUpdateCustomerMutation();
+  const { success, error: showError } = useNotification();
+
+  const isLoading = isCreating || isUpdating;
+
+  useEffect(() => {
+    if (customer && open) {
+      form.setFieldsValue({
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone,
+        status: customer.status,
+        notes: customer.notes,
+      });
+    }
+  }, [customer, open, form]);
 
   const onClose = () => {
     setOpen(false);
+    form.resetFields();
+    onSuccess?.();
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      
+      if (isEditing && customer) {
+        await updateCustomer({ _id: customer._id, customer: values }).unwrap();
+        success("Customer updated successfully");
+      } else {
+        await createCustomer(values).unwrap();
+        success("Customer created successfully");
+      }
+      
+      onClose();
+    } catch (err: unknown) {
+      const error = err as { data?: { message?: string }; errorFields?: unknown };
+      if (error?.data?.message) {
+        showError("Failed to save customer", error.data.message);
+      } else if (!error?.errorFields) {
+        // Only show error if it's not a form validation error
+        showError("Failed to save customer", "An unexpected error occurred");
+      }
+    }
   };
 
   return (
     <div>
-      <Button onClick={() => setOpen(true)} size="large" type="primary">
-        <Icon icon="mdi:plus" />
-        Add Customer
-      </Button>
       <Drawer
-        title="Add New Customer"
+        title={isEditing ? "Edit Customer" : "Add New Customer"}
         open={open}
         onClose={onClose}
         width={480}
@@ -31,21 +78,27 @@ export default function AddEditCustomerDrawer({}: Props) {
         closeIcon={<Icon icon="lineicons:close" className="font-extrabold" />}
         extra={
           <div className="flex gap-4 justify-end">
-            <Button type="default" onClick={onClose}>
+            <Button type="default" onClick={onClose} disabled={isLoading}>
               Discard
             </Button>
-            <Button type="primary" onClick={onClose}>
-              Save
+            <Button 
+              type="primary" 
+              onClick={handleSubmit}
+              loading={isLoading}
+              icon={isLoading ? <Spin size="small" /> : undefined}
+            >
+              {isLoading ? "Saving..." : "Save"}
             </Button>
           </div>
         }
       >
         <Form
           form={form}
-          name="customer-add"
+          name="customer-form"
           layout="vertical"
           requiredMark={false}
           className="border border-gray-200 shadow-sm rounded-xl p-4 pb-6"
+          disabled={isLoading}
         >
           <Form.Item
             name="name"
@@ -85,73 +138,6 @@ export default function AddEditCustomerDrawer({}: Props) {
               <Input
                 size="large"
                 placeholder="Enter Phone"
-                className="w-full"
-              />
-            </Form.Item>
-          </div>
-
-          <Form.Item
-            name="address"
-            label="Address"
-            rules={[{ required: true, message: "Please enter address" }]}
-            className="font-medium"
-          >
-            <Input.TextArea
-              rows={2}
-              placeholder="Enter Address"
-              className="w-full"
-            />
-          </Form.Item>
-
-          <div className="grid grid-cols-2 gap-6">
-            <Form.Item
-              name="city"
-              label="City"
-              rules={[{ required: true, message: "Please enter city" }]}
-              className="font-medium"
-            >
-              <Input
-                size="large"
-                placeholder="Enter City"
-                className="w-full"
-              />
-            </Form.Item>
-            <Form.Item
-              name="state"
-              label="State"
-              rules={[{ required: true, message: "Please enter state" }]}
-              className="font-medium"
-            >
-              <Input
-                size="large"
-                placeholder="Enter State"
-                className="w-full"
-              />
-            </Form.Item>
-          </div>
-
-          <div className="grid grid-cols-2 gap-6">
-            <Form.Item
-              name="zipCode"
-              label="Zip Code"
-              rules={[{ required: true, message: "Please enter zip code" }]}
-              className="font-medium"
-            >
-              <Input
-                size="large"
-                placeholder="Enter Zip Code"
-                className="w-full"
-              />
-            </Form.Item>
-            <Form.Item
-              name="country"
-              label="Country"
-              rules={[{ required: true, message: "Please enter country" }]}
-              className="font-medium"
-            >
-              <Input
-                size="large"
-                placeholder="Enter Country"
                 className="w-full"
               />
             </Form.Item>

@@ -89,21 +89,21 @@ export default function POS({}: Props) {
       return [...prev, { ...product, quantity: 1, price: DEFAULT_UNIT_PRICE }];
     });
   };
-  const handleQtyChange = (id: string, qty: number) => {
+  const handleQtyChange = (_id: string, qty: number) => {
     setCart((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, quantity: Math.max(1, qty) } : item
       )
     );
   };
-  const handlePriceChange = (id: string, price: number) => {
+  const handlePriceChange = (_id: string, price: number) => {
     setCart((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, price: Math.max(0, price) } : item
       )
     );
   };
-  const handleRemoveFromCart = (id: string) => {
+  const handleRemoveFromCart = (_id: string) => {
     setCart((prev) => prev.filter((item) => item.id !== id));
   };
 

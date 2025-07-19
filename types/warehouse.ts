@@ -1,5 +1,5 @@
 export interface Warehouse {
-    id: string;
+    _id: string;
     name: string;
     location: string;
 }

@@ -3,18 +3,20 @@ import { Icon } from "@iconify/react";
 
 type Props = {
   form: FormInstance;
+  warehouseOptions?: { label: string; value: string; }[];
 };
 
-export default function StockEntries({ form }: Props) {
+export default function StockEntries({ form, warehouseOptions = [] }: Props) {
   return (
     <div>
       <label className="block text-base font-semibold mb-2">
         Stock Entries
       </label>
-      <Form.List name="stock">
+      <Form form={form}>
+        <Form.List name="stock">
         {(fields, { add, remove }) => (
           <div className="flex flex-col gap-3">
-            {fields.map((field, idx) => (
+            {fields.map((field) => (
               <div
                 key={field.key}
                 className="border border-gray-200 rounded-lg p-4 relative"
@@ -29,13 +31,7 @@ export default function StockEntries({ form }: Props) {
                     <Select
                       size="large"
                       placeholder="Select Warehouse"
-                      options={[
-                        { label: "Main Warehouse", value: "main" },
-                        {
-                          label: "Secondary Warehouse",
-                          value: "secondary",
-                        },
-                      ]}
+                      options={warehouseOptions}
                       className="w-full"
                     />
                   </Form.Item>
@@ -103,7 +99,8 @@ export default function StockEntries({ form }: Props) {
             </Button>
           </div>
         )}
-      </Form.List>
+        </Form.List>
+      </Form>
     </div>
   );
 }

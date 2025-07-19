@@ -1,11 +1,28 @@
 "use client";
 import { Form, Input } from "antd";
-import React from "react";
+import React, { useEffect } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 
-type Props = {};
+interface Props {
+  searchTerm: string;
+  onSearchChange: (value: string) => void;
+  onPageChange: (page: number) => void;
+}
 
-export default function CategoryFilters({}: Props) {
+export default function CategoryFilters({ searchTerm, onSearchChange, onPageChange }: Props) {
   const [form] = Form.useForm();
+  const debouncedSearch = useDebounce(searchTerm, 500);
+
+  useEffect(() => {
+    // Reset to first page when search changes
+    onPageChange(1);
+  }, [debouncedSearch, onPageChange]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    onSearchChange(value);
+  };
+
   return (
     <Form
       form={form}
@@ -23,6 +40,8 @@ export default function CategoryFilters({}: Props) {
           size="large"
           placeholder="Search categories..."
           className="w-full"
+          value={searchTerm}
+          onChange={handleSearchChange}
         />
       </Form.Item>
     </Form>

@@ -1,29 +1,86 @@
 "use client";
 import { Icon } from "@iconify/react";
-import { Button, Divider, Drawer, Form, Input } from "antd";
-import { useState } from "react";
+import { Button, Drawer, Form, Input, message } from "antd";
+import React, { useState, useEffect } from "react";
 import { Category } from "@/types";
+import { useCreateCategoryMutation, useUpdateCategoryMutation } from "@/store/api/categories";
+import toast from "react-hot-toast";
 
-type Props = {};
+interface Props {
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  category?: Category | null;
+  onClose?: () => void;
+}
 
-export default function AddEditCategoryDrawer({}: Props) {
-  const [open, setOpen] = useState(false);
+export default function AddEditCategoryDrawer({ open, setOpen, category, onClose }: Props) {
   const [form] = Form.useForm<Category>();
+  
+  // API hooks
+  const [createCategory, { isLoading: isCreating }] = useCreateCategoryMutation();
+  const [updateCategory, { isLoading: isUpdating }] = useUpdateCategoryMutation();
 
-  const onClose = () => {
+  const isEditing = !!category;
+  const isLoading = isCreating || isUpdating;
+
+  useEffect(() => {
+    if (category && open) {
+      form.setFieldsValue({
+        name: category.name,
+        description: category.description,
+      });
+    } else if (!open) {
+      form.resetFields();
+    }
+  }, [category, open, form]);
+
+  const handleOpen = () => {
+    setOpen(true);
+    form.resetFields();
+  };
+
+  const handleClose = () => {
     setOpen(false);
+    form.resetFields();
+    if (onClose) {
+      onClose();
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      
+      if (isEditing && category) {
+        await updateCategory({
+          _id: category._id,
+          category: values,
+        }).unwrap();
+        toast.success('Category updated successfully');
+      } else {
+        await createCategory(values).unwrap();
+        toast.success('Category created successfully');
+      }
+      
+      handleClose();
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'data' in error && error.data && typeof error.data === 'object' && 'message' in error.data) {
+        toast.error((error.data as { message: string }).message);
+      } else if (error && typeof error === 'object' && 'errorFields' in error) {
+        // Form validation error
+        return;
+      } else {
+        toast.error('Failed to save category');
+      }
+    }
   };
 
   return (
     <div>
-      <Button onClick={() => setOpen(true)} size="large" type="primary">
-        <Icon icon="mdi:plus" />
-        Add Category
-      </Button>
       <Drawer
-        title="Add New Category"
+        title={isEditing ? "Edit Category" : "Add New Category"}
         open={open}
-        onClose={onClose}
+        onClose={handleClose}
         width={480}
         className="rounded-3xl"
         getContainer={false}
@@ -31,11 +88,15 @@ export default function AddEditCategoryDrawer({}: Props) {
         closeIcon={<Icon icon="lineicons:close" className="font-extrabold" />}
         extra={
           <div className="flex gap-4 justify-end">
-            <Button type="default" onClick={onClose}>
+            <Button type="default" onClick={handleClose} disabled={isLoading}>
               Discard
             </Button>
-            <Button type="primary" onClick={onClose}>
-              Save
+            <Button 
+              type="primary" 
+              onClick={handleSubmit}
+              loading={isLoading}
+            >
+              {isEditing ? 'Update' : 'Save'}
             </Button>
           </div>
         }

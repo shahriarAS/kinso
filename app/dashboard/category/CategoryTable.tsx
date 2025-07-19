@@ -1,20 +1,48 @@
 "use client";
 
-import { Table, Button, Tooltip, Pagination } from "antd";
+import { Table, Button, Tooltip, Pagination, Popconfirm, message } from "antd";
 import { Icon } from "@iconify/react";
 import React, { useState } from "react";
+import { useGetCategoriesQuery, useDeleteCategoryMutation } from "@/store/api/categories";
 import type { Category } from "@/types";
+import AddEditCategoryDrawer from './AddEditCategoryDrawer';
+import toast from "react-hot-toast";
 
-const mockData: Category[] = [
-  { id: "1", name: "Electronics", description: "Devices and gadgets" },
-  { id: "2", name: "Clothing", description: "Apparel and accessories" },
-  { id: "3", name: "Food", description: "Groceries and perishables" },
-];
+interface Props {
+  searchTerm: string;
+  currentPage: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+}
 
-export default function CategoryTable() {
-  const [current, setCurrent] = useState(1);
-  const pageSize = 10;
-  const paginatedData = mockData.slice((current - 1) * pageSize, current * pageSize);
+export default function CategoryTable({ searchTerm, currentPage, pageSize, onPageChange }: Props) {
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  
+  // API hooks
+  const { data, isLoading } = useGetCategoriesQuery({
+    page: currentPage,
+    limit: pageSize,
+    search: searchTerm,
+  });
+  
+  const [deleteCategory, { isLoading: isDeleting }] = useDeleteCategoryMutation();
+
+  const handleEdit = (category: Category) => {
+    setEditingCategory(category);
+  };
+
+  const handleDelete = async (_id: string) => {
+    try {
+      await deleteCategory(_id).unwrap();
+      toast.success('Category deleted successfully');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'data' in error && error.data && typeof error.data === 'object' && 'message' in error.data) {
+        toast.error((error.data as { message: string }).message);
+      } else {
+        toast.error('Failed to delete category');
+      }
+    }
+  };
 
   const columns = [
     {
@@ -27,27 +55,45 @@ export default function CategoryTable() {
       title: <span className="font-medium text-base">Description</span>,
       dataIndex: "description",
       key: "description",
-      render: (text: string) => <span className="text-gray-700">{text}</span>,
+      render: (text: string) => <span className="text-gray-700">{text || '-'}</span>,
     },
     {
       title: <span className="font-medium text-base">Action</span>,
       key: "action",
-      render: (_: any, record: Category) => (
+      render: (_: unknown, record: Category) => (
         <div className="flex gap-2">
           <Tooltip title="Edit">
-            <Button className="inline-flex items-center justify-center rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 transition p-1.5">
+            <Button 
+              className="inline-flex items-center justify-center rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 transition p-1.5"
+              onClick={() => handleEdit(record)}
+            >
               <Icon icon="lineicons:pencil-1" className="text-lg text-blue-700" />
             </Button>
           </Tooltip>
           <Tooltip title="Delete">
-            <Button className="inline-flex items-center justify-center rounded-lg bg-red-50 border border-red-200 hover:bg-red-100 transition p-1.5">
-              <Icon icon="lineicons:trash-3" className="text-lg text-red-600" />
-            </Button>
+            <Popconfirm
+              title="Delete Category"
+              description="Are you sure you want to delete this category?"
+              onConfirm={() => handleDelete(record._id)}
+              okText="Yes"
+              cancelText="No"
+              okButtonProps={{ danger: true }}
+            >
+              <Button 
+                className="inline-flex items-center justify-center rounded-lg bg-red-50 border border-red-200 hover:bg-red-100 transition p-1.5"
+                loading={isDeleting}
+              >
+                <Icon icon="lineicons:trash-3" className="text-lg text-red-600" />
+              </Button>
+            </Popconfirm>
           </Tooltip>
         </div>
       ),
     },
   ];
+
+  const categories = data?.data || [];
+  const pagination = data?.pagination;
 
   return (
     <div className="bg-white border border-gray-300 rounded-3xl shadow-lg overflow-hidden flex flex-col" style={{ maxHeight: 600 }}>
@@ -57,23 +103,37 @@ export default function CategoryTable() {
       >
         <Table
           columns={columns}
-          dataSource={paginatedData}
-          rowKey="id"
+          dataSource={categories}
+          rowKey="_id"
           className="min-w-[700px] !bg-white"
           scroll={{ x: '100%' }}
           pagination={false}
+          loading={isLoading}
           sticky
         />
       </div>
-      <div className="custom-pagination">
-        <Pagination
-          current={current}
-          pageSize={pageSize}
-          total={mockData.length}
-          onChange={setCurrent}
-          showSizeChanger={false}
-        />
-      </div>
+      {pagination && (
+        <div className="custom-pagination">
+          <Pagination
+            current={currentPage}
+            pageSize={pageSize}
+            total={pagination.total}
+            onChange={onPageChange}
+            showSizeChanger={false}
+            showTotal={(total, range) => 
+              `${range[0]}-${range[1]} of ${total} items`
+            }
+          />
+        </div>
+      )}
+      
+      {/* Edit Drawer */}
+      <AddEditCategoryDrawer 
+        open={!!editingCategory}
+        setOpen={() => setEditingCategory(null)}
+        category={editingCategory}
+        onClose={() => setEditingCategory(null)}
+      />
     </div>
   );
 } 

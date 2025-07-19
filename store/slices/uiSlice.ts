@@ -47,7 +47,7 @@ const uiSlice = createSlice({
     addNotification: (state, action: PayloadAction<Omit<Notification, "id" | "timestamp">>) => {
       const notification: Notification = {
         ...action.payload,
-        id: Date.now().toString(),
+        _id: Date.now().toString(),
         timestamp: new Date().toISOString(),
         read: false,
       };
@@ -55,12 +55,12 @@ const uiSlice = createSlice({
     },
     removeNotification: (state, action: PayloadAction<string>) => {
       state.notifications = state.notifications.filter(
-        (notification) => notification.id !== action.payload
+        (notification) => notification._id !== action.payload
       );
     },
     markNotificationAsRead: (state, action: PayloadAction<string>) => {
       const notification = state.notifications.find(
-        (notification) => notification.id === action.payload
+        (notification) => notification._id === action.payload
       );
       if (notification) {
         notification.read = true;

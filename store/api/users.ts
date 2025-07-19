@@ -60,7 +60,7 @@ export const usersApi = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.data.map(({ id }) => ({ type: "User" as const, id })),
+              ...result.data.map(({ _id }) => ({ type: "User" as const, id: _id })),
               { type: "User", id: "LIST" },
             ]
           : [{ type: "User", id: "LIST" }],
@@ -75,7 +75,7 @@ export const usersApi = createApi({
         url: `/${_id}`,
         method: "GET",
       }),
-      providesTags: (result, error, id) => [{ type: "User", id }],
+      providesTags: (result, error, _id) => [{ type: "User", _id }],
     }),
 
     // Create new user
@@ -96,13 +96,13 @@ export const usersApi = createApi({
       { message: string; data: User },
       { _id: string; user: UserUpdateInput }
     >({
-      query: ({ id, user }) => ({
+      query: ({ _id, user }) => ({
         url: `/${_id}`,
         method: "PUT",
         body: user,
       }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: "User", id },
+      invalidatesTags: (result, error, { _id }) => [
+        { type: "User", _id },
         { type: "User", id: "LIST" },
       ],
     }),
@@ -153,7 +153,7 @@ export const usersApi = createApi({
       }),
       providesTags: (result) =>
         result
-          ? result.data.map(({ id }) => ({ type: "User" as const, id }))
+          ? result.data.map(({ _id }) => ({ type: "User" as const, _id }))
           : [],
     }),
   }),

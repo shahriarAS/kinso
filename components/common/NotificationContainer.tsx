@@ -16,10 +16,10 @@ const NotificationContainer: React.FC = () => {
         notification[notificationItem.type]({
           message: notificationItem.title,
           description: notificationItem.message,
-          key: notificationItem.id,
+          key: notificationItem._id,
           duration: notificationItem.type === 'error' ? 0 : 4.5, // Error notifications don't auto-close
           onClose: () => {
-            dispatch(removeNotification(notificationItem.id));
+            dispatch(removeNotification(notificationItem._id));
           },
         });
       }

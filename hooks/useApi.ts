@@ -34,8 +34,6 @@ export {
   useCreateOrderMutation,
   useUpdateOrderMutation,
   useDeleteOrderMutation,
-  useUpdateOrderStatusMutation,
-  useUpdatePaymentStatusMutation,
   useGetOrdersByCustomerQuery,
 } from "@/store/api/orders";
 
@@ -47,7 +45,6 @@ export {
   useUpdateProductMutation,
   useDeleteProductMutation,
   useUpdateProductStockMutation,
-  useGetCategoriesQuery as useGetProductCategoriesQuery,
 } from "@/store/api/products";
 
 export {

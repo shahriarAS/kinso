@@ -17,7 +17,7 @@ interface Cached {
  * during API Route usage.
  */
 declare global {
-  var mongoose: { conn: null | typeof mongoose; promise: null | Promise<typeof mongoose> } | undefined;
+  var mongoose: Cached | undefined;
 }
 
 let cached: Cached = global.mongoose || { conn: null, promise: null }; // eslint-disable-line
@@ -51,4 +51,4 @@ async function dbConnect() {
   return cached.conn;
 }
 
-export default dbConnect; 
+export default dbConnect;

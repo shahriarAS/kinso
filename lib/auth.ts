@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { User } from '@/models';
 import dbConnect from './database';
@@ -16,10 +16,15 @@ export interface AuthOptions {
   requireAuth?: boolean;
 }
 
-// JWT configuration
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+// JWT configuration with proper validation
+const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || '30d';
+
+// Validate JWT_SECRET at startup
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required');
+}
 
 // Cookie configuration
 const COOKIE_OPTIONS = {
@@ -35,29 +40,38 @@ const REFRESH_COOKIE_OPTIONS = {
   maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
 };
 
+// Custom JWT payload interface
+interface TokenPayload extends JwtPayload {
+  userId: string;
+  role: UserRole;
+  type: 'access' | 'refresh';
+}
+
 // JWT token generation
 export function generateTokens(userId: string, role: UserRole) {
-   
+  const payload = { userId, role, type: 'access' as const };
+  const refreshPayload = { userId, role, type: 'refresh' as const };
+  
   const accessToken = jwt.sign(
-    { userId, role, type: 'access' },
-    JWT_SECRET,
-    { expiresIn: JWT_EXPIRES_IN }
+    payload,
+    JWT_SECRET!,
+    { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions
   );
 
-   
   const refreshToken = jwt.sign(
-    { userId, role, type: 'refresh' },
-    JWT_SECRET,
-    { expiresIn: REFRESH_TOKEN_EXPIRES_IN }
+    refreshPayload,
+    JWT_SECRET!,
+    { expiresIn: REFRESH_TOKEN_EXPIRES_IN } as jwt.SignOptions
   );
 
   return { accessToken, refreshToken };
 }
 
 // JWT token verification
-export function verifyToken(token: string): any {
+export function verifyToken(token: string): TokenPayload | null {
   try {
-    return jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET!) as TokenPayload;
+    return decoded;
   } catch (error) {
     return null;
   }
@@ -114,9 +128,9 @@ export async function authenticateUser(request: NextRequest): Promise<any> {
       const decoded = verifyToken(refreshToken);
       if (decoded && decoded.type === 'refresh') {
         const user = await getUserById(decoded.userId);
-                 if (user && user.isActive) {
-           // Generate new tokens
-           const newTokens = generateTokens((user._id as any).toString(), user.role);
+        if (user && user.isActive) {
+          // Generate new tokens
+          const newTokens = generateTokens((user._id as any).toString(), user.role);
           
           // Set new cookies (this will be handled by the calling function)
           return {
@@ -266,4 +280,4 @@ export function checkRateLimit(identifier: string, limit: number = 5, windowMs: 
 
   record.count++;
   return true;
-} 
+}

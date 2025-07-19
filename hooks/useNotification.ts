@@ -19,11 +19,13 @@ export const useNotification = () => {
       type,
       title,
       message,
+      _id: Date.now().toString(),
+      read: false,
     }));
   }, [dispatch]);
 
   const removeNotificationById = useCallback((_id: string) => {
-    dispatch(removeNotification(id));
+    dispatch(removeNotification(_id));
   }, [dispatch]);
 
   const success = useCallback((title: string, message?: string) => {

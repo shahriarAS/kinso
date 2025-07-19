@@ -96,21 +96,6 @@ export const ordersApi = createApi({
       invalidatesTags: [{ type: "Order", id: "LIST" }],
     }),
 
-    // Update order status
-    updateOrderStatus: builder.mutation<
-      { message: string; data: Order },
-      { _id: string; status: Order["status"] }
-    >({
-      query: ({ _id, status }) => ({
-        url: `/${_id}/status`,
-        method: "PATCH",
-        body: { status },
-      }),
-      invalidatesTags: (result, error, { _id }) => [
-        { type: "Order", id: _id },
-        { type: "Order", id: "LIST" },
-      ],
-    }),
     
     // Get order statistics
     getOrderStats: builder.query<
@@ -161,8 +146,6 @@ export const {
   useCreateOrderMutation,
   useUpdateOrderMutation,
   useDeleteOrderMutation,
-  useUpdateOrderStatusMutation,
-  useUpdatePaymentStatusMutation,
   useGetOrderStatsQuery,
   useGetOrdersByCustomerQuery,
 } = ordersApi; 

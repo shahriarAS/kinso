@@ -5,6 +5,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { twMerge } from "tailwind-merge";
+import { Dropdown, Avatar, Button, Spin } from "antd";
+import { UserOutlined, LogoutOutlined, DownOutlined } from "@ant-design/icons";
+import { useFetchAuthUserQuery, useLogoutUserMutation } from "@/store/api/auth";
 
 type Props = {};
 
@@ -77,7 +80,7 @@ export default function DashboardSidebar({}: Props) {
           />
         </span>
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 flex-1">
         {menuItems.map((item) => (
           <Link
             key={item.href}
@@ -103,6 +106,83 @@ export default function DashboardSidebar({}: Props) {
           </Link>
         ))}
       </div>
+      {/* Profile context menu at the bottom */}
+      <ProfileMenu collapsed={collapsed} />
     </aside>
+  );
+}
+
+function ProfileMenu({ collapsed }: { collapsed: boolean }) {
+  const { data, isLoading } = useFetchAuthUserQuery();
+  const [logoutUser, { isLoading: isLoggingOut }] = useLogoutUserMutation();
+  const email = data?.user?.email || "";
+  const avatar = data?.user?.avatar;
+
+  const handleLogout = async () => {
+    await logoutUser();
+  };
+
+  const menu = (
+    <div className="min-w-[180px] py-2 px-3 bg-[#232323] rounded-lg shadow-lg border border-white/10">
+      <div className="flex items-center gap-2 mb-2">
+        <Avatar size={32} src={avatar} icon={<UserOutlined />} className="bg-secondary/30" />
+        <div className="flex flex-col">
+          <span className="text-xs text-white font-medium">{email}</span>
+        </div>
+      </div>
+      <Button
+        type="text"
+        icon={<LogoutOutlined />}
+        className="w-full text-left text-red-500 hover:bg-red-50 hover:text-red-700 mt-2"
+        onClick={handleLogout}
+        loading={isLoggingOut}
+      >
+        Logout
+      </Button>
+    </div>
+  );
+
+  return (
+    <div
+      className={twMerge(
+        "w-full flex items-center justify-center py-4 border-t border-white/10",
+        collapsed ? "px-0" : "px-4"
+      )}
+    >
+      {isLoading ? (
+        <Spin size="small" />
+      ) : (
+        <Dropdown
+          dropdownRender={() => menu}
+          trigger={["click"]}
+          placement="topCenter"
+        >
+          <div
+            className={twMerge(
+              "flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-secondary/10 transition-all",
+              collapsed ? "justify-center" : "justify-start"
+            )}
+            tabIndex={0}
+          >
+            <Avatar
+              size={collapsed ? 32 : 40}
+              src={avatar}
+              icon={<UserOutlined />}
+              className="bg-secondary/30"
+            />
+            <span
+              className={twMerge(
+                "transition-all text-white text-sm font-medium whitespace-nowrap overflow-hidden",
+                collapsed ? "max-w-0 opacity-0 pointer-events-none select-none" : "max-w-xs opacity-100"
+              )}
+              style={{ transitionProperty: "max-width, opacity" }}
+            >
+              {email}
+            </span>
+            <DownOutlined className={twMerge("text-white text-xs transition-all", collapsed ? "opacity-0" : "opacity-100")}/>
+          </div>
+        </Dropdown>
+      )}
+    </div>
   );
 }

@@ -5,7 +5,7 @@ export default async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
   // Read the token from HTTP-only cookies (automatically sent by the browser)
-  const sessionValue = (await cookies()).get("connect.sid")?.value || "";
+  const sessionValue = (await cookies()).get("accessToken")?.value || "";
 
   // Root path - redirect based on authentication
   if (path === "/") {
@@ -18,11 +18,11 @@ export default async function middleware(req: NextRequest) {
 
   // Protected routes
   if (path.startsWith("/dashboard")) {
-    // if (!sessionValue) {
-    //   return NextResponse.redirect(
-    //     new URL("/login?redirect=/dashboard", req.nextUrl),
-    //   );
-    // }
+    if (!sessionValue) {
+      return NextResponse.redirect(
+        new URL("/login?redirect=/dashboard", req.nextUrl),
+      );
+    }
   }
 
   // Public routes (e.g., login, signup) - redirect if already logged in

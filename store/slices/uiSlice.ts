@@ -30,7 +30,7 @@ const initialState: UIState = {
   },
   theme: {
     mode: "light",
-    primaryColor: "#1890ff",
+    primaryColor: "#181818",
   },
 };
 

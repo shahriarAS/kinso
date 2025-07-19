@@ -213,10 +213,10 @@ export default function CartDetails({
                     {getInitials(item.name)}
                   </div>
                   <div>
-                    <div className="font-medium text-primary text-sm line-clamp-1">
+                    <div className="font-medium text-primary text-sm line-clamp-2">
                       {item.name}
                     </div>
-                    <div className="text-xs text-gray-400">UPC: {item.upc}</div>
+                    <div className="text-xs font-bold text-gray-600">UPC: {item.upc}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -245,8 +245,8 @@ export default function CartDetails({
                   type="number"
                   min={0}
                   value={item.price}
-                  size="small"
-                  className="w-20 text-right font-semibold text-green-600"
+                  size="large"
+                  className="w-60 text-right font-semibold text-green-600"
                   onChange={(e) => onPrice(item._id, Number(e.target.value))}
                   prefix="$"
                   style={{ textAlign: "right" }}
@@ -283,8 +283,8 @@ export default function CartDetails({
               type="number"
               min={0}
               value={discount}
-              size="small"
-              className="w-20 text-right font-semibold"
+              size="large"
+              className="w-36  text-right font-semibold"
               onChange={(e) => setDiscount(Number(e.target.value))}
               prefix="$"
               style={{ textAlign: "right" }}
@@ -296,8 +296,8 @@ export default function CartDetails({
               type="number"
               min={0}
               value={total}
-              size="small"
-              className="w-24 text-right font-bold text-green-700"
+              size="large"
+              className="w-36 text-right font-bold text-green-700"
               onChange={(e) => setCustomTotal(e.target.value)}
               prefix="$"
               style={{ textAlign: "right" }}

@@ -20,6 +20,11 @@ export default function AppProvider({
             colorPrimary: theme.primaryColor,
           },
           algorithm: theme.mode === 'dark' ? undefined : undefined, // Add dark mode support later
+          components: {
+            Button: {
+              colorPrimary: theme.primaryColor,
+            },
+          },
         }}
       >
         {children}

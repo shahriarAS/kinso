@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { Product } from "@/types/product";
 import { Button, Input, Select, message } from "antd";
 import { useGetWarehousesQuery } from "@/store/api/warehouses";
@@ -34,6 +34,7 @@ export default function POS({}: Props) {
   const [selectedWarehouse, setSelectedWarehouse] = useState<string>("");
   const [customerModalOpen, setCustomerModalOpen] = useState(false);
   const [lastInvoiceData, setLastInvoiceData] = useState<InvoiceData | null>(null);
+  const searchInputRef = useRef<any>(null);
 
   // API hooks
   const { data: warehousesData, isLoading: warehousesLoading } = useGetWarehousesQuery({
@@ -153,6 +154,12 @@ export default function POS({}: Props) {
     setCustomTotal(null);
     setCustomer("walkin");
     message.success("Cart cleared! Ready for next sale.");
+    // Refocus search bar
+    setTimeout(() => {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+      }
+    }, 100);
   };
 
   const handleOrderCompleted = (invoiceData: InvoiceData) => {
@@ -162,6 +169,12 @@ export default function POS({}: Props) {
     setCustomTotal(null);
     setCustomer("walkin");
     message.success("Cart cleared! Ready for next sale.");
+    // Refocus search bar
+    setTimeout(() => {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+      }
+    }, 100);
   };
 
   const handlePrint = () => {
@@ -180,6 +193,13 @@ export default function POS({}: Props) {
       setLastInvoiceData(null); // Reset after print
     }
   }, [lastInvoiceData]);
+
+  // Focus search bar on mount and after order/checkout
+  useEffect(() => {
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, []);
 
 
   return (
@@ -209,6 +229,7 @@ export default function POS({}: Props) {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               allowClear
+              ref={searchInputRef}
             />
           </div>
           {inventoryLoading ? (

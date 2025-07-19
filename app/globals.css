@@ -76,12 +76,22 @@
 
 /* Button styles */
 .ant-btn-primary {
-  background: #3b82f6;
-  border-color: #3b82f6;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
 }
 .ant-btn-primary:hover {
-  background: #2563eb;
-  border-color: #2563eb;
+  background: #232323;
+  border-color: #232323;
+}
+.ant-btn-default {
+  background: var(--color-secondary);
+  border-color: var(--color-secondary);
+  color: var(--color-primary);
+}
+.ant-btn-default:hover {
+  background: #e6e8e0;
+  border-color: #e6e8e0;
+  color: var(--color-primary);
 }
 
 @media (max-width: 900px) {

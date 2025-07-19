@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useCreateOrderMutation } from "@/store/api/orders";
 import { CartItem, CustomerOption } from "./types";
 import { getInitials } from "./page";
+import type { InvoiceData } from "./InvoiceTemplate";
 
 interface CartDetailsProps {
   cart: CartItem[];
@@ -22,6 +23,7 @@ interface CartDetailsProps {
   customers: CustomerOption[];
   onCreateCustomer: () => void;
   onCheckoutSuccess: () => void;
+  onOrderCompleted?: (invoiceData: InvoiceData) => void;
 }
 
 export default function CartDetails({
@@ -39,6 +41,7 @@ export default function CartDetails({
   customers,
   onCreateCustomer,
   onCheckoutSuccess,
+  onOrderCompleted,
 }: CartDetailsProps) {
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
   const [createOrder, { isLoading: isCreatingOrder }] =
@@ -66,8 +69,45 @@ export default function CartDetails({
   const confirmCheckout = async () => {
     try {
       const selectedCustomer = customers.find((c) => c.value === customer);
-
-      const orderData = {
+      const now = new Date();
+      const invoiceNumber = `${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}-${now.getTime()}`;
+      // Build InvoiceData
+      const invoiceData: InvoiceData = {
+        invoiceNumber,
+        date: now.toLocaleDateString(),
+        customerId: customer,
+        customer: {
+          name: selectedCustomer?.label || "Unknown Customer",
+          location: "",
+          id: customer,
+          email: (selectedCustomer as any)?.email || undefined,
+          phone: (selectedCustomer as any)?.phone || undefined,
+        },
+        company: {
+          name: "EZ POS",
+          location: "Your City, Country",
+          address: "123 Main St, Suite 100",
+          phone: "+1-555-123-4567",
+          email: "info@ezpos.com",
+          website: "www.ezpos.com",
+          logo: "EZ",
+        },
+        items: cart.map((item) => ({
+          description: item.name,
+          details: `UPC: ${item.upc}`,
+          quantity: item.quantity,
+          rate: item.price,
+          price: item.price * item.quantity,
+        })),
+        subtotal: subtotal,
+        discount,
+        total: total,
+        signatory: {
+          name: "EZ POS",
+          title: "Cashier",
+        },
+      };
+      await createOrder({
         customerId: customer,
         customerName: selectedCustomer?.label || "Unknown Customer",
         items: cart.map((item) => ({
@@ -77,13 +117,12 @@ export default function CartDetails({
           totalPrice: item.price * item.quantity,
         })),
         totalAmount: total,
-        status: "pending" as const,
+        discount, // Send discount to backend
         notes: discount > 0 ? `Discount applied: $${discount}` : undefined,
-      };
-
-      await createOrder(orderData).unwrap();
+      }).unwrap();
       message.success("Order created successfully!");
       setCheckoutModalOpen(false);
+      if (onOrderCompleted) onOrderCompleted(invoiceData);
       onCheckoutSuccess();
     } catch (error: any) {
       message.error(error.data?.message || "Failed to create order");

@@ -56,6 +56,9 @@ importers:
       react-redux:
         specifier: ^9.2.0
         version: 9.2.0(@types/react@19.1.8)(react@19.1.0)(redux@5.0.1)
+      react-tailwind-printer:
+        specifier: ^1.1.0
+        version: 1.1.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       tailwind-merge:
         specifier: ^3.3.1
         version: 3.3.1
@@ -2133,6 +2136,12 @@ packages:
         optional: true
       redux:
         optional: true
+
+  react-tailwind-printer@1.1.0:
+    resolution: {integrity: sha512-voDiCmIF+UUPNRznnXwX0AerbF/uW/fdnXE0vFPR438e/xMIpT71J4wNZGWpI4BKcPXz23lwQbiD/KSRz8mZRQ==}
+    peerDependencies:
+      react: ^18.0.0 || ~19
+      react-dom: ^18.0.0 || ~19
 
   react@19.1.0:
     resolution: {integrity: sha512-FS+XFBNvn3GTAWq26joslQgWNoFu08F4kl0J4CgdNKADkdSGXQyTCnKteIAJy96Br6YbpEU1LSzV5dYtjMkMDg==}
@@ -4751,6 +4760,11 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.1.8
       redux: 5.0.1
+
+  react-tailwind-printer@1.1.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+    dependencies:
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
 
   react@19.1.0: {}
 

@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     await dbConnect();
     
     const body = await request.json();
-    const { customerId, customerName, items, notes } = body;
+    const { customerId, customerName, items, notes, discount = 0 } = body;
     
     // Basic validation
     if (!customerId) {
@@ -170,6 +170,9 @@ export async function POST(request: NextRequest) {
         totalPrice
       });
     }
+
+    // Apply discount
+    const finalTotal = Math.max(0, totalAmount - discount);
     
     // Generate order number (you might want to implement a more sophisticated numbering system)
     const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -180,7 +183,8 @@ export async function POST(request: NextRequest) {
       customerId,
       customerName: customerName.trim(),
       items: validatedItems,
-      totalAmount,
+      totalAmount: finalTotal,
+      discount,
       notes: notes?.trim() || ''
     });
     
@@ -188,7 +192,7 @@ export async function POST(request: NextRequest) {
     await Customer.findByIdAndUpdate(customerId, {
       $inc: { 
         totalOrders: 1, 
-        totalSpent: totalAmount 
+        totalSpent: finalTotal 
       }
     });
     

@@ -1,14 +1,100 @@
 "use client";
 
-import { Table, Button, Tooltip, Pagination, Tag } from "antd";
+import { Table, Button, Tooltip, Pagination, Drawer, Spin } from "antd";
 import { Icon } from "@iconify/react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import type { Order } from "@/types/order";
+import { useGetOrdersQuery } from "@/store/api/orders";
+import InvoiceTemplate, { InvoiceData } from "../pos/InvoiceTemplate";
+import { printWithTailwind } from "react-tailwind-printer";
 
-export default function OrderTable() {
+interface OrderTableProps {
+  filters?: {
+    search?: string;
+    dateRange?: [string, string];
+  };
+}
+
+function mapOrderToInvoiceData(order: Order): InvoiceData {
+  // Support both string and populated object for customerId
+  const customerObj = typeof order.customerId === "object" && order.customerId !== null
+    ? order.customerId as { _id: string; name: string; email?: string; phone?: string }
+    : null;
+
+  const subtotal = order.items.reduce((sum, item) => sum + item.totalPrice, 0);
+  const discount = subtotal - order.totalAmount;
+
+  return {
+    invoiceNumber: order.orderNumber,
+    date: new Date(order.createdAt).toLocaleDateString(),
+    customerId: customerObj ? customerObj._id : (order.customerId as string),
+    customer: {
+      name: customerObj ? customerObj.name : order.customerName,
+      location: "",
+      id: customerObj ? customerObj._id : (order.customerId as string),
+      email: customerObj ? customerObj.email : undefined,
+      phone: customerObj ? customerObj.phone : undefined,
+    },
+    company: {
+      name: "EZ POS",
+      location: "Your City, Country",
+      address: "123 Main St, Suite 100",
+      phone: "+1-555-123-4567",
+      email: "info@ezpos.com",
+      website: "www.ezpos.com",
+      logo: "EZ",
+    },
+    items: order.items.map((item) => ({
+      description: item.product.name,
+      details: `UPC: ${item.product.upc}`,
+      quantity: item.quantity,
+      rate: item.unitPrice,
+      price: item.totalPrice,
+    })),
+    subtotal,
+    discount,
+    total: order.totalAmount,
+    signatory: {
+      name: "EZ POS",
+      title: "Cashier",
+    },
+  };
+}
+
+export default function OrderTable({ filters = {} }: OrderTableProps) {
   const [current, setCurrent] = useState(1);
-  const pageSize = 10;
-  const paginatedData = mockData.slice((current - 1) * pageSize, current * pageSize);
+  const [pageSize, setPageSize] = useState(10);
+  const [viewOrder, setViewOrder] = useState<Order | null>(null);
+  const [printOrder, setPrintOrder] = useState<Order | null>(null);
+
+  // Prepare API params
+  const params: any = {
+    page: current,
+    limit: pageSize,
+  };
+  if (filters.search) params.search = filters.search;
+  if (filters.dateRange && filters.dateRange.length === 2) {
+    params.startDate = filters.dateRange[0];
+    params.endDate = filters.dateRange[1];
+  }
+
+  const { data, isLoading, error, refetch } = useGetOrdersQuery(params);
+
+  const handleView = (order: Order) => setViewOrder(order);
+  const handlePrint = (order: Order) => {
+    setPrintOrder(order);
+  };
+
+  useEffect(() => {
+    if (printOrder) {
+      const invoiceData = mapOrderToInvoiceData(printOrder);
+      printWithTailwind({
+        title: `Invoice #${invoiceData.invoiceNumber}`,
+        component: <InvoiceTemplate data={invoiceData} />,
+      });
+      setPrintOrder(null);
+    }
+  }, [printOrder]);
 
   const columns = [
     {
@@ -30,23 +116,36 @@ export default function OrderTable() {
       render: (amount: number) => <span className="font-medium text-gray-900">${amount.toFixed(2)}</span>,
     },
     {
+      title: <span className="font-medium text-base">Discount</span>,
+      dataIndex: "discount",
+      key: "discount",
+      render: (_: any, record: Order) => {
+        const subtotal = record.items.reduce((sum, item) => sum + item.totalPrice, 0);
+        const discount = typeof record.discount === 'number' ? record.discount : subtotal - record.totalAmount;
+        return <span className="text-red-500">${discount.toFixed(2)}</span>;
+      },
+    },
+    {
+      title: <span className="font-medium text-base">Final Total</span>,
+      dataIndex: "totalAmount",
+      key: "finalTotal",
+      render: (amount: number, record: Order) => {
+        return <span className="font-bold text-green-700">${amount.toFixed(2)}</span>;
+      },
+    },
+    {
       title: <span className="font-medium text-base">Action</span>,
       key: "action",
       render: (_: any, record: Order) => (
         <div className="flex gap-2">
           <Tooltip title="View Details">
-            <Button className="inline-flex items-center justify-center rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 transition p-1.5">
+            <Button className="inline-flex items-center justify-center rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 transition p-1.5" onClick={() => handleView(record)}>
               <Icon icon="lineicons:eye" className="text-lg text-blue-700" />
             </Button>
           </Tooltip>
-          <Tooltip title="Edit">
-            <Button className="inline-flex items-center justify-center rounded-lg bg-green-50 border border-green-200 hover:bg-green-100 transition p-1.5">
-              <Icon icon="lineicons:pencil-1" className="text-lg text-green-700" />
-            </Button>
-          </Tooltip>
-          <Tooltip title="Delete">
-            <Button className="inline-flex items-center justify-center rounded-lg bg-red-50 border border-red-200 hover:bg-red-100 transition p-1.5">
-              <Icon icon="lineicons:trash-3" className="text-lg text-red-600" />
+          <Tooltip title="Print">
+            <Button className="inline-flex items-center justify-center rounded-lg bg-gray-50 border border-gray-200 hover:bg-gray-100 transition p-1.5" onClick={() => handlePrint(record)}>
+              <Icon icon="lineicons:printer" className="text-lg text-gray-700" />
             </Button>
           </Tooltip>
         </div>
@@ -62,23 +161,78 @@ export default function OrderTable() {
       >
         <Table
           columns={columns}
-          dataSource={paginatedData}
-          rowKey="id"
+          dataSource={data?.data || []}
+          rowKey="_id"
           className="min-w-[700px] !bg-white"
           scroll={{ x: '100%' }}
           pagination={false}
           sticky
+          loading={isLoading}
         />
       </div>
-      <div className="custom-pagination">
+      <div className="custom-pagination p-4">
         <Pagination
           current={current}
           pageSize={pageSize}
-          total={mockData.length}
-          onChange={setCurrent}
-          showSizeChanger={false}
+          total={data?.pagination?.total || 0}
+          onChange={(page, size) => {
+            setCurrent(page);
+            if (size !== pageSize) {
+              setPageSize(size);
+              setCurrent(1);
+            }
+          }}
+          showSizeChanger
+          showQuickJumper
+          showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} orders`}
+          pageSizeOptions={['10', '20', '50', '100']}
         />
       </div>
+      <Drawer
+        title={viewOrder ? `Order #${viewOrder.orderNumber}` : ''}
+        open={!!viewOrder}
+        onClose={() => setViewOrder(null)}
+        width={600}
+        className="rounded-3xl"
+        getContainer={false}
+        destroyOnClose
+        extra={
+          <Button onClick={() => setViewOrder(null)} type="default">
+            Close
+          </Button>
+        }
+      >
+        {viewOrder ? (
+          <div className="space-y-4">
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+              <div className="font-semibold text-lg mb-2">Customer: {viewOrder.customerName}</div>
+              <div className="text-gray-600 text-sm mb-1">Order #: {viewOrder.orderNumber}</div>
+              <div className="text-gray-600 text-sm mb-1">Date: {new Date(viewOrder.createdAt).toLocaleString()}</div>
+              <div className="text-gray-600 text-sm mb-1">Subtotal: ${viewOrder.items.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2)}</div>
+              <div className="text-red-500 text-sm mb-1">Discount: ${typeof viewOrder.discount === 'number' ? viewOrder.discount.toFixed(2) : (viewOrder.items.reduce((sum, item) => sum + item.totalPrice, 0) - viewOrder.totalAmount).toFixed(2)}</div>
+              <div className="text-green-700 text-base font-bold mb-1">Final Total: ${viewOrder.totalAmount.toFixed(2)}</div>
+              {viewOrder.notes && <div className="text-gray-600 text-sm mb-1">Notes: {viewOrder.notes}</div>}
+            </div>
+            <div>
+              <div className="font-semibold mb-2">Items</div>
+              <Table
+                columns={[
+                  { title: 'Product', dataIndex: ['product', 'name'], key: 'product' },
+                  { title: 'UPC', dataIndex: ['product', 'upc'], key: 'upc' },
+                  { title: 'Qty', dataIndex: 'quantity', key: 'quantity' },
+                  { title: 'Unit Price', dataIndex: 'unitPrice', key: 'unitPrice', render: (v: number) => `$${v.toFixed(2)}` },
+                  { title: 'Total', dataIndex: 'totalPrice', key: 'totalPrice', render: (v: number) => `$${v.toFixed(2)}` },
+                ]}
+                dataSource={viewOrder.items}
+                rowKey={(_, idx) => String(idx)}
+                pagination={false}
+                size="small"
+                bordered
+              />
+            </div>
+          </div>
+        ) : <Spin />}
+      </Drawer>
     </div>
   );
 } 

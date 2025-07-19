@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { Product } from "@/types/product";
-import { Input, Select, message } from "antd";
+import { Button, Input, Select, message } from "antd";
 import { useGetWarehousesQuery } from "@/store/api/warehouses";
 import { useGetCustomersQuery } from "@/store/api/customers";
 import { useGetWarehouseInventoryQuery } from "@/store/api/warehouses";
@@ -10,6 +10,9 @@ import ProductGrid from "./ProductGrid";
 import CartDetails from "./CartDetails";
 import CustomerModal from "./CustomerModal";
 import { CartItem, DEFAULT_UNIT_PRICE, CustomerOption, WarehouseOption } from "./types";
+import { printWithTailwind } from "react-tailwind-printer";
+import InvoiceTemplate from "./InvoiceTemplate";
+import type { InvoiceData } from "./InvoiceTemplate";
 
 export function getInitials(name: string) {
   return name
@@ -30,6 +33,7 @@ export default function POS({}: Props) {
   const [customTotal, setCustomTotal] = useState<string | null>(null);
   const [selectedWarehouse, setSelectedWarehouse] = useState<string>("");
   const [customerModalOpen, setCustomerModalOpen] = useState(false);
+  const [lastInvoiceData, setLastInvoiceData] = useState<InvoiceData | null>(null);
 
   // API hooks
   const { data: warehousesData, isLoading: warehousesLoading } = useGetWarehousesQuery({
@@ -66,6 +70,8 @@ export default function POS({}: Props) {
       label: customer.name,
       value: customer._id,
       _id: customer._id,
+      email: customer.email,
+      phone: customer.phone,
     })) || []),
   ];
 
@@ -149,6 +155,33 @@ export default function POS({}: Props) {
     message.success("Cart cleared! Ready for next sale.");
   };
 
+  const handleOrderCompleted = (invoiceData: InvoiceData) => {
+    setLastInvoiceData(invoiceData);
+    setCart([]);
+    setDiscount(0);
+    setCustomTotal(null);
+    setCustomer("walkin");
+    message.success("Cart cleared! Ready for next sale.");
+  };
+
+  const handlePrint = () => {
+    printWithTailwind({
+      title: "Printable Component",
+      component: <InvoiceTemplate />,
+    });
+  };
+
+  useEffect(() => {
+    if (lastInvoiceData) {
+      printWithTailwind({
+        title: `Invoice #${lastInvoiceData.invoiceNumber}`,
+        component: <InvoiceTemplate data={lastInvoiceData} />,
+      });
+      setLastInvoiceData(null); // Reset after print
+    }
+  }, [lastInvoiceData]);
+
+
   return (
     <div className="h-full w-full p-6 px-4 relative overflow-x-hidden flex flex-col gap-4 bg-secondary rounded-3xl">
       {/* Header */}
@@ -204,6 +237,7 @@ export default function POS({}: Props) {
             customers={customerOptions}
             onCreateCustomer={() => setCustomerModalOpen(true)}
             onCheckoutSuccess={handleCheckoutSuccess}
+            onOrderCompleted={handleOrderCompleted}
           />
         </div>
       </div>

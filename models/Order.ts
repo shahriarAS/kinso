@@ -13,6 +13,7 @@ export interface IOrder extends Document {
   customerName: string;
   items: IOrderItem[];
   totalAmount: number;
+  discount?: number; // Discount amount for the order
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -63,6 +64,12 @@ const OrderSchema: Schema = new Schema({
     type: Number,
     required: true,
     min: 0,
+  },
+  discount: {
+    type: Number,
+    required: false,
+    min: 0,
+    default: 0,
   },
   notes: {
     type: String,

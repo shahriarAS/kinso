@@ -12,6 +12,7 @@ export interface Order {
     totalPrice: number;
   }[];
   totalAmount: number;
+  discount?: number;
   notes?: string;
   createdAt: string;
   updatedAt: string;

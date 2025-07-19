@@ -9,8 +9,6 @@ import { Dropdown, Avatar, Button, Spin } from "antd";
 import { UserOutlined, LogoutOutlined, DownOutlined } from "@ant-design/icons";
 import { useFetchAuthUserQuery, useLogoutUserMutation } from "@/store/api/auth";
 
-type Props = {};
-
 const menuItems = [
   {
     icon: "lineicons:dashboard-square-1",
@@ -49,7 +47,7 @@ const menuItems = [
   },
 ];
 
-export default function DashboardSidebar({}: Props) {
+export default function DashboardSidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 

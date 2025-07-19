@@ -47,8 +47,8 @@ export const warehousesApi = createApi({
       { data: Warehouse },
       string
     >({
-      query: (id) => ({
-        url: `/${id}`,
+      query: (_id) => ({
+        url: `/${_id}`,
         method: "GET",
       }),
       providesTags: (result, error, id) => [{ type: "Warehouse", id }],
@@ -88,8 +88,8 @@ export const warehousesApi = createApi({
       { message: string },
       string
     >({
-      query: (id) => ({
-        url: `/${id}`,
+      query: (_id) => ({
+        url: `/${_id}`,
         method: "DELETE",
       }),
       invalidatesTags: [{ type: "Warehouse", id: "LIST" }],

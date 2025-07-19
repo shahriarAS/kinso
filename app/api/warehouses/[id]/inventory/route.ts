@@ -6,7 +6,7 @@ import { authorizeRequest, AuthenticatedRequest } from '@/lib/auth';
 // GET /api/warehouses/[id]/inventory - Get inventory for a specific warehouse
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ _id: string }> }
 ) {
   try {
     // Authorize request - all authenticated users can view warehouse inventory
@@ -24,7 +24,8 @@ export async function GET(
     await dbConnect();
     
     // Check if warehouse exists
-    const warehouse = await Warehouse.findById(params.id).lean();
+    const { _id } = await params;
+    const warehouse = await Warehouse.findById(_id).lean();
     if (!warehouse) {
       return NextResponse.json(
         { success: false, message: 'Warehouse not found' },
@@ -34,14 +35,14 @@ export async function GET(
 
     // Get all products that have stock in this warehouse
     const products = await Product.find({
-      'stock.warehouse': params.id
+      'stock.warehouse': _id
     }).populate('category').lean();
 
     // Transform the data to match the expected format
     const inventoryData = products.map(product => {
       // Find the stock entry for this warehouse
       const stockEntry = product.stock.find((stock: any) => 
-        stock.warehouse.toString() === params.id
+          stock.warehouse.toString() === _id
       );
 
       if (!stockEntry) {

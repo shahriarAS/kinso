@@ -6,7 +6,7 @@ import { authorizeRequest, AuthenticatedRequest } from '@/lib/auth';
 // GET /api/products/[id] - Get a specific product
 export async function GET(
   request: NextRequest,
-  { params }: { params: { _id: string } }
+  { params }: { params: Promise<{ _id: string }> }
 ) {
   try {
     // Authorize request - all authenticated users can view products
@@ -23,7 +23,9 @@ export async function GET(
 
     await dbConnect();
     
-    const product = await Product.findById(params.id)
+    const { _id } = await params;
+
+    const product = await Product.findById(_id)
       .populate('category', 'name')
       .populate('stock.warehouse', 'name location')
       .lean();
@@ -52,7 +54,7 @@ export async function GET(
 // PUT /api/products/[id] - Update a product
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { _id: string } }
+  { params }: { params: Promise<{ _id: string }> }
 ) {
   try {
     // Authorize request - only managers and admins can update products
@@ -73,7 +75,8 @@ export async function PUT(
     const { name, upc, category, stock } = body;
     
     // Check if product exists
-    const existingProduct = await Product.findById(params.id);
+    const { _id } = await params;
+    const existingProduct = await Product.findById(_id);
     if (!existingProduct) {
       return NextResponse.json(
         { success: false, message: 'Product not found' },
@@ -136,7 +139,7 @@ export async function PUT(
     
     // Check if new UPC conflicts with existing product (excluding current one)
     const upcConflict = await Product.findOne({
-      _id: { $ne: params.id },
+      _id: { $ne: _id },
       upc: upc.trim()
     });
     
@@ -168,7 +171,7 @@ export async function PUT(
     
     // Update product
     const updatedProduct = await Product.findByIdAndUpdate(
-      params.id,
+      _id,
       {
         name: name.trim(),
         upc: upc.trim(),
@@ -214,7 +217,7 @@ export async function PUT(
 // DELETE /api/products/[id] - Delete a product
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { _id: string } }
+  { params }: { params: Promise<{ _id: string }> }
 ) {
   try {
     // Authorize request - only admins can delete products
@@ -232,7 +235,8 @@ export async function DELETE(
     await dbConnect();
     
     // Check if product exists
-    const product = await Product.findById(params.id);
+    const { _id } = await params;
+    const product = await Product.findById(_id);
     if (!product) {
       return NextResponse.json(
         { success: false, message: 'Product not found' },
@@ -244,7 +248,7 @@ export async function DELETE(
     // This would require checking the Order model for references
     // For now, we'll allow deletion but you should implement this check
     
-    await Product.findByIdAndDelete(params.id);
+    await Product.findByIdAndDelete(_id);
     
     return NextResponse.json({
       success: true,

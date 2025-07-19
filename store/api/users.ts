@@ -71,8 +71,8 @@ export const usersApi = createApi({
       { data: User },
       string
     >({
-      query: (id) => ({
-        url: `/${id}`,
+      query: (_id) => ({
+        url: `/${_id}`,
         method: "GET",
       }),
       providesTags: (result, error, id) => [{ type: "User", id }],
@@ -97,7 +97,7 @@ export const usersApi = createApi({
       { _id: string; user: UserUpdateInput }
     >({
       query: ({ id, user }) => ({
-        url: `/${id}`,
+        url: `/${_id}`,
         method: "PUT",
         body: user,
       }),
@@ -112,8 +112,8 @@ export const usersApi = createApi({
       { message: string },
       string
     >({
-      query: (id) => ({
-        url: `/${id}`,
+      query: (_id) => ({
+        url: `/${_id}`,
         method: "DELETE",
       }),
       invalidatesTags: [{ type: "User", id: "LIST" }],

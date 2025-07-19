@@ -6,8 +6,9 @@ import { authorizeRequest, AuthenticatedRequest } from '@/lib/auth';
 // GET /api/categories/[id] - Get a specific category
 export async function GET(
   request: NextRequest,
-  { params }: { params: { _id: string } }
+  { params }: { params: Promise<{ _id: string }> }
 ) {
+  const { _id } = await params;
   try {
     // Authorize request - all authenticated users can view categories
     const authResult = await authorizeRequest(request as AuthenticatedRequest, {
@@ -23,7 +24,7 @@ export async function GET(
 
     await dbConnect();
     
-    const category = await Category.findById(params.id).lean();
+    const category = await Category.findById(_id).lean();
     
     if (!category) {
       return NextResponse.json(
@@ -49,8 +50,9 @@ export async function GET(
 // PUT /api/categories/[id] - Update a category
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { _id: string } }
+  { params }: { params: Promise<{ _id: string }> }
 ) {
+  const { _id } = await params;
   try {
     // Authorize request - only managers and admins can update categories
     const authResult = await authorizeRequest(request as AuthenticatedRequest, {
@@ -70,7 +72,7 @@ export async function PUT(
     const { name, description } = body;
     
     // Check if category exists
-    const existingCategory = await Category.findById(params.id);
+    const existingCategory = await Category.findById(_id);
     if (!existingCategory) {
       return NextResponse.json(
         { success: false, message: 'Category not found' },
@@ -88,7 +90,7 @@ export async function PUT(
     
     // Check if new name conflicts with existing category (excluding current one)
     const nameConflict = await Category.findOne({
-      _id: { $ne: params.id },
+      _id: { $ne: _id },
       name: { $regex: new RegExp(`^${name.trim()}$`, 'i') }
     });
     
@@ -101,7 +103,7 @@ export async function PUT(
     
     // Update category
     const updatedCategory = await Category.findByIdAndUpdate(
-      params.id,
+      _id,
       {
         name: name.trim(),
         description: description?.trim() || ''
@@ -127,8 +129,9 @@ export async function PUT(
 // DELETE /api/categories/[id] - Delete a category
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { _id: string } }
+  { params }: { params: Promise<{ _id: string }> }
 ) {
+  const { _id } = await params;
   try {
     // Authorize request - only admins can delete categories
     const authResult = await authorizeRequest(request as AuthenticatedRequest, {
@@ -145,7 +148,7 @@ export async function DELETE(
     await dbConnect();
     
     // Check if category exists
-    const category = await Category.findById(params.id);
+    const category = await Category.findById(_id);
     if (!category) {
       return NextResponse.json(
         { success: false, message: 'Category not found' },
@@ -157,7 +160,7 @@ export async function DELETE(
     // This would require checking the Product model for references
     // For now, we'll allow deletion but you should implement this check
     
-    await Category.findByIdAndDelete(params.id);
+    await Category.findByIdAndDelete(_id);
     
     return NextResponse.json({
       success: true,

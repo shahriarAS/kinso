@@ -6,8 +6,9 @@ import { authorizeRequest, AuthenticatedRequest } from '@/lib/auth';
 // GET /api/orders/[id] - Get a specific order
 export async function GET(
   request: NextRequest,
-  { params }: { params: { _id: string } }
+  { params }: { params: Promise<{ _id: string }> }
 ) {
+  const { _id } = await params;
   try {
     // Authorize request - all authenticated users can view orders
     const authResult = await authorizeRequest(request as AuthenticatedRequest, {
@@ -23,7 +24,7 @@ export async function GET(
 
     await dbConnect();
     
-    const order = await Order.findById(params.id)
+    const order = await Order.findById(_id)
       .populate('customerId', 'name email phone')
       .populate('items.product', 'name upc')
       .lean();
@@ -52,8 +53,9 @@ export async function GET(
 // PUT /api/orders/[id] - Update an order
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { _id: string } }
+  { params }: { params: Promise<{ _id: string }> }
 ) {
+  const { _id } = await params;
   try {
     // Authorize request - only managers and admins can update orders
     const authResult = await authorizeRequest(request as AuthenticatedRequest, {
@@ -73,7 +75,7 @@ export async function PUT(
     const { customerId, customerName, items, notes } = body;
     
     // Check if order exists
-    const existingOrder = await Order.findById(params.id);
+    const existingOrder = await Order.findById(_id);
     if (!existingOrder) {
       return NextResponse.json(
         { success: false, message: 'Order not found' },
@@ -163,7 +165,7 @@ export async function PUT(
     
     // Update order
     const updatedOrder = await Order.findByIdAndUpdate(
-      params.id,
+      _id,
       {
         customerId,
         customerName: customerName.trim(),
@@ -233,8 +235,9 @@ export async function PUT(
 // DELETE /api/orders/[id] - Delete an order
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { _id: string } }
+  { params }: { params: Promise<{ _id: string }> }
 ) {
+  const { _id } = await params;
   try {
     // Authorize request - only admins can delete orders
     const authResult = await authorizeRequest(request as AuthenticatedRequest, {
@@ -251,7 +254,7 @@ export async function DELETE(
     await dbConnect();
     
     // Check if order exists
-    const order = await Order.findById(params.id);
+    const order = await Order.findById(_id);
     if (!order) {
       return NextResponse.json(
         { success: false, message: 'Order not found' },
@@ -267,7 +270,7 @@ export async function DELETE(
       }
     });
     
-    await Order.findByIdAndDelete(params.id);
+    await Order.findByIdAndDelete(_id);
     
     return NextResponse.json({
       success: true,

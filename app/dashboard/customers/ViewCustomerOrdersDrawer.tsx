@@ -97,7 +97,7 @@ export default function ViewCustomerOrdersDrawer({ customer, onClose }: Props) {
           <Icon icon="lineicons:user" className="text-xl text-blue-600" />
           <div>
             <h3 className="text-lg font-semibold text-gray-900">
-              {customer.name}'s Orders
+              {customer.name}{"'"}s Orders
             </h3>
             <p className="text-sm text-gray-500">{customer.email}</p>
           </div>

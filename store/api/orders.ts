@@ -48,8 +48,8 @@ export const ordersApi = createApi({
       { data: Order },
       string
     >({
-      query: (id) => ({
-        url: `/${id}`,
+      query: (_id) => ({
+        url: `/${_id}`,
         method: "GET",
       }),
       providesTags: (result, error, id) => [{ type: "Order", id }],
@@ -89,8 +89,8 @@ export const ordersApi = createApi({
       { message: string },
       string
     >({
-      query: (id) => ({
-        url: `/${id}`,
+      query: (_id) => ({
+        url: `/${_id}`,
         method: "DELETE",
       }),
       invalidatesTags: [{ type: "Order", id: "LIST" }],

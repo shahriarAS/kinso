@@ -6,7 +6,7 @@ import { authorizeRequest, AuthenticatedRequest } from '@/lib/auth';
 // GET /api/users/[id] - Get a specific user
 export async function GET(
   request: NextRequest,
-  { params }: { params: { _id: string } }
+  { params }: { params: Promise<{ _id: string }> }
 ) {
   try {
     // Authorize request - only admins can view users
@@ -23,7 +23,8 @@ export async function GET(
 
     await dbConnect();
     
-    const user = await User.findById(params.id).select('-password').lean();
+    const { _id } = await params;
+    const user = await User.findById(_id).select('-password').lean();
     
     if (!user) {
       return NextResponse.json(
@@ -49,7 +50,7 @@ export async function GET(
 // PUT /api/users/[id] - Update a user
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { _id: string } }
+  { params }: { params: Promise<{ _id: string }> }
 ) {
   try {
     // Authorize request - only admins can update users
@@ -70,7 +71,8 @@ export async function PUT(
     const { name, email, role, isActive, avatar } = body;
     
     // Check if user exists
-    const existingUser = await User.findById(params.id);
+    const { _id } = await params;
+    const existingUser = await User.findById(_id);
     if (!existingUser) {
       return NextResponse.json(
         { success: false, message: 'User not found' },
@@ -104,7 +106,7 @@ export async function PUT(
     
     // Check if new email conflicts with existing user (excluding current one)
     const emailConflict = await User.findOne({
-      _id: { $ne: params.id },
+      _id: { $ne: _id },
       email: email.trim().toLowerCase()
     });
     
@@ -117,7 +119,7 @@ export async function PUT(
     
     // Update user
     const updatedUser = await User.findByIdAndUpdate(
-      params.id,
+      _id,
       {
         name: name.trim(),
         email: email.trim().toLowerCase(),
@@ -153,7 +155,7 @@ export async function PUT(
 // DELETE /api/users/[id] - Delete a user
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { _id: string } }
+  { params }: { params: Promise<{ _id: string }> }
 ) {
   try {
     // Authorize request - only admins can delete users
@@ -171,7 +173,8 @@ export async function DELETE(
     await dbConnect();
     
     // Check if user exists
-    const user = await User.findById(params.id);
+    const { _id } = await params;
+    const user = await User.findById(_id);
     if (!user) {
       return NextResponse.json(
         { success: false, message: 'User not found' },
@@ -180,14 +183,14 @@ export async function DELETE(
     }
     
     // Prevent self-deletion
-    if (authResult.user && authResult.user._id === params.id) {
+    if (authResult.user && authResult.user._id === _id) {
       return NextResponse.json(
         { success: false, message: 'Cannot delete your own account' },
         { status: 400 }
       );
     }
     
-    await User.findByIdAndDelete(params.id);
+    await User.findByIdAndDelete(_id);
     
     return NextResponse.json({
       success: true,

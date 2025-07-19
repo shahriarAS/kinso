@@ -6,7 +6,7 @@ import { authorizeRequest, AuthenticatedRequest } from '@/lib/auth';
 // GET /api/warehouses/[id] - Get a specific warehouse
 export async function GET(
   request: NextRequest,
-  { params }: { params: { _id: string } }
+  { params }: { params: Promise<{ _id: string }> }
 ) {
   try {
     // Authorize request - all authenticated users can view warehouses
@@ -23,7 +23,8 @@ export async function GET(
 
     await dbConnect();
     
-    const warehouse = await Warehouse.findById(params.id).lean();
+    const { _id } = await params;
+    const warehouse = await Warehouse.findById(_id).lean();
     
     if (!warehouse) {
       return NextResponse.json(
@@ -49,7 +50,7 @@ export async function GET(
 // PUT /api/warehouses/[id] - Update a warehouse
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { _id: string } }
+  { params }: { params: Promise<{ _id: string }> }
 ) {
   try {
     // Authorize request - only managers and admins can update warehouses
@@ -70,7 +71,8 @@ export async function PUT(
     const { name, location } = body;
     
     // Check if warehouse exists
-    const existingWarehouse = await Warehouse.findById(params.id);
+    const { _id } = await params;
+    const existingWarehouse = await Warehouse.findById(_id);
     if (!existingWarehouse) {
       return NextResponse.json(
         { success: false, message: 'Warehouse not found' },
@@ -95,7 +97,7 @@ export async function PUT(
     
     // Check if new name conflicts with existing warehouse (excluding current one)
     const nameConflict = await Warehouse.findOne({
-      _id: { $ne: params.id },
+      _id: { $ne: _id },
       name: { $regex: new RegExp(`^${name.trim()}$`, 'i') }
     });
     
@@ -108,7 +110,7 @@ export async function PUT(
     
     // Update warehouse
     const updatedWarehouse = await Warehouse.findByIdAndUpdate(
-      params.id,
+      _id,
       {
         name: name.trim(),
         location: location.trim()
@@ -134,7 +136,7 @@ export async function PUT(
 // DELETE /api/warehouses/[id] - Delete a warehouse
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { _id: string } }
+  { params }: { params: Promise<{ _id: string }> }
 ) {
   try {
     // Authorize request - only admins can delete warehouses
@@ -152,7 +154,8 @@ export async function DELETE(
     await dbConnect();
     
     // Check if warehouse exists
-    const warehouse = await Warehouse.findById(params.id);
+    const { _id } = await params;
+    const warehouse = await Warehouse.findById(_id);
     if (!warehouse) {
       return NextResponse.json(
         { success: false, message: 'Warehouse not found' },
@@ -164,7 +167,7 @@ export async function DELETE(
     // This would require checking the Product model for references in stock array
     // For now, we'll allow deletion but you should implement this check
     
-    await Warehouse.findByIdAndDelete(params.id);
+      await Warehouse.findByIdAndDelete(_id);
     
     return NextResponse.json({
       success: true,

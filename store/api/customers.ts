@@ -47,8 +47,8 @@ export const customersApi = createApi({
       { data: Customer },
       string
     >({
-      query: (id) => ({
-        url: `/${id}`,
+      query: (_id) => ({
+        url: `/${_id}`,
         method: "GET",
       }),
       providesTags: (result, error, id) => [{ type: "Customer", id }],
@@ -88,8 +88,8 @@ export const customersApi = createApi({
       { message: string },
       string
     >({
-      query: (id) => ({
-        url: `/${id}`,
+      query: (_id) => ({
+        url: `/${_id}`,
         method: "DELETE",
       }),
       invalidatesTags: [{ type: "Customer", id: "LIST" }],

@@ -1,8 +1,7 @@
-"use client";
-
+"use client";;
 import { useState, useEffect, useRef } from "react";
 import type { Product } from "@/types/product";
-import { Button, Input, Select, message } from "antd";
+import { Input, Select, message } from "antd";
 import { useGetWarehousesQuery } from "@/store/api/warehouses";
 import { useGetCustomersQuery } from "@/store/api/customers";
 import { useGetWarehouseInventoryQuery } from "@/store/api/warehouses";
@@ -14,18 +13,7 @@ import { printWithTailwind } from "react-tailwind-printer";
 import InvoiceTemplate from "./InvoiceTemplate";
 import type { InvoiceData } from "./InvoiceTemplate";
 
-export function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
-
-type Props = {};
-
-export default function POS({}: Props) {
+export default function POS() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [search, setSearch] = useState("");
   const [customer, setCustomer] = useState("walkin");

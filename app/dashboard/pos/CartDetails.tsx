@@ -5,7 +5,6 @@ import { Icon } from "@iconify/react";
 import { useState } from "react";
 import { useCreateOrderMutation } from "@/store/api/orders";
 import { CartItem, CustomerOption } from "./types";
-import { getInitials } from "./page";
 import type { InvoiceData } from "./InvoiceTemplate";
 
 interface OrderCreatePayload {
@@ -98,7 +97,6 @@ export default function CartDetails({
         notes: discount > 0 ? `Discount applied: ৳${discount}` : undefined,
       };
       // The API slice expects the wrong type for createOrder, but our payload matches the backend expectation.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const response = await createOrder(orderPayload as any).unwrap();
       const order = response.data;
 
@@ -107,7 +105,12 @@ export default function CartDetails({
       if (typeof order.customerId === "object" && order.customerId !== null) {
         customerObj = order.customerId;
       } else {
-        customerObj = { _id: order.customerId, name: order.customerName, email: undefined, phone: undefined };
+        customerObj = {
+          _id: order.customerId,
+          name: order.customerName,
+          email: undefined,
+          phone: undefined,
+        };
       }
 
       // Build InvoiceData from server order
@@ -121,8 +124,14 @@ export default function CartDetails({
           name: customerObj.name,
           location: "",
           id: customerObj._id,
-          email: typeof customerObj.email === "string" ? customerObj.email : undefined,
-          phone: typeof customerObj.phone === "string" ? customerObj.phone : undefined,
+          email:
+            typeof customerObj.email === "string"
+              ? customerObj.email
+              : undefined,
+          phone:
+            typeof customerObj.phone === "string"
+              ? customerObj.phone
+              : undefined,
         },
         company: {
           name: "EZ POS",
@@ -216,54 +225,56 @@ export default function CartDetails({
                     <div className="font-medium text-primary text-sm line-clamp-2">
                       {item.name}
                     </div>
-                    <div className="text-xs font-bold text-gray-600">UPC: {item.upc}</div>
+                    <div className="text-xs font-bold text-gray-600">
+                      UPC: {item.upc}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 w-2/3">
-                <div className="flex items-center gap-2">
-                  <Button
-                    size="small"
-                    shape="circle"
-                    onClick={() => onQty(item._id, item.quantity - 1)}
-                    disabled={item.quantity <= 1}
-                    className="border-gray-300"
-                  >
-                    <Icon icon="mdi:minus" />
-                  </Button>
-                  <span className="w-7 text-center font-semibold text-base">
-                    {item.quantity}
-                  </span>
-                  <Button
-                    size="small"
-                    shape="circle"
-                    onClick={() => onQty(item._id, item.quantity + 1)}
-                    className="border-gray-300"
-                  >
-                    <Icon icon="mdi:plus" />
-                  </Button>
-                </div>
-                <Input
-                  type="number"
-                  min={0}
-                  value={item.price}
-                  size="large"
-                  className="w-60 text-right font-semibold text-green-600"
-                  onChange={(e) => onPrice(item._id, Number(e.target.value))}
-                  prefix="৳"
-                  style={{ textAlign: "right" }}
-                />
-                <span className="font-semibold text-green-700 text-base w-20 text-right">
-                  ৳{item.price * item.quantity}
-                </span>
-                <Tooltip title="Remove">
-                  <Button
-                    type="text"
-                    danger
-                    size="small"
-                    onClick={() => onRemove(item._id)}
-                    icon={<Icon icon="lineicons:close" />}
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="small"
+                      shape="circle"
+                      onClick={() => onQty(item._id, item.quantity - 1)}
+                      disabled={item.quantity <= 1}
+                      className="border-gray-300"
+                    >
+                      <Icon icon="mdi:minus" />
+                    </Button>
+                    <span className="w-7 text-center font-semibold text-base">
+                      {item.quantity}
+                    </span>
+                    <Button
+                      size="small"
+                      shape="circle"
+                      onClick={() => onQty(item._id, item.quantity + 1)}
+                      className="border-gray-300"
+                    >
+                      <Icon icon="mdi:plus" />
+                    </Button>
+                  </div>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={item.price}
+                    size="large"
+                    className="w-60 text-right font-semibold text-green-600"
+                    onChange={(e) => onPrice(item._id, Number(e.target.value))}
+                    prefix="৳"
+                    style={{ textAlign: "right" }}
                   />
-                </Tooltip>
+                  <span className="font-semibold text-green-700 text-base w-20 text-right">
+                    ৳{item.price * item.quantity}
+                  </span>
+                  <Tooltip title="Remove">
+                    <Button
+                      type="text"
+                      danger
+                      size="small"
+                      onClick={() => onRemove(item._id)}
+                      icon={<Icon icon="lineicons:close" />}
+                    />
+                  </Tooltip>
                 </div>
               </div>
             ))
@@ -339,7 +350,9 @@ export default function CartDetails({
       >
         <div className="space-y-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">৳{total.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-green-600">
+              ৳{total.toFixed(2)}
+            </div>
             <div className="text-gray-500">Total Amount</div>
           </div>
           <div className="border-t pt-4">

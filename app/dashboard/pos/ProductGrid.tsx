@@ -4,7 +4,7 @@ import { Button, Tooltip, Tag } from "antd";
 import { Icon } from "@iconify/react";
 import type { Product } from "@/types/product";
 import { categoryColors } from "./types";
-import { getInitials } from "./page";
+import { getInitials } from "@/lib/getInitials";
 
 interface ProductGridProps {
   products: Product[];

@@ -6,8 +6,9 @@ import { authorizeRequest, AuthenticatedRequest } from '@/lib/auth';
 // GET /api/customers/[id] - Get a specific customer
 export async function GET(
   request: NextRequest,
-  { params }: { params: { _id: string } }
+  { params }: { params: Promise<{ _id: string }> }
 ) {
+  const { _id } = await params;
   try {
     // Authorize request - all authenticated users can view customers
     const authResult = await authorizeRequest(request as AuthenticatedRequest, {
@@ -23,7 +24,7 @@ export async function GET(
 
     await dbConnect();
     
-    const customer = await Customer.findById(params.id).lean();
+    const customer = await Customer.findById(_id).lean();
     
     if (!customer) {
       return NextResponse.json(
@@ -49,8 +50,9 @@ export async function GET(
 // PUT /api/customers/[id] - Update a customer
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { _id: string } }
+  { params }: { params: Promise<{ _id: string }> }
 ) {
+  const { _id } = await params;
   try {
     // Authorize request - all authenticated users can update customers
     const authResult = await authorizeRequest(request as AuthenticatedRequest, {
@@ -70,7 +72,7 @@ export async function PUT(
     const { name, email, phone, status, notes } = body;
     
     // Check if customer exists
-    const existingCustomer = await Customer.findById(params.id);
+    const existingCustomer = await Customer.findById(_id);
     if (!existingCustomer) {
       return NextResponse.json(
         { success: false, message: 'Customer not found' },
@@ -111,7 +113,7 @@ export async function PUT(
     
     // Check if new email conflicts with existing customer (excluding current one)
     const emailConflict = await Customer.findOne({
-      _id: { $ne: params.id },
+      _id: { $ne: _id },
       email: email.trim().toLowerCase()
     });
     
@@ -124,7 +126,7 @@ export async function PUT(
     
     // Update customer
     const updatedCustomer = await Customer.findByIdAndUpdate(
-      params.id,
+      _id,
       {
         name: name.trim(),
         email: email.trim().toLowerCase(),
@@ -160,8 +162,9 @@ export async function PUT(
 // DELETE /api/customers/[id] - Delete a customer
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { _id: string } }
+  { params }: { params: Promise<{ _id: string }> }
 ) {
+  const { _id } = await params;
   try {
     // Authorize request - only managers and admins can delete customers
     const authResult = await authorizeRequest(request as AuthenticatedRequest, {
@@ -178,7 +181,7 @@ export async function DELETE(
     await dbConnect();
     
     // Check if customer exists
-    const customer = await Customer.findById(params.id);
+    const customer = await Customer.findById(_id);
     if (!customer) {
       return NextResponse.json(
         { success: false, message: 'Customer not found' },
@@ -190,7 +193,7 @@ export async function DELETE(
     // This would require checking the Order model for references
     // For now, we'll allow deletion but you should implement this check
     
-    await Customer.findByIdAndDelete(params.id);
+      await Customer.findByIdAndDelete(_id);
     
     return NextResponse.json({
       success: true,

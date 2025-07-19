@@ -2,7 +2,7 @@
 import { useLoginUserMutation } from "@/store/api/auth";
 import logo from "@/public/images/brand/logo.png";
 import { LockOutlined, MailOutlined } from "@ant-design/icons";
-import { Button, Form, Input, Alert, Spin, Divider } from "antd";
+import { Button, Form, Input, Alert, Spin } from "antd";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -21,7 +21,7 @@ function Login() {
       .then(() => {
         router.replace(redirectURL || "/dashboard");
       })
-      .catch((err) => {
+      .catch(() => {
         router.replace(
           "/login" + (redirectURL ? `?redirect=${redirectURL}` : ""),
         );

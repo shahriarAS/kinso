@@ -47,8 +47,8 @@ export const productsApi = createApi({
       { data: Product },
       string
     >({
-      query: (id) => ({
-        url: `/${id}`,
+      query: (_id) => ({
+        url: `/${_id}`,
         method: "GET",
       }),
       providesTags: (result, error, id) => [{ type: "Product", id }],
@@ -88,8 +88,8 @@ export const productsApi = createApi({
       { message: string },
       string
     >({
-      query: (id) => ({
-        url: `/${id}`,
+      query: (_id) => ({
+        url: `/${_id}`,
         method: "DELETE",
       }),
       invalidatesTags: [{ type: "Product", id: "LIST" }],

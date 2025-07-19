@@ -57,8 +57,8 @@ export const categoriesApi = createApi({
       { data: Category },
       string
     >({
-      query: (id) => ({
-        url: `/${id}`,
+      query: (_id) => ({
+        url: `/${_id}`,
         method: "GET",
       }),
       providesTags: (result, error, id) => [{ type: "Category", id }],

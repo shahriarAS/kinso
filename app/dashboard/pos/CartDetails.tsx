@@ -95,7 +95,7 @@ export default function CartDetails({
         })),
         totalAmount: total,
         discount,
-        notes: discount > 0 ? `Discount applied: $${discount}` : undefined,
+        notes: discount > 0 ? `Discount applied: ৳${discount}` : undefined,
       };
       // The API slice expects the wrong type for createOrder, but our payload matches the backend expectation.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -249,11 +249,11 @@ export default function CartDetails({
                   size="large"
                   className="w-60 text-right font-semibold text-green-600"
                   onChange={(e) => onPrice(item._id, Number(e.target.value))}
-                  prefix="$"
+                  prefix="৳"
                   style={{ textAlign: "right" }}
                 />
                 <span className="font-semibold text-green-700 text-base w-20 text-right">
-                  ${item.price * item.quantity}
+                  ৳{item.price * item.quantity}
                 </span>
                 <Tooltip title="Remove">
                   <Button
@@ -277,7 +277,7 @@ export default function CartDetails({
           </div>
           <div className="flex justify-between">
             <span className="text-gray-500">Subtotal</span>
-            <span>${subtotal.toFixed(2)}</span>
+            <span>৳{subtotal.toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-red-500 items-center">
             <span>Discount</span>
@@ -288,7 +288,7 @@ export default function CartDetails({
               size="large"
               className="w-36  text-right font-semibold"
               onChange={(e) => setDiscount(Number(e.target.value))}
-              prefix="$"
+              prefix="৳"
               style={{ textAlign: "right" }}
             />
           </div>
@@ -301,7 +301,7 @@ export default function CartDetails({
               size="large"
               className="w-36 text-right font-bold text-green-700"
               onChange={(e) => setCustomTotal(e.target.value)}
-              prefix="$"
+              prefix="৳"
               style={{ textAlign: "right" }}
               placeholder={computedTotal.toString()}
             />
@@ -339,7 +339,7 @@ export default function CartDetails({
       >
         <div className="space-y-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">${total.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-green-600">৳{total.toFixed(2)}</div>
             <div className="text-gray-500">Total Amount</div>
           </div>
           <div className="border-t pt-4">
@@ -354,7 +354,7 @@ export default function CartDetails({
             {discount > 0 && (
               <div className="flex justify-between text-red-500">
                 <span>Discount:</span>
-                <span>-${discount.toFixed(2)}</span>
+                <span>-৳{discount.toFixed(2)}</span>
               </div>
             )}
           </div>

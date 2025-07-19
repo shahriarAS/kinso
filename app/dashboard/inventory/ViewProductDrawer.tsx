@@ -54,20 +54,20 @@ export default function ViewProductDrawer({ open, setOpen, product, onClose }: P
       title: <span className="font-medium text-base">DP</span>,
       dataIndex: "dp",
       key: "dp",
-      render: (text: number) => <span className="text-gray-700">${text.toFixed(2)}</span>,
+      render: (text: number) => <span className="text-gray-700">৳{text.toFixed(2)}</span>,
     },
     {
       title: <span className="font-medium text-base">MRP</span>,
       dataIndex: "mrp",
       key: "mrp",
-      render: (text: number) => <span className="text-gray-700">${text.toFixed(2)}</span>,
+      render: (text: number) => <span className="text-gray-700">৳{text.toFixed(2)}</span>,
     },
     {
       title: <span className="font-medium text-base">Total Value</span>,
       key: "totalValue",
       render: (_: unknown, record: { warehouse: Warehouse; unit: number; mrp: number }) => (
         <span className="font-medium text-green-600">
-          ${(record.unit * record.mrp).toFixed(2)}
+          ৳{(record.unit * record.mrp).toFixed(2)}
         </span>
       ),
     },
@@ -120,7 +120,7 @@ export default function ViewProductDrawer({ open, setOpen, product, onClose }: P
               </div>
             </Descriptions.Item>
             <Descriptions.Item label="Total Value">
-              <span className="font-medium text-green-600">${totalValue.toFixed(2)}</span>
+              <span className="font-medium text-green-600">৳{totalValue.toFixed(2)}</span>
             </Descriptions.Item>
           </Descriptions>
         </div>
@@ -161,7 +161,7 @@ export default function ViewProductDrawer({ open, setOpen, product, onClose }: P
             </div>
             <div>
               <span className="text-gray-600">Total Value:</span>
-              <span className="font-medium text-green-600 ml-2">${totalValue.toFixed(2)}</span>
+              <span className="font-medium text-green-600 ml-2">৳{totalValue.toFixed(2)}</span>
             </div>
           </div>
         </div>

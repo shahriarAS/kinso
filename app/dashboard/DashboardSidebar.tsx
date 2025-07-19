@@ -38,7 +38,7 @@ const menuItems = [
     href: "/dashboard/warehouse",
   },
   {
-    icon: "lineicons:dollar-circle",
+    icon: "tabler:currency-taka",
     label: "Orders",
     href: "/dashboard/orders",
   },

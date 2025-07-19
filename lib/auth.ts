@@ -37,14 +37,14 @@ const REFRESH_COOKIE_OPTIONS = {
 
 // JWT token generation
 export function generateTokens(userId: string, role: UserRole) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const accessToken = jwt.sign(
     { userId, role, type: 'access' },
     JWT_SECRET,
     { expiresIn: JWT_EXPIRES_IN }
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const refreshToken = jwt.sign(
     { userId, role, type: 'refresh' },
     JWT_SECRET,

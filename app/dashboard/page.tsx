@@ -9,7 +9,7 @@ import {
   InboxOutlined,
   ExclamationCircleOutlined,
   RiseOutlined,
-  ClockCircleOutlined
+  ClockCircleOutlined,
 } from '@ant-design/icons';
 import { useGetDashboardStatsQuery, useGetInventoryAlertsQuery } from '@/store/api/dashboard';
 
@@ -128,7 +128,7 @@ const Dashboard: React.FC = () => {
       title: 'Amount',
       dataIndex: 'totalAmount',
       key: 'totalAmount',
-      render: (amount: number) => `$${amount.toFixed(2)}`,
+      render: (amount: number) => `৳${amount.toFixed(2)}`,
     },
   ];
 
@@ -182,7 +182,7 @@ const Dashboard: React.FC = () => {
               precision={2}
               valueStyle={{ color: '#181818', fontWeight: 600, fontSize: 24 }}
               prefix={<DollarOutlined className="mr-1 text-lg align-middle" />}
-              suffix={<span className="text-base font-semibold">$</span>}
+              suffix={<span className="text-base font-semibold">৳</span>}
             />
           </Card>
         </Col>
@@ -337,7 +337,7 @@ const Dashboard: React.FC = () => {
                   title: 'Revenue', 
                   dataIndex: 'revenue', 
                   key: 'revenue',
-                  render: (revenue: number) => `$${revenue.toFixed(2)}`
+                  render: (revenue: number) => `৳${revenue.toFixed(2)}`
                 },
               ]}
               pagination={false}

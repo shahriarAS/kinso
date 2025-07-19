@@ -107,7 +107,7 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
       dataIndex: "totalSpent",
       key: "totalSpent",
       sorter: true,
-      render: (amount: number) => <span className="font-medium text-gray-900">${amount.toFixed(2)}</span>,
+      render: (amount: number) => <span className="font-medium text-gray-900">৳{amount.toFixed(2)}</span>,
     },
     {
       title: <span className="font-medium text-base">Status</span>,

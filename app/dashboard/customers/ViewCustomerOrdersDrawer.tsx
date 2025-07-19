@@ -69,7 +69,7 @@ export default function ViewCustomerOrdersDrawer({ customer, onClose }: Props) {
       dataIndex: "totalAmount",
       key: "totalAmount",
       render: (amount: number) => (
-        <span className="font-medium text-gray-900">${amount.toFixed(2)}</span>
+        <span className="font-medium text-gray-900">৳{amount.toFixed(2)}</span>
       ),
     },
     {
@@ -128,7 +128,7 @@ export default function ViewCustomerOrdersDrawer({ customer, onClose }: Props) {
             </div>
             <div>
               <p className="text-sm font-medium text-gray-500">Total Spent</p>
-              <p className="text-2xl font-bold text-gray-900">${customer.totalSpent?.toFixed(2) || '0.00'}</p>
+              <p className="text-2xl font-bold text-gray-900">৳{customer.totalSpent?.toFixed(2) || '0.00'}</p>
             </div>
           </div>
         </div>

@@ -72,7 +72,7 @@ export default function ProductGrid({ products, onAdd }: ProductGridProps) {
             </div>
             <div className="flex items-center justify-between mb-1">
               <span className="text-xl font-semibold text-green-600">
-                ${price ? price.toFixed(2) : '0.00'}
+                ৳{price ? price.toFixed(2) : '0.00'}
               </span>
               <span className="text-xs text-gray-400">Stock: {stockQuantity}</span>
             </div>

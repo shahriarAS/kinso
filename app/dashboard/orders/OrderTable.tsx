@@ -113,7 +113,7 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
       title: <span className="font-medium text-base">Total Amount</span>,
       dataIndex: "totalAmount",
       key: "totalAmount",
-      render: (amount: number) => <span className="font-medium text-gray-900">${amount.toFixed(2)}</span>,
+      render: (amount: number) => <span className="font-medium text-gray-900">৳{amount.toFixed(2)}</span>,
     },
     {
       title: <span className="font-medium text-base">Discount</span>,
@@ -122,7 +122,7 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
       render: (_: any, record: Order) => {
         const subtotal = record.items.reduce((sum, item) => sum + item.totalPrice, 0);
         const discount = typeof record.discount === 'number' ? record.discount : subtotal - record.totalAmount;
-        return <span className="text-red-500">${discount.toFixed(2)}</span>;
+        return <span className="text-red-500">৳{discount.toFixed(2)}</span>;
       },
     },
     {
@@ -130,7 +130,7 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
       dataIndex: "totalAmount",
       key: "finalTotal",
       render: (amount: number, record: Order) => {
-        return <span className="font-bold text-green-700">${amount.toFixed(2)}</span>;
+        return <span className="font-bold text-green-700">৳{amount.toFixed(2)}</span>;
       },
     },
     {
@@ -208,9 +208,9 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
               <div className="font-semibold text-lg mb-2">Customer: {viewOrder.customerName}</div>
               <div className="text-gray-600 text-sm mb-1">Order #: {viewOrder.orderNumber}</div>
               <div className="text-gray-600 text-sm mb-1">Date: {new Date(viewOrder.createdAt).toLocaleString()}</div>
-              <div className="text-gray-600 text-sm mb-1">Subtotal: ${viewOrder.items.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2)}</div>
-              <div className="text-red-500 text-sm mb-1">Discount: ${typeof viewOrder.discount === 'number' ? viewOrder.discount.toFixed(2) : (viewOrder.items.reduce((sum, item) => sum + item.totalPrice, 0) - viewOrder.totalAmount).toFixed(2)}</div>
-              <div className="text-green-700 text-base font-bold mb-1">Final Total: ${viewOrder.totalAmount.toFixed(2)}</div>
+              <div className="text-gray-600 text-sm mb-1">Subtotal: ৳{viewOrder.items.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2)}</div>
+              <div className="text-red-500 text-sm mb-1">Discount: ৳{typeof viewOrder.discount === 'number' ? viewOrder.discount.toFixed(2) : (viewOrder.items.reduce((sum, item) => sum + item.totalPrice, 0) - viewOrder.totalAmount).toFixed(2)}</div>
+              <div className="text-green-700 text-base font-bold mb-1">Final Total: ৳{viewOrder.totalAmount.toFixed(2)}</div>
               {viewOrder.notes && <div className="text-gray-600 text-sm mb-1">Notes: {viewOrder.notes}</div>}
             </div>
             <div>
@@ -220,8 +220,8 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
                   { title: 'Product', dataIndex: ['product', 'name'], key: 'product' },
                   { title: 'UPC', dataIndex: ['product', 'upc'], key: 'upc' },
                   { title: 'Qty', dataIndex: 'quantity', key: 'quantity' },
-                  { title: 'Unit Price', dataIndex: 'unitPrice', key: 'unitPrice', render: (v: number) => `$${v.toFixed(2)}` },
-                  { title: 'Total', dataIndex: 'totalPrice', key: 'totalPrice', render: (v: number) => `$${v.toFixed(2)}` },
+                  { title: 'Unit Price', dataIndex: 'unitPrice', key: 'unitPrice', render: (v: number) => `৳${v.toFixed(2)}` },
+                  { title: 'Total', dataIndex: 'totalPrice', key: 'totalPrice', render: (v: number) => `৳${v.toFixed(2)}` },
                 ]}
                 dataSource={viewOrder.items}
                 rowKey={(_, idx) => String(idx)}

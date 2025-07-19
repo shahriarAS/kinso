@@ -116,7 +116,7 @@ const InvoiceTemplate: React.FC<FlowInvoiceProps> = ({ data }) => {
   const invoiceData = data || defaultData;
 
   const formatCurrency = (amount: number) => {
-    return `$${amount.toFixed(2)}`;
+    return `৳${amount.toFixed(2)}`;
   };
 
   return (

@@ -13,11 +13,6 @@ export interface IOrder extends Document {
   customerName: string;
   items: IOrderItem[];
   totalAmount: number;
-//   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-//   orderDate: Date;
-//   deliveryDate?: Date;
-//   paymentStatus: 'pending' | 'paid' | 'failed';
-//   shippingAddress: string;
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -69,28 +64,6 @@ const OrderSchema: Schema = new Schema({
     required: true,
     min: 0,
   },
-//   status: {
-//     type: String,
-//     enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
-//     default: 'pending',
-//   },
-//   orderDate: {
-//     type: Date,
-//     default: Date.now,
-//   },
-//   deliveryDate: {
-//     type: Date,
-//   },
-//   paymentStatus: {
-//     type: String,
-//     enum: ['pending', 'paid', 'failed'],
-//     default: 'pending',
-//   },
-//   shippingAddress: {
-//     type: String,
-//     required: true,
-//     trim: true,
-//   },
   notes: {
     type: String,
     trim: true,
@@ -105,14 +78,6 @@ OrderSchema.index({ orderNumber: 1 });
 // Index for customer queries
 OrderSchema.index({ customerId: 1 });
 
-// Index for status queries
-// OrderSchema.index({ status: 1 });
-
-// Index for payment status queries
-// OrderSchema.index({ paymentStatus: 1 });
-
-// Index for order date queries
-// OrderSchema.index({ orderDate: 1 });
 
 // Compound index for customer and status
 OrderSchema.index({ customerId: 1});

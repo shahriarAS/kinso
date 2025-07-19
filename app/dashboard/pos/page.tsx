@@ -1,11 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Product } from "@/types/product";
-import { Input, Select } from "antd";
+import { Input, Select, message } from "antd";
+import { useGetWarehousesQuery } from "@/store/api/warehouses";
+import { useGetCustomersQuery } from "@/store/api/customers";
+import { useGetWarehouseInventoryQuery } from "@/store/api/warehouses";
 import ProductGrid from "./ProductGrid";
 import CartDetails from "./CartDetails";
-import { CartItem, DEFAULT_UNIT_PRICE } from "./types";
+import CustomerModal from "./CustomerModal";
+import { CartItem, DEFAULT_UNIT_PRICE, CustomerOption, WarehouseOption } from "./types";
 
 export function getInitials(name: string) {
   return name
@@ -14,40 +18,7 @@ export function getInitials(name: string) {
     .join("")
     .toUpperCase()
     .slice(0, 2);
-} 
-
-export const mockProducts: Product[] = [
-  {
-    id: "1",
-    name: "iPhone 15 Pro Max",
-    upc: "123456789012",
-    category: "electronics",
-    stock: [],
-  },
-  {
-    id: "2",
-    name: "T-Shirt Black",
-    upc: "987654321098",
-    category: "clothing",
-    stock: [],
-  },
-  {
-    id: "3",
-    name: "Organic Apple",
-    upc: "555666777888",
-    category: "food",
-    stock: [],
-  },
-  {
-    id: "4",
-    name: "Sony Bluetooth 5.1 Headphones",
-    upc: "111222333444",
-    category: "electronics",
-    stock: [],
-  },
-]; 
-
-
+}
 
 type Props = {};
 
@@ -57,8 +28,62 @@ export default function POS({}: Props) {
   const [customer, setCustomer] = useState("walkin");
   const [discount, setDiscount] = useState(0);
   const [customTotal, setCustomTotal] = useState<string | null>(null);
+  const [selectedWarehouse, setSelectedWarehouse] = useState<string>("");
+  const [customerModalOpen, setCustomerModalOpen] = useState(false);
 
-  const filteredProducts = mockProducts.filter(
+  // API hooks
+  const { data: warehousesData, isLoading: warehousesLoading } = useGetWarehousesQuery({
+    limit: 100,
+  });
+  
+  const { data: customersData, isLoading: customersLoading } = useGetCustomersQuery({
+    limit: 100,
+  });
+
+  const { data: inventoryData, isLoading: inventoryLoading } = useGetWarehouseInventoryQuery(
+    selectedWarehouse,
+    { skip: !selectedWarehouse }
+  );
+
+  // Set default warehouse when warehouses load
+  useEffect(() => {
+    if (warehousesData?.data && warehousesData.data.length > 0 && !selectedWarehouse) {
+      setSelectedWarehouse(warehousesData.data[0]._id);
+    }
+  }, [warehousesData, selectedWarehouse]);
+
+  // Prepare warehouse options
+  const warehouseOptions: WarehouseOption[] = warehousesData?.data.map(warehouse => ({
+    label: warehouse.name,
+    value: warehouse._id,
+    _id: warehouse._id,
+  })) || [];
+
+  // Prepare customer options
+  const customerOptions: CustomerOption[] = [
+    { label: "Walk-in Customer", value: "walkin" },
+    ...(customersData?.data.map(customer => ({
+      label: customer.name,
+      value: customer._id,
+      _id: customer._id,
+    })) || []),
+  ];
+
+  // Get products from inventory
+  const products: Product[] = inventoryData?.data?.products.map((item: any) => ({
+    _id: item.product._id,
+    name: item.product.name,
+    upc: item.product.upc,
+    category: item.product.category,
+    stock: [{
+      warehouse: inventoryData.data.warehouse,
+      unit: item.quantity,
+      dp: item.dp,
+      mrp: item.mrp,
+    }],
+  })) || [];
+
+  const filteredProducts = products.filter(
     (p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       p.upc.includes(search)
@@ -68,9 +93,7 @@ export default function POS({}: Props) {
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-  const tax = subtotal * 0.05;
-  const shipping = cart.length > 0 ? 60 : 0;
-  const computedTotal = subtotal + tax + shipping - discount;
+  const computedTotal = subtotal - discount;
   const total =
     customTotal !== null && customTotal !== ""
       ? Number(customTotal)
@@ -78,33 +101,52 @@ export default function POS({}: Props) {
 
   const handleAddToCart = (product: Product) => {
     setCart((prev) => {
-      const found = prev.find((item) => item.id === product.id);
+      const found = prev.find((item) => item._id === product._id);
       if (found) {
         return prev.map((item) =>
-          item.id === product.id
+          item._id === product._id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       }
-      return [...prev, { ...product, quantity: 1, price: DEFAULT_UNIT_PRICE }];
+      // Use the actual MRP price from warehouse inventory
+      const stockItem = product.stock[0];
+      const price = stockItem?.mrp || DEFAULT_UNIT_PRICE;
+      return [...prev, { ...product, quantity: 1, price: Number(price) }];
     });
   };
+
   const handleQtyChange = (_id: string, qty: number) => {
     setCart((prev) =>
       prev.map((item) =>
-        item.id === id ? { ...item, quantity: Math.max(1, qty) } : item
+        item._id === _id ? { ...item, quantity: Math.max(1, qty) } : item
       )
     );
   };
+
   const handlePriceChange = (_id: string, price: number) => {
     setCart((prev) =>
       prev.map((item) =>
-        item.id === id ? { ...item, price: Math.max(0, price) } : item
+        item._id === _id ? { ...item, price: Math.max(0, price) } : item
       )
     );
   };
+
   const handleRemoveFromCart = (_id: string) => {
-    setCart((prev) => prev.filter((item) => item.id !== id));
+    setCart((prev) => prev.filter((item) => item._id !== _id));
+  };
+
+  const handleCustomerCreated = (newCustomer: { _id: string; name: string; value: string }) => {
+    setCustomer(newCustomer.value);
+    message.success(`Customer ${newCustomer.name} created and selected!`);
+  };
+
+  const handleCheckoutSuccess = () => {
+    setCart([]);
+    setDiscount(0);
+    setCustomTotal(null);
+    setCustomer("walkin");
+    message.success("Cart cleared! Ready for next sale.");
   };
 
   return (
@@ -116,13 +158,12 @@ export default function POS({}: Props) {
         </h1>
         <Select
           size="large"
-          options={[
-            { label: "Warehouse A", value: "warehouseA" },
-            { label: "Warehouse B", value: "warehouseB" },
-            { label: "Warehouse C", value: "warehouseC" },
-          ]}
+          options={warehouseOptions}
+          value={selectedWarehouse}
+          onChange={setSelectedWarehouse}
           className="w-52"
           placeholder="Select Warehouse"
+          loading={warehousesLoading}
         />
       </div>
       <div className="gap-4 grid grid-cols-5">
@@ -137,7 +178,15 @@ export default function POS({}: Props) {
               allowClear
             />
           </div>
-          <ProductGrid products={filteredProducts} onAdd={handleAddToCart} />
+          {inventoryLoading ? (
+            <div className="text-center py-8 text-gray-500">Loading products...</div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              {search ? "No products found matching your search" : "No products available in this warehouse"}
+            </div>
+          ) : (
+            <ProductGrid products={filteredProducts} onAdd={handleAddToCart} />
+          )}
         </div>
         <div className="col-span-2">
           <CartDetails
@@ -152,9 +201,18 @@ export default function POS({}: Props) {
             total={total}
             setCustomTotal={setCustomTotal}
             computedTotal={computedTotal}
+            customers={customerOptions}
+            onCreateCustomer={() => setCustomerModalOpen(true)}
+            onCheckoutSuccess={handleCheckoutSuccess}
           />
         </div>
       </div>
+
+      <CustomerModal
+        open={customerModalOpen}
+        onClose={() => setCustomerModalOpen(false)}
+        onCustomerCreated={handleCustomerCreated}
+      />
     </div>
   );
 }

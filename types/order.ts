@@ -12,12 +12,9 @@ export interface Order {
     totalPrice: number;
   }[];
   totalAmount: number;
-  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
-  orderDate: string;
-  deliveryDate?: string;
-  paymentStatus: "pending" | "paid" | "failed";
-  shippingAddress: string;
   notes?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface OrderInput extends Omit<Order, "id"> {} 
+export interface OrderInput extends Omit<Order, "_id" | "orderNumber" | "createdAt" | "updatedAt"> {} 

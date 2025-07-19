@@ -46,8 +46,8 @@ export default function ViewCustomerOrdersDrawer({ customer, onClose }: Props) {
     },
     {
       title: <span className="font-medium text-base">Date</span>,
-      dataIndex: "orderDate",
-      key: "orderDate",
+      dataIndex: "createdAt",
+      key: "createdAt",
       render: (date: string) => (
         <span className="text-gray-700">
           {new Date(date).toLocaleDateString()}
@@ -70,26 +70,6 @@ export default function ViewCustomerOrdersDrawer({ customer, onClose }: Props) {
       key: "totalAmount",
       render: (amount: number) => (
         <span className="font-medium text-gray-900">${amount.toFixed(2)}</span>
-      ),
-    },
-    {
-      title: <span className="font-medium text-base">Status</span>,
-      dataIndex: "status",
-      key: "status",
-      render: (status: string) => (
-        <Tag color={orderStatusColors[status]} className="capitalize">
-          {status}
-        </Tag>
-      ),
-    },
-    {
-      title: <span className="font-medium text-base">Payment</span>,
-      dataIndex: "paymentStatus",
-      key: "paymentStatus",
-      render: (status: string) => (
-        <Tag color={paymentStatusColors[status]} className="capitalize">
-          {status}
-        </Tag>
       ),
     },
     {
@@ -166,7 +146,7 @@ export default function ViewCustomerOrdersDrawer({ customer, onClose }: Props) {
               <Table
                 columns={columns}
                 dataSource={data?.data || []}
-                rowKey="id"
+                rowKey="_id"
                 className="!bg-white"
                 pagination={false}
                 scroll={{ x: '100%' }}

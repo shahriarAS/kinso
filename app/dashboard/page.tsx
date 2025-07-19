@@ -83,27 +83,6 @@ const Dashboard: React.FC = () => {
       key: 'totalAmount',
       render: (amount: number) => `$${amount.toFixed(2)}`,
     },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: string) => {
-        const statusColors = {
-          pending: 'orange',
-          processing: 'blue',
-          shipped: 'purple',
-          delivered: 'green',
-          cancelled: 'red',
-        };
-        return <Tag color={statusColors[status as keyof typeof statusColors]}>{status.toUpperCase()}</Tag>;
-      },
-    },
-    {
-      title: 'Date',
-      dataIndex: 'orderDate',
-      key: 'orderDate',
-      render: (date: string) => new Date(date).toLocaleDateString(),
-    },
   ];
 
   // Low stock products table columns

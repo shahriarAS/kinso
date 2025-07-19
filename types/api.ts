@@ -73,8 +73,6 @@ export interface Order {
   customerName: string;
   items: OrderItem[];
   totalAmount: number;
-  status: "pending" | "processing" | "completed" | "cancelled";
-  paymentStatus: "pending" | "paid" | "failed" | "refunded";
   notes?: string;
   createdAt: string;
   updatedAt: string;
@@ -176,7 +174,6 @@ export interface DashboardStats {
     customerName: string;
     totalAmount: number;
     status: string;
-    orderDate: string;
   }>;
   topProducts: Array<{
     _id: string;

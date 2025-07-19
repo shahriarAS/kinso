@@ -22,8 +22,6 @@ export const ordersApi = createApi({
         page?: number;
         limit?: number;
         search?: string;
-        status?: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
-        paymentStatus?: "pending" | "paid" | "failed";
         customerId?: string;
         startDate?: string;
         endDate?: string;
@@ -39,7 +37,7 @@ export const ordersApi = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.data.map(({ id }) => ({ type: "Order" as const, id })),
+              ...result.data.map(({ _id }) => ({ type: "Order" as const, id: _id })),
               { type: "Order", id: "LIST" },
             ]
           : [{ type: "Order", id: "LIST" }],
@@ -75,13 +73,13 @@ export const ordersApi = createApi({
       { message: string; data: Order },
       { _id: string; order: Partial<OrderInput> }
     >({
-      query: ({ id, order }) => ({
-        url: `/${id}`,
+      query: ({ _id, order }) => ({
+        url: `/${_id}`,
         method: "PUT",
         body: order,
       }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: "Order", id },
+      invalidatesTags: (result, error, { _id }) => [
+        { type: "Order", id: _id },
         { type: "Order", id: "LIST" },
       ],
     }),
@@ -103,33 +101,17 @@ export const ordersApi = createApi({
       { message: string; data: Order },
       { _id: string; status: Order["status"] }
     >({
-      query: ({ id, status }) => ({
-        url: `/${id}/status`,
+      query: ({ _id, status }) => ({
+        url: `/${_id}/status`,
         method: "PATCH",
         body: { status },
       }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: "Order", id },
+      invalidatesTags: (result, error, { _id }) => [
+        { type: "Order", id: _id },
         { type: "Order", id: "LIST" },
       ],
     }),
-
-    // Update payment status
-    updatePaymentStatus: builder.mutation<
-      { message: string; data: Order },
-      { _id: string; paymentStatus: Order["paymentStatus"] }
-    >({
-      query: ({ id, paymentStatus }) => ({
-        url: `/${id}/payment-status`,
-        method: "PATCH",
-        body: { paymentStatus },
-      }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: "Order", id },
-        { type: "Order", id: "LIST" },
-      ],
-    }),
-
+    
     // Get order statistics
     getOrderStats: builder.query<
       {
@@ -167,7 +149,7 @@ export const ordersApi = createApi({
       }),
       providesTags: (result) =>
         result
-          ? result.data.map(({ id }) => ({ type: "Order" as const, id }))
+          ? result.data.map(({ _id }) => ({ type: "Order" as const, id: _id }))
           : [],
     }),
   }),

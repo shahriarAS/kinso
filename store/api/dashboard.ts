@@ -21,7 +21,6 @@ export const dashboardApi = createApi({
           customerName: string;
           totalAmount: number;
           status: string;
-          orderDate: string;
         }>;
         topProducts: Array<{
           _id: string;

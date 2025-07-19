@@ -98,21 +98,23 @@ export const warehousesApi = createApi({
     // Get warehouse inventory
     getWarehouseInventory: builder.query<
       {
-        warehouse: Warehouse;
-        products: Array<{
-          product: {
-            _id: string;
-            name: string;
-            upc: string;
-            category: string;
-          };
-          quantity: number;
-          unit: string;
-          dp: number;
-          mrp: number;
-        }>;
-        totalProducts: number;
-        totalValue: number;
+        data: {
+          warehouse: Warehouse;
+          products: Array<{
+            product: {
+              _id: string;
+              name: string;
+              upc: string;
+              category: string;
+            };
+            quantity: number;
+            unit: string;
+            dp: number;
+            mrp: number;
+          }>;
+          totalProducts: number;
+          totalValue: number;
+        };
       },
       string
     >({

@@ -64,58 +64,6 @@ export default function AddEditOrderDrawer({}: Props) {
               className="w-full"
             />
           </Form.Item>
-          
-          <div className="grid grid-cols-2 gap-6">
-            <Form.Item
-              name="status"
-              label="Status"
-              rules={[{ required: true, message: "Please select status" }]}
-              className="font-medium"
-            >
-              <Select
-                size="large"
-                placeholder="Select Status"
-                options={[
-                  { label: "Pending", value: "pending" },
-                  { label: "Processing", value: "processing" },
-                  { label: "Shipped", value: "shipped" },
-                  { label: "Delivered", value: "delivered" },
-                  { label: "Cancelled", value: "cancelled" },
-                ]}
-                className="w-full"
-              />
-            </Form.Item>
-            <Form.Item
-              name="paymentStatus"
-              label="Payment Status"
-              rules={[{ required: true, message: "Please select payment status" }]}
-              className="font-medium"
-            >
-              <Select
-                size="large"
-                placeholder="Select Payment Status"
-                options={[
-                  { label: "Pending", value: "pending" },
-                  { label: "Paid", value: "paid" },
-                  { label: "Failed", value: "failed" },
-                ]}
-                className="w-full"
-              />
-            </Form.Item>
-          </div>
-
-          <Form.Item
-            name="shippingAddress"
-            label="Shipping Address"
-            rules={[{ required: true, message: "Please enter shipping address" }]}
-            className="font-medium"
-          >
-            <Input.TextArea
-              rows={3}
-              placeholder="Enter Shipping Address"
-              className="w-full"
-            />
-          </Form.Item>
 
           <Form.Item
             name="notes"

@@ -9,6 +9,7 @@ export const DEFAULT_UNIT_PRICE = 1000;
 export interface CustomerOption {
   label: string;
   value: string;
+  disabled?: boolean;
   _id?: string;
 }
 

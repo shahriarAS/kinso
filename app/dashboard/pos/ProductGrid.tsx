@@ -79,7 +79,7 @@ export default function ProductGrid({ products, onAdd }: ProductGridProps) {
             <Button
               type="primary"
               size="large"
-              className="w-full flex items-center justify-center gap-2 font-semibold !bg-primary hover:!bg-primary/90 !border-primary mt-auto py-3 text-lg rounded-xl"
+              className="w-full flex items-center justify-center gap-2 font-semibold mt-auto py-3 text-lg rounded-xl"
               onClick={() => onAdd(product)}
               icon={<Icon icon="mdi:cart-plus" className="text-2xl" />}
               disabled={stockQuantity === 0}

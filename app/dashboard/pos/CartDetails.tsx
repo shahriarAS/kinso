@@ -71,7 +71,7 @@ export default function CartDetails({
       return;
     }
 
-    if (customer === "walkin") {
+    if (!customer) {
       message.error("Please select a customer!");
       return;
     }
@@ -200,7 +200,6 @@ export default function CartDetails({
             size="large"
             onClick={onCreateCustomer}
             icon={<Icon icon="mdi:account-plus" />}
-            className="!bg-primary hover:!bg-primary/90 !border-primary"
           >
             New
           </Button>
@@ -319,7 +318,7 @@ export default function CartDetails({
           <Button
             size="large"
             type="primary"
-            className="w-full mt-4 !bg-primary hover:!bg-primary/90 !border-primary text-lg font-semibold py-2 rounded-xl transition-all"
+            className="w-full mt-4 text-lg font-semibold py-2 rounded-xl transition-all"
             onClick={handleCheckout}
             disabled={cart.length === 0}
           >
@@ -341,7 +340,6 @@ export default function CartDetails({
             type="primary"
             loading={isCreatingOrder}
             onClick={confirmCheckout}
-            className="!bg-primary hover:!bg-primary/90 !border-primary"
           >
             Confirm Order
           </Button>,

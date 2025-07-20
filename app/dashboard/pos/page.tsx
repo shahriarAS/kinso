@@ -18,7 +18,7 @@ import { useGetProductsQuery } from "@/hooks/useApi";
 export default function POS() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [search, setSearch] = useState("");
-  const [customer, setCustomer] = useState("walkin");
+  const [customer, setCustomer] = useState("");
   const [discount, setDiscount] = useState(0);
   const [customTotal, setCustomTotal] = useState<string | null>(null);
   const [selectedWarehouse, setSelectedWarehouse] = useState<string>("");
@@ -51,7 +51,7 @@ export default function POS() {
 
   // Prepare customer options
   const customerOptions: CustomerOption[] = [
-    { label: "Walk-in Customer", value: "walkin" },
+    { label: "Select A Customer", value: "", disabled: true },
     ...(customersData?.data.map(customer => ({
       label: customer.name,
       value: customer._id,
@@ -134,7 +134,7 @@ export default function POS() {
     setCart([]);
     setDiscount(0);
     setCustomTotal(null);
-    setCustomer("walkin");
+    setCustomer("");
     message.success("Cart cleared! Ready for next sale.");
     // Refocus search bar
     setTimeout(() => {
@@ -149,7 +149,7 @@ export default function POS() {
     setCart([]);
     setDiscount(0);
     setCustomTotal(null);
-    setCustomer("walkin");
+    setCustomer("");
     message.success("Cart cleared! Ready for next sale.");
     // Refocus search bar
     setTimeout(() => {

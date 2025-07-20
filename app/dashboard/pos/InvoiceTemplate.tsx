@@ -124,17 +124,11 @@ const InvoiceTemplate: React.FC<FlowInvoiceProps> = ({ data }) => {
       {/* Header */}
       <div className="flex justify-between items-start mb-6">
         <div className="text-xs space-y-0.5 leading-relaxed" style={{ color: '#6b7280' }}>
-          {/* <div style={{ fontWeight: 500, color: '#111827' }}>{invoiceData.company.location}</div>
-          <div>{invoiceData.company.address}</div>
-          <div>{invoiceData.company.phone}</div>
-          <div>{invoiceData.company.email}</div>
-          <div style={{ paddingTop: 4 }}>{invoiceData.company.website}</div> */}
         </div>
         <div style={{ textAlign: 'right' }}>
           <div style={{ width: 40, height: 40, background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
             <span style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>{invoiceData.company.logo}</span>
           </div>
-          {/* <div style={{ fontWeight: 'bold', fontSize: 18, letterSpacing: 2 }}>{invoiceData.company.name}</div> */}
         </div>
       </div>
 
@@ -165,7 +159,7 @@ const InvoiceTemplate: React.FC<FlowInvoiceProps> = ({ data }) => {
           <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 4 }}>Invoice to:</div>
           <div style={{ fontWeight: 600, fontSize: 14 }}>{invoiceData.customer.name}</div>
         </div>
-        <div style={{ textAlign: 'right', fontSize: 12 }}>
+        <div style={{ textAlign: 'right', fontSize: 12, width: '50%'}}>
           {invoiceData.customer.email && (
             <div style={{ color: '#6b7280', marginBottom: 2 }}>{invoiceData.customer.email}</div>
           )}

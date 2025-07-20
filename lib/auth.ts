@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import User from "@/features/users/model";
 import dbConnect from "@/lib/database";
@@ -83,6 +83,7 @@ export async function getUserById(userId: string) {
 }
 
 // Main authentication function
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function authenticateUser(request: NextRequest) {
   try {
     // Get access token from cookies
@@ -211,8 +212,8 @@ export async function authorizeRequest(
 export function createAuthMiddleware(
   options: { requiredRoles?: UserRole[]; requireAuth?: boolean } = {},
 ) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return async (request: NextRequest & { user?: any }) => {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
     const authResult = await authorizeRequest(request, options);
 
     if (!authResult.success) {

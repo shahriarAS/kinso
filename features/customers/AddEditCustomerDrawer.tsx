@@ -2,11 +2,11 @@
 import { Icon } from "@iconify/react";
 import { Button, Drawer, Form, Input, Select, Spin } from "antd";
 import { useEffect } from "react";
-import { CustomerInput, Customer } from "@/types/customer";
+import { CustomerInput, Customer } from "./types";
 import {
   useCreateCustomerMutation,
   useUpdateCustomerMutation,
-} from "@/store/api/customers";
+} from "./api";
 import { useNotification } from "@/hooks/useNotification";
 
 interface Props {
@@ -184,4 +184,4 @@ export default function AddEditCustomerDrawer({
       </Drawer>
     </div>
   );
-}
+} 

@@ -10,4 +10,10 @@ export interface Customer {
 }
 
 export interface CustomerInput
-  extends Omit<Customer, "id" | "totalOrders" | "totalSpent"> {}
+  extends Omit<Customer, "_id" | "totalOrders" | "totalSpent"> {}
+
+export interface CustomerFilters {
+  search?: string;
+  status?: "active" | "inactive";
+  email?: string;
+} 

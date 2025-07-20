@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { authApi } from "./api/auth";
-import { customersApi } from "./api/customers";
+import { customersApi } from "@/features/customers";
 import { ordersApi } from "./api/orders";
 import { warehousesApi } from "./api/warehouses";
 import { categoriesApi } from "./api/categories";

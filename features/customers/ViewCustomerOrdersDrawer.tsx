@@ -3,7 +3,7 @@
 import { Icon } from "@iconify/react";
 import { Button, Drawer, Table } from "antd";
 import { useState } from "react";
-import type { Customer } from "@/types/customer";
+import type { Customer } from "./types";
 import type { Order } from "@/features/orders/types";
 import { useGetOrdersByCustomerQuery } from "@/store/api/orders";
 import ApiStatusHandler from "@/components/common/ApiStatusHandler";
@@ -190,4 +190,4 @@ export default function ViewCustomerOrdersDrawer({ customer, onClose }: Props) {
       />
     </Drawer>
   );
-}
+} 

@@ -24,8 +24,7 @@ export {
   useUpdateCustomerMutation,
   useDeleteCustomerMutation,
   useGetCustomerStatsQuery,
-  useSearchCustomersQuery,
-} from "@/store/api/customers";
+} from "@/features/customers";
 
 export {
   // Orders API hooks

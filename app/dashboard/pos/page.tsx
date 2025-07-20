@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import type { Product } from "@/features/products/types";
 import { Input, Select, message } from "antd";
 import { useGetWarehousesQuery } from "@/store/api/warehouses";
-import { useGetCustomersQuery } from "@/store/api/customers";
+import { useGetCustomersQuery } from "@/features/customers";
 import ProductGrid from "./ProductGrid";
 import CartDetails from "./CartDetails";
 import CustomerModal from "./CustomerModal";

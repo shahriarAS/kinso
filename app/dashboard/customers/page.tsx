@@ -1,26 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import AddEditCustomerDrawer from "./AddEditCustomerDrawer";
-import CustomerFilters from "./CustomerFilters";
-import CustomerTable from "./CustomerTable";
 import { Button } from "antd";
 import { Icon } from "@iconify/react";
-
-interface CustomerFilters {
-  search?: string;
-  status?: "active" | "inactive";
-  email?: string;
-}
+import {
+  AddEditCustomerDrawer,
+  CustomerFilters,
+  CustomerTable,
+} from "@/features/customers";
+import type { CustomerFilters as CustomerFiltersType } from "@/features/customers/types";
 
 export default function Customers() {
-  const [filters, setFilters] = useState<CustomerFilters>({
+  const [filters, setFilters] = useState<CustomerFiltersType>({
     search: "",
     status: undefined,
     email: "",
   });
   const [open, setOpen] = useState(false);
-  const handleFiltersChange = (newFilters: CustomerFilters) => {
+  const handleFiltersChange = (newFilters: CustomerFiltersType) => {
     setFilters(newFilters);
   };
 

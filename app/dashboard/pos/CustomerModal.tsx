@@ -1,7 +1,7 @@
 "use client";
 import { Modal, Form, Input, Button, Select, message } from "antd";
-import { useCreateCustomerMutation } from "@/store/api/customers";
-import { CustomerInput } from "@/types";
+import { useCreateCustomerMutation } from "@/features/customers";
+import type { CustomerInput } from "@/features/customers";
 
 interface CustomerModalProps {
   open: boolean;

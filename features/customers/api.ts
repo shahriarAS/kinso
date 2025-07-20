@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import baseQueryWithErrorHandling from "../baseQueryWithErrorHandling";
-import { Customer, CustomerInput } from "@/types";
+import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
+import { Customer, CustomerInput } from "./types";
 
 export const customersApi = createApi({
   reducerPath: "customersApi",
@@ -98,13 +98,8 @@ export const customersApi = createApi({
         totalCustomers: number;
         activeCustomers: number;
         inactiveCustomers: number;
+        newCustomersThisMonth: number;
         averageOrdersPerCustomer: number;
-        topCustomers: Array<{
-          _id: string;
-          name: string;
-          totalOrders: number;
-          totalSpent: number;
-        }>;
       },
       void
     >({
@@ -112,23 +107,7 @@ export const customersApi = createApi({
         url: "/stats",
         method: "GET",
       }),
-      providesTags: ["Customer"],
-    }),
-
-    // Search customers by name or email
-    searchCustomers: builder.query<{ customers: Customer[] }, string>({
-      query: (searchTerm) => ({
-        url: "/search",
-        method: "GET",
-        params: { q: searchTerm },
-      }),
-      providesTags: (result) =>
-        result
-          ? result.customers.map(({ _id }) => ({
-              type: "Customer" as const,
-              _id,
-            }))
-          : [],
+      providesTags: [{ type: "Customer", id: "STATS" }],
     }),
   }),
 });
@@ -140,5 +119,4 @@ export const {
   useUpdateCustomerMutation,
   useDeleteCustomerMutation,
   useGetCustomerStatsQuery,
-  useSearchCustomersQuery,
-} = customersApi;
+} = customersApi; 

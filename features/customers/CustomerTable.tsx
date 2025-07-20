@@ -11,11 +11,11 @@ import {
 } from "antd";
 import { Icon } from "@iconify/react";
 import React, { useState, useEffect } from "react";
-import type { Customer } from "@/types/customer";
+import type { Customer, CustomerFilters } from "./types";
 import {
   useGetCustomersQuery,
   useDeleteCustomerMutation,
-} from "@/store/api/customers";
+} from "./api";
 import { useNotification } from "@/hooks/useNotification";
 import ApiStatusHandler from "@/components/common/ApiStatusHandler";
 import AddEditCustomerDrawer from "./AddEditCustomerDrawer";
@@ -27,11 +27,7 @@ const statusColors: Record<string, string> = {
 };
 
 interface CustomerTableProps {
-  filters?: {
-    search?: string;
-    status?: "active" | "inactive";
-    email?: string;
-  };
+  filters?: CustomerFilters;
 }
 
 export default function CustomerTable({ filters = {} }: CustomerTableProps) {
@@ -286,4 +282,4 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
       )}
     </>
   );
-}
+} 

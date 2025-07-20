@@ -1,12 +1,9 @@
 "use client";
 import { Form, Input, Select } from "antd";
+import { CustomerFilters as CustomerFiltersType } from "./types";
 
 interface CustomerFiltersProps {
-  onFiltersChange?: (filters: {
-    search?: string;
-    status?: "active" | "inactive";
-    email?: string;
-  }) => void;
+  onFiltersChange?: (filters: CustomerFiltersType) => void;
 }
 
 export default function CustomerFilters({
@@ -66,4 +63,4 @@ export default function CustomerFilters({
       </Form.Item>
     </Form>
   );
-}
+} 

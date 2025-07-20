@@ -98,7 +98,10 @@ export default function DashboardSidebar() {
               collapsed ? "pl-6" : "px-8",
             )}
           >
-            <Icon icon={item.icon} className="text-2xl" />
+            <Icon
+              icon={item.icon}
+              className="text-xl text-white/80 flex-shrink-0"
+            />
             <span
               className={twMerge(
                 "whitespace-nowrap overflow-hidden transition-all duration-300",
@@ -113,91 +116,102 @@ export default function DashboardSidebar() {
           </Link>
         ))}
       </div>
-      {/* Profile context menu at the bottom */}
       <ProfileMenu collapsed={collapsed} />
     </aside>
   );
 }
 
 function ProfileMenu({ collapsed }: { collapsed: boolean }) {
-  const { data, isLoading } = useFetchAuthUserQuery();
-  const [logoutUser, { isLoading: isLoggingOut }] = useLogoutUserMutation();
-  const email = data?.user?.email || "";
-  const avatar = data?.user?.avatar;
+  const { data: authUser, isLoading } = useFetchAuthUserQuery();
+  const [logoutUser] = useLogoutUserMutation();
 
   const handleLogout = async () => {
-    await logoutUser();
+    try {
+      await logoutUser().unwrap();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
-  const menu = (
-    <div className="min-w-[180px] py-2 px-3 bg-[#232323] rounded-lg shadow-lg border border-white/10">
-      <div className="flex items-center gap-2 mb-2">
-        <Avatar
-          size={32}
-          src={avatar}
-          icon={<UserOutlined />}
-          className="bg-secondary/30"
-        />
-        <div className="flex flex-col">
-          <span className="text-xs text-white font-medium">{email}</span>
-        </div>
-      </div>
-      <Button
-        type="text"
-        icon={<LogoutOutlined />}
-        className="w-full text-left text-red-500 hover:bg-red-50 hover:text-red-700 mt-2"
-        onClick={handleLogout}
-        loading={isLoggingOut}
+  const menuItems = [
+    {
+      key: "profile",
+      label: "Profile",
+      icon: <UserOutlined />,
+      onClick: () => {
+        // Handle profile navigation
+      },
+    },
+    {
+      key: "logout",
+      label: "Logout",
+      icon: <LogoutOutlined />,
+      onClick: handleLogout,
+    },
+  ];
+
+  if (isLoading) {
+    return (
+      <div
+        className={twMerge(
+          "flex items-center gap-3 transition-all duration-300",
+          collapsed ? "px-4" : "px-8",
+        )}
       >
-        Logout
-      </Button>
-    </div>
-  );
+        <Spin size="small" />
+        {!collapsed && <span className="text-white/60">Loading...</span>}
+      </div>
+    );
+  }
 
   return (
     <div
       className={twMerge(
-        "w-full flex items-center justify-center py-4 border-t border-white/10",
-        collapsed ? "px-0" : "px-4",
+        "flex items-center gap-3 transition-all duration-300",
+        collapsed ? "px-4" : "px-8",
       )}
     >
-      {isLoading ? (
-        <Spin size="small" />
-      ) : (
-        <Dropdown popupRender={() => menu} trigger={["click"]} placement="top">
+      <Dropdown
+        menu={{ items: menuItems }}
+        placement="topRight"
+        trigger={["click"]}
+      >
+        <Button
+          type="text"
+          className="flex items-center gap-3 text-white hover:bg-secondary/10 p-2 rounded-lg transition-all duration-75"
+        >
+          <Avatar
+            size="small"
+            icon={<UserOutlined />}
+            className="bg-secondary/20"
+          />
           <div
             className={twMerge(
-              "flex items-center cursor-pointer p-2 rounded-lg hover:bg-secondary/10 transition-all",
-              collapsed ? "justify-center" : "justify-start gap-2",
+              "flex flex-col items-start whitespace-nowrap overflow-hidden transition-all duration-300",
+              collapsed
+                ? "max-w-0 opacity-0 pointer-events-none select-none"
+                : "max-w-xs opacity-100",
             )}
-            tabIndex={0}
+            style={{ transitionProperty: "max-width, opacity" }}
           >
-            <Avatar
-              size={collapsed ? 32 : 40}
-              src={avatar}
-              icon={<UserOutlined />}
-              className={twMerge("bg-secondary/30", collapsed ? "ml-4" : "")}
-            />
-            <span
-              className={twMerge(
-                "transition-all text-white text-sm font-medium whitespace-nowrap overflow-hidden",
-                collapsed
-                  ? "max-w-0 opacity-0 pointer-events-none select-none"
-                  : "max-w-xs opacity-100",
-              )}
-              style={{ transitionProperty: "max-width, opacity" }}
-            >
-              {email}
+            <span className="text-sm font-medium text-white">
+              {authUser?.user?.name || "User"}
             </span>
-            <DownOutlined
-              className={twMerge(
-                "text-white text-xs transition-all",
-                collapsed ? "opacity-0" : "opacity-100",
-              )}
-            />
+            <span className="text-xs text-white/60">
+              {authUser?.user?.role || "Staff"}
+            </span>
           </div>
-        </Dropdown>
-      )}
+          <DownOutlined
+            className={twMerge(
+              "text-white/60 transition-all duration-300",
+              collapsed
+                ? "max-w-0 opacity-0 pointer-events-none select-none"
+                : "max-w-xs opacity-100",
+            )}
+            style={{ transitionProperty: "max-width, opacity" }}
+          />
+        </Button>
+      </Dropdown>
     </div>
   );
 }

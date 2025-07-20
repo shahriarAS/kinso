@@ -1,5 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
+import { DashboardStats, SalesAnalytics, InventoryAlerts } from "./types";
 
 export const dashboardApi = createApi({
   reducerPath: "dashboardApi",
@@ -8,32 +9,7 @@ export const dashboardApi = createApi({
   endpoints: (builder) => ({
     // Get dashboard overview statistics
     getDashboardStats: builder.query<
-      {
-        totalRevenue: number;
-        totalOrders: number;
-        totalCustomers: number;
-        totalProducts: number;
-        pendingOrders: number;
-        lowStockProducts: number;
-        recentOrders: Array<{
-          _id: string;
-          orderNumber: string;
-          customerName: string;
-          totalAmount: number;
-          status: string;
-        }>;
-        topProducts: Array<{
-          _id: string;
-          name: string;
-          totalSold: number;
-          revenue: number;
-        }>;
-        revenueChart: Array<{
-          date: string;
-          revenue: number;
-          orders: number;
-        }>;
-      },
+      DashboardStats,
       {
         startDate?: string;
         endDate?: string;
@@ -49,23 +25,7 @@ export const dashboardApi = createApi({
 
     // Get sales analytics
     getSalesAnalytics: builder.query<
-      {
-        dailySales: Array<{
-          date: string;
-          revenue: number;
-          orders: number;
-        }>;
-        monthlySales: Array<{
-          month: string;
-          revenue: number;
-          orders: number;
-        }>;
-        topCategories: Array<{
-          category: string;
-          revenue: number;
-          orders: number;
-        }>;
-      },
+      SalesAnalytics,
       {
         period: "daily" | "weekly" | "monthly";
         startDate?: string;
@@ -81,29 +41,7 @@ export const dashboardApi = createApi({
     }),
 
     // Get inventory alerts
-    getInventoryAlerts: builder.query<
-      {
-        lowStockProducts: Array<{
-          _id: string;
-          name: string;
-          currentStock: number;
-          minStock: number;
-          warehouse: string;
-        }>;
-        outOfStockProducts: Array<{
-          _id: string;
-          name: string;
-          warehouse: string;
-        }>;
-        expiringProducts: Array<{
-          _id: string;
-          name: string;
-          expiryDate: string;
-          quantity: number;
-        }>;
-      },
-      void
-    >({
+    getInventoryAlerts: builder.query<InventoryAlerts, void>({
       query: () => ({
         url: "/inventory-alerts",
         method: "GET",

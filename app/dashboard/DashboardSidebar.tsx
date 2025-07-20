@@ -7,7 +7,7 @@ import { useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { Dropdown, Avatar, Button, Spin } from "antd";
 import { UserOutlined, LogoutOutlined, DownOutlined } from "@ant-design/icons";
-import { useFetchAuthUserQuery, useLogoutUserMutation } from "@/store/api/auth";
+import { useFetchAuthUserQuery, useLogoutUserMutation } from "@/features/auth";
 
 const menuItems = [
   {

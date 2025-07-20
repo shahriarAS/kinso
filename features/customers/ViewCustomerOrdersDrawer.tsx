@@ -5,7 +5,7 @@ import { Button, Drawer, Table } from "antd";
 import { useState } from "react";
 import type { Customer } from "./types";
 import type { Order } from "@/features/orders/types";
-import { useGetOrdersByCustomerQuery } from "@/store/api/orders";
+import { useGetOrdersByCustomerQuery } from "@/features/orders";
 import ApiStatusHandler from "@/components/common/ApiStatusHandler";
 import ViewOrderDrawer from "@/features/orders/ViewOrderDrawer";
 

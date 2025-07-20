@@ -1,11 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { authApi } from "./api/auth";
+import { authApi } from "@/features/auth";
 import { customersApi } from "@/features/customers";
-import { ordersApi } from "./api/orders";
-import { warehousesApi } from "./api/warehouses";
-import { categoriesApi } from "./api/categories";
-import { usersApi } from "./api/users";
-import { dashboardApi } from "./api/dashboard";
+import { ordersApi } from "@/features/orders";
+import { warehousesApi } from "@/features/warehouses";
+import { categoriesApi } from "@/features/categories";
+import { usersApi } from "@/features/users";
+import { dashboardApi } from "@/features/dashboard";
 import uiReducer from "./slices/uiSlice";
 import { productsApi } from "@/features/products";
 

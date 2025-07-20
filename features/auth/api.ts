@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { User } from "@/features/users";
+import { LoginInput, RegisterInput, AuthResponse } from "./types";
 
 export const authApi = createApi({
   reducerPath: "authApi",
@@ -13,11 +13,8 @@ export const authApi = createApi({
   tagTypes: ["Auth"],
   endpoints: (builder) => ({
     loginUser: builder.mutation<
-      {
-        message: string;
-        user: User;
-      },
-      { email: string; password: string }
+      AuthResponse,
+      LoginInput
     >({
       query: ({ email, password }) => ({
         url: "/login",
@@ -53,10 +50,8 @@ export const authApi = createApi({
       },
     }),
     registerUser: builder.mutation<
-      {
-        message: string;
-      },
-      { name: string; email: string; password: string; password2: string }
+      { message: string },
+      RegisterInput
     >({
       query: ({ name, email, password, password2 }) => ({
         url: "/register",
@@ -71,10 +66,7 @@ export const authApi = createApi({
       invalidatesTags: ["Auth"],
     }),
     fetchAuthUser: builder.query<
-      {
-        message: string;
-        user: User;
-      },
+      AuthResponse,
       void
     >({
       query: () => ({
@@ -89,5 +81,6 @@ export const authApi = createApi({
 export const {
   useLoginUserMutation,
   useLogoutUserMutation,
+  useRegisterUserMutation,
   useFetchAuthUserQuery,
-} = authApi;
+} = authApi; 

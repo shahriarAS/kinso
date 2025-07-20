@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import type { Product } from "@/features/products/types";
 import { Input, Select, message } from "antd";
-import { useGetWarehousesQuery } from "@/store/api/warehouses";
+import { useGetWarehousesQuery } from "@/features/warehouses";
 import { useGetCustomersQuery } from "@/features/customers";
 import ProductGrid from "./ProductGrid";
 import CartDetails from "./CartDetails";

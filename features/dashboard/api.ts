@@ -1,5 +1,5 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import baseQueryWithErrorHandling from "../baseQueryWithErrorHandling";
+import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
 
 export const dashboardApi = createApi({
   reducerPath: "dashboardApi",

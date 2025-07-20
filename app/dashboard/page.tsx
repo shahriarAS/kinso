@@ -24,7 +24,7 @@ import {
 import {
   useGetDashboardStatsQuery,
   useGetInventoryAlertsQuery,
-} from "@/store/api/dashboard";
+} from "@/features/dashboard";
 
 // Types for API responses
 interface RecentOrder {

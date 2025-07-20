@@ -7,6 +7,7 @@ import type { Customer } from "@/types/customer";
 import type { Order } from "@/types/order";
 import { useGetOrdersByCustomerQuery } from "@/store/api/orders";
 import ApiStatusHandler from "@/components/common/ApiStatusHandler";
+import ViewOrderDrawer from "../orders/ViewOrderDrawer";
 
 interface Props {
   customer: Customer;
@@ -29,7 +30,7 @@ const paymentStatusColors: Record<string, string> = {
 
 export default function ViewCustomerOrdersDrawer({ customer, onClose }: Props) {
   const [open, setOpen] = useState(true);
-
+  const [viewOrder, setViewOrder] = useState<Order | null>(null);
   const { data, isLoading, error, refetch } = useGetOrdersByCustomerQuery(customer._id);
 
   const handleClose = () => {
@@ -72,22 +73,23 @@ export default function ViewCustomerOrdersDrawer({ customer, onClose }: Props) {
         <span className="font-medium text-gray-900">৳{amount.toFixed(2)}</span>
       ),
     },
-    {
-      title: <span className="font-medium text-base">Action</span>,
-      key: "action",
-      render: (_: unknown, record: Order) => (
-        <Space size="small">
-          <Tooltip title="View Details">
-            <Button 
-              className="inline-flex items-center justify-center rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 transition p-1.5"
-              size="small"
-            >
-              <Icon icon="lineicons:eye" className="text-lg text-blue-700" />
-            </Button>
-          </Tooltip>
-        </Space>
-      ),
-    },
+    // {
+    //   title: <span className="font-medium text-base">Action</span>,
+    //   key: "action",
+    //   render: (_: unknown, record: Order) => (
+    //     <Space size="small">
+    //       <Tooltip title="View Details">
+    //         <Button 
+    //           className="inline-flex items-center justify-center rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 transition p-1.5"
+    //           size="small"
+    //           onClick={() => setViewOrder(record)}
+    //         >
+    //           <Icon icon="lineicons:eye" className="text-lg text-blue-700" />
+    //         </Button>
+    //       </Tooltip>
+    //     </Space>
+    //   ),
+    // },
   ];
 
   return (
@@ -164,6 +166,7 @@ export default function ViewCustomerOrdersDrawer({ customer, onClose }: Props) {
           </ApiStatusHandler>
         </div>
       </div>
+      <ViewOrderDrawer viewOrder={viewOrder} setViewOrder={setViewOrder} />
     </Drawer>
   );
 } 

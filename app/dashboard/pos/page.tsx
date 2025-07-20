@@ -1,10 +1,9 @@
-"use client";;
+"use client";
 import { useState, useEffect, useRef } from "react";
 import type { Product } from "@/types/product";
 import { Input, Select, message, Spin } from "antd";
 import { useGetWarehousesQuery } from "@/store/api/warehouses";
 import { useGetCustomersQuery } from "@/store/api/customers";
-import { useGetWarehouseInventoryQuery } from "@/store/api/warehouses";
 import ProductGrid from "./ProductGrid";
 import CartDetails from "./CartDetails";
 import CustomerModal from "./CustomerModal";
@@ -14,6 +13,7 @@ import type { InvoiceData } from "./InvoiceTemplate";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { Skeleton } from "antd";
+import { useGetProductsQuery } from "@/hooks/useApi";
 
 export default function POS() {
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -36,17 +36,11 @@ export default function POS() {
     limit: 100,
   });
 
-  const { data: inventoryData, isLoading: inventoryLoading } = useGetWarehouseInventoryQuery(
-    selectedWarehouse,
-    { skip: !selectedWarehouse }
-  );
+  const { data: inventoryData, isLoading: inventoryLoading } = useGetProductsQuery({
+    limit: 10000,
+    warehouse: selectedWarehouse || undefined,
+  });
 
-  // Set default warehouse when warehouses load
-  useEffect(() => {
-    if (warehousesData?.data && warehousesData.data.length > 0 && !selectedWarehouse) {
-      setSelectedWarehouse(warehousesData.data[0]._id);
-    }
-  }, [warehousesData, selectedWarehouse]);
 
   // Prepare warehouse options
   const warehouseOptions: WarehouseOption[] = warehousesData?.data.map(warehouse => ({
@@ -68,18 +62,13 @@ export default function POS() {
   ];
 
   // Get products from inventory
-  const products: Product[] = inventoryData?.data?.products.map((item: any) => ({
-    _id: item.product._id,
-    name: item.product.name,
-    upc: item.product.upc,
-    sku: item.product.sku,
-    category: item.product.category,
-    stock: [{
-      warehouse: inventoryData.data.warehouse,
-      unit: item.quantity,
-      dp: item.dp,
-      mrp: item.mrp,
-    }],
+  const products: Product[] = inventoryData?.data.map((item: Product) => ({
+    _id: item._id,
+    name: item.name,
+    upc: item.upc,
+    sku: item.sku,
+    category: item.category,
+    stock: item.stock,
   })) || [];
 
   const filteredProducts = products.filter(
@@ -215,7 +204,13 @@ export default function POS() {
         </h1>
         <Select
           size="large"
-          options={warehouseOptions}
+          options={[
+            {
+              label: "All Warehouses",
+              value: "",
+            },
+            ...warehouseOptions,
+          ]}
           value={selectedWarehouse}
           onChange={setSelectedWarehouse}
           className="w-52"

@@ -1,6 +1,4 @@
 "use client";
-
-import { useState } from "react";
 import { Modal, Form, Input, Button, Select, message } from "antd";
 import { useCreateCustomerMutation } from "@/store/api/customers";
 import { CustomerInput } from "@/types";
@@ -34,6 +32,7 @@ export default function CustomerModal({
       });
       form.resetFields();
       onClose();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       message.error(error.data?.message || "Failed to create customer");
     }

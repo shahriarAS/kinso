@@ -1,8 +1,8 @@
 "use client";
 
-import { Table, Button, Tooltip, Pagination, Popconfirm, message } from "antd";
+import { Table, Button, Tooltip, Pagination, Popconfirm } from "antd";
 import { Icon } from "@iconify/react";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   useGetCategoriesQuery,
   useDeleteCategoryMutation,

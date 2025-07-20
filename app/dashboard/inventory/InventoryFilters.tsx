@@ -32,8 +32,8 @@ export default function InventoryFilters({
   onCategoryChange,
   onWarehouseChange,
   onStatusChange,
-  onMinPriceChange,
-  onMaxPriceChange,
+  // onMinPriceChange,
+  // onMaxPriceChange,
   onPageChange,
 }: Props) {
   const debouncedSearch = useDebounce(searchTerm, 500);

@@ -1,18 +1,13 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import type { Product } from "@/types/product";
-import { Input, Select, message, Spin } from "antd";
+import { Input, Select, message } from "antd";
 import { useGetWarehousesQuery } from "@/store/api/warehouses";
 import { useGetCustomersQuery } from "@/store/api/customers";
 import ProductGrid from "./ProductGrid";
 import CartDetails from "./CartDetails";
 import CustomerModal from "./CustomerModal";
-import {
-  CartItem,
-  DEFAULT_UNIT_PRICE,
-  CustomerOption,
-  WarehouseOption,
-} from "./types";
+import { CartItem, CustomerOption, WarehouseOption } from "./types";
 import InvoiceTemplate from "./InvoiceTemplate";
 import type { InvoiceData } from "./InvoiceTemplate";
 import jsPDF from "jspdf";
@@ -31,6 +26,7 @@ export default function POS() {
   const [lastInvoiceData, setLastInvoiceData] = useState<InvoiceData | null>(
     null,
   );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const searchInputRef = useRef<any>(null);
   const printContainerRef = useRef<HTMLDivElement>(null);
 
@@ -40,10 +36,9 @@ export default function POS() {
       limit: 100,
     });
 
-  const { data: customersData, isLoading: customersLoading } =
-    useGetCustomersQuery({
-      limit: 100,
-    });
+  const { data: customersData } = useGetCustomersQuery({
+    limit: 100,
+  });
 
   const { data: inventoryData, isLoading: inventoryLoading } =
     useGetProductsQuery({
@@ -111,7 +106,7 @@ export default function POS() {
       }
       // Use the actual MRP price from warehouse inventory
       const stockItem = product.stock[0];
-      const price = stockItem?.mrp || DEFAULT_UNIT_PRICE;
+      const price = stockItem?.mrp || 0;
       return [...prev, { ...product, quantity: 1, price: Number(price) }];
     });
   };

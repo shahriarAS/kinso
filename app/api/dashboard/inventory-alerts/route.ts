@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/database";
-import { Product, Warehouse } from "@/models";
+import { Product } from "@/models";
 import { authorizeRequest, AuthenticatedRequest } from "@/lib/auth";
-import mongoose from "mongoose";
 
 export async function GET(request: NextRequest) {
   try {
@@ -69,8 +68,8 @@ export async function GET(request: NextRequest) {
       outOfStockProducts: outOfStockProductsAgg,
       expiringProducts: [],
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
     return NextResponse.json(
       {
         success: false,

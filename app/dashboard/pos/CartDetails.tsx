@@ -102,10 +102,12 @@ export default function CartDetails({
         notes: discount > 0 ? `Discount applied: ৳${discount}` : undefined,
       };
       // The API slice expects the wrong type for createOrder, but our payload matches the backend expectation.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const response = await createOrder(orderPayload as any).unwrap();
       const order = response.data;
 
       // Handle customerId (string or object)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let customerObj: any;
       if (typeof order.customerId === "object" && order.customerId !== null) {
         customerObj = order.customerId;
@@ -147,6 +149,7 @@ export default function CartDetails({
           website: "www.ezpos.com",
           logo: "EZ",
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         items: order.items.map((item: any) => {
           // Handle product (string or object)
           const productObj =
@@ -173,6 +176,7 @@ export default function CartDetails({
       setCheckoutModalOpen(false);
       if (onOrderCompleted) onOrderCompleted(invoiceData);
       onCheckoutSuccess();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       message.error(error.data?.message || "Failed to create order");
     }

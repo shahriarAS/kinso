@@ -1,10 +1,6 @@
 import type { Product } from "@/types/product";
-import type { Customer } from "@/types/customer";
-import type { Warehouse } from "@/types/warehouse";
 
 export type CartItem = Product & { quantity: number; price: number };
-
-export const DEFAULT_UNIT_PRICE = 1000;
 
 export interface CustomerOption {
   label: string;

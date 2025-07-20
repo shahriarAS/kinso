@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/database";
-import { Order, Customer, Product } from "@/models";
+import { Order } from "@/models";
 import { authorizeRequest, AuthenticatedRequest } from "@/lib/auth";
 
 // GET /api/orders/[id] - Get a specific order

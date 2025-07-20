@@ -1,7 +1,7 @@
 "use client";
 
 import { Icon } from "@iconify/react";
-import { Button, Drawer, Table, Tag, Space, Tooltip } from "antd";
+import { Button, Drawer, Table } from "antd";
 import { useState } from "react";
 import type { Customer } from "@/types/customer";
 import type { Order } from "@/types/order";
@@ -14,19 +14,19 @@ interface Props {
   onClose: () => void;
 }
 
-const orderStatusColors: Record<string, string> = {
-  pending: "orange",
-  processing: "blue",
-  shipped: "purple",
-  delivered: "green",
-  cancelled: "red",
-};
+// const orderStatusColors: Record<string, string> = {
+//   pending: "orange",
+//   processing: "blue",
+//   shipped: "purple",
+//   delivered: "green",
+//   cancelled: "red",
+// };
 
-const paymentStatusColors: Record<string, string> = {
-  pending: "orange",
-  paid: "green",
-  failed: "red",
-};
+// const paymentStatusColors: Record<string, string> = {
+//   pending: "orange",
+//   paid: "green",
+//   failed: "red",
+// };
 
 export default function ViewCustomerOrdersDrawer({ customer, onClose }: Props) {
   const [open, setOpen] = useState(true);

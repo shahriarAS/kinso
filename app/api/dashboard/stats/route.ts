@@ -116,8 +116,8 @@ export async function GET(request: NextRequest) {
       topProducts: topProductsAgg,
       revenueChart,
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
     return NextResponse.json(
       {
         success: false,

@@ -6,7 +6,7 @@ import { ReloadOutlined } from "@ant-design/icons";
 
 interface ApiStatusHandlerProps {
   isLoading?: boolean;
-  error?: any;
+  error?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   loadingText?: string;
   errorTitle?: string;
   errorMessage?: string;

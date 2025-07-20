@@ -1,6 +1,6 @@
 "use client";
 
-import { Table, Button, Tooltip, Pagination, Drawer, Spin } from "antd";
+import { Table, Button, Tooltip, Pagination } from "antd";
 import { Icon } from "@iconify/react";
 import React, { useState, useEffect } from "react";
 import type { Order } from "@/types/order";
@@ -82,6 +82,7 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
   const printContainerRef = React.useRef<HTMLDivElement>(null);
 
   // Prepare API params
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const params: any = {
     page: current,
     limit: pageSize,
@@ -92,7 +93,7 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
     params.endDate = filters.dateRange[1];
   }
   if (filters.paymentMethod) params.paymentMethod = filters.paymentMethod;
-  const { data, isLoading, error, refetch } = useGetOrdersQuery(params);
+  const { data, isLoading } = useGetOrdersQuery(params);
 
   const handleView = (order: Order) => setViewOrder(order);
   const handlePrint = (order: Order) => {
@@ -116,16 +117,16 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
         const pdf = new jsPDF({ orientation: "p", unit: "pt", format: "a4" });
         // Calculate width/height for A4
         const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
+        // const pdfHeight = pdf.internal.pageSize.getHeight();
         // Scale image to fit width
-        const imgProps = canvas;
+        // const imgProps = canvas;
         const imgWidth = pdfWidth;
         const imgHeight = (canvas.height * pdfWidth) / canvas.width;
         pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
         pdf.autoPrint();
         // Open PDF in new window and trigger print
         const pdfBlob = pdf.output("bloburl");
-        const printWindow = window.open(pdfBlob);
+        window.open(pdfBlob);
         setPrintOrder(null);
         setPrintInvoiceData(null);
       }, 100); // Wait for DOM update
@@ -167,6 +168,7 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
       title: <span className="font-medium text-base">Discount</span>,
       dataIndex: "discount",
       key: "discount",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: (_: any, record: Order) => {
         const subtotal = record.items.reduce(
           (sum, item) => sum + item.totalPrice,
@@ -183,7 +185,7 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
       title: <span className="font-medium text-base">Final Total</span>,
       dataIndex: "totalAmount",
       key: "finalTotal",
-      render: (amount: number, record: Order) => {
+      render: (amount: number) => {
         return (
           <span className="font-bold text-green-700">৳{amount.toFixed(2)}</span>
         );
@@ -192,6 +194,7 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
     {
       title: <span className="font-medium text-base">Action</span>,
       key: "action",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: (_: any, record: Order) => (
         <div className="flex gap-2">
           <Tooltip title="View Details">

@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { User } from "@/models";
 import dbConnect from "./database";
 
 export interface AuthenticatedRequest extends NextRequest {
-  user?: any;
+  user?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export type UserRole = "admin" | "manager" | "staff";
@@ -68,7 +68,7 @@ export function verifyToken(token: string): TokenPayload | null {
   try {
     const decoded = jwt.verify(token, JWT_SECRET!) as TokenPayload;
     return decoded;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -100,6 +100,7 @@ export async function getUserById(userId: string) {
 }
 
 // Main authentication function
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
 export async function authenticateUser(request: NextRequest): Promise<any> {
   try {
     // Get access token from cookies
@@ -130,7 +131,7 @@ export async function authenticateUser(request: NextRequest): Promise<any> {
         if (user && user.isActive) {
           // Generate new tokens
           const newTokens = generateTokens(
-            (user._id as any).toString(),
+            (user._id as any).toString(), // eslint-disable-line @typescript-eslint/no-explicit-any
             user.role,
           );
 
@@ -157,9 +158,10 @@ export async function authorizeRequest(
   options: AuthOptions = {},
 ): Promise<{
   success: boolean;
-  user?: any;
+  user?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   error?: string;
   status?: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   newTokens?: any;
 }> {
   const { requiredRoles = [], requireAuth = true } = options;

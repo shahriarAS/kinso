@@ -1,7 +1,7 @@
 "use client";
 import { Icon } from "@iconify/react";
-import { Button, Drawer, Form, Input, message } from "antd";
-import React, { useState, useEffect } from "react";
+import { Button, Drawer, Form, Input } from "antd";
+import React, { useEffect } from "react";
 import { Category } from "@/types";
 import {
   useCreateCategoryMutation,
@@ -43,11 +43,6 @@ export default function AddEditCategoryDrawer({
       form.resetFields();
     }
   }, [category, open, form]);
-
-  const handleOpen = () => {
-    setOpen(true);
-    form.resetFields();
-  };
 
   const handleClose = () => {
     setOpen(false);

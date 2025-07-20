@@ -7,11 +7,9 @@ import {
   Col,
   Statistic,
   Table,
-  Tag,
   Space,
   Spin,
   Alert,
-  Empty,
   Skeleton,
 } from "antd";
 import {
@@ -255,6 +253,7 @@ const Dashboard: React.FC = () => {
       title: "Current Stock",
       dataIndex: "currentStock",
       key: "currentStock",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: (stock: number, record: any) => (
         <span
           className={

@@ -44,8 +44,8 @@ export async function GET(
     const inventoryData = products
       .map((product) => {
         // Find the stock entry for this warehouse
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const stockEntry = product.stock.find(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (stock: any) => stock.warehouse.toString() === _id,
         );
 

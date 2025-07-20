@@ -16,4 +16,4 @@ export interface CustomerFilters {
   search?: string;
   status?: "active" | "inactive";
   email?: string;
-} 
+}

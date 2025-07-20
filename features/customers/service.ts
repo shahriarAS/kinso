@@ -1,16 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/database";
 import CustomerModel from "./model";
-import { authorizeRequest, AuthenticatedRequest } from "@/lib/auth";
+import { authorizeRequest } from "@/lib/auth";
+import { AuthenticatedRequest } from "@/features/auth";
 import type { Customer, CustomerInput, CustomerFilters } from "./types";
 
 // GET /api/customers - List all customers with pagination and search
 export async function handleGet(request: NextRequest) {
   try {
     // Authorize request - all authenticated users can view customers
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requireAuth: true,
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requireAuth: true,
+      },
+    );
 
     if (!authResult.success) {
       return NextResponse.json(
@@ -85,9 +89,12 @@ export async function handleGet(request: NextRequest) {
 export async function handlePost(request: NextRequest) {
   try {
     // Authorize request - all authenticated users can create customers
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requireAuth: true,
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requireAuth: true,
+      },
+    );
 
     if (!authResult.success) {
       return NextResponse.json(
@@ -180,9 +187,12 @@ export async function handleGetById(
   const { _id } = await params;
   try {
     // Authorize request - all authenticated users can view customers
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requireAuth: true,
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requireAuth: true,
+      },
+    );
 
     if (!authResult.success) {
       return NextResponse.json(
@@ -223,9 +233,12 @@ export async function handleUpdateById(
   const { _id } = await params;
   try {
     // Authorize request - all authenticated users can update customers
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requireAuth: true,
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requireAuth: true,
+      },
+    );
 
     if (!authResult.success) {
       return NextResponse.json(
@@ -334,9 +347,12 @@ export async function handleDeleteById(
   const { _id } = await params;
   try {
     // Authorize request - only managers and admins can delete customers
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requiredRoles: ["admin", "manager"],
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requiredRoles: ["admin", "manager"],
+      },
+    );
 
     if (!authResult.success) {
       return NextResponse.json(
@@ -440,7 +456,10 @@ export class CustomerService {
   /**
    * Apply filters to customer data
    */
-  static applyFilters(customers: Customer[], filters: CustomerFilters): Customer[] {
+  static applyFilters(
+    customers: Customer[],
+    filters: CustomerFilters,
+  ): Customer[] {
     return customers.filter((customer) => {
       // Search filter
       if (filters.search) {
@@ -473,7 +492,7 @@ export class CustomerService {
   static sortCustomers(
     customers: Customer[],
     sortBy: keyof Customer = "name",
-    sortOrder: "asc" | "desc" = "asc"
+    sortOrder: "asc" | "desc" = "asc",
   ): Customer[] {
     return [...customers].sort((a, b) => {
       let aValue = a[sortBy];
@@ -505,7 +524,9 @@ export class CustomerService {
    */
   static getCustomerStats(customers: Customer[]) {
     const totalCustomers = customers.length;
-    const activeCustomers = customers.filter((c) => c.status === "active").length;
+    const activeCustomers = customers.filter(
+      (c) => c.status === "active",
+    ).length;
     const inactiveCustomers = totalCustomers - activeCustomers;
     const totalSpent = customers.reduce((sum, c) => sum + c.totalSpent, 0);
     const averageSpent = totalCustomers > 0 ? totalSpent / totalCustomers : 0;
@@ -529,9 +550,12 @@ export class CustomerService {
   /**
    * Check if customer has recent activity
    */
-  static hasRecentActivity(customer: Customer, daysThreshold: number = 30): boolean {
+  static hasRecentActivity(
+    customer: Customer,
+    daysThreshold: number = 30,
+  ): boolean {
     // This would typically check order history
     // For now, we'll use totalOrders as a proxy
     return customer.totalOrders > 0;
   }
-} 
+}

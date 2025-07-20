@@ -1,4 +1,8 @@
-import { handleGetById, handleUpdateById, handleDeleteById } from "@/features/users/service";
+import {
+  handleGetById,
+  handleUpdateById,
+  handleDeleteById,
+} from "@/features/users/service";
 
 export const GET = handleGetById;
 export const PUT = handleUpdateById;

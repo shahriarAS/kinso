@@ -3,13 +3,17 @@ import dbConnect from "@/lib/database";
 import Product from "@/features/products/model";
 import Order from "@/features/orders/model";
 import Customer from "@/features/customers/model";
-import { authorizeRequest, AuthenticatedRequest } from "@/lib/auth";
+import { authorizeRequest } from "@/lib/auth";
+import { AuthenticatedRequest } from "@/features/auth";
 
 export async function GET(request: NextRequest) {
   try {
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requireAuth: true,
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requireAuth: true,
+      },
+    );
     if (!authResult.success) {
       return NextResponse.json(
         { success: false, message: authResult.error },

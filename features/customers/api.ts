@@ -119,4 +119,4 @@ export const {
   useUpdateCustomerMutation,
   useDeleteCustomerMutation,
   useGetCustomerStatsQuery,
-} = customersApi; 
+} = customersApi;

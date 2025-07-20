@@ -46,4 +46,4 @@ export default function CategoryFilters({
       </Form.Item>
     </Form>
   );
-} 
+}

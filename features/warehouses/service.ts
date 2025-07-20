@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/database";
 import Warehouse from "./model";
-import { authorizeRequest, AuthenticatedRequest } from "@/lib/auth";
+import { authorizeRequest } from "@/lib/auth";
+import { AuthenticatedRequest } from "@/features/auth";
 
 // GET /api/warehouses - List all warehouses with pagination and search
 export async function handleGet(request: NextRequest) {
   try {
     // Authorize request - all authenticated users can view warehouses
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requireAuth: true,
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requireAuth: true,
+      },
+    );
 
     if (!authResult.success) {
       return NextResponse.json(
@@ -72,9 +76,12 @@ export async function handleGet(request: NextRequest) {
 export async function handlePost(request: NextRequest) {
   try {
     // Authorize request - only managers and admins can create warehouses
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requiredRoles: ["admin", "manager"],
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requiredRoles: ["admin", "manager"],
+      },
+    );
 
     if (!authResult.success) {
       return NextResponse.json(
@@ -139,13 +146,19 @@ export async function handlePost(request: NextRequest) {
 }
 
 // GET /api/warehouses/[id] - Get a specific warehouse
-export async function handleGetById(request: NextRequest, { params }: { params: Promise<{ _id: string }> }) {
+export async function handleGetById(
+  request: NextRequest,
+  { params }: { params: Promise<{ _id: string }> },
+) {
   const { _id } = await params;
   try {
     // Authorize request - all authenticated users can view warehouses
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requireAuth: true,
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requireAuth: true,
+      },
+    );
 
     if (!authResult.success) {
       return NextResponse.json(
@@ -179,13 +192,19 @@ export async function handleGetById(request: NextRequest, { params }: { params: 
 }
 
 // PUT /api/warehouses/[id] - Update a warehouse
-export async function handleUpdateById(request: NextRequest, { params }: { params: Promise<{ _id: string }> }) {
+export async function handleUpdateById(
+  request: NextRequest,
+  { params }: { params: Promise<{ _id: string }> },
+) {
   const { _id } = await params;
   try {
     // Authorize request - only managers and admins can update warehouses
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requiredRoles: ["admin", "manager"],
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requiredRoles: ["admin", "manager"],
+      },
+    );
 
     if (!authResult.success) {
       return NextResponse.json(
@@ -261,13 +280,19 @@ export async function handleUpdateById(request: NextRequest, { params }: { param
 }
 
 // DELETE /api/warehouses/[id] - Delete a warehouse
-export async function handleDeleteById(request: NextRequest, { params }: { params: Promise<{ _id: string }> }) {
+export async function handleDeleteById(
+  request: NextRequest,
+  { params }: { params: Promise<{ _id: string }> },
+) {
   const { _id } = await params;
   try {
     // Authorize request - only admins can delete warehouses
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requiredRoles: ["admin"],
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requiredRoles: ["admin"],
+      },
+    );
 
     if (!authResult.success) {
       return NextResponse.json(
@@ -304,4 +329,4 @@ export async function handleDeleteById(request: NextRequest, { params }: { param
       { status: 500 },
     );
   }
-} 
+}

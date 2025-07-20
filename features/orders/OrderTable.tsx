@@ -4,7 +4,9 @@ import { Icon } from "@iconify/react";
 import React, { useState, useEffect } from "react";
 import { Order } from "@/features/orders/types";
 import { useGetOrdersQuery } from "@/features/orders/api";
-import InvoiceTemplate, { InvoiceData } from "@/app/dashboard/pos/InvoiceTemplate";
+import InvoiceTemplate, {
+  InvoiceData,
+} from "@/app/dashboard/pos/InvoiceTemplate";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import ViewOrderDrawer from "./ViewOrderDrawer";
@@ -291,4 +293,4 @@ export default function OrderTable({
       </div>
     </>
   );
-} 
+}

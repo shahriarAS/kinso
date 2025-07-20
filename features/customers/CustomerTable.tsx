@@ -12,10 +12,7 @@ import {
 import { Icon } from "@iconify/react";
 import React, { useState, useEffect } from "react";
 import type { Customer, CustomerFilters } from "./types";
-import {
-  useGetCustomersQuery,
-  useDeleteCustomerMutation,
-} from "./api";
+import { useGetCustomersQuery, useDeleteCustomerMutation } from "./api";
 import { useNotification } from "@/hooks/useNotification";
 import ApiStatusHandler from "@/components/common/ApiStatusHandler";
 import AddEditCustomerDrawer from "./AddEditCustomerDrawer";
@@ -282,4 +279,4 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
       )}
     </>
   );
-} 
+}

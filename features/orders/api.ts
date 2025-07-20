@@ -57,14 +57,16 @@ export const ordersApi = createApi({
     }),
 
     // Create new order
-    createOrder: builder.mutation<{ message: string; data: Order }, OrderInput>({
-      query: (order) => ({
-        url: "/",
-        method: "POST",
-        body: order,
-      }),
-      invalidatesTags: [{ type: "Order", id: "LIST" }],
-    }),
+    createOrder: builder.mutation<{ message: string; data: Order }, OrderInput>(
+      {
+        query: (order) => ({
+          url: "/",
+          method: "POST",
+          body: order,
+        }),
+        invalidatesTags: [{ type: "Order", id: "LIST" }],
+      },
+    ),
 
     // Update order
     updateOrder: builder.mutation<
@@ -139,4 +141,4 @@ export const {
   useDeleteOrderMutation,
   useGetOrderStatsQuery,
   useGetOrdersByCustomerQuery,
-} = ordersApi; 
+} = ordersApi;

@@ -8,7 +8,7 @@ import {
   checkRateLimit,
   hashPassword,
   requireAuth,
-} from "./utils";
+} from "@/lib/auth";
 
 // POST /api/auth/login - User login
 export async function handleLogin(request: NextRequest) {
@@ -259,4 +259,4 @@ export async function handleGetProfile(request: NextRequest) {
       { status: 500 },
     );
   }
-} 
+}

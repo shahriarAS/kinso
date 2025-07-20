@@ -3,18 +3,8 @@ import { cookies } from "next/headers";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import User from "@/features/users/model";
-import dbConnect from "./database";
-
-export interface AuthenticatedRequest extends NextRequest {
-  user?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-}
-
-export type UserRole = "admin" | "manager" | "staff";
-
-export interface AuthOptions {
-  requiredRoles?: UserRole[];
-  requireAuth?: boolean;
-}
+import dbConnect from "@/lib/database";
+import { TokenPayload, Tokens, UserRole } from "@/features/auth";
 
 // JWT configuration with proper validation
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -40,15 +30,8 @@ const REFRESH_COOKIE_OPTIONS = {
   maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
 };
 
-// Custom JWT payload interface
-interface TokenPayload extends JwtPayload {
-  userId: string;
-  role: UserRole;
-  type: "access" | "refresh";
-}
-
 // JWT token generation
-export function generateTokens(userId: string, role: UserRole) {
+export function generateTokens(userId: string, role: UserRole): Tokens {
   const payload = { userId, role, type: "access" as const };
   const refreshPayload = { userId, role, type: "refresh" as const };
 
@@ -100,8 +83,7 @@ export async function getUserById(userId: string) {
 }
 
 // Main authentication function
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
-export async function authenticateUser(request: NextRequest): Promise<any> {
+export async function authenticateUser(request: NextRequest) {
   try {
     // Get access token from cookies
     const cookieStore = await cookies();
@@ -154,15 +136,14 @@ export async function authenticateUser(request: NextRequest): Promise<any> {
 
 // Authorization function
 export async function authorizeRequest(
-  request: AuthenticatedRequest,
-  options: AuthOptions = {},
+  request: NextRequest & { user?: any }, // eslint-disable-line @typescript-eslint/no-explicit-any
+  options: { requiredRoles?: UserRole[]; requireAuth?: boolean } = {},
 ): Promise<{
   success: boolean;
   user?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   error?: string;
   status?: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  newTokens?: any;
+  newTokens?: Tokens;
 }> {
   const { requiredRoles = [], requireAuth = true } = options;
 
@@ -227,8 +208,11 @@ export async function authorizeRequest(
 }
 
 // Auth middleware factory
-export function createAuthMiddleware(options: AuthOptions = {}) {
-  return async (request: AuthenticatedRequest) => {
+export function createAuthMiddleware(
+  options: { requiredRoles?: UserRole[]; requireAuth?: boolean } = {},
+) {
+  return async (request: NextRequest & { user?: any }) => {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
     const authResult = await authorizeRequest(request, options);
 
     if (!authResult.success) {

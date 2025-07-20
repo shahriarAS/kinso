@@ -38,4 +38,4 @@ export interface TokenPayload {
 export interface Tokens {
   accessToken: string;
   refreshToken: string;
-} 
+}

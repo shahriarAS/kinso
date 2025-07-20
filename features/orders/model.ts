@@ -104,4 +104,4 @@ OrderSchema.index({ customerId: 1 });
 
 // Check if model already exists to prevent overwrite error
 export default mongoose.models.Order ||
-  mongoose.model<IOrder>("Order", OrderSchema); 
+  mongoose.model<IOrder>("Order", OrderSchema);

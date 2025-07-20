@@ -109,4 +109,4 @@ export const {
   useUpdateCategoryMutation,
   useDeleteCategoryMutation,
   useGetAllCategoriesQuery,
-} = categoriesApi; 
+} = categoriesApi;

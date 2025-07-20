@@ -3,17 +3,21 @@ import dbConnect from "@/lib/database";
 import Order from "./model";
 import Customer from "@/features/customers/model";
 import Product from "@/features/products/model";
-import { authorizeRequest, AuthenticatedRequest } from "@/lib/auth";
+import { authorizeRequest } from "@/lib/auth";
 import OrderCounter from "@/features/orders/modelOrderCounter";
 import { PaymentMethod } from "./model";
+import { AuthenticatedRequest } from "@/features/auth";
 
 // GET /api/orders - List all orders with pagination and search
 export async function handleGet(request: NextRequest) {
   try {
     // Authorize request - all authenticated users can view orders
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requireAuth: true,
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requireAuth: true,
+      },
+    );
 
     if (!authResult.success) {
       return NextResponse.json(
@@ -87,9 +91,12 @@ export async function handleGet(request: NextRequest) {
 export async function handlePost(request: NextRequest) {
   try {
     // Authorize request - all authenticated users can create orders
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requireAuth: true,
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requireAuth: true,
+      },
+    );
 
     if (!authResult.success) {
       return NextResponse.json(
@@ -263,13 +270,19 @@ export async function handlePost(request: NextRequest) {
 }
 
 // GET /api/orders/[id] - Get a specific order
-export async function handleGetById(request: NextRequest, { params }: { params: Promise<{ _id: string }> }) {
+export async function handleGetById(
+  request: NextRequest,
+  { params }: { params: Promise<{ _id: string }> },
+) {
   const { _id } = await params;
   try {
     // Authorize request - all authenticated users can view orders
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requireAuth: true,
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requireAuth: true,
+      },
+    );
 
     if (!authResult.success) {
       return NextResponse.json(
@@ -306,13 +319,19 @@ export async function handleGetById(request: NextRequest, { params }: { params: 
 }
 
 // PUT /api/orders/[id] - Update an order
-export async function handleUpdateById(request: NextRequest, { params }: { params: Promise<{ _id: string }> }) {
+export async function handleUpdateById(
+  request: NextRequest,
+  { params }: { params: Promise<{ _id: string }> },
+) {
   const { _id } = await params;
   try {
     // Authorize request - only managers and admins can update orders
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requiredRoles: ["admin", "manager"],
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requiredRoles: ["admin", "manager"],
+      },
+    );
 
     if (!authResult.success) {
       return NextResponse.json(
@@ -478,13 +497,19 @@ export async function handleUpdateById(request: NextRequest, { params }: { param
 }
 
 // DELETE /api/orders/[id] - Delete an order
-export async function handleDeleteById(request: NextRequest, { params }: { params: Promise<{ _id: string }> }) {
+export async function handleDeleteById(
+  request: NextRequest,
+  { params }: { params: Promise<{ _id: string }> },
+) {
   const { _id } = await params;
   try {
     // Authorize request - only admins can delete orders
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requiredRoles: ["admin"],
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requiredRoles: ["admin"],
+      },
+    );
 
     if (!authResult.success) {
       return NextResponse.json(
@@ -520,13 +545,19 @@ export async function handleDeleteById(request: NextRequest, { params }: { param
 }
 
 // GET /api/orders/customer/[id] - Get orders by customer
-export async function handleGetByCustomer(request: NextRequest, { params }: { params: Promise<{ _id: string }> }) {
+export async function handleGetByCustomer(
+  request: NextRequest,
+  { params }: { params: Promise<{ _id: string }> },
+) {
   const { _id } = await params;
   try {
     // Authorize request - all authenticated users can view customer orders
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requireAuth: true,
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requireAuth: true,
+      },
+    );
 
     if (!authResult.success) {
       return NextResponse.json(
@@ -554,4 +585,4 @@ export async function handleGetByCustomer(request: NextRequest, { params }: { pa
       { status: 500 },
     );
   }
-} 
+}

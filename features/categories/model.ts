@@ -30,4 +30,4 @@ CategorySchema.index({ name: 1 });
 
 // Check if model already exists to prevent overwrite error
 export default mongoose.models.Category ||
-  mongoose.model<ICategory>("Category", CategorySchema); 
+  mongoose.model<ICategory>("Category", CategorySchema);

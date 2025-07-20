@@ -12,10 +12,7 @@ export const authApi = createApi({
   }),
   tagTypes: ["Auth"],
   endpoints: (builder) => ({
-    loginUser: builder.mutation<
-      AuthResponse,
-      LoginInput
-    >({
+    loginUser: builder.mutation<AuthResponse, LoginInput>({
       query: ({ email, password }) => ({
         url: "/login",
         method: "post",
@@ -49,10 +46,7 @@ export const authApi = createApi({
         }
       },
     }),
-    registerUser: builder.mutation<
-      { message: string },
-      RegisterInput
-    >({
+    registerUser: builder.mutation<{ message: string }, RegisterInput>({
       query: ({ name, email, password, password2 }) => ({
         url: "/register",
         method: "post",
@@ -65,10 +59,7 @@ export const authApi = createApi({
       }),
       invalidatesTags: ["Auth"],
     }),
-    fetchAuthUser: builder.query<
-      AuthResponse,
-      void
-    >({
+    fetchAuthUser: builder.query<AuthResponse, void>({
       query: () => ({
         url: "/profile",
         method: "get",
@@ -83,4 +74,4 @@ export const {
   useLogoutUserMutation,
   useRegisterUserMutation,
   useFetchAuthUserQuery,
-} = authApi; 
+} = authApi;

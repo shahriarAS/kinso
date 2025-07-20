@@ -9,4 +9,4 @@ export interface Category {
 export interface CategoryInput {
   name: string;
   description?: string;
-} 
+}

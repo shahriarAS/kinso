@@ -1,6 +1,10 @@
 "use client";
 import { useState } from "react";
-import { AddEditCategoryDrawer, CategoryFilters, CategoryTable } from "@/features/categories";
+import {
+  AddEditCategoryDrawer,
+  CategoryFilters,
+  CategoryTable,
+} from "@/features/categories";
 import { Button } from "antd";
 import { Icon } from "@iconify/react";
 

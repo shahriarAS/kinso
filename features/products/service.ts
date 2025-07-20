@@ -3,15 +3,19 @@ import dbConnect from "@/lib/database";
 import Product from "./model";
 import Category from "@/features/categories/model";
 import Warehouse from "@/features/warehouses/model";
-import { authorizeRequest, AuthenticatedRequest } from "@/lib/auth";
+import { authorizeRequest } from "@/lib/auth";
+import { AuthenticatedRequest } from "@/features/auth";
 
 // GET /api/products - List all products with pagination, search, and filters
 export async function handleGet(request: NextRequest) {
   try {
     // Authorize request - all authenticated users can view products
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requireAuth: true,
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requireAuth: true,
+      },
+    );
 
     if (!authResult.success) {
       return NextResponse.json(
@@ -89,9 +93,12 @@ export async function handleGet(request: NextRequest) {
 export async function handlePost(request: NextRequest) {
   try {
     // Authorize request - only managers and admins can create products
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requiredRoles: ["admin", "manager"],
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requiredRoles: ["admin", "manager"],
+      },
+    );
 
     if (!authResult.success) {
       return NextResponse.json(
@@ -245,11 +252,17 @@ export async function handlePost(request: NextRequest) {
 }
 
 // GET /api/products/[id] - Get a specific product
-export async function handleGetById(request: NextRequest, { params }: { params: Promise<{ _id: string }> }) {
+export async function handleGetById(
+  request: NextRequest,
+  { params }: { params: Promise<{ _id: string }> },
+) {
   try {
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requireAuth: true,
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requireAuth: true,
+      },
+    );
     if (!authResult.success) {
       return NextResponse.json(
         { success: false, message: authResult.error },
@@ -282,11 +295,17 @@ export async function handleGetById(request: NextRequest, { params }: { params: 
 }
 
 // PUT /api/products/[id] - Update a product
-export async function handleUpdateById(request: NextRequest, { params }: { params: Promise<{ _id: string }> }) {
+export async function handleUpdateById(
+  request: NextRequest,
+  { params }: { params: Promise<{ _id: string }> },
+) {
   try {
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requiredRoles: ["admin", "manager"],
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requiredRoles: ["admin", "manager"],
+      },
+    );
     if (!authResult.success) {
       return NextResponse.json(
         { success: false, message: authResult.error },
@@ -433,11 +452,17 @@ export async function handleUpdateById(request: NextRequest, { params }: { param
 }
 
 // DELETE /api/products/[id] - Delete a product
-export async function handleDeleteById(request: NextRequest, { params }: { params: Promise<{ _id: string }> }) {
+export async function handleDeleteById(
+  request: NextRequest,
+  { params }: { params: Promise<{ _id: string }> },
+) {
   try {
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requiredRoles: ["admin"],
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requiredRoles: ["admin"],
+      },
+    );
     if (!authResult.success) {
       return NextResponse.json(
         { success: false, message: authResult.error },
@@ -466,4 +491,4 @@ export async function handleDeleteById(request: NextRequest, { params }: { param
       { status: 500 },
     );
   }
-} 
+}

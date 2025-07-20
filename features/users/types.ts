@@ -23,4 +23,4 @@ export interface UserUpdateInput {
   role?: "admin" | "manager" | "staff";
   isActive?: boolean;
   avatar?: string;
-} 
+}

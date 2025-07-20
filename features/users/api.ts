@@ -133,4 +133,4 @@ export const {
   useDeleteUserMutation,
   useGetUserStatsQuery,
   useSearchUsersQuery,
-} = usersApi; 
+} = usersApi;

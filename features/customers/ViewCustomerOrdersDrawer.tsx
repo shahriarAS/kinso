@@ -190,4 +190,4 @@ export default function ViewCustomerOrdersDrawer({ customer, onClose }: Props) {
       />
     </Drawer>
   );
-} 
+}

@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/database";
 import User from "./model";
-import { authorizeRequest, AuthenticatedRequest } from "@/lib/auth";
+import { authorizeRequest } from "@/lib/auth";
+import { AuthenticatedRequest } from "@/features/auth";
 
 // GET /api/users - List all users with pagination and search
 export async function handleGet(request: NextRequest) {
   try {
     // Authorize request - only admins can view users
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requiredRoles: ["admin"],
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requiredRoles: ["admin"],
+      },
+    );
 
     if (!authResult.success) {
       return NextResponse.json(
@@ -77,9 +81,12 @@ export async function handleGet(request: NextRequest) {
 export async function handlePost(request: NextRequest) {
   try {
     // Authorize request - only admins can create users
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requiredRoles: ["admin"],
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requiredRoles: ["admin"],
+      },
+    );
 
     if (!authResult.success) {
       return NextResponse.json(
@@ -143,13 +150,19 @@ export async function handlePost(request: NextRequest) {
 }
 
 // GET /api/users/[id] - Get a specific user
-export async function handleGetById(request: NextRequest, { params }: { params: Promise<{ _id: string }> }) {
+export async function handleGetById(
+  request: NextRequest,
+  { params }: { params: Promise<{ _id: string }> },
+) {
   const { _id } = await params;
   try {
     // Authorize request - only admins can view users
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requiredRoles: ["admin"],
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requiredRoles: ["admin"],
+      },
+    );
 
     if (!authResult.success) {
       return NextResponse.json(
@@ -183,13 +196,19 @@ export async function handleGetById(request: NextRequest, { params }: { params: 
 }
 
 // PUT /api/users/[id] - Update a user
-export async function handleUpdateById(request: NextRequest, { params }: { params: Promise<{ _id: string }> }) {
+export async function handleUpdateById(
+  request: NextRequest,
+  { params }: { params: Promise<{ _id: string }> },
+) {
   const { _id } = await params;
   try {
     // Authorize request - only admins can update users
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requiredRoles: ["admin"],
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requiredRoles: ["admin"],
+      },
+    );
 
     if (!authResult.success) {
       return NextResponse.json(
@@ -284,13 +303,19 @@ export async function handleUpdateById(request: NextRequest, { params }: { param
 }
 
 // DELETE /api/users/[id] - Delete a user
-export async function handleDeleteById(request: NextRequest, { params }: { params: Promise<{ _id: string }> }) {
+export async function handleDeleteById(
+  request: NextRequest,
+  { params }: { params: Promise<{ _id: string }> },
+) {
   const { _id } = await params;
   try {
     // Authorize request - only admins can delete users
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requiredRoles: ["admin"],
-    });
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requiredRoles: ["admin"],
+      },
+    );
 
     if (!authResult.success) {
       return NextResponse.json(
@@ -331,4 +356,4 @@ export async function handleDeleteById(request: NextRequest, { params }: { param
       { status: 500 },
     );
   }
-} 
+}

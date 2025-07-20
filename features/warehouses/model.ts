@@ -32,4 +32,4 @@ WarehouseSchema.index({ location: 1 });
 
 // Check if model already exists to prevent overwrite error
 export default mongoose.models.Warehouse ||
-  mongoose.model<IWarehouse>("Warehouse", WarehouseSchema); 
+  mongoose.model<IWarehouse>("Warehouse", WarehouseSchema);

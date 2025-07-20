@@ -7,43 +7,55 @@ import type { FormInstance } from "antd/es/form";
 export interface FormField {
   name: string;
   label: string;
-  type: "input" | "textarea" | "select" | "number" | "email" | "password" | "date" | "custom";
+  type:
+    | "input"
+    | "textarea"
+    | "select"
+    | "number"
+    | "email"
+    | "password"
+    | "date"
+    | "custom";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   rules?: any[];
   placeholder?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   options?: { label: string; value: any }[];
   component?: React.ReactNode;
   className?: string;
   span?: number; // For grid layout
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface GenericDrawerProps<T = any> {
   // Drawer configuration
   open: boolean;
   onClose: () => void;
   title: string;
   width?: number;
-  
+
   // Form configuration
   form: FormInstance<T>;
   fields: FormField[];
   initialValues?: Partial<T>;
   layout?: "vertical" | "horizontal" | "inline";
-  
+
   // Actions
   onSubmit: (values: T) => Promise<void> | void;
   submitText?: string;
   loading?: boolean;
-  
+
   // Custom content
   children?: React.ReactNode;
   extra?: React.ReactNode;
-  
+
   // Styling
   className?: string;
   formClassName?: string;
   gridCols?: number;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function GenericDrawer<T = any>({
   open,
   onClose,
@@ -64,6 +76,7 @@ export default function GenericDrawer<T = any>({
 }: GenericDrawerProps<T>) {
   useEffect(() => {
     if (open && initialValues) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       form.setFieldsValue(initialValues as any);
     } else if (!open) {
       form.resetFields();
@@ -80,15 +93,15 @@ export default function GenericDrawer<T = any>({
       const values = await form.validateFields();
       await onSubmit(values);
       handleClose();
-    } catch (error) {
+    } catch {
       // Form validation errors are handled by Ant Design
       // API errors should be handled in the onSubmit function
     }
   };
 
   const renderField = (field: FormField) => {
-    const { type, component, ...fieldProps } = field;
-    
+    const { type, component } = field;
+
     if (type === "custom" && component) {
       return component;
     }
@@ -105,9 +118,7 @@ export default function GenericDrawer<T = any>({
       case "textarea":
         return <Input.TextArea {...commonProps} rows={4} />;
       case "select":
-        return (
-          <Select {...commonProps} options={field.options} />
-        );
+        return <Select {...commonProps} options={field.options} />;
       case "number":
         return <Input type="number" {...commonProps} />;
       case "email":
@@ -197,4 +208,4 @@ export default function GenericDrawer<T = any>({
       </Form>
     </Drawer>
   );
-} 
+}

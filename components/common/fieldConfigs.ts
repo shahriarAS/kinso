@@ -45,6 +45,7 @@ export const commonFormFields = {
   }),
 
   // Status fields
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   status: (options: { label: string; value: any }[]): FormField => ({
     name: "status",
     label: "Status",
@@ -111,7 +112,9 @@ export const commonFormFields = {
     name,
     label,
     type: "date",
-    rules: [{ required: true, message: `Please select ${label.toLowerCase()}` }],
+    rules: [
+      { required: true, message: `Please select ${label.toLowerCase()}` },
+    ],
   }),
 
   // Number fields
@@ -160,7 +163,11 @@ export const commonFilterFields = {
   }),
 
   // Status filter
-  status: (options: { label: string; value: any }[], label = "Status"): FilterField => ({
+  status: (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    options: { label: string; value: any }[],
+    label = "Status",
+  ): FilterField => ({
     name: "status",
     label,
     type: "select",
@@ -185,6 +192,7 @@ export const commonFilterFields = {
   }),
 
   // Category filter
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   category: (options: { label: string; value: any }[]): FilterField => ({
     name: "category",
     label: "Category",
@@ -194,6 +202,7 @@ export const commonFilterFields = {
   }),
 
   // Warehouse filter
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   warehouse: (options: { label: string; value: any }[]): FilterField => ({
     name: "warehouse",
     label: "Warehouse",
@@ -220,7 +229,10 @@ export const commonFilterFields = {
 };
 
 // Helper function to create grid layouts
-export const createGridLayout = (fields: FormField[], cols: number): FormField[][] => {
+export const createGridLayout = (
+  fields: FormField[],
+  cols: number,
+): FormField[][] => {
   const rows: FormField[][] = [];
   for (let i = 0; i < fields.length; i += cols) {
     rows.push(fields.slice(i, i + cols));
@@ -231,6 +243,7 @@ export const createGridLayout = (fields: FormField[], cols: number): FormField[]
 // Helper function to create common form configurations
 export const createFormConfig = {
   // Product form
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   product: (categoryOptions: { label: string; value: any }[]) => [
     commonFormFields.name("Product Name"),
     {
@@ -293,13 +306,18 @@ export const createFormConfig = {
 export const createFilterConfig = {
   // Product filters
   product: (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     categoryOptions: { label: string; value: any }[],
-    warehouseOptions: { label: string; value: any }[]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    warehouseOptions: { label: string; value: any }[],
   ) => [
     commonFilterFields.search("Search products..."),
     commonFilterFields.category(categoryOptions),
     commonFilterFields.warehouse(warehouseOptions),
-    commonFilterFields.status(commonFormFields.statusOptions.stock, "Stock Status"),
+    commonFilterFields.status(
+      commonFormFields.statusOptions.stock,
+      "Stock Status",
+    ),
   ],
 
   // Customer filters
@@ -316,4 +334,4 @@ export const createFilterConfig = {
     commonFilterFields.status(commonFormFields.statusOptions.order),
     commonFilterFields.dateRange("orderDate", "Order Date"),
   ],
-}; 
+};

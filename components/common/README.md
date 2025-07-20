@@ -5,17 +5,21 @@ This directory contains reusable, generic components that can be configured via 
 ## Components Overview
 
 ### 1. GenericTable
+
 A configurable table component that handles data display, pagination, sorting, and actions.
 
 ### 2. GenericDrawer
+
 A configurable drawer component for forms with built-in validation and submission handling.
 
 ### 3. GenericFilters
+
 A configurable filter component with debounced input handling and grid layout support.
 
 ## GenericTable
 
 ### Features
+
 - ✅ Configurable columns with custom rendering
 - ✅ Built-in action buttons (view, edit, delete, custom)
 - ✅ Pagination support
@@ -28,7 +32,11 @@ A configurable filter component with debounced input handling and grid layout su
 ### Usage Example
 
 ```tsx
-import { GenericTable, type TableColumn, type TableAction } from "@/components/common";
+import {
+  GenericTable,
+  type TableColumn,
+  type TableAction,
+} from "@/components/common";
 
 // Define columns
 const columns: TableColumn<Product>[] = [
@@ -99,29 +107,30 @@ const actions: TableAction<Product>[] = [
     showQuickJumper: true,
     showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
   }}
-/>
+/>;
 ```
 
 ### Props
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `data` | `T[]` | Array of data to display |
-| `loading` | `boolean` | Loading state |
-| `error` | `any` | Error state |
-| `onRetry` | `() => void` | Retry function for error handling |
-| `columns` | `TableColumn<T>[]` | Column definitions |
-| `actions` | `TableAction<T>[]` | Action button definitions |
-| `pagination` | `object` | Pagination configuration |
-| `rowKey` | `string \| function` | Unique key for rows |
-| `scroll` | `object` | Scroll configuration |
-| `sticky` | `boolean` | Enable sticky headers |
-| `className` | `string` | Custom CSS classes |
-| `maxHeight` | `number` | Maximum height of table |
+| Prop         | Type                 | Description                       |
+| ------------ | -------------------- | --------------------------------- |
+| `data`       | `T[]`                | Array of data to display          |
+| `loading`    | `boolean`            | Loading state                     |
+| `error`      | `any`                | Error state                       |
+| `onRetry`    | `() => void`         | Retry function for error handling |
+| `columns`    | `TableColumn<T>[]`   | Column definitions                |
+| `actions`    | `TableAction<T>[]`   | Action button definitions         |
+| `pagination` | `object`             | Pagination configuration          |
+| `rowKey`     | `string \| function` | Unique key for rows               |
+| `scroll`     | `object`             | Scroll configuration              |
+| `sticky`     | `boolean`            | Enable sticky headers             |
+| `className`  | `string`             | Custom CSS classes                |
+| `maxHeight`  | `number`             | Maximum height of table           |
 
 ## GenericDrawer
 
 ### Features
+
 - ✅ Configurable form fields
 - ✅ Built-in validation
 - ✅ Grid layout support
@@ -180,7 +189,7 @@ const fields: FormField[] = [
   <div className="mt-6">
     <StockEntries form={form} warehouseOptions={warehouseOptions} />
   </div>
-</GenericDrawer>
+</GenericDrawer>;
 ```
 
 ### Supported Field Types
@@ -196,23 +205,24 @@ const fields: FormField[] = [
 
 ### Props
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `open` | `boolean` | Drawer visibility |
-| `onClose` | `() => void` | Close handler |
-| `title` | `string` | Drawer title |
-| `width` | `number` | Drawer width |
-| `form` | `FormInstance<T>` | Ant Design form instance |
-| `fields` | `FormField[]` | Form field definitions |
-| `initialValues` | `Partial<T>` | Initial form values |
-| `onSubmit` | `(values: T) => void` | Form submission handler |
-| `submitText` | `string` | Submit button text |
-| `loading` | `boolean` | Loading state |
-| `gridCols` | `number` | Number of columns in grid layout |
+| Prop            | Type                  | Description                      |
+| --------------- | --------------------- | -------------------------------- |
+| `open`          | `boolean`             | Drawer visibility                |
+| `onClose`       | `() => void`          | Close handler                    |
+| `title`         | `string`              | Drawer title                     |
+| `width`         | `number`              | Drawer width                     |
+| `form`          | `FormInstance<T>`     | Ant Design form instance         |
+| `fields`        | `FormField[]`         | Form field definitions           |
+| `initialValues` | `Partial<T>`          | Initial form values              |
+| `onSubmit`      | `(values: T) => void` | Form submission handler          |
+| `submitText`    | `string`              | Submit button text               |
+| `loading`       | `boolean`             | Loading state                    |
+| `gridCols`      | `number`              | Number of columns in grid layout |
 
 ## GenericFilters
 
 ### Features
+
 - ✅ Configurable filter fields
 - ✅ Debounced input handling
 - ✅ Grid layout support
@@ -258,7 +268,7 @@ const fields: FilterField[] = [
   showReset={true}
   resetText="Clear Filters"
   onReset={handleReset}
-/>
+/>;
 ```
 
 ### Supported Field Types
@@ -272,23 +282,24 @@ const fields: FilterField[] = [
 
 ### Props
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `fields` | `FilterField[]` | Filter field definitions |
-| `initialValues` | `Partial<T>` | Initial filter values |
-| `onFiltersChange` | `(filters: T) => void` | Filter change handler |
-| `gridCols` | `number` | Number of columns in grid |
-| `className` | `string` | Custom CSS classes |
-| `showReset` | `boolean` | Show reset button |
-| `resetText` | `string` | Reset button text |
-| `onReset` | `() => void` | Reset handler |
-| `debounceDelay` | `number` | Debounce delay in ms |
+| Prop              | Type                   | Description               |
+| ----------------- | ---------------------- | ------------------------- |
+| `fields`          | `FilterField[]`        | Filter field definitions  |
+| `initialValues`   | `Partial<T>`           | Initial filter values     |
+| `onFiltersChange` | `(filters: T) => void` | Filter change handler     |
+| `gridCols`        | `number`               | Number of columns in grid |
+| `className`       | `string`               | Custom CSS classes        |
+| `showReset`       | `boolean`              | Show reset button         |
+| `resetText`       | `string`               | Reset button text         |
+| `onReset`         | `() => void`           | Reset handler             |
+| `debounceDelay`   | `number`               | Debounce delay in ms      |
 
 ## Migration Guide
 
 ### From ProductTable to GenericTable
 
 **Before:**
+
 ```tsx
 // 245 lines of repetitive table code
 const columns = [
@@ -315,6 +326,7 @@ return (
 ```
 
 **After:**
+
 ```tsx
 // 50 lines of clean, reusable code
 const columns: TableColumn<Product>[] = [
@@ -369,6 +381,7 @@ All components support extensive customization through props and CSS classes. Yo
 ## Examples
 
 See the following files for complete examples:
+
 - `features/products/ProductTableRefactored.tsx`
 - `features/products/ProductFiltersRefactored.tsx`
-- `features/products/AddEditProductDrawerRefactored.tsx` 
+- `features/products/AddEditProductDrawerRefactored.tsx`

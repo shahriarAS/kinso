@@ -100,7 +100,7 @@ export default function ProductFiltersRefactored({
   const handleFiltersChange = (filters: ProductFilters) => {
     // Reset to first page when filters change
     onPageChange(1);
-    
+
     // Update individual filter values
     if (filters.search !== undefined) {
       onSearchChange(filters.search);
@@ -132,4 +132,4 @@ export default function ProductFiltersRefactored({
       debounceDelay={500}
     />
   );
-} 
+}

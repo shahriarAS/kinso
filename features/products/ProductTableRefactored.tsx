@@ -1,7 +1,11 @@
 "use client";
 import { useState } from "react";
 import { Tag } from "antd";
-import { GenericTable, type TableColumn, type TableAction } from "@/components/common";
+import {
+  GenericTable,
+  type TableColumn,
+  type TableAction,
+} from "@/components/common";
 import {
   useGetProductsQuery,
   useDeleteProductMutation,
@@ -217,4 +221,4 @@ export default function ProductTableRefactored({
       />
     </>
   );
-} 
+}

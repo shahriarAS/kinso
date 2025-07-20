@@ -2,11 +2,11 @@
 import { Icon } from "@iconify/react";
 import { Button, Drawer, Form, Input } from "antd";
 import React, { useEffect } from "react";
-import { Warehouse } from "@/types";
+import { Warehouse } from "@/features/warehouses/types";
 import {
   useCreateWarehouseMutation,
   useUpdateWarehouseMutation,
-} from "@/store/api/warehouses";
+} from "@/features/warehouses/api";
 import toast from "react-hot-toast";
 
 interface Props {
@@ -144,4 +144,4 @@ export default function AddEditWarehouseDrawer({
       </Drawer>
     </div>
   );
-}
+} 

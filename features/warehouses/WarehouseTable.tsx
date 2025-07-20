@@ -6,8 +6,8 @@ import { useState } from "react";
 import {
   useGetWarehousesQuery,
   useDeleteWarehouseMutation,
-} from "@/store/api/warehouses";
-import type { Warehouse } from "@/types";
+} from "@/features/warehouses/api";
+import type { Warehouse } from "@/features/warehouses/types";
 import AddEditWarehouseDrawer from "./AddEditWarehouseDrawer";
 import toast from "react-hot-toast";
 
@@ -165,4 +165,4 @@ export default function WarehouseTable({
       />
     </div>
   );
-}
+} 

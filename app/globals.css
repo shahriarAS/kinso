@@ -6,6 +6,14 @@
   --font-montserrat: var(--font-montserrat);
 }
 
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 
 .custom-scrollbar {
   scrollbar-width: thin;

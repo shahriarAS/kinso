@@ -54,8 +54,8 @@ export default function DashboardSidebar() {
   return (
     <aside
       className={twMerge(
-        "h-full w-1/6 py-6 flex flex-col gap-16 transition-all duration-300",
-        collapsed ? "w-20" : "w-1/6"
+        "h-full py-6 flex flex-col gap-16 transition-all duration-300",
+        collapsed ? "w-20" : "w-72"
       )}
     >
       <div className={twMerge("flex justify-between items-center transition-all duration-300", collapsed ? "px-4" : "px-8")}>
@@ -157,8 +157,8 @@ function ProfileMenu({ collapsed }: { collapsed: boolean }) {
         >
           <div
             className={twMerge(
-              "flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-secondary/10 transition-all",
-              collapsed ? "justify-center" : "justify-start"
+              "flex items-center cursor-pointer p-2 rounded-lg hover:bg-secondary/10 transition-all",
+              collapsed ? "justify-center" : "justify-start gap-2"
             )}
             tabIndex={0}
           >
@@ -166,7 +166,7 @@ function ProfileMenu({ collapsed }: { collapsed: boolean }) {
               size={collapsed ? 32 : 40}
               src={avatar}
               icon={<UserOutlined />}
-              className="bg-secondary/30"
+              className={twMerge("bg-secondary/30", collapsed ? "ml-4" : "")}
             />
             <span
               className={twMerge(

@@ -18,41 +18,52 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
       <Col xs={24} sm={12} lg={6}>
         <Card className="bg-white border rounded-2xl shadow-sm">
           <Statistic
-            title="Total Revenue"
+            title={
+              <span className="text-primary font-medium">Total Revenue</span>
+            }
             value={stats.totalRevenue}
-            prefix={<DollarOutlined className="text-green-500" />}
-            valueStyle={{ color: "#10b981" }}
-            suffix="৳"
+            precision={2}
+            valueStyle={{ color: "#181818", fontWeight: 600, fontSize: 24 }}
+            prefix={<DollarOutlined className="mr-1 text-lg align-middle" />}
+            suffix={<span className="text-base font-semibold">৳</span>}
           />
         </Card>
       </Col>
       <Col xs={24} sm={12} lg={6}>
         <Card className="bg-white border rounded-2xl shadow-sm">
           <Statistic
-            title="Total Orders"
+            title={
+              <span className="text-primary font-medium">Total Orders</span>
+            }
             value={stats.totalOrders}
-            prefix={<ShoppingCartOutlined className="text-blue-500" />}
-            valueStyle={{ color: "#3b82f6" }}
+            valueStyle={{ color: "#181818", fontWeight: 600, fontSize: 24 }}
+            prefix={
+              <ShoppingCartOutlined className="mr-1 text-lg align-middle" />
+            }
           />
         </Card>
       </Col>
       <Col xs={24} sm={12} lg={6}>
         <Card className="bg-white border rounded-2xl shadow-sm">
           <Statistic
-            title="Total Customers"
+            title={
+              <span className="text-primary font-medium">Total Customers</span>
+            }
             value={stats.totalCustomers}
-            prefix={<UserOutlined className="text-purple-500" />}
-            valueStyle={{ color: "#8b5cf6" }}
+            valueStyle={{ color: "#181818", fontWeight: 600, fontSize: 24 }}
+            prefix={<UserOutlined className="mr-1 text-lg align-middle" />}
           />
         </Card>
       </Col>
       <Col xs={24} sm={12} lg={6}>
         <Card className="bg-white border rounded-2xl shadow-sm">
           <Statistic
-            title="Total Products"
+            title={
+              <span className="text-primary font-medium">Total Products</span>
+            }
             value={stats.totalProducts}
-            prefix={<InboxOutlined className="text-orange-500" />}
-            valueStyle={{ color: "#f59e0b" }}
+            valueStyle={{ color: "#181818", fontWeight: 600, fontSize: 24 }}
+            prefix={<InboxOutlined className="mr-1 text-lg align-middle" />}
           />
         </Card>
       </Col>

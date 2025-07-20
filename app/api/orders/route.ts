@@ -3,6 +3,7 @@ import dbConnect from '@/lib/database';
 import { Order, Customer, Product } from '@/models';
 import { authorizeRequest, AuthenticatedRequest } from '@/lib/auth';
 import OrderCounter from '@/models/OrderCounter';
+import { PaymentMethod } from '@/models/Order';
 
 // GET /api/orders - List all orders with pagination and search
 export async function GET(request: NextRequest) {
@@ -26,7 +27,8 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const search = searchParams.get('search') || '';
     const customerId = searchParams.get('customerId') || '';
-    
+    const paymentMethod = searchParams.get('paymentMethod') || '';
+      
     const skip = (page - 1) * limit;
     
     // Build query
@@ -40,7 +42,11 @@ export async function GET(request: NextRequest) {
     if (customerId) {
       query.customerId = customerId;
     }
-    
+
+    if (paymentMethod) {
+      query.paymentMethod = paymentMethod.toUpperCase();
+    }
+
     // Execute query
     const [orders, total] = await Promise.all([
       Order.find(query)
@@ -93,7 +99,7 @@ export async function POST(request: NextRequest) {
     await dbConnect();
     
     const body = await request.json();
-    const { customerId, customerName, items, notes, discount = 0 } = body;
+    const { customerId, customerName, items, notes, discount = 0, paymentMethod } = body;
     
     // Basic validation
     if (!customerId) {
@@ -113,6 +119,13 @@ export async function POST(request: NextRequest) {
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
         { success: false, message: 'Order items are required' },
+        { status: 400 }
+      );
+    }
+
+    if (!paymentMethod) {
+      return NextResponse.json(
+        { success: false, message: 'Payment method is required' },
         { status: 400 }
       );
     }
@@ -199,7 +212,8 @@ export async function POST(request: NextRequest) {
       items: validatedItems,
       totalAmount: finalTotal,
       discount,
-      notes: notes?.trim() || ''
+      notes: notes?.trim() || '',
+      paymentMethod: paymentMethod.toUpperCase() as PaymentMethod
     });
     
     // Update customer statistics

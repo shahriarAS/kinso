@@ -35,6 +35,9 @@ export default function ViewOrderDrawer({ viewOrder, setViewOrder }: Props) {
               Date: {new Date(viewOrder.createdAt).toLocaleString()}
             </div>
             <div className="text-gray-600 text-sm mb-1">
+              Payment Method: <span className="font-medium text-blue-600">{viewOrder.paymentMethod}</span>
+            </div>
+            <div className="text-gray-600 text-sm mb-1">
               Subtotal: ৳
               {viewOrder.items
                 .reduce((sum, item) => sum + item.totalPrice, 0)

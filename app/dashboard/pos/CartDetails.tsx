@@ -6,6 +6,8 @@ import { useState } from "react";
 import { useCreateOrderMutation } from "@/store/api/orders";
 import { CartItem, CustomerOption } from "./types";
 import type { InvoiceData } from "./InvoiceTemplate";
+import { PaymentMethod } from "@/types/order";
+import { PAYMENT_METHODS } from "@/lib/constraints";
 
 interface OrderCreatePayload {
   customerId: string;
@@ -17,6 +19,7 @@ interface OrderCreatePayload {
     totalPrice: number;
   }[];
   totalAmount: number;
+  paymentMethod: PaymentMethod;
   discount?: number;
   notes?: string;
 }
@@ -57,6 +60,7 @@ export default function CartDetails({
   onOrderCompleted,
 }: CartDetailsProps) {
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CASH");
   const [createOrder, { isLoading: isCreatingOrder }] =
     useCreateOrderMutation();
 
@@ -93,6 +97,7 @@ export default function CartDetails({
           totalPrice: item.price * item.quantity,
         })),
         totalAmount: total,
+        paymentMethod,
         discount,
         notes: discount > 0 ? `Discount applied: ৳${discount}` : undefined,
       };
@@ -204,6 +209,24 @@ export default function CartDetails({
             New
           </Button>
         </div>
+
+        {/* Payment Method Selection */}
+        <div className="flex gap-2 mb-1">
+          <Select
+            options={
+              PAYMENT_METHODS.map(method => ({
+                label: method.label,
+                value: method.value
+              }))
+            }
+            value={paymentMethod}
+            onChange={setPaymentMethod}
+            className="flex-1 rounded-3xl"
+            size="large"
+            placeholder="Select Payment Method"
+          />
+        </div>
+
         <div className="flex-1 flex flex-col gap-2 overflow-y-auto custom-scrollbar">
           {cart.length === 0 ? (
             <div className="text-gray-400 text-center py-8">

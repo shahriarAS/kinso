@@ -14,6 +14,7 @@ interface OrderTableProps {
   filters?: {
     search?: string;
     dateRange?: [string, string];
+    paymentMethod?: string;
   };
 }
 
@@ -82,7 +83,7 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
     params.startDate = filters.dateRange[0];
     params.endDate = filters.dateRange[1];
   }
-
+  if (filters.paymentMethod) params.paymentMethod = filters.paymentMethod;
   const { data, isLoading, error, refetch } = useGetOrdersQuery(params);
 
   const handleView = (order: Order) => setViewOrder(order);
@@ -131,6 +132,14 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
       dataIndex: "customerName",
       key: "customerName",
       render: (text: string) => <span className="text-gray-700">{text}</span>,
+    },
+    {
+      title: <span className="font-medium text-base">Payment Method</span>,
+      dataIndex: "paymentMethod",
+      key: "paymentMethod",
+      render: (method: string) => (
+        <span className="font-medium text-blue-600">{method}</span>
+      ),
     },
     {
       title: <span className="font-medium text-base">Total Amount</span>,

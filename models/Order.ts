@@ -1,5 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+export type PaymentMethod = "CASH" | "BKASH" | "ROCKET" | "NAGAD" | "BANK";
+
 export interface IOrderItem {
   product: mongoose.Types.ObjectId;
   quantity: number;
@@ -13,6 +15,7 @@ export interface IOrder extends Document {
   customerName: string;
   items: IOrderItem[];
   totalAmount: number;
+  paymentMethod: PaymentMethod;
   discount?: number; // Discount amount for the order
   notes?: string;
   createdAt: Date;
@@ -64,6 +67,11 @@ const OrderSchema: Schema = new Schema({
     type: Number,
     required: true,
     min: 0,
+  },
+  paymentMethod: {
+    type: String,
+    required: true,
+    enum: ["CASH", "BKASH", "ROCKET", "NAGAD", "BANK"],
   },
   discount: {
     type: Number,

@@ -7,14 +7,17 @@ import OrderTable from './OrderTable';
 interface OrderFiltersType {
   search?: string;
   dateRange?: [string, string];
+  paymentMethod?: string;
 }
 
 export default function Orders() {
   const [filters, setFilters] = useState<OrderFiltersType>({
     search: "",
     dateRange: undefined,
+    paymentMethod: "",
   });
   const handleFiltersChange = (newFilters: OrderFiltersType) => {
+    console.log(newFilters)
     setFilters(newFilters);
   };
 

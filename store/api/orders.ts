@@ -27,6 +27,7 @@ export const ordersApi = createApi({
         endDate?: string;
         sortBy?: string;
         sortOrder?: "asc" | "desc";
+        paymentMethod?: string;
       }
     >({
       query: (params) => ({

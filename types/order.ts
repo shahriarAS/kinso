@@ -1,5 +1,7 @@
 import { Product } from "./product";
 
+export type PaymentMethod = "CASH" | "BKASH" | "ROCKET" | "NAGAD" | "BANK";
+
 export interface Order {
   _id: string;
   orderNumber: string;
@@ -12,6 +14,7 @@ export interface Order {
     totalPrice: number;
   }[];
   totalAmount: number;
+  paymentMethod: PaymentMethod;
   discount?: number;
   notes?: string;
   createdAt: string;

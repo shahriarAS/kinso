@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
-import { User } from '@/models';
-import dbConnect from './database';
+import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import { User } from "@/models";
+import dbConnect from "./database";
 
 export interface AuthenticatedRequest extends NextRequest {
   user?: any;
 }
 
-export type UserRole = 'admin' | 'manager' | 'staff';
+export type UserRole = "admin" | "manager" | "staff";
 
 export interface AuthOptions {
   requiredRoles?: UserRole[];
@@ -18,21 +18,21 @@ export interface AuthOptions {
 
 // JWT configuration with proper validation
 const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
-const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || '30d';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
+const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || "30d";
 
 // Validate JWT_SECRET at startup
 if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is required');
+  throw new Error("JWT_SECRET environment variable is required");
 }
 
 // Cookie configuration
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict' as const,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "strict" as const,
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-  path: '/',
+  path: "/",
 };
 
 const REFRESH_COOKIE_OPTIONS = {
@@ -44,25 +44,21 @@ const REFRESH_COOKIE_OPTIONS = {
 interface TokenPayload extends JwtPayload {
   userId: string;
   role: UserRole;
-  type: 'access' | 'refresh';
+  type: "access" | "refresh";
 }
 
 // JWT token generation
 export function generateTokens(userId: string, role: UserRole) {
-  const payload = { userId, role, type: 'access' as const };
-  const refreshPayload = { userId, role, type: 'refresh' as const };
-  
-  const accessToken = jwt.sign(
-    payload,
-    JWT_SECRET!,
-    { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions
-  );
+  const payload = { userId, role, type: "access" as const };
+  const refreshPayload = { userId, role, type: "refresh" as const };
 
-  const refreshToken = jwt.sign(
-    refreshPayload,
-    JWT_SECRET!,
-    { expiresIn: REFRESH_TOKEN_EXPIRES_IN } as jwt.SignOptions
-  );
+  const accessToken = jwt.sign(payload, JWT_SECRET!, {
+    expiresIn: JWT_EXPIRES_IN,
+  } as jwt.SignOptions);
+
+  const refreshToken = jwt.sign(refreshPayload, JWT_SECRET!, {
+    expiresIn: REFRESH_TOKEN_EXPIRES_IN,
+  } as jwt.SignOptions);
 
   return { accessToken, refreshToken };
 }
@@ -84,7 +80,10 @@ export async function hashPassword(password: string): Promise<string> {
 }
 
 // Password verification
-export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+export async function verifyPassword(
+  password: string,
+  hashedPassword: string,
+): Promise<boolean> {
   return bcrypt.compare(password, hashedPassword);
 }
 
@@ -92,10 +91,10 @@ export async function verifyPassword(password: string, hashedPassword: string): 
 export async function getUserById(userId: string) {
   try {
     await dbConnect();
-    const user = await User.findById(userId).select('-password');
+    const user = await User.findById(userId).select("-password");
     return user;
   } catch (error) {
-    console.error('Error fetching user:', error);
+    console.error("Error fetching user:", error);
     return null;
   }
 }
@@ -105,8 +104,8 @@ export async function authenticateUser(request: NextRequest): Promise<any> {
   try {
     // Get access token from cookies
     const cookieStore = await cookies();
-    const accessToken = cookieStore.get('accessToken')?.value;
-    const refreshToken = cookieStore.get('refreshToken')?.value;
+    const accessToken = cookieStore.get("accessToken")?.value;
+    const refreshToken = cookieStore.get("refreshToken")?.value;
 
     if (!accessToken && !refreshToken) {
       return null;
@@ -115,7 +114,7 @@ export async function authenticateUser(request: NextRequest): Promise<any> {
     // Try to verify access token first
     if (accessToken) {
       const decoded = verifyToken(accessToken);
-      if (decoded && decoded.type === 'access') {
+      if (decoded && decoded.type === "access") {
         const user = await getUserById(decoded.userId);
         if (user && user.isActive) {
           return user;
@@ -126,17 +125,20 @@ export async function authenticateUser(request: NextRequest): Promise<any> {
     // If access token is invalid or expired, try refresh token
     if (refreshToken) {
       const decoded = verifyToken(refreshToken);
-      if (decoded && decoded.type === 'refresh') {
+      if (decoded && decoded.type === "refresh") {
         const user = await getUserById(decoded.userId);
         if (user && user.isActive) {
           // Generate new tokens
-          const newTokens = generateTokens((user._id as any).toString(), user.role);
-          
+          const newTokens = generateTokens(
+            (user._id as any).toString(),
+            user.role,
+          );
+
           // Set new cookies (this will be handled by the calling function)
           return {
             user,
             newTokens,
-            needsTokenRefresh: true
+            needsTokenRefresh: true,
           };
         }
       }
@@ -144,7 +146,7 @@ export async function authenticateUser(request: NextRequest): Promise<any> {
 
     return null;
   } catch (error) {
-    console.error('Authentication error:', error);
+    console.error("Authentication error:", error);
     return null;
   }
 }
@@ -152,8 +154,14 @@ export async function authenticateUser(request: NextRequest): Promise<any> {
 // Authorization function
 export async function authorizeRequest(
   request: AuthenticatedRequest,
-  options: AuthOptions = {}
-): Promise<{ success: boolean; user?: any; error?: string; status?: number; newTokens?: any }> {
+  options: AuthOptions = {},
+): Promise<{
+  success: boolean;
+  user?: any;
+  error?: string;
+  status?: number;
+  newTokens?: any;
+}> {
   const { requiredRoles = [], requireAuth = true } = options;
 
   try {
@@ -164,12 +172,12 @@ export async function authorizeRequest(
 
     // Authenticate user
     const authResult = await authenticateUser(request);
-    
+
     if (!authResult) {
       return {
         success: false,
-        error: 'Authentication required',
-        status: 401
+        error: "Authentication required",
+        status: 401,
       };
     }
 
@@ -178,7 +186,7 @@ export async function authorizeRequest(
       return {
         success: true,
         user: authResult.user,
-        newTokens: authResult.newTokens
+        newTokens: authResult.newTokens,
       };
     }
 
@@ -188,8 +196,8 @@ export async function authorizeRequest(
     if (!user.isActive) {
       return {
         success: false,
-        error: 'Account is deactivated',
-        status: 403
+        error: "Account is deactivated",
+        status: 403,
       };
     }
 
@@ -197,21 +205,21 @@ export async function authorizeRequest(
     if (requiredRoles.length > 0 && !requiredRoles.includes(user.role)) {
       return {
         success: false,
-        error: 'Insufficient permissions',
-        status: 403
+        error: "Insufficient permissions",
+        status: 403,
       };
     }
 
     // Attach user to request
     request.user = user;
-    
+
     return { success: true, user };
   } catch (error) {
-    console.error('Authorization error:', error);
+    console.error("Authorization error:", error);
     return {
       success: false,
-      error: 'Authorization failed',
-      status: 500
+      error: "Authorization failed",
+      status: 500,
     };
   }
 }
@@ -220,52 +228,72 @@ export async function authorizeRequest(
 export function createAuthMiddleware(options: AuthOptions = {}) {
   return async (request: AuthenticatedRequest) => {
     const authResult = await authorizeRequest(request, options);
-    
+
     if (!authResult.success) {
       return NextResponse.json(
         { success: false, message: authResult.error },
-        { status: authResult.status || 401 }
+        { status: authResult.status || 401 },
       );
     }
 
     // Handle token refresh in middleware
     if (authResult.newTokens) {
       const response = NextResponse.next();
-      
+
       // Set new cookies
-      response.cookies.set('accessToken', authResult.newTokens.accessToken, COOKIE_OPTIONS);
-      response.cookies.set('refreshToken', authResult.newTokens.refreshToken, REFRESH_COOKIE_OPTIONS);
-      
+      response.cookies.set(
+        "accessToken",
+        authResult.newTokens.accessToken,
+        COOKIE_OPTIONS,
+      );
+      response.cookies.set(
+        "refreshToken",
+        authResult.newTokens.refreshToken,
+        REFRESH_COOKIE_OPTIONS,
+      );
+
       return response;
     }
-    
+
     return null; // Continue to the next handler
   };
 }
 
 // Helper functions for common authorization patterns
 export const requireAuth = createAuthMiddleware({ requireAuth: true });
-export const requireAdmin = createAuthMiddleware({ requiredRoles: ['admin'] });
-export const requireManager = createAuthMiddleware({ requiredRoles: ['admin', 'manager'] });
-export const requireStaff = createAuthMiddleware({ requiredRoles: ['admin', 'manager', 'staff'] });
+export const requireAdmin = createAuthMiddleware({ requiredRoles: ["admin"] });
+export const requireManager = createAuthMiddleware({
+  requiredRoles: ["admin", "manager"],
+});
+export const requireStaff = createAuthMiddleware({
+  requiredRoles: ["admin", "manager", "staff"],
+});
 
 // Utility functions for API routes
-export function setAuthCookies(response: NextResponse, accessToken: string, refreshToken: string) {
-  response.cookies.set('accessToken', accessToken, COOKIE_OPTIONS);
-  response.cookies.set('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS);
+export function setAuthCookies(
+  response: NextResponse,
+  accessToken: string,
+  refreshToken: string,
+) {
+  response.cookies.set("accessToken", accessToken, COOKIE_OPTIONS);
+  response.cookies.set("refreshToken", refreshToken, REFRESH_COOKIE_OPTIONS);
   return response;
 }
 
 export function clearAuthCookies(response: NextResponse) {
-  response.cookies.delete('accessToken');
-  response.cookies.delete('refreshToken');
+  response.cookies.delete("accessToken");
+  response.cookies.delete("refreshToken");
   return response;
 }
 
 // Rate limiting helper (basic implementation)
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
-export function checkRateLimit(identifier: string, limit: number = 5, windowMs: number = 60000): boolean {
+export function checkRateLimit(
+  identifier: string,
+  limit: number = 5,
+  windowMs: number = 60000,
+): boolean {
   const now = Date.now();
   const record = rateLimitMap.get(identifier);
 

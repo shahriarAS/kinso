@@ -1,14 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/database';
-import { Product, Warehouse } from '@/models';
-import { authorizeRequest, AuthenticatedRequest } from '@/lib/auth';
-import mongoose from 'mongoose';
+import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "@/lib/database";
+import { Product, Warehouse } from "@/models";
+import { authorizeRequest, AuthenticatedRequest } from "@/lib/auth";
+import mongoose from "mongoose";
 
 export async function GET(request: NextRequest) {
   try {
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, { requireAuth: true });
+    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
+      requireAuth: true,
+    });
     if (!authResult.success) {
-      return NextResponse.json({ success: false, message: authResult.error }, { status: authResult.status || 401 });
+      return NextResponse.json(
+        { success: false, message: authResult.error },
+        { status: authResult.status || 401 },
+      );
     }
     await dbConnect();
 
@@ -16,51 +21,63 @@ export async function GET(request: NextRequest) {
     const lowStockProductsAgg = await Product.aggregate([
       { $unwind: "$stock" },
       { $match: { "stock.unit": { $gt: 0, $lt: 5 } } },
-      { $lookup: {
-        from: "warehouses",
-        localField: "stock.warehouse",
-        foreignField: "_id",
-        as: "warehouse"
-      } },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "stock.warehouse",
+          foreignField: "_id",
+          as: "warehouse",
+        },
+      },
       { $unwind: "$warehouse" },
-      { $project: {
-        _id: 1,
-        name: 1,
-        currentStock: "$stock.unit",
-        minStock: { $literal: 5 },
-        warehouse: "$warehouse.name"
-      } }
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          currentStock: "$stock.unit",
+          minStock: { $literal: 5 },
+          warehouse: "$warehouse.name",
+        },
+      },
     ]);
 
     // Out of stock products (unit == 0)
     const outOfStockProductsAgg = await Product.aggregate([
       { $unwind: "$stock" },
       { $match: { "stock.unit": 0 } },
-      { $lookup: {
-        from: "warehouses",
-        localField: "stock.warehouse",
-        foreignField: "_id",
-        as: "warehouse"
-      } },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "stock.warehouse",
+          foreignField: "_id",
+          as: "warehouse",
+        },
+      },
       { $unwind: "$warehouse" },
-      { $project: {
-        _id: 1,
-        name: 1,
-        warehouse: "$warehouse.name"
-      } }
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          warehouse: "$warehouse.name",
+        },
+      },
     ]);
 
     // No expiry field, so expiringProducts is empty
     return NextResponse.json({
       lowStockProducts: lowStockProductsAgg,
       outOfStockProducts: outOfStockProductsAgg,
-      expiringProducts: []
+      expiringProducts: [],
     });
   } catch (error: any) {
-    return NextResponse.json({ 
-      success: false, 
-      message: 'Failed to fetch inventory alerts', 
-      error: error?.message ?? String(error) 
-    }, { status: 500 });
+    // eslint-disable-line @typescript-eslint/no-explicit-any
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Failed to fetch inventory alerts",
+        error: error?.message ?? String(error),
+      },
+      { status: 500 },
+    );
   }
-} 
+}

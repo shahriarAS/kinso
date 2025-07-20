@@ -21,4 +21,5 @@ export interface Order {
   updatedAt: string;
 }
 
-export interface OrderInput extends Omit<Order, "_id" | "orderNumber" | "createdAt" | "updatedAt"> {} 
+export interface OrderInput
+  extends Omit<Order, "_id" | "orderNumber" | "createdAt" | "updatedAt"> {}

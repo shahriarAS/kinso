@@ -1,10 +1,8 @@
 "use client";
+
 import { useLoginUserMutation } from "@/store/api/auth";
-import logo from "@/public/images/brand/logo.png";
 import { LockOutlined, MailOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Alert, Spin } from "antd";
-import Image from "next/image";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
@@ -56,7 +54,7 @@ function Login() {
 
           {/* Form */}
           <Form
-          form={form}
+            form={form}
             name="login"
             onFinish={onFinish}
             className="space-y-6"

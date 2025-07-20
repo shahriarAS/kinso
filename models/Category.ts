@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface ICategory extends Document {
   name: string;
@@ -7,23 +7,27 @@ export interface ICategory extends Document {
   updatedAt: Date;
 }
 
-const CategorySchema: Schema = new Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-    unique: true,
+const CategorySchema: Schema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+    },
+    description: {
+      type: String,
+      trim: true,
+    },
   },
-  description: {
-    type: String,
-    trim: true,
+  {
+    timestamps: true,
   },
-}, {
-  timestamps: true,
-});
+);
 
 // Index for name queries
 CategorySchema.index({ name: 1 });
 
 // Check if model already exists to prevent overwrite error
-export default mongoose.models.Category || mongoose.model<ICategory>('Category', CategorySchema); 
+export default mongoose.models.Category ||
+  mongoose.model<ICategory>("Category", CategorySchema);

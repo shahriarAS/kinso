@@ -24,7 +24,13 @@ export interface BaseFilters {
 }
 
 // Common status types
-export type Status = "active" | "inactive" | "pending" | "processing" | "completed" | "cancelled";
+export type Status =
+  | "active"
+  | "inactive"
+  | "pending"
+  | "processing"
+  | "completed"
+  | "cancelled";
 
 // Common date range type
 export interface DateRange {
@@ -55,7 +61,15 @@ export interface TableColumn<T = any> {
 export interface FormField {
   name: string;
   label: string;
-  type: "text" | "email" | "password" | "number" | "select" | "textarea" | "date" | "checkbox";
+  type:
+    | "text"
+    | "email"
+    | "password"
+    | "number"
+    | "select"
+    | "textarea"
+    | "date"
+    | "checkbox";
   required?: boolean;
   placeholder?: string;
   options?: SelectOption[];
@@ -95,4 +109,4 @@ export interface AuditLog {
   timestamp: string;
   ipAddress?: string;
   userAgent?: string;
-} 
+}

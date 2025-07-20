@@ -9,7 +9,11 @@ interface Props {
   onPageChange: (page: number) => void;
 }
 
-export default function CategoryFilters({ searchTerm, onSearchChange, onPageChange }: Props) {
+export default function CategoryFilters({
+  searchTerm,
+  onSearchChange,
+  onPageChange,
+}: Props) {
   const [form] = Form.useForm();
   const debouncedSearch = useDebounce(searchTerm, 500);
 
@@ -31,11 +35,7 @@ export default function CategoryFilters({ searchTerm, onSearchChange, onPageChan
       requiredMark={false}
       className="border border-gray-300 rounded-3xl p-4 bg-white grid grid-cols-4 gap-8"
     >
-      <Form.Item
-        name="search"
-        label="Search"
-        className="font-medium"
-      >
+      <Form.Item name="search" label="Search" className="font-medium">
         <Input
           size="large"
           placeholder="Search categories..."
@@ -46,4 +46,4 @@ export default function CategoryFilters({ searchTerm, onSearchChange, onPageChan
       </Form.Item>
     </Form>
   );
-} 
+}

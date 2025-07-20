@@ -1,16 +1,27 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { User } from '@/models';
-import dbConnect from '@/lib/database';
-import { verifyPassword, generateTokens, setAuthCookies, checkRateLimit } from '@/lib/auth';
+import { NextRequest, NextResponse } from "next/server";
+import { User } from "@/models";
+import dbConnect from "@/lib/database";
+import {
+  verifyPassword,
+  generateTokens,
+  setAuthCookies,
+  checkRateLimit,
+} from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting
-    const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const clientIP =
+      request.headers.get("x-forwarded-for") ||
+      request.headers.get("x-real-ip") ||
+      "unknown";
     if (!checkRateLimit(`login:${clientIP}`, 5, 60000)) {
       return NextResponse.json(
-        { success: false, message: 'Too many login attempts. Please try again later.' },
-        { status: 429 }
+        {
+          success: false,
+          message: "Too many login attempts. Please try again later.",
+        },
+        { status: 429 },
       );
     }
 
@@ -19,8 +30,8 @@ export async function POST(request: NextRequest) {
     // Validate input
     if (!email || !password) {
       return NextResponse.json(
-        { success: false, message: 'Email and password are required' },
-        { status: 400 }
+        { success: false, message: "Email and password are required" },
+        { status: 400 },
       );
     }
 
@@ -31,16 +42,16 @@ export async function POST(request: NextRequest) {
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       return NextResponse.json(
-        { success: false, message: 'Invalid email or password' },
-        { status: 401 }
+        { success: false, message: "Invalid email or password" },
+        { status: 401 },
       );
     }
 
     // Check if user is active
     if (!user.isActive) {
       return NextResponse.json(
-        { success: false, message: 'Account is deactivated' },
-        { status: 403 }
+        { success: false, message: "Account is deactivated" },
+        { status: 403 },
       );
     }
 
@@ -48,8 +59,8 @@ export async function POST(request: NextRequest) {
     const isPasswordValid = await verifyPassword(password, user.password);
     if (!isPasswordValid) {
       return NextResponse.json(
-        { success: false, message: 'Invalid email or password' },
-        { status: 401 }
+        { success: false, message: "Invalid email or password" },
+        { status: 401 },
       );
     }
 
@@ -58,12 +69,13 @@ export async function POST(request: NextRequest) {
     await user.save();
 
     // Generate tokens
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const tokens = generateTokens((user._id as any).toString(), user.role);
 
     // Create response
     const response = NextResponse.json({
       success: true,
-      message: 'Login successful',
+      message: "Login successful",
       user: {
         _id: user._id,
         name: user.name,
@@ -72,7 +84,7 @@ export async function POST(request: NextRequest) {
         avatar: user.avatar,
         isActive: user.isActive,
         lastLoginAt: user.lastLoginAt,
-      }
+      },
     });
 
     // Set authentication cookies
@@ -80,10 +92,10 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error) {
-    console.error('Login error:', error);
+    console.error("Login error:", error);
     return NextResponse.json(
-      { success: false, message: 'Internal server error' },
-      { status: 500 }
+      { success: false, message: "Internal server error" },
+      { status: 500 },
     );
   }
-} 
+}

@@ -36,17 +36,17 @@ export const customersApi = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.data.map(({ _id }) => ({ type: "Customer" as const, _id })),
+              ...result.data.map(({ _id }) => ({
+                type: "Customer" as const,
+                _id,
+              })),
               { type: "Customer", id: "LIST" },
             ]
           : [{ type: "Customer", id: "LIST" }],
     }),
 
     // Get single customer by ID
-    getCustomer: builder.query<
-      { data: Customer },
-      string
-    >({
+    getCustomer: builder.query<{ data: Customer }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "GET",
@@ -84,10 +84,7 @@ export const customersApi = createApi({
     }),
 
     // Delete customer
-    deleteCustomer: builder.mutation<
-      { message: string },
-      string
-    >({
+    deleteCustomer: builder.mutation<{ message: string }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",
@@ -119,10 +116,7 @@ export const customersApi = createApi({
     }),
 
     // Search customers by name or email
-    searchCustomers: builder.query<
-      { customers: Customer[] },
-      string
-    >({
+    searchCustomers: builder.query<{ customers: Customer[] }, string>({
       query: (searchTerm) => ({
         url: "/search",
         method: "GET",
@@ -130,7 +124,10 @@ export const customersApi = createApi({
       }),
       providesTags: (result) =>
         result
-          ? result.customers.map(({ _id }) => ({ type: "Customer" as const, _id }))
+          ? result.customers.map(({ _id }) => ({
+              type: "Customer" as const,
+              _id,
+            }))
           : [],
     }),
   }),
@@ -144,4 +141,4 @@ export const {
   useDeleteCustomerMutation,
   useGetCustomerStatsQuery,
   useSearchCustomersQuery,
-} = customersApi; 
+} = customersApi;

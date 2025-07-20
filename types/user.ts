@@ -10,6 +10,7 @@ export interface User {
   isActive: boolean;
 }
 
-export interface UserInput extends Omit<User, "id" | "createdAt" | "updatedAt" | "lastLoginAt"> {
+export interface UserInput
+  extends Omit<User, "id" | "createdAt" | "updatedAt" | "lastLoginAt"> {
   password?: string;
-} 
+}

@@ -9,4 +9,5 @@ export interface Customer {
   notes?: string;
 }
 
-export interface CustomerInput extends Omit<Customer, "id" | "totalOrders" | "totalSpent"> {} 
+export interface CustomerInput
+  extends Omit<Customer, "id" | "totalOrders" | "totalSpent"> {}

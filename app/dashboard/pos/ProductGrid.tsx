@@ -12,20 +12,27 @@ interface ProductGridProps {
 }
 
 export default function ProductGrid({ products, onAdd }: ProductGridProps) {
-  const getCategoryName = (category: string | { _id: string; name: string }) => {
-    if (typeof category === 'string') {
+  const getCategoryName = (
+    category: string | { _id: string; name: string },
+  ) => {
+    if (typeof category === "string") {
       return category;
     }
     return category.name;
   };
 
-  const getCategoryColor = (category: string | { _id: string; name: string }) => {
+  const getCategoryColor = (
+    category: string | { _id: string; name: string },
+  ) => {
     const categoryName = getCategoryName(category).toLowerCase();
     return categoryColors[categoryName] || "bg-gray-200 text-gray-600";
   };
 
   const getStockQuantity = (product: Product) => {
-    return product.stock.reduce((total, stockItem) => total + stockItem.unit, 0);
+    return product.stock.reduce(
+      (total, stockItem) => total + stockItem.unit,
+      0,
+    );
   };
 
   const getProductPrice = (product: Product) => {
@@ -42,7 +49,7 @@ export default function ProductGrid({ products, onAdd }: ProductGridProps) {
         const stockQuantity = getStockQuantity(product);
         const lowStock = isLowStock(stockQuantity);
         const price = getProductPrice(product);
-        
+
         return (
           <div
             key={product._id}
@@ -56,7 +63,9 @@ export default function ProductGrid({ products, onAdd }: ProductGridProps) {
                 <span className="font-semibold text-base text-primary line-clamp-3 leading-tight break-words max-w-full">
                   {product.name}
                 </span>
-                <span className="text-sm text-gray-500">SKU: {product.sku}</span>
+                <span className="text-sm text-gray-500">
+                  SKU: {product.sku}
+                </span>
               </div>
             </div>
             <div className="flex items-center gap-2 mb-1">
@@ -67,14 +76,18 @@ export default function ProductGrid({ products, onAdd }: ProductGridProps) {
                   getCategoryName(product.category).slice(1)}
               </span>
               {lowStock && (
-                <span className="ml-1 px-2 py-0.5 rounded-full bg-red-50 text-red-500 text-xs font-medium border border-red-100">Low</span>
+                <span className="ml-1 px-2 py-0.5 rounded-full bg-red-50 text-red-500 text-xs font-medium border border-red-100">
+                  Low
+                </span>
               )}
             </div>
             <div className="flex items-center justify-between mb-1">
               <span className="text-xl font-semibold text-green-600">
-                ৳{price ? price.toFixed(2) : '0.00'}
+                ৳{price ? price.toFixed(2) : "0.00"}
               </span>
-              <span className="text-xs text-gray-400">Stock: {stockQuantity}</span>
+              <span className="text-xs text-gray-400">
+                Stock: {stockQuantity}
+              </span>
             </div>
             <Button
               type="primary"
@@ -87,11 +100,13 @@ export default function ProductGrid({ products, onAdd }: ProductGridProps) {
               {stockQuantity === 0 ? "Out of Stock" : "Add to Cart"}
             </Button>
             {stockQuantity === 0 && (
-              <span className="absolute top-3 right-3 text-xs text-red-400 font-medium bg-red-50 px-2 py-0.5 rounded-full border border-red-100">Out of Stock</span>
+              <span className="absolute top-3 right-3 text-xs text-red-400 font-medium bg-red-50 px-2 py-0.5 rounded-full border border-red-100">
+                Out of Stock
+              </span>
             )}
           </div>
         );
       })}
     </div>
   );
-} 
+}

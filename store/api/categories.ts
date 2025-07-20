@@ -46,17 +46,17 @@ export const categoriesApi = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.data.map(({ _id }) => ({ type: "Category" as const, _id })),
+              ...result.data.map(({ _id }) => ({
+                type: "Category" as const,
+                _id,
+              })),
               { type: "Category", id: "LIST" },
             ]
           : [{ type: "Category", id: "LIST" }],
     }),
 
     // Get single category by ID
-    getCategory: builder.query<
-      { data: Category },
-      string
-    >({
+    getCategory: builder.query<{ data: Category }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "GET",
@@ -87,18 +87,15 @@ export const categoriesApi = createApi({
         method: "PUT",
         body: category,
       }),
-        invalidatesTags: (result, error, { _id }) => [
+      invalidatesTags: (result, error, { _id }) => [
         { type: "Category", _id },
         { type: "Category", id: "LIST" },
       ],
     }),
 
     // Delete category
-    deleteCategory: builder.mutation<
-      { message: string },
-      string
-    >({
-        query: (_id) => ({
+    deleteCategory: builder.mutation<{ message: string }, string>({
+      query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",
       }),
@@ -106,10 +103,7 @@ export const categoriesApi = createApi({
     }),
 
     // Get all categories for dropdown/select
-    getAllCategories: builder.query<
-      { data: Category[] },
-      void
-    >({
+    getAllCategories: builder.query<{ data: Category[] }, void>({
       query: () => ({
         url: "/",
         method: "GET",
@@ -127,4 +121,4 @@ export const {
   useUpdateCategoryMutation,
   useDeleteCategoryMutation,
   useGetAllCategoriesQuery,
-} = categoriesApi; 
+} = categoriesApi;

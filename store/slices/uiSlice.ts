@@ -38,13 +38,19 @@ const uiSlice = createSlice({
   name: "ui",
   initialState,
   reducers: {
-    setLoading: (state, action: PayloadAction<{ key: string; loading: boolean }>) => {
+    setLoading: (
+      state,
+      action: PayloadAction<{ key: string; loading: boolean }>,
+    ) => {
       state.loading[action.payload.key] = action.payload.loading;
     },
     clearLoading: (state, action: PayloadAction<string>) => {
       delete state.loading[action.payload];
     },
-    addNotification: (state, action: PayloadAction<Omit<Notification, "id" | "timestamp">>) => {
+    addNotification: (
+      state,
+      action: PayloadAction<Omit<Notification, "id" | "timestamp">>,
+    ) => {
       const notification: Notification = {
         ...action.payload,
         _id: Date.now().toString(),
@@ -55,12 +61,12 @@ const uiSlice = createSlice({
     },
     removeNotification: (state, action: PayloadAction<string>) => {
       state.notifications = state.notifications.filter(
-        (notification) => notification._id !== action.payload
+        (notification) => notification._id !== action.payload,
       );
     },
     markNotificationAsRead: (state, action: PayloadAction<string>) => {
       const notification = state.notifications.find(
-        (notification) => notification._id === action.payload
+        (notification) => notification._id === action.payload,
       );
       if (notification) {
         notification.read = true;
@@ -111,4 +117,4 @@ export const {
   setPrimaryColor,
 } = uiSlice.actions;
 
-export default uiSlice.reducer; 
+export default uiSlice.reducer;

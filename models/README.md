@@ -7,24 +7,28 @@ This directory contains all the MongoDB/Mongoose schemas for the EZ Inventory Ma
 ### Core Business Models
 
 #### 1. **User** (`User.ts`)
+
 - **Purpose**: Manages system users (admin, manager, staff)
 - **Key Fields**: name, email, password, role, avatar, isActive
 - **Indexes**: email, role, isActive
 - **Relationships**: Referenced by AuditLog, Notification
 
 #### 2. **Category** (`Category.ts`)
+
 - **Purpose**: Product categorization
 - **Key Fields**: name, description
 - **Indexes**: name (unique)
 - **Relationships**: Referenced by Product
 
 #### 3. **Warehouse** (`Warehouse.ts`)
+
 - **Purpose**: Inventory storage locations
 - **Key Fields**: name, location
 - **Indexes**: name, location
 - **Relationships**: Referenced by Product (stock array)
 
 #### 4. **Product** (`Product.ts`)
+
 - **Purpose**: Inventory items with stock management
 - **Key Fields**: name, upc, sku, category, stock[]
 - **Embedded Schema**: Stock (warehouse, unit, dp, mrp)
@@ -32,12 +36,14 @@ This directory contains all the MongoDB/Mongoose schemas for the EZ Inventory Ma
 - **Relationships**: References Category, Warehouse; Referenced by Order
 
 #### 5. **Customer** (`Customer.ts`)
+
 - **Purpose**: Customer information and statistics
 - **Key Fields**: name, email, phone, address, status, totalOrders, totalSpent
 - **Indexes**: email, phone, name, status, registrationDate
 - **Relationships**: Referenced by Order
 
 #### 6. **Order** (`Order.ts`)
+
 - **Purpose**: Sales orders with items and status tracking
 - **Key Fields**: orderNumber, customerId, items[], totalAmount, status, paymentStatus
 - **Embedded Schema**: OrderItem (product, quantity, unitPrice, totalPrice)
@@ -47,12 +53,14 @@ This directory contains all the MongoDB/Mongoose schemas for the EZ Inventory Ma
 ### System Models
 
 #### 7. **AuditLog** (`AuditLog.ts`)
+
 - **Purpose**: System activity tracking and audit trail
 - **Key Fields**: action, entity, entityId, userId, changes, timestamp
 - **Indexes**: entity, entityId, userId, timestamp
 - **Relationships**: References User
 
 #### 8. **Notification** (`Notification.ts`)
+
 - **Purpose**: System notifications for users
 - **Key Fields**: type, title, message, read, userId
 - **Indexes**: type, read, timestamp, userId
@@ -61,6 +69,7 @@ This directory contains all the MongoDB/Mongoose schemas for the EZ Inventory Ma
 ## Database Connection
 
 The database connection is managed in `lib/database.ts` with:
+
 - Connection caching for development
 - Environment variable configuration
 - Error handling
@@ -70,19 +79,19 @@ The database connection is managed in `lib/database.ts` with:
 ### Basic CRUD Operations
 
 ```typescript
-import dbConnect from '@/lib/database';
-import { User, Product, Order } from '@/models';
+import dbConnect from "@/lib/database";
+import { User, Product, Order } from "@/models";
 
 // Create
 const user = await User.create({
-  name: 'John Doe',
-  email: 'john@example.com',
-  password: 'hashedPassword',
-  role: 'staff'
+  name: "John Doe",
+  email: "john@example.com",
+  password: "hashedPassword",
+  role: "staff",
 });
 
 // Read
-const users = await User.find({ role: 'admin' }).populate('role');
+const users = await User.find({ role: "admin" }).populate("role");
 
 // Update
 await User.findByIdAndUpdate(userId, { isActive: false });
@@ -96,20 +105,20 @@ await User.findByIdAndDelete(userId);
 ```typescript
 // Find products with low stock
 const lowStockProducts = await Product.find({
-  'stock.unit': { $lt: 10 }
-}).populate('category');
+  "stock.unit": { $lt: 10 },
+}).populate("category");
 
 // Find orders by date range
 const orders = await Order.find({
   orderDate: {
-    $gte: new Date('2024-01-01'),
-    $lte: new Date('2024-12-31')
-  }
-}).populate('customerId');
+    $gte: new Date("2024-01-01"),
+    $lte: new Date("2024-12-31"),
+  },
+}).populate("customerId");
 
 // Aggregate customer spending
 const customerStats = await Customer.aggregate([
-  { $group: { _id: '$status', totalSpent: { $sum: '$totalSpent' } } }
+  { $group: { _id: "$status", totalSpent: { $sum: "$totalSpent" } } },
 ]);
 ```
 
@@ -118,13 +127,13 @@ const customerStats = await Customer.aggregate([
 ```typescript
 // Populate nested relationships
 const order = await Order.findById(orderId)
-  .populate('customerId')
-  .populate('items.product');
+  .populate("customerId")
+  .populate("items.product");
 
 // Update related documents
 const order = await Order.findById(orderId);
 await Customer.findByIdAndUpdate(order.customerId, {
-  $inc: { totalOrders: 1, totalSpent: order.totalAmount }
+  $inc: { totalOrders: 1, totalSpent: order.totalAmount },
 });
 ```
 
@@ -149,7 +158,7 @@ MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/ez-inventory
 
 ## Schema Design Decisions
 
-1. **Embedded vs Referenced**: 
+1. **Embedded vs Referenced**:
    - Stock information is embedded in Product for performance
    - Order items are embedded for atomicity
    - User references are used for audit trails
@@ -162,4 +171,4 @@ MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/ez-inventory
 3. **Data Validation**:
    - Required fields are enforced at schema level
    - Enums for status fields ensure data consistency
-   - Min/max values for numeric fields 
+   - Min/max values for numeric fields

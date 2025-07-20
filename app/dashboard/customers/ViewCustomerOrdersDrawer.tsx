@@ -31,7 +31,9 @@ const paymentStatusColors: Record<string, string> = {
 export default function ViewCustomerOrdersDrawer({ customer, onClose }: Props) {
   const [open, setOpen] = useState(true);
   const [viewOrder, setViewOrder] = useState<Order | null>(null);
-  const { data, isLoading, error, refetch } = useGetOrdersByCustomerQuery(customer._id);
+  const { data, isLoading, error, refetch } = useGetOrdersByCustomerQuery(
+    customer._id,
+  );
 
   const handleClose = () => {
     setOpen(false);
@@ -43,7 +45,9 @@ export default function ViewCustomerOrdersDrawer({ customer, onClose }: Props) {
       title: <span className="font-medium text-base">Order #</span>,
       dataIndex: "orderNumber",
       key: "orderNumber",
-      render: (text: string) => <span className="font-medium text-gray-900">{text}</span>,
+      render: (text: string) => (
+        <span className="font-medium text-gray-900">{text}</span>
+      ),
     },
     {
       title: <span className="font-medium text-base">Date</span>,
@@ -61,7 +65,7 @@ export default function ViewCustomerOrdersDrawer({ customer, onClose }: Props) {
       key: "items",
       render: (items: Order["items"]) => (
         <span className="text-gray-700">
-          {items.length} item{items.length !== 1 ? 's' : ''}
+          {items.length} item{items.length !== 1 ? "s" : ""}
         </span>
       ),
     },
@@ -79,7 +83,7 @@ export default function ViewCustomerOrdersDrawer({ customer, onClose }: Props) {
     //   render: (_: unknown, record: Order) => (
     //     <Space size="small">
     //       <Tooltip title="View Details">
-    //         <Button 
+    //         <Button
     //           className="inline-flex items-center justify-center rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 transition p-1.5"
     //           size="small"
     //           onClick={() => setViewOrder(record)}
@@ -99,7 +103,8 @@ export default function ViewCustomerOrdersDrawer({ customer, onClose }: Props) {
           <Icon icon="lineicons:user" className="text-xl text-blue-600" />
           <div>
             <h3 className="text-lg font-semibold text-gray-900">
-              {customer.name}{"'"}s Orders
+              {customer.name}
+              {"'"}s Orders
             </h3>
             <p className="text-sm text-gray-500">{customer.email}</p>
           </div>
@@ -126,18 +131,24 @@ export default function ViewCustomerOrdersDrawer({ customer, onClose }: Props) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm font-medium text-gray-500">Total Orders</p>
-              <p className="text-2xl font-bold text-gray-900">{customer.totalOrders}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {customer.totalOrders}
+              </p>
             </div>
             <div>
               <p className="text-sm font-medium text-gray-500">Total Spent</p>
-              <p className="text-2xl font-bold text-gray-900">৳{customer.totalSpent?.toFixed(2) || '0.00'}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                ৳{customer.totalSpent?.toFixed(2) || "0.00"}
+              </p>
             </div>
           </div>
         </div>
 
         {/* Orders Table */}
         <div>
-          <h4 className="text-lg font-semibold text-gray-900 mb-4">Order History</h4>
+          <h4 className="text-lg font-semibold text-gray-900 mb-4">
+            Order History
+          </h4>
           <ApiStatusHandler
             isLoading={isLoading}
             error={error}
@@ -151,13 +162,18 @@ export default function ViewCustomerOrdersDrawer({ customer, onClose }: Props) {
                 rowKey="_id"
                 className="!bg-white"
                 pagination={false}
-                scroll={{ x: '100%' }}
+                scroll={{ x: "100%" }}
                 loading={isLoading}
                 locale={{
                   emptyText: (
                     <div className="py-8 text-center">
-                      <Icon icon="lineicons:box" className="text-4xl text-gray-300 mx-auto mb-2" />
-                      <p className="text-gray-500">No orders found for this customer</p>
+                      <Icon
+                        icon="lineicons:box"
+                        className="text-4xl text-gray-300 mx-auto mb-2"
+                      />
+                      <p className="text-gray-500">
+                        No orders found for this customer
+                      </p>
                     </div>
                   ),
                 }}
@@ -169,4 +185,4 @@ export default function ViewCustomerOrdersDrawer({ customer, onClose }: Props) {
       <ViewOrderDrawer viewOrder={viewOrder} setViewOrder={setViewOrder} />
     </Drawer>
   );
-} 
+}

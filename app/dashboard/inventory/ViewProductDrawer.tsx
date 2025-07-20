@@ -12,7 +12,12 @@ interface Props {
   onClose?: () => void;
 }
 
-export default function ViewProductDrawer({ open, setOpen, product, onClose }: Props) {
+export default function ViewProductDrawer({
+  open,
+  setOpen,
+  product,
+  onClose,
+}: Props) {
   const handleClose = () => {
     setOpen(false);
     if (onClose) {
@@ -20,14 +25,16 @@ export default function ViewProductDrawer({ open, setOpen, product, onClose }: P
     }
   };
 
-  const getStockStatus = (stock: Product['stock']) => {
+  const getStockStatus = (stock: Product["stock"]) => {
     const totalStock = stock.reduce((sum, item) => sum + item.unit, 0);
-    if (totalStock === 0) return { status: 'out_of_stock', color: 'red', text: 'Out of Stock' };
-    if (totalStock <= 10) return { status: 'low_stock', color: 'orange', text: 'Low Stock' };
-    return { status: 'in_stock', color: 'green', text: 'In Stock' };
+    if (totalStock === 0)
+      return { status: "out_of_stock", color: "red", text: "Out of Stock" };
+    if (totalStock <= 10)
+      return { status: "low_stock", color: "orange", text: "Low Stock" };
+    return { status: "in_stock", color: "green", text: "In Stock" };
   };
 
-  const getTotalStock = (stock: Product['stock']) => {
+  const getTotalStock = (stock: Product["stock"]) => {
     return stock.reduce((sum, item) => sum + item.unit, 0);
   };
 
@@ -36,7 +43,9 @@ export default function ViewProductDrawer({ open, setOpen, product, onClose }: P
       title: <span className="font-medium text-base">Warehouse</span>,
       dataIndex: ["warehouse", "name"],
       key: "warehouse",
-      render: (text: string) => <span className="font-medium text-gray-900">{text}</span>,
+      render: (text: string) => (
+        <span className="font-medium text-gray-900">{text}</span>
+      ),
     },
     {
       title: <span className="font-medium text-base">Location</span>,
@@ -48,24 +57,33 @@ export default function ViewProductDrawer({ open, setOpen, product, onClose }: P
       title: <span className="font-medium text-base">Quantity</span>,
       dataIndex: "unit",
       key: "unit",
-      render: (text: number) => <span className="font-medium text-blue-600">{text}</span>,
+      render: (text: number) => (
+        <span className="font-medium text-blue-600">{text}</span>
+      ),
     },
     {
       title: <span className="font-medium text-base">DP</span>,
       dataIndex: "dp",
       key: "dp",
-      render: (text: number) => <span className="text-gray-700">৳{text.toFixed(2)}</span>,
+      render: (text: number) => (
+        <span className="text-gray-700">৳{text.toFixed(2)}</span>
+      ),
     },
     {
       title: <span className="font-medium text-base">MRP</span>,
       dataIndex: "mrp",
       key: "mrp",
-      render: (text: number) => <span className="text-gray-700">৳{text.toFixed(2)}</span>,
+      render: (text: number) => (
+        <span className="text-gray-700">৳{text.toFixed(2)}</span>
+      ),
     },
     {
       title: <span className="font-medium text-base">Total Value</span>,
       key: "totalValue",
-      render: (_: unknown, record: { warehouse: Warehouse; unit: number; mrp: number }) => (
+      render: (
+        _: unknown,
+        record: { warehouse: Warehouse; unit: number; mrp: number },
+      ) => (
         <span className="font-medium text-green-600">
           ৳{(record.unit * record.mrp).toFixed(2)}
         </span>
@@ -77,7 +95,10 @@ export default function ViewProductDrawer({ open, setOpen, product, onClose }: P
 
   const stockStatus = getStockStatus(product.stock);
   const totalStock = getTotalStock(product.stock);
-  const totalValue = product.stock.reduce((sum, item) => sum + (item.unit * item.mrp), 0);
+  const totalValue = product.stock.reduce(
+    (sum, item) => sum + item.unit * item.mrp,
+    0,
+  );
 
   return (
     <Drawer
@@ -100,7 +121,9 @@ export default function ViewProductDrawer({ open, setOpen, product, onClose }: P
       <div className="space-y-6">
         {/* Product Information */}
         <div className="border border-gray-200 rounded-xl p-6">
-          <h3 className="text-lg font-semibold mb-4 text-gray-900">Product Information</h3>
+          <h3 className="text-lg font-semibold mb-4 text-gray-900">
+            Product Information
+          </h3>
           <Descriptions column={2} bordered size="small">
             <Descriptions.Item label="Product Name" span={2}>
               <span className="font-medium">{product.name}</span>
@@ -113,7 +136,9 @@ export default function ViewProductDrawer({ open, setOpen, product, onClose }: P
             </Descriptions.Item>
             <Descriptions.Item label="Category">
               <span className="capitalize">
-                {typeof product.category === 'string' ? product.category : product.category?.name || ''}
+                {typeof product.category === "string"
+                  ? product.category
+                  : product.category?.name || ""}
               </span>
             </Descriptions.Item>
             <Descriptions.Item label="Total Stock">
@@ -123,7 +148,9 @@ export default function ViewProductDrawer({ open, setOpen, product, onClose }: P
               </div>
             </Descriptions.Item>
             <Descriptions.Item label="Total Value">
-              <span className="font-medium text-green-600">৳{totalValue.toFixed(2)}</span>
+              <span className="font-medium text-green-600">
+                ৳{totalValue.toFixed(2)}
+              </span>
             </Descriptions.Item>
           </Descriptions>
         </div>
@@ -132,7 +159,9 @@ export default function ViewProductDrawer({ open, setOpen, product, onClose }: P
 
         {/* Stock Entries */}
         <div className="border border-gray-200 rounded-xl p-6">
-          <h3 className="text-lg font-semibold mb-4 text-gray-900">Stock Entries</h3>
+          <h3 className="text-lg font-semibold mb-4 text-gray-900">
+            Stock Entries
+          </h3>
           {product.stock.length > 0 ? (
             <Table
               columns={stockColumns}
@@ -164,11 +193,13 @@ export default function ViewProductDrawer({ open, setOpen, product, onClose }: P
             </div>
             <div>
               <span className="text-gray-600">Total Value:</span>
-              <span className="font-medium text-green-600 ml-2">৳{totalValue.toFixed(2)}</span>
+              <span className="font-medium text-green-600 ml-2">
+                ৳{totalValue.toFixed(2)}
+              </span>
             </div>
           </div>
         </div>
       </div>
     </Drawer>
   );
-} 
+}

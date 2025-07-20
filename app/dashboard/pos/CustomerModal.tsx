@@ -8,10 +8,18 @@ import { CustomerInput } from "@/types";
 interface CustomerModalProps {
   open: boolean;
   onClose: () => void;
-  onCustomerCreated: (customer: { _id: string; name: string; value: string }) => void;
+  onCustomerCreated: (customer: {
+    _id: string;
+    name: string;
+    value: string;
+  }) => void;
 }
 
-export default function CustomerModal({ open, onClose, onCustomerCreated }: CustomerModalProps) {
+export default function CustomerModal({
+  open,
+  onClose,
+  onCustomerCreated,
+}: CustomerModalProps) {
   const [form] = Form.useForm();
   const [createCustomer, { isLoading }] = useCreateCustomerMutation();
 
@@ -98,4 +106,4 @@ export default function CustomerModal({ open, onClose, onCustomerCreated }: Cust
       </Form>
     </Modal>
   );
-} 
+}

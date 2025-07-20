@@ -20,9 +20,15 @@ interface OrderTableProps {
 
 function mapOrderToInvoiceData(order: Order): InvoiceData {
   // Support both string and populated object for customerId
-  const customerObj = typeof order.customerId === "object" && order.customerId !== null
-    ? order.customerId as { _id: string; name: string; email?: string; phone?: string }
-    : null;
+  const customerObj =
+    typeof order.customerId === "object" && order.customerId !== null
+      ? (order.customerId as {
+          _id: string;
+          name: string;
+          email?: string;
+          phone?: string;
+        })
+      : null;
 
   const subtotal = order.items.reduce((sum, item) => sum + item.totalPrice, 0);
   const discount = subtotal - order.totalAmount;
@@ -69,7 +75,9 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
   const [pageSize, setPageSize] = useState(10);
   const [viewOrder, setViewOrder] = useState<Order | null>(null);
   const [printOrder, setPrintOrder] = useState<Order | null>(null);
-  const [printInvoiceData, setPrintInvoiceData] = useState<InvoiceData | null>(null);
+  const [printInvoiceData, setPrintInvoiceData] = useState<InvoiceData | null>(
+    null,
+  );
 
   const printContainerRef = React.useRef<HTMLDivElement>(null);
 
@@ -99,7 +107,11 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
         const input = printContainerRef.current;
         if (!input) return;
         // Use html2canvas to capture the invoice
-        const canvas = await html2canvas(input, { scale: 2, useCORS: false, backgroundColor: '#fff' });
+        const canvas = await html2canvas(input, {
+          scale: 2,
+          useCORS: false,
+          backgroundColor: "#fff",
+        });
         const imgData = canvas.toDataURL("image/png");
         const pdf = new jsPDF({ orientation: "p", unit: "pt", format: "a4" });
         // Calculate width/height for A4
@@ -125,7 +137,9 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
       title: <span className="font-medium text-base">Order #</span>,
       dataIndex: "orderNumber",
       key: "orderNumber",
-      render: (text: string) => <span className="font-medium text-gray-900">{text}</span>,
+      render: (text: string) => (
+        <span className="font-medium text-gray-900">{text}</span>
+      ),
     },
     {
       title: <span className="font-medium text-base">Customer</span>,
@@ -145,15 +159,23 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
       title: <span className="font-medium text-base">Total Amount</span>,
       dataIndex: "totalAmount",
       key: "totalAmount",
-      render: (amount: number) => <span className="font-medium text-gray-900">৳{amount.toFixed(2)}</span>,
+      render: (amount: number) => (
+        <span className="font-medium text-gray-900">৳{amount.toFixed(2)}</span>
+      ),
     },
     {
       title: <span className="font-medium text-base">Discount</span>,
       dataIndex: "discount",
       key: "discount",
       render: (_: any, record: Order) => {
-        const subtotal = record.items.reduce((sum, item) => sum + item.totalPrice, 0);
-        const discount = typeof record.discount === 'number' ? record.discount : subtotal - record.totalAmount;
+        const subtotal = record.items.reduce(
+          (sum, item) => sum + item.totalPrice,
+          0,
+        );
+        const discount =
+          typeof record.discount === "number"
+            ? record.discount
+            : subtotal - record.totalAmount;
         return <span className="text-red-500">৳{discount.toFixed(2)}</span>;
       },
     },
@@ -162,7 +184,9 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
       dataIndex: "totalAmount",
       key: "finalTotal",
       render: (amount: number, record: Order) => {
-        return <span className="font-bold text-green-700">৳{amount.toFixed(2)}</span>;
+        return (
+          <span className="font-bold text-green-700">৳{amount.toFixed(2)}</span>
+        );
       },
     },
     {
@@ -171,13 +195,22 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
       render: (_: any, record: Order) => (
         <div className="flex gap-2">
           <Tooltip title="View Details">
-            <Button className="inline-flex items-center justify-center rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 transition p-1.5" onClick={() => handleView(record)}>
+            <Button
+              className="inline-flex items-center justify-center rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 transition p-1.5"
+              onClick={() => handleView(record)}
+            >
               <Icon icon="lineicons:eye" className="text-lg text-blue-700" />
             </Button>
           </Tooltip>
           <Tooltip title="Print">
-            <Button className="inline-flex items-center justify-center rounded-lg bg-gray-50 border border-gray-200 hover:bg-gray-100 transition p-1.5" onClick={() => handlePrint(record)}>
-              <Icon icon="lineicons:printer" className="text-lg text-gray-700" />
+            <Button
+              className="inline-flex items-center justify-center rounded-lg bg-gray-50 border border-gray-200 hover:bg-gray-100 transition p-1.5"
+              onClick={() => handlePrint(record)}
+            >
+              <Icon
+                icon="lineicons:printer"
+                className="text-lg text-gray-700"
+              />
             </Button>
           </Tooltip>
         </div>
@@ -187,15 +220,36 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
 
   return (
     <>
-      <div style={{ position: "fixed", left: -9999, top: 0, zIndex: -1, width: 794, height: 1123, background: "white" }}>
+      <div
+        style={{
+          position: "fixed",
+          left: -9999,
+          top: 0,
+          zIndex: -1,
+          width: 794,
+          height: 1123,
+          background: "white",
+        }}
+      >
         {/* Hidden print container for PDF generation (A4 size: 794x1123 px at 96dpi) */}
         {printInvoiceData && (
-          <div ref={printContainerRef} style={{ width: 794, minHeight: 1123, background: "white", padding: 24 }}>
+          <div
+            ref={printContainerRef}
+            style={{
+              width: 794,
+              minHeight: 1123,
+              background: "white",
+              padding: 24,
+            }}
+          >
             <InvoiceTemplate data={printInvoiceData} />
           </div>
         )}
       </div>
-      <div className="bg-white border border-gray-300 rounded-3xl shadow-lg overflow-hidden flex flex-col" style={{ maxHeight: 600 }}>
+      <div
+        className="bg-white border border-gray-300 rounded-3xl shadow-lg overflow-hidden flex flex-col"
+        style={{ maxHeight: 600 }}
+      >
         <div
           className="overflow-x-auto custom-scrollbar flex-1"
           style={{ maxHeight: 500 }}
@@ -205,7 +259,7 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
             dataSource={data?.data || []}
             rowKey="_id"
             className="min-w-[700px] !bg-white"
-            scroll={{ x: '100%' }}
+            scroll={{ x: "100%" }}
             pagination={false}
             sticky
             loading={isLoading}
@@ -225,12 +279,14 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
             }}
             showSizeChanger
             showQuickJumper
-            showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} orders`}
-            pageSizeOptions={['10', '20', '50', '100']}
+            showTotal={(total, range) =>
+              `${range[0]}-${range[1]} of ${total} orders`
+            }
+            pageSizeOptions={["10", "20", "50", "100"]}
           />
         </div>
         <ViewOrderDrawer viewOrder={viewOrder} setViewOrder={setViewOrder} />
       </div>
     </>
   );
-} 
+}

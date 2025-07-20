@@ -3,7 +3,10 @@ import { Icon } from "@iconify/react";
 import { Button, Drawer, Form, Input, message } from "antd";
 import React, { useState, useEffect } from "react";
 import { Category } from "@/types";
-import { useCreateCategoryMutation, useUpdateCategoryMutation } from "@/store/api/categories";
+import {
+  useCreateCategoryMutation,
+  useUpdateCategoryMutation,
+} from "@/store/api/categories";
 import toast from "react-hot-toast";
 
 interface Props {
@@ -13,12 +16,19 @@ interface Props {
   onClose?: () => void;
 }
 
-export default function AddEditCategoryDrawer({ open, setOpen, category, onClose }: Props) {
+export default function AddEditCategoryDrawer({
+  open,
+  setOpen,
+  category,
+  onClose,
+}: Props) {
   const [form] = Form.useForm<Category>();
-  
+
   // API hooks
-  const [createCategory, { isLoading: isCreating }] = useCreateCategoryMutation();
-  const [updateCategory, { isLoading: isUpdating }] = useUpdateCategoryMutation();
+  const [createCategory, { isLoading: isCreating }] =
+    useCreateCategoryMutation();
+  const [updateCategory, { isLoading: isUpdating }] =
+    useUpdateCategoryMutation();
 
   const isEditing = !!category;
   const isLoading = isCreating || isUpdating;
@@ -50,27 +60,34 @@ export default function AddEditCategoryDrawer({ open, setOpen, category, onClose
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      
+
       if (isEditing && category) {
         await updateCategory({
           _id: category._id,
           category: values,
         }).unwrap();
-        toast.success('Category updated successfully');
+        toast.success("Category updated successfully");
       } else {
         await createCategory(values).unwrap();
-        toast.success('Category created successfully');
+        toast.success("Category created successfully");
       }
-      
+
       handleClose();
     } catch (error: unknown) {
-      if (error && typeof error === 'object' && 'data' in error && error.data && typeof error.data === 'object' && 'message' in error.data) {
+      if (
+        error &&
+        typeof error === "object" &&
+        "data" in error &&
+        error.data &&
+        typeof error.data === "object" &&
+        "message" in error.data
+      ) {
         toast.error((error.data as { message: string }).message);
-      } else if (error && typeof error === 'object' && 'errorFields' in error) {
+      } else if (error && typeof error === "object" && "errorFields" in error) {
         // Form validation error
         return;
       } else {
-        toast.error('Failed to save category');
+        toast.error("Failed to save category");
       }
     }
   };
@@ -91,12 +108,8 @@ export default function AddEditCategoryDrawer({ open, setOpen, category, onClose
             <Button type="default" onClick={handleClose} disabled={isLoading}>
               Discard
             </Button>
-            <Button 
-              type="primary" 
-              onClick={handleSubmit}
-              loading={isLoading}
-            >
-              {isEditing ? 'Update' : 'Save'}
+            <Button type="primary" onClick={handleSubmit} loading={isLoading}>
+              {isEditing ? "Update" : "Save"}
             </Button>
           </div>
         }
@@ -135,4 +148,4 @@ export default function AddEditCategoryDrawer({ open, setOpen, category, onClose
       </Drawer>
     </div>
   );
-} 
+}

@@ -36,17 +36,17 @@ export const warehousesApi = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.data.map(({ _id }) => ({ type: "Warehouse" as const, _id })),
+              ...result.data.map(({ _id }) => ({
+                type: "Warehouse" as const,
+                _id,
+              })),
               { type: "Warehouse", id: "LIST" },
             ]
           : [{ type: "Warehouse", id: "LIST" }],
     }),
 
     // Get single warehouse by ID
-    getWarehouse: builder.query<
-      { data: Warehouse },
-      string
-    >({
+    getWarehouse: builder.query<{ data: Warehouse }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "GET",
@@ -84,10 +84,7 @@ export const warehousesApi = createApi({
     }),
 
     // Delete warehouse
-    deleteWarehouse: builder.mutation<
-      { message: string },
-      string
-    >({
+    deleteWarehouse: builder.mutation<{ message: string }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",
@@ -162,4 +159,4 @@ export const {
   useDeleteWarehouseMutation,
   useGetWarehouseInventoryQuery,
   useGetWarehouseStatsQuery,
-} = warehousesApi; 
+} = warehousesApi;

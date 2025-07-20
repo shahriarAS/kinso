@@ -43,11 +43,10 @@ export const authApi = createApi({
           dispatch(authApi.util.resetApiState());
 
           // Wait for cache clearing
-          await new Promise(resolve => setTimeout(resolve, 150));
+          await new Promise((resolve) => setTimeout(resolve, 150));
 
           // Navigate after cache is cleared
           window.location.href = "/login";
-
         } catch (err) {
           // Handle error
         }

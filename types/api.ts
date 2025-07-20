@@ -255,4 +255,4 @@ export interface QueryParams {
   sortOrder?: "asc" | "desc";
 }
 
-// All types are already exported above 
+// All types are already exported above

@@ -84,29 +84,33 @@ The application now includes a production-ready authentication system with the f
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - pnpm (recommended) or npm
 - MongoDB instance
 
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd ez
    ```
 
 2. **Install dependencies**
+
    ```bash
    pnpm install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp env.example .env.local
    ```
-   
+
    Edit `.env.local` with your configuration:
+
    ```env
    MONGODB_URI=mongodb://localhost:27017/your-database-name
    JWT_SECRET=your-super-secret-jwt-key-change-in-production
@@ -116,6 +120,7 @@ The application now includes a production-ready authentication system with the f
    ```
 
 4. **Start the development server**
+
    ```bash
    pnpm dev
    ```
@@ -155,6 +160,7 @@ pnpm start
 ### Authentication Endpoints
 
 #### Login
+
 ```http
 POST /api/auth/login
 Content-Type: application/json
@@ -166,6 +172,7 @@ Content-Type: application/json
 ```
 
 #### Register
+
 ```http
 POST /api/auth/register
 Content-Type: application/json
@@ -179,11 +186,13 @@ Content-Type: application/json
 ```
 
 #### Get Profile
+
 ```http
 GET /api/auth/profile
 ```
 
 #### Logout
+
 ```http
 POST /api/auth/logout
 ```

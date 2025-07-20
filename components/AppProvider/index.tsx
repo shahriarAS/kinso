@@ -19,7 +19,7 @@ export default function AppProvider({
             fontFamily: "var(--font-montserrat)",
             colorPrimary: theme.primaryColor,
           },
-          algorithm: theme.mode === 'dark' ? undefined : undefined, // Add dark mode support later
+          algorithm: theme.mode === "dark" ? undefined : undefined, // Add dark mode support later
           components: {
             Button: {
               colorPrimary: theme.primaryColor,

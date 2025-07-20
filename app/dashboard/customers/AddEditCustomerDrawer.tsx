@@ -3,7 +3,10 @@ import { Icon } from "@iconify/react";
 import { Button, Drawer, Form, Input, Select, Spin } from "antd";
 import { useEffect } from "react";
 import { CustomerInput, Customer } from "@/types/customer";
-import { useCreateCustomerMutation, useUpdateCustomerMutation } from "@/store/api/customers";
+import {
+  useCreateCustomerMutation,
+  useUpdateCustomerMutation,
+} from "@/store/api/customers";
 import { useNotification } from "@/hooks/useNotification";
 
 interface Props {
@@ -13,12 +16,19 @@ interface Props {
   onSuccess?: () => void;
 }
 
-export default function AddEditCustomerDrawer({ open, setOpen, customer, onSuccess }: Props) {
+export default function AddEditCustomerDrawer({
+  open,
+  setOpen,
+  customer,
+  onSuccess,
+}: Props) {
   const [form] = Form.useForm<CustomerInput>();
   const isEditing = !!customer;
 
-  const [createCustomer, { isLoading: isCreating }] = useCreateCustomerMutation();
-  const [updateCustomer, { isLoading: isUpdating }] = useUpdateCustomerMutation();
+  const [createCustomer, { isLoading: isCreating }] =
+    useCreateCustomerMutation();
+  const [updateCustomer, { isLoading: isUpdating }] =
+    useUpdateCustomerMutation();
   const { success, error: showError } = useNotification();
 
   const isLoading = isCreating || isUpdating;
@@ -44,7 +54,7 @@ export default function AddEditCustomerDrawer({ open, setOpen, customer, onSucce
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      
+
       if (isEditing && customer) {
         await updateCustomer({ _id: customer._id, customer: values }).unwrap();
         success("Customer updated successfully");
@@ -52,10 +62,13 @@ export default function AddEditCustomerDrawer({ open, setOpen, customer, onSucce
         await createCustomer(values).unwrap();
         success("Customer created successfully");
       }
-      
+
       onClose();
     } catch (err: unknown) {
-      const error = err as { data?: { message?: string }; errorFields?: unknown };
+      const error = err as {
+        data?: { message?: string };
+        errorFields?: unknown;
+      };
       if (error?.data?.message) {
         showError("Failed to save customer", error.data.message);
       } else if (!error?.errorFields) {
@@ -81,8 +94,8 @@ export default function AddEditCustomerDrawer({ open, setOpen, customer, onSucce
             <Button type="default" onClick={onClose} disabled={isLoading}>
               Discard
             </Button>
-            <Button 
-              type="primary" 
+            <Button
+              type="primary"
               onClick={handleSubmit}
               loading={isLoading}
               icon={isLoading ? <Spin size="small" /> : undefined}
@@ -112,14 +125,14 @@ export default function AddEditCustomerDrawer({ open, setOpen, customer, onSucce
               className="w-full"
             />
           </Form.Item>
-          
+
           <div className="grid grid-cols-2 gap-6">
             <Form.Item
               name="email"
               label="Email"
               rules={[
                 { required: true, message: "Please enter email" },
-                { type: "email", message: "Please enter a valid email" }
+                { type: "email", message: "Please enter a valid email" },
               ]}
               className="font-medium"
             >
@@ -160,11 +173,7 @@ export default function AddEditCustomerDrawer({ open, setOpen, customer, onSucce
             />
           </Form.Item>
 
-          <Form.Item
-            name="notes"
-            label="Notes"
-            className="font-medium"
-          >
+          <Form.Item name="notes" label="Notes" className="font-medium">
             <Input.TextArea
               rows={2}
               placeholder="Enter Notes"
@@ -175,4 +184,4 @@ export default function AddEditCustomerDrawer({ open, setOpen, customer, onSucce
       </Drawer>
     </div>
   );
-} 
+}

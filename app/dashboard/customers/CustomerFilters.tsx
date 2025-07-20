@@ -1,4 +1,4 @@
-"use client";;
+"use client";
 import { Form, Input, Select } from "antd";
 
 interface CustomerFiltersProps {
@@ -9,14 +9,22 @@ interface CustomerFiltersProps {
   }) => void;
 }
 
-export default function CustomerFilters({ onFiltersChange }: CustomerFiltersProps) {
+export default function CustomerFilters({
+  onFiltersChange,
+}: CustomerFiltersProps) {
   const [form] = Form.useForm();
 
-  const handleValuesChange = (changedValues: Record<string, unknown>, allValues: Record<string, unknown>) => {
+  const handleValuesChange = (
+    changedValues: Record<string, unknown>,
+    allValues: Record<string, unknown>,
+  ) => {
     // Convert "all" status to undefined
     const filters = {
       ...allValues,
-      status: allValues.status === "all" ? undefined : allValues.status as "active" | "inactive" | undefined,
+      status:
+        allValues.status === "all"
+          ? undefined
+          : (allValues.status as "active" | "inactive" | undefined),
     };
     onFiltersChange?.(filters);
   };
@@ -30,11 +38,7 @@ export default function CustomerFilters({ onFiltersChange }: CustomerFiltersProp
       className="border border-gray-300 rounded-3xl p-4 bg-white grid grid-cols-4 gap-8"
       onValuesChange={handleValuesChange}
     >
-      <Form.Item
-        name="status"
-        label="Status"
-        className="font-medium"
-      >
+      <Form.Item name="status" label="Status" className="font-medium">
         <Select
           size="large"
           placeholder="Select Status"
@@ -46,22 +50,14 @@ export default function CustomerFilters({ onFiltersChange }: CustomerFiltersProp
           className="w-full"
         />
       </Form.Item>
-      <Form.Item
-        name="search"
-        label="Search"
-        className="font-medium"
-      >
+      <Form.Item name="search" label="Search" className="font-medium">
         <Input
           size="large"
           placeholder="Search customers..."
           className="w-full"
         />
       </Form.Item>
-      <Form.Item
-        name="email"
-        label="Email"
-        className="font-medium"
-      >
+      <Form.Item name="email" label="Email" className="font-medium">
         <Input
           size="large"
           placeholder="Search by email..."
@@ -70,4 +66,4 @@ export default function CustomerFilters({ onFiltersChange }: CustomerFiltersProp
       </Form.Item>
     </Form>
   );
-} 
+}

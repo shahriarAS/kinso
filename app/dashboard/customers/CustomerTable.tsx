@@ -1,10 +1,21 @@
 "use client";
 
-import { Table, Button, Tooltip, Pagination, Tag, Space, Popconfirm } from "antd";
+import {
+  Table,
+  Button,
+  Tooltip,
+  Pagination,
+  Tag,
+  Space,
+  Popconfirm,
+} from "antd";
 import { Icon } from "@iconify/react";
 import React, { useState, useEffect } from "react";
 import type { Customer } from "@/types/customer";
-import { useGetCustomersQuery, useDeleteCustomerMutation } from "@/store/api/customers";
+import {
+  useGetCustomersQuery,
+  useDeleteCustomerMutation,
+} from "@/store/api/customers";
 import { useNotification } from "@/hooks/useNotification";
 import ApiStatusHandler from "@/components/common/ApiStatusHandler";
 import AddEditCustomerDrawer from "./AddEditCustomerDrawer";
@@ -40,7 +51,8 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
     ...sortFilters,
   });
 
-  const [deleteCustomer, { isLoading: isDeleting }] = useDeleteCustomerMutation();
+  const [deleteCustomer, { isLoading: isDeleting }] =
+    useDeleteCustomerMutation();
   const { success, error: showError } = useNotification();
 
   // Update filters when they change
@@ -54,7 +66,10 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
       success("Customer deleted successfully");
     } catch (err: unknown) {
       const error = err as { data?: { message?: string } };
-      showError("Failed to delete customer", error?.data?.message || "An error occurred");
+      showError(
+        "Failed to delete customer",
+        error?.data?.message || "An error occurred",
+      );
     }
   };
 
@@ -81,7 +96,9 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
       dataIndex: "name",
       key: "name",
       sorter: true,
-      render: (text: string) => <span className="font-medium text-gray-900">{text}</span>,
+      render: (text: string) => (
+        <span className="font-medium text-gray-900">{text}</span>
+      ),
     },
     {
       title: <span className="font-medium text-base">Email</span>,
@@ -100,14 +117,18 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
       dataIndex: "totalOrders",
       key: "totalOrders",
       sorter: true,
-      render: (count: number) => <span className="font-medium text-gray-900">{count}</span>,
+      render: (count: number) => (
+        <span className="font-medium text-gray-900">{count}</span>
+      ),
     },
     {
       title: <span className="font-medium text-base">Total Spent</span>,
       dataIndex: "totalSpent",
       key: "totalSpent",
       sorter: true,
-      render: (amount: number) => <span className="font-medium text-gray-900">৳{amount.toFixed(2)}</span>,
+      render: (amount: number) => (
+        <span className="font-medium text-gray-900">৳{amount.toFixed(2)}</span>
+      ),
     },
     {
       title: <span className="font-medium text-base">Status</span>,
@@ -127,7 +148,7 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
       render: (_: unknown, record: Customer) => (
         <Space size="small">
           <Tooltip title="View Orders">
-            <Button 
+            <Button
               className="inline-flex items-center justify-center rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 transition p-1.5"
               size="small"
               onClick={() => handleViewOrders(record)}
@@ -136,12 +157,15 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
             </Button>
           </Tooltip>
           <Tooltip title="Edit">
-            <Button 
+            <Button
               className="inline-flex items-center justify-center rounded-lg bg-green-50 border border-green-200 hover:bg-green-100 transition p-1.5"
               size="small"
               onClick={() => handleEdit(record)}
             >
-              <Icon icon="lineicons:pencil-1" className="text-lg text-green-700" />
+              <Icon
+                icon="lineicons:pencil-1"
+                className="text-lg text-green-700"
+              />
             </Button>
           </Tooltip>
           <Popconfirm
@@ -153,12 +177,15 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
             okButtonProps={{ danger: true, loading: isDeleting }}
           >
             <Tooltip title="Delete">
-              <Button 
+              <Button
                 className="inline-flex items-center justify-center rounded-lg bg-red-50 border border-red-200 hover:bg-red-100 transition p-1.5"
                 size="small"
                 danger
               >
-                <Icon icon="lineicons:trash-3" className="text-lg text-red-600" />
+                <Icon
+                  icon="lineicons:trash-3"
+                  className="text-lg text-red-600"
+                />
               </Button>
             </Tooltip>
           </Popconfirm>
@@ -167,10 +194,14 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
     },
   ];
 
-  const handleTableChange = (pagination: unknown, filters: unknown, sorter: unknown) => {
+  const handleTableChange = (
+    pagination: unknown,
+    filters: unknown,
+    sorter: unknown,
+  ) => {
     const paginationObj = pagination as { current?: number; pageSize?: number };
     const sorterObj = sorter as { field?: string; order?: string };
-    
+
     if (paginationObj.current !== current) {
       setCurrent(paginationObj.current || 1);
     }
@@ -179,10 +210,10 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
       setCurrent(1);
     }
     if (sorterObj.field) {
-      setSortFilters(prev => ({
+      setSortFilters((prev) => ({
         ...prev,
         sortBy: sorterObj.field || "name",
-        sortOrder: sorterObj.order === 'descend' ? 'desc' : 'asc',
+        sortOrder: sorterObj.order === "descend" ? "desc" : "asc",
       }));
     }
   };
@@ -195,7 +226,10 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
         onRetry={refetch}
         minHeight="400px"
       >
-        <div className="bg-white border border-gray-300 rounded-3xl shadow-lg overflow-hidden flex flex-col" style={{ maxHeight: 600 }}>
+        <div
+          className="bg-white border border-gray-300 rounded-3xl shadow-lg overflow-hidden flex flex-col"
+          style={{ maxHeight: 600 }}
+        >
           <div
             className="overflow-x-auto custom-scrollbar flex-1"
             style={{ maxHeight: 500 }}
@@ -205,7 +239,7 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
               dataSource={data?.data || []}
               rowKey="_id"
               className="min-w-[700px] !bg-white"
-              scroll={{ x: '100%' }}
+              scroll={{ x: "100%" }}
               pagination={false}
               sticky
               onChange={handleTableChange}
@@ -226,15 +260,17 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
               }}
               showSizeChanger
               showQuickJumper
-              showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} customers`}
-              pageSizeOptions={['10', '20', '50', '100']}
+              showTotal={(total, range) =>
+                `${range[0]}-${range[1]} of ${total} customers`
+              }
+              pageSizeOptions={["10", "20", "50", "100"]}
             />
           </div>
         </div>
       </ApiStatusHandler>
 
       {/* Edit Customer Drawer */}
-      <AddEditCustomerDrawer 
+      <AddEditCustomerDrawer
         open={!!editingCustomer}
         setOpen={() => setEditingCustomer(null)}
         customer={editingCustomer}
@@ -250,4 +286,4 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
       )}
     </>
   );
-} 
+}

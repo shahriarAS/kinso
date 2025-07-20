@@ -4,7 +4,6 @@ import { Button, Divider, Drawer, Form, Input, Select } from "antd";
 import React, { useEffect } from "react";
 import { Product, ProductInput } from "@/types";
 
-
 import {
   useCreateProductMutation,
   useUpdateProductMutation,
@@ -41,26 +40,29 @@ export default function AddEditProductDrawer({
   useEffect(() => {
     if (product && open) {
       // Transform stock data to match form structure
-      const transformedStock = product.stock?.map(stockItem => ({
-        ...stockItem,
-        warehouse: typeof stockItem.warehouse === 'string' 
-          ? stockItem.warehouse 
-          : stockItem.warehouse?._id
-      })) || [];
+      const transformedStock =
+        product.stock?.map((stockItem) => ({
+          ...stockItem,
+          warehouse:
+            typeof stockItem.warehouse === "string"
+              ? stockItem.warehouse
+              : stockItem.warehouse?._id,
+        })) || [];
 
       form.setFieldsValue({
         name: product.name,
         sku: product.sku,
         upc: product.upc,
-        category: typeof product.category === 'string' ? product.category : product.category?._id,
+        category:
+          typeof product.category === "string"
+            ? product.category
+            : product.category?._id,
         stock: transformedStock,
       });
     } else if (!open) {
       form.resetFields();
     }
   }, [product, open, form]);
-
-
 
   const handleClose = () => {
     setOpen(false);

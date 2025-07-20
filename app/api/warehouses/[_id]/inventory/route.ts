@@ -1,72 +1,80 @@
-import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/database';
-import { Warehouse, Product } from '@/models';
-import { authorizeRequest, AuthenticatedRequest } from '@/lib/auth';
+import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "@/lib/database";
+import { Warehouse, Product } from "@/models";
+import { authorizeRequest, AuthenticatedRequest } from "@/lib/auth";
 
 // GET /api/warehouses/[id]/inventory - Get inventory for a specific warehouse
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ _id: string }> }
+  { params }: { params: Promise<{ _id: string }> },
 ) {
   try {
     // Authorize request - all authenticated users can view warehouse inventory
     const authResult = await authorizeRequest(request as AuthenticatedRequest, {
-      requireAuth: true
+      requireAuth: true,
     });
-    
+
     if (!authResult.success) {
       return NextResponse.json(
         { success: false, message: authResult.error },
-        { status: authResult.status || 401 }
+        { status: authResult.status || 401 },
       );
     }
 
     await dbConnect();
-    
+
     // Check if warehouse exists
     const { _id } = await params;
     const warehouse = await Warehouse.findById(_id).lean();
     if (!warehouse) {
       return NextResponse.json(
-        { success: false, message: 'Warehouse not found' },
-        { status: 404 }
+        { success: false, message: "Warehouse not found" },
+        { status: 404 },
       );
     }
 
     // Get all products that have stock in this warehouse
     const products = await Product.find({
-      'stock.warehouse': _id
-    }).populate('category').lean();
+      "stock.warehouse": _id,
+    })
+      .populate("category")
+      .lean();
 
     // Transform the data to match the expected format
-    const inventoryData = products.map(product => {
-      // Find the stock entry for this warehouse
-      const stockEntry = product.stock.find((stock: any) => 
-          stock.warehouse.toString() === _id
-      );
+    const inventoryData = products
+      .map((product) => {
+        // Find the stock entry for this warehouse
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const stockEntry = product.stock.find(
+          (stock: any) => stock.warehouse.toString() === _id,
+        );
 
-      if (!stockEntry) {
-        return null;
-      }
+        if (!stockEntry) {
+          return null;
+        }
 
-      return {
-        product: {
-          _id: product._id,
-          name: product.name,
-          upc: product.upc,
-          sku: product.sku,
-          category: product.category,
-        },
-        quantity: stockEntry.unit,
-        unit: stockEntry.unit,
-        dp: stockEntry.dp,
-        mrp: stockEntry.mrp,
-      };
-    }).filter((item): item is NonNullable<typeof item> => item !== null); // Remove null entries
+        return {
+          product: {
+            _id: product._id,
+            name: product.name,
+            upc: product.upc,
+            sku: product.sku,
+            category: product.category,
+          },
+          quantity: stockEntry.unit,
+          unit: stockEntry.unit,
+          dp: stockEntry.dp,
+          mrp: stockEntry.mrp,
+        };
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null); // Remove null entries
 
     // Calculate totals
     const totalProducts = inventoryData.length;
-    const totalValue = inventoryData.reduce((sum, item) => sum + (item.mrp * item.quantity), 0);
+    const totalValue = inventoryData.reduce(
+      (sum, item) => sum + item.mrp * item.quantity,
+      0,
+    );
 
     return NextResponse.json({
       success: true,
@@ -75,14 +83,13 @@ export async function GET(
         products: inventoryData,
         totalProducts,
         totalValue,
-      }
+      },
     });
-    
   } catch (error) {
-    console.error('Error fetching warehouse inventory:', error);
+    console.error("Error fetching warehouse inventory:", error);
     return NextResponse.json(
-      { success: false, message: 'Failed to fetch warehouse inventory' },
-      { status: 500 }
+      { success: false, message: "Failed to fetch warehouse inventory" },
+      { status: 500 },
     );
   }
-} 
+}

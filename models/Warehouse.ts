@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface IWarehouse extends Document {
   name: string;
@@ -7,20 +7,23 @@ export interface IWarehouse extends Document {
   updatedAt: Date;
 }
 
-const WarehouseSchema: Schema = new Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
+const WarehouseSchema: Schema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    location: {
+      type: String,
+      required: true,
+      trim: true,
+    },
   },
-  location: {
-    type: String,
-    required: true,
-    trim: true,
+  {
+    timestamps: true,
   },
-}, {
-  timestamps: true,
-});
+);
 
 // Index for name queries
 WarehouseSchema.index({ name: 1 });
@@ -29,4 +32,5 @@ WarehouseSchema.index({ name: 1 });
 WarehouseSchema.index({ location: 1 });
 
 // Check if model already exists to prevent overwrite error
-export default mongoose.models.Warehouse || mongoose.model<IWarehouse>('Warehouse', WarehouseSchema); 
+export default mongoose.models.Warehouse ||
+  mongoose.model<IWarehouse>("Warehouse", WarehouseSchema);

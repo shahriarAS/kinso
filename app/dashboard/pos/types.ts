@@ -28,4 +28,4 @@ export const categoryColors: Record<string, string> = {
   beauty: "bg-red-100 text-red-700",
   home: "bg-indigo-100 text-indigo-700",
   automotive: "bg-gray-100 text-gray-700",
-}; 
+};

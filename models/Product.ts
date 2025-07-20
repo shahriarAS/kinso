@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface IStock {
   warehouse: mongoose.Types.ObjectId;
@@ -17,57 +17,63 @@ export interface IProduct extends Document {
   updatedAt: Date;
 }
 
-const StockSchema: Schema = new Schema({
-  warehouse: {
-    type: Schema.Types.ObjectId,
-    ref: 'Warehouse',
-    required: true,
+const StockSchema: Schema = new Schema(
+  {
+    warehouse: {
+      type: Schema.Types.ObjectId,
+      ref: "Warehouse",
+      required: true,
+    },
+    unit: {
+      type: Number,
+      required: true,
+      min: 0,
+      default: 0,
+    },
+    dp: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    mrp: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
   },
-  unit: {
-    type: Number,
-    required: true,
-    min: 0,
-    default: 0,
-  },
-  dp: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-  mrp: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-}, { _id: false });
+  { _id: false },
+);
 
-const ProductSchema: Schema = new Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
+const ProductSchema: Schema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    upc: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    sku: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    category: {
+      type: Schema.Types.ObjectId,
+      ref: "Category",
+      required: true,
+    },
+    stock: [StockSchema],
   },
-  upc: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
+  {
+    timestamps: true,
   },
-  sku: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-  },
-  category: {
-    type: Schema.Types.ObjectId,
-    ref: 'Category',
-    required: true,
-  },
-  stock: [StockSchema],
-}, {
-  timestamps: true,
-});
+);
 
 // Index for SKU queries
 ProductSchema.index({ sku: 1 });
@@ -82,7 +88,8 @@ ProductSchema.index({ name: 1 });
 ProductSchema.index({ category: 1 });
 
 // Index for stock queries
-ProductSchema.index({ 'stock.warehouse': 1 });
+ProductSchema.index({ "stock.warehouse": 1 });
 
 // Check if model already exists to prevent overwrite error
-export default mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema); 
+export default mongoose.models.Product ||
+  mongoose.model<IProduct>("Product", ProductSchema);

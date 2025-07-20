@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface IOrderCounter extends Document {
   date: string; // Format: YYMMDD
@@ -11,4 +11,4 @@ const OrderCounterSchema = new Schema<IOrderCounter>({
 });
 
 export default mongoose.models.OrderCounter ||
-  mongoose.model<IOrderCounter>('OrderCounter', OrderCounterSchema); 
+  mongoose.model<IOrderCounter>("OrderCounter", OrderCounterSchema);

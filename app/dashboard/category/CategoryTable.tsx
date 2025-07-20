@@ -3,9 +3,12 @@
 import { Table, Button, Tooltip, Pagination, Popconfirm, message } from "antd";
 import { Icon } from "@iconify/react";
 import React, { useState } from "react";
-import { useGetCategoriesQuery, useDeleteCategoryMutation } from "@/store/api/categories";
+import {
+  useGetCategoriesQuery,
+  useDeleteCategoryMutation,
+} from "@/store/api/categories";
 import type { Category } from "@/types";
-import AddEditCategoryDrawer from './AddEditCategoryDrawer';
+import AddEditCategoryDrawer from "./AddEditCategoryDrawer";
 import toast from "react-hot-toast";
 
 interface Props {
@@ -15,17 +18,23 @@ interface Props {
   onPageChange: (page: number) => void;
 }
 
-export default function CategoryTable({ searchTerm, currentPage, pageSize, onPageChange }: Props) {
+export default function CategoryTable({
+  searchTerm,
+  currentPage,
+  pageSize,
+  onPageChange,
+}: Props) {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  
+
   // API hooks
   const { data, isLoading } = useGetCategoriesQuery({
     page: currentPage,
     limit: pageSize,
     search: searchTerm,
   });
-  
-  const [deleteCategory, { isLoading: isDeleting }] = useDeleteCategoryMutation();
+
+  const [deleteCategory, { isLoading: isDeleting }] =
+    useDeleteCategoryMutation();
 
   const handleEdit = (category: Category) => {
     setEditingCategory(category);
@@ -34,12 +43,19 @@ export default function CategoryTable({ searchTerm, currentPage, pageSize, onPag
   const handleDelete = async (_id: string) => {
     try {
       await deleteCategory(_id).unwrap();
-      toast.success('Category deleted successfully');
+      toast.success("Category deleted successfully");
     } catch (error: unknown) {
-      if (error && typeof error === 'object' && 'data' in error && error.data && typeof error.data === 'object' && 'message' in error.data) {
+      if (
+        error &&
+        typeof error === "object" &&
+        "data" in error &&
+        error.data &&
+        typeof error.data === "object" &&
+        "message" in error.data
+      ) {
         toast.error((error.data as { message: string }).message);
       } else {
-        toast.error('Failed to delete category');
+        toast.error("Failed to delete category");
       }
     }
   };
@@ -49,13 +65,17 @@ export default function CategoryTable({ searchTerm, currentPage, pageSize, onPag
       title: <span className="font-medium text-base">Name</span>,
       dataIndex: "name",
       key: "name",
-      render: (text: string) => <span className="font-medium text-gray-900">{text}</span>,
+      render: (text: string) => (
+        <span className="font-medium text-gray-900">{text}</span>
+      ),
     },
     {
       title: <span className="font-medium text-base">Description</span>,
       dataIndex: "description",
       key: "description",
-      render: (text: string) => <span className="text-gray-700">{text || '-'}</span>,
+      render: (text: string) => (
+        <span className="text-gray-700">{text || "-"}</span>
+      ),
     },
     {
       title: <span className="font-medium text-base">Action</span>,
@@ -63,11 +83,14 @@ export default function CategoryTable({ searchTerm, currentPage, pageSize, onPag
       render: (_: unknown, record: Category) => (
         <div className="flex gap-2">
           <Tooltip title="Edit">
-            <Button 
+            <Button
               className="inline-flex items-center justify-center rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 transition p-1.5"
               onClick={() => handleEdit(record)}
             >
-              <Icon icon="lineicons:pencil-1" className="text-lg text-blue-700" />
+              <Icon
+                icon="lineicons:pencil-1"
+                className="text-lg text-blue-700"
+              />
             </Button>
           </Tooltip>
           <Tooltip title="Delete">
@@ -79,11 +102,14 @@ export default function CategoryTable({ searchTerm, currentPage, pageSize, onPag
               cancelText="No"
               okButtonProps={{ danger: true }}
             >
-              <Button 
+              <Button
                 className="inline-flex items-center justify-center rounded-lg bg-red-50 border border-red-200 hover:bg-red-100 transition p-1.5"
                 loading={isDeleting}
               >
-                <Icon icon="lineicons:trash-3" className="text-lg text-red-600" />
+                <Icon
+                  icon="lineicons:trash-3"
+                  className="text-lg text-red-600"
+                />
               </Button>
             </Popconfirm>
           </Tooltip>
@@ -96,7 +122,10 @@ export default function CategoryTable({ searchTerm, currentPage, pageSize, onPag
   const pagination = data?.pagination;
 
   return (
-    <div className="bg-white border border-gray-300 rounded-3xl shadow-lg overflow-hidden flex flex-col" style={{ maxHeight: 600 }}>
+    <div
+      className="bg-white border border-gray-300 rounded-3xl shadow-lg overflow-hidden flex flex-col"
+      style={{ maxHeight: 600 }}
+    >
       <div
         className="overflow-x-auto custom-scrollbar flex-1"
         style={{ maxHeight: 500 }}
@@ -106,7 +135,7 @@ export default function CategoryTable({ searchTerm, currentPage, pageSize, onPag
           dataSource={categories}
           rowKey="_id"
           className="min-w-[700px] !bg-white"
-          scroll={{ x: '100%' }}
+          scroll={{ x: "100%" }}
           pagination={false}
           loading={isLoading}
           sticky
@@ -120,15 +149,15 @@ export default function CategoryTable({ searchTerm, currentPage, pageSize, onPag
             total={pagination.total}
             onChange={onPageChange}
             showSizeChanger={false}
-            showTotal={(total, range) => 
+            showTotal={(total, range) =>
               `${range[0]}-${range[1]} of ${total} items`
             }
           />
         </div>
       )}
-      
+
       {/* Edit Drawer */}
-      <AddEditCategoryDrawer 
+      <AddEditCategoryDrawer
         open={!!editingCategory}
         setOpen={() => setEditingCategory(null)}
         category={editingCategory}
@@ -136,4 +165,4 @@ export default function CategoryTable({ searchTerm, currentPage, pageSize, onPag
       />
     </div>
   );
-} 
+}

@@ -15,15 +15,21 @@ interface OrderFiltersProps {
 export default function OrderFilters({ onFiltersChange }: OrderFiltersProps) {
   const [form] = Form.useForm();
 
-  const handleValuesChange = (_changedValues: Record<string, unknown>, allValues: Record<string, unknown>) => {
+  const handleValuesChange = (
+    _changedValues: Record<string, unknown>,
+    allValues: Record<string, unknown>,
+  ) => {
     let dateRange: [string, string] | undefined = undefined;
-    if (Array.isArray(allValues.dateRange) && allValues.dateRange.length === 2) {
+    if (
+      Array.isArray(allValues.dateRange) &&
+      allValues.dateRange.length === 2
+    ) {
       dateRange = allValues.dateRange as [string, string];
     }
 
     const filters = {
       ...allValues,
-      dateRange
+      dateRange,
     };
     onFiltersChange?.(filters);
   };
@@ -48,16 +54,8 @@ export default function OrderFilters({ onFiltersChange }: OrderFiltersProps) {
           placeholder={["Start Date", "End Date"]}
         />
       </Form.Item> */}
-      <Form.Item
-        name="search"
-        label="Search"
-        className="font-medium"
-      >
-        <Input
-          size="large"
-          placeholder="Search orders..."
-          className="w-full"
-        />
+      <Form.Item name="search" label="Search" className="font-medium">
+        <Input size="large" placeholder="Search orders..." className="w-full" />
       </Form.Item>
       <Form.Item
         name="paymentMethod"
@@ -68,20 +66,18 @@ export default function OrderFilters({ onFiltersChange }: OrderFiltersProps) {
           size="large"
           placeholder="Select Payment Method"
           className="w-full"
-          options={
-            [
-              {
-                label: "All",
-                value: ""
-              },
-              ...PAYMENT_METHODS.map(method => ({
-                label: method.label,
-                value: method.value
-              }))
-            ]
-          }
+          options={[
+            {
+              label: "All",
+              value: "",
+            },
+            ...PAYMENT_METHODS.map((method) => ({
+              label: method.label,
+              value: method.value,
+            })),
+          ]}
         />
       </Form.Item>
     </Form>
   );
-} 
+}

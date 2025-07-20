@@ -2,10 +2,13 @@
 import { Table, Button, Tooltip, Pagination, Popconfirm, Tag } from "antd";
 import { Icon } from "@iconify/react";
 import { useState } from "react";
-import { useGetProductsQuery, useDeleteProductMutation } from "@/store/api/products";
+import {
+  useGetProductsQuery,
+  useDeleteProductMutation,
+} from "@/store/api/products";
 import type { Product } from "@/types";
-import AddEditProductDrawer from './AddEditProductDrawer';
-import ViewProductDrawer from './ViewProductDrawer';
+import AddEditProductDrawer from "./AddEditProductDrawer";
+import ViewProductDrawer from "./ViewProductDrawer";
 import toast from "react-hot-toast";
 
 interface Props {
@@ -20,17 +23,17 @@ interface Props {
   onPageChange: (page: number) => void;
 }
 
-export default function InventoryTable({ 
-  searchTerm, 
-  categoryFilter, 
-  warehouseFilter, 
-  currentPage, 
-  pageSize, 
-  onPageChange 
+export default function InventoryTable({
+  searchTerm,
+  categoryFilter,
+  warehouseFilter,
+  currentPage,
+  pageSize,
+  onPageChange,
 }: Props) {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
-  
+
   // API hooks
   const { data, isLoading } = useGetProductsQuery({
     page: currentPage,
@@ -38,10 +41,10 @@ export default function InventoryTable({
     search: searchTerm,
     category: categoryFilter || undefined,
     warehouse: warehouseFilter || undefined,
-    sortBy: 'name',
-    sortOrder: 'asc',
+    sortBy: "name",
+    sortOrder: "asc",
   });
-  
+
   const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
 
   const handleEdit = (product: Product) => {
@@ -55,24 +58,33 @@ export default function InventoryTable({
   const handleDelete = async (_id: string) => {
     try {
       await deleteProduct(_id).unwrap();
-      toast.success('Product deleted successfully');
+      toast.success("Product deleted successfully");
     } catch (error: unknown) {
-      if (error && typeof error === 'object' && 'data' in error && error.data && typeof error.data === 'object' && 'message' in error.data) {
+      if (
+        error &&
+        typeof error === "object" &&
+        "data" in error &&
+        error.data &&
+        typeof error.data === "object" &&
+        "message" in error.data
+      ) {
         toast.error((error.data as { message: string }).message);
       } else {
-        toast.error('Failed to delete product');
+        toast.error("Failed to delete product");
       }
     }
   };
 
-  const getStockStatus = (stock: Product['stock']) => {
+  const getStockStatus = (stock: Product["stock"]) => {
     const totalStock = stock.reduce((sum, item) => sum + item.unit, 0);
-    if (totalStock === 0) return { status: 'out_of_stock', color: 'red', text: 'Out of Stock' };
-    if (totalStock <= 10) return { status: 'low_stock', color: 'orange', text: 'Low Stock' };
-    return { status: 'in_stock', color: 'green', text: 'In Stock' };
+    if (totalStock === 0)
+      return { status: "out_of_stock", color: "red", text: "Out of Stock" };
+    if (totalStock <= 10)
+      return { status: "low_stock", color: "orange", text: "Low Stock" };
+    return { status: "in_stock", color: "green", text: "In Stock" };
   };
 
-  const getTotalStock = (stock: Product['stock']) => {
+  const getTotalStock = (stock: Product["stock"]) => {
     return stock.reduce((sum, item) => sum + item.unit, 0);
   };
 
@@ -81,26 +93,33 @@ export default function InventoryTable({
       title: <span className="font-medium text-base">Name</span>,
       dataIndex: "name",
       key: "name",
-      render: (text: string) => <span className="font-medium text-gray-900">{text}</span>,
+      render: (text: string) => (
+        <span className="font-medium text-gray-900">{text}</span>
+      ),
     },
     {
       title: <span className="font-medium text-base">SKU</span>,
       dataIndex: "sku",
       key: "sku",
-      render: (text: string) => <span className="text-gray-700 font-mono">{text}</span>,
+      render: (text: string) => (
+        <span className="text-gray-700 font-mono">{text}</span>
+      ),
     },
     {
       title: <span className="font-medium text-base">UPC</span>,
       dataIndex: "upc",
       key: "upc",
-      render: (text: string) => <span className="text-gray-700 font-mono">{text}</span>,
+      render: (text: string) => (
+        <span className="text-gray-700 font-mono">{text}</span>
+      ),
     },
     {
       title: <span className="font-medium text-base">Category</span>,
       dataIndex: "category",
       key: "category",
       render: (category: string | { _id: string; name: string }) => {
-        const categoryName = typeof category === 'string' ? category : category?.name || '';
+        const categoryName =
+          typeof category === "string" ? category : category?.name || "";
         return <span className="text-gray-700 capitalize">{categoryName}</span>;
       },
     },
@@ -124,7 +143,7 @@ export default function InventoryTable({
       render: (_: unknown, record: Product) => (
         <div className="flex gap-2">
           <Tooltip title="View Product">
-            <Button 
+            <Button
               className="inline-flex items-center justify-center rounded-lg bg-green-50 border border-green-200 hover:bg-green-100 transition p-1.5"
               onClick={() => handleView(record)}
             >
@@ -132,11 +151,14 @@ export default function InventoryTable({
             </Button>
           </Tooltip>
           <Tooltip title="Edit">
-            <Button 
+            <Button
               className="inline-flex items-center justify-center rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 transition p-1.5"
               onClick={() => handleEdit(record)}
             >
-              <Icon icon="lineicons:pencil-1" className="text-lg text-blue-700" />
+              <Icon
+                icon="lineicons:pencil-1"
+                className="text-lg text-blue-700"
+              />
             </Button>
           </Tooltip>
           <Tooltip title="Delete">
@@ -148,11 +170,14 @@ export default function InventoryTable({
               cancelText="No"
               okButtonProps={{ danger: true }}
             >
-              <Button 
+              <Button
                 className="inline-flex items-center justify-center rounded-lg bg-red-50 border border-red-200 hover:bg-red-100 transition p-1.5"
                 loading={isDeleting}
               >
-                <Icon icon="lineicons:trash-3" className="text-lg text-red-600" />
+                <Icon
+                  icon="lineicons:trash-3"
+                  className="text-lg text-red-600"
+                />
               </Button>
             </Popconfirm>
           </Tooltip>
@@ -165,7 +190,10 @@ export default function InventoryTable({
   const pagination = data?.pagination;
 
   return (
-    <div className="bg-white border border-gray-300 rounded-3xl shadow-lg overflow-hidden flex flex-col" style={{ maxHeight: 600 }}>
+    <div
+      className="bg-white border border-gray-300 rounded-3xl shadow-lg overflow-hidden flex flex-col"
+      style={{ maxHeight: 600 }}
+    >
       <div
         className="overflow-x-auto custom-scrollbar flex-1"
         style={{ maxHeight: 500 }}
@@ -175,7 +203,7 @@ export default function InventoryTable({
           dataSource={products}
           rowKey="_id"
           className="min-w-[700px] !bg-white"
-          scroll={{ x: '100%' }}
+          scroll={{ x: "100%" }}
           pagination={false}
           loading={isLoading}
           sticky
@@ -189,15 +217,15 @@ export default function InventoryTable({
             total={pagination.total}
             onChange={onPageChange}
             showSizeChanger={false}
-            showTotal={(total, range) => 
+            showTotal={(total, range) =>
               `${range[0]}-${range[1]} of ${total} items`
             }
           />
         </div>
       )}
-      
+
       {/* Edit Drawer */}
-      <AddEditProductDrawer 
+      <AddEditProductDrawer
         open={!!editingProduct}
         setOpen={() => setEditingProduct(null)}
         product={editingProduct}
@@ -205,7 +233,7 @@ export default function InventoryTable({
       />
 
       {/* View Product Drawer */}
-      <ViewProductDrawer 
+      <ViewProductDrawer
         open={!!viewingProduct}
         setOpen={() => setViewingProduct(null)}
         product={viewingProduct}

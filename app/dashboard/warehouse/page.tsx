@@ -38,4 +38,4 @@ export default function Warehouse() {
       />
     </div>
   );
-} 
+}

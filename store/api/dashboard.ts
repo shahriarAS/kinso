@@ -117,4 +117,4 @@ export const {
   useGetDashboardStatsQuery,
   useGetSalesAnalyticsQuery,
   useGetInventoryAlertsQuery,
-} = dashboardApi; 
+} = dashboardApi;

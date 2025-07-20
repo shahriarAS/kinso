@@ -1,19 +1,24 @@
-import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/database';
-import { Order, Customer, Product } from '@/models';
-import { authorizeRequest, AuthenticatedRequest } from '@/lib/auth';
+import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "@/lib/database";
+import { Order, Customer, Product } from "@/models";
+import { authorizeRequest, AuthenticatedRequest } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
-    const authResult = await authorizeRequest(request as AuthenticatedRequest, { requireAuth: true });
+    const authResult = await authorizeRequest(request as AuthenticatedRequest, {
+      requireAuth: true,
+    });
     if (!authResult.success) {
-      return NextResponse.json({ success: false, message: authResult.error }, { status: authResult.status || 401 });
+      return NextResponse.json(
+        { success: false, message: authResult.error },
+        { status: authResult.status || 401 },
+      );
     }
     await dbConnect();
 
     // Total revenue
     const totalRevenueAgg = await Order.aggregate([
-      { $group: { _id: null, total: { $sum: "$totalAmount" } } }
+      { $group: { _id: null, total: { $sum: "$totalAmount" } } },
     ]);
     const totalRevenue = totalRevenueAgg[0]?.total || 0;
 
@@ -30,7 +35,7 @@ export async function GET(request: NextRequest) {
     const lowStockProductsAgg = await Product.aggregate([
       { $unwind: "$stock" },
       { $match: { "stock.unit": { $gt: 0, $lt: 5 } } },
-      { $group: { _id: "$name" } }
+      { $group: { _id: "$name" } },
     ]);
     const lowStockProducts = lowStockProductsAgg.length;
 
@@ -40,37 +45,43 @@ export async function GET(request: NextRequest) {
       .limit(5)
       .select("_id orderNumber customerName totalAmount createdAt")
       .lean();
-    const recentOrdersFormatted = recentOrders.map(o => ({
+    const recentOrdersFormatted = recentOrders.map((o) => ({
       _id: o._id,
       orderNumber: o.orderNumber,
       customerName: o.customerName,
       totalAmount: o.totalAmount,
-      status: "N/A"
+      status: "N/A",
     }));
 
     // Top products (by total sold)
     const topProductsAgg = await Order.aggregate([
       { $unwind: "$items" },
-      { $group: {
-        _id: "$items.product",
-        totalSold: { $sum: "$items.quantity" },
-        revenue: { $sum: "$items.totalPrice" }
-      } },
+      {
+        $group: {
+          _id: "$items.product",
+          totalSold: { $sum: "$items.quantity" },
+          revenue: { $sum: "$items.totalPrice" },
+        },
+      },
       { $sort: { totalSold: -1 } },
       { $limit: 5 },
-      { $lookup: {
-        from: "products",
-        localField: "_id",
-        foreignField: "_id",
-        as: "product"
-      } },
+      {
+        $lookup: {
+          from: "products",
+          localField: "_id",
+          foreignField: "_id",
+          as: "product",
+        },
+      },
       { $unwind: "$product" },
-      { $project: {
-        _id: 1,
-        name: "$product.name",
-        totalSold: 1,
-        revenue: 1
-      } }
+      {
+        $project: {
+          _id: 1,
+          name: "$product.name",
+          totalSold: 1,
+          revenue: 1,
+        },
+      },
     ]);
 
     // Revenue chart (last 7 days)
@@ -79,17 +90,19 @@ export async function GET(request: NextRequest) {
     sevenDaysAgo.setDate(today.getDate() - 6);
     const revenueChartAgg = await Order.aggregate([
       { $match: { createdAt: { $gte: sevenDaysAgo } } },
-      { $group: {
-        _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-        revenue: { $sum: "$totalAmount" },
-        orders: { $sum: 1 }
-      } },
-      { $sort: { _id: 1 } }
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          revenue: { $sum: "$totalAmount" },
+          orders: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
     ]);
-    const revenueChart = revenueChartAgg.map(d => ({
+    const revenueChart = revenueChartAgg.map((d) => ({
       date: d._id,
       revenue: d.revenue,
-      orders: d.orders
+      orders: d.orders,
     }));
 
     return NextResponse.json({
@@ -101,9 +114,17 @@ export async function GET(request: NextRequest) {
       lowStockProducts,
       recentOrders: recentOrdersFormatted,
       topProducts: topProductsAgg,
-      revenueChart
+      revenueChart,
     });
   } catch (error: any) {
-    return NextResponse.json({ success: false, message: 'Failed to fetch dashboard stats', error: error?.message ?? String(error) }, { status: 500 });
+    // eslint-disable-line @typescript-eslint/no-explicit-any
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Failed to fetch dashboard stats",
+        error: error?.message ?? String(error),
+      },
+      { status: 500 },
+    );
   }
 }

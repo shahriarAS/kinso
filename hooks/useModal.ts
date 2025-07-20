@@ -1,6 +1,6 @@
-import { useCallback } from 'react';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { openModal, closeModal } from '@/store/slices/uiSlice';
+import { useCallback } from "react";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { openModal, closeModal } from "@/store/slices/uiSlice";
 
 export const useModal = (modalKey: string) => {
   const dispatch = useAppDispatch();
@@ -9,9 +9,12 @@ export const useModal = (modalKey: string) => {
   const isOpen = modalState?.isOpen || false;
   const data = modalState?.data;
 
-  const open = useCallback((data?: any) => {
-    dispatch(openModal({ key: modalKey, data }));
-  }, [dispatch, modalKey]);
+  const open = useCallback(
+    (data?: any) => {
+      dispatch(openModal({ key: modalKey, data }));
+    },
+    [dispatch, modalKey],
+  );
 
   const close = useCallback(() => {
     dispatch(closeModal(modalKey));
@@ -32,4 +35,4 @@ export const useModal = (modalKey: string) => {
     close,
     toggle,
   };
-}; 
+};

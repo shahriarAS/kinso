@@ -55,16 +55,23 @@ export default function DashboardSidebar() {
     <aside
       className={twMerge(
         "h-full py-6 flex flex-col gap-16 transition-all duration-300",
-        collapsed ? "w-20" : "w-72"
+        collapsed ? "w-20" : "w-72",
       )}
     >
-      <div className={twMerge("flex justify-between items-center transition-all duration-300", collapsed ? "px-4" : "px-8")}>
+      <div
+        className={twMerge(
+          "flex justify-between items-center transition-all duration-300",
+          collapsed ? "px-4" : "px-8",
+        )}
+      >
         <span
           className={twMerge(
             "text-2xl font-medium whitespace-nowrap overflow-hidden transition-all duration-300",
-            collapsed ? "max-w-0 opacity-0 pointer-events-none select-none" : "max-w-xs opacity-100"
+            collapsed
+              ? "max-w-0 opacity-0 pointer-events-none select-none"
+              : "max-w-xs opacity-100",
           )}
-          style={{ transitionProperty: 'max-width, opacity' }}
+          style={{ transitionProperty: "max-width, opacity" }}
         >
           Ez Gadgets
         </span>
@@ -88,16 +95,18 @@ export default function DashboardSidebar() {
               pathname === item.href
                 ? "bg-gradient-to-r from-secondary/10 to-40% border-secondary"
                 : "hover:bg-secondary/5",
-              collapsed ? "pl-6" : "px-8"
+              collapsed ? "pl-6" : "px-8",
             )}
           >
             <Icon icon={item.icon} className="text-2xl" />
             <span
               className={twMerge(
                 "whitespace-nowrap overflow-hidden transition-all duration-300",
-                collapsed ? "max-w-0 opacity-0 pointer-events-none select-none" : "max-w-xs opacity-100"
+                collapsed
+                  ? "max-w-0 opacity-0 pointer-events-none select-none"
+                  : "max-w-xs opacity-100",
               )}
-              style={{ transitionProperty: 'max-width, opacity' }}
+              style={{ transitionProperty: "max-width, opacity" }}
             >
               {item.label}
             </span>
@@ -123,7 +132,12 @@ function ProfileMenu({ collapsed }: { collapsed: boolean }) {
   const menu = (
     <div className="min-w-[180px] py-2 px-3 bg-[#232323] rounded-lg shadow-lg border border-white/10">
       <div className="flex items-center gap-2 mb-2">
-        <Avatar size={32} src={avatar} icon={<UserOutlined />} className="bg-secondary/30" />
+        <Avatar
+          size={32}
+          src={avatar}
+          icon={<UserOutlined />}
+          className="bg-secondary/30"
+        />
         <div className="flex flex-col">
           <span className="text-xs text-white font-medium">{email}</span>
         </div>
@@ -144,21 +158,17 @@ function ProfileMenu({ collapsed }: { collapsed: boolean }) {
     <div
       className={twMerge(
         "w-full flex items-center justify-center py-4 border-t border-white/10",
-        collapsed ? "px-0" : "px-4"
+        collapsed ? "px-0" : "px-4",
       )}
     >
       {isLoading ? (
         <Spin size="small" />
       ) : (
-        <Dropdown
-          popupRender={() => menu}
-          trigger={["click"]}
-          placement="top"
-        >
+        <Dropdown popupRender={() => menu} trigger={["click"]} placement="top">
           <div
             className={twMerge(
               "flex items-center cursor-pointer p-2 rounded-lg hover:bg-secondary/10 transition-all",
-              collapsed ? "justify-center" : "justify-start gap-2"
+              collapsed ? "justify-center" : "justify-start gap-2",
             )}
             tabIndex={0}
           >
@@ -171,13 +181,20 @@ function ProfileMenu({ collapsed }: { collapsed: boolean }) {
             <span
               className={twMerge(
                 "transition-all text-white text-sm font-medium whitespace-nowrap overflow-hidden",
-                collapsed ? "max-w-0 opacity-0 pointer-events-none select-none" : "max-w-xs opacity-100"
+                collapsed
+                  ? "max-w-0 opacity-0 pointer-events-none select-none"
+                  : "max-w-xs opacity-100",
               )}
               style={{ transitionProperty: "max-width, opacity" }}
             >
               {email}
             </span>
-            <DownOutlined className={twMerge("text-white text-xs transition-all", collapsed ? "opacity-0" : "opacity-100")}/>
+            <DownOutlined
+              className={twMerge(
+                "text-white text-xs transition-all",
+                collapsed ? "opacity-0" : "opacity-100",
+              )}
+            />
           </div>
         </Dropdown>
       )}

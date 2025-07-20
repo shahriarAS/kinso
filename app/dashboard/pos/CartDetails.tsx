@@ -66,7 +66,7 @@ export default function CartDetails({
 
   const subtotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
-    0
+    0,
   );
 
   const handleCheckout = async () => {
@@ -213,12 +213,10 @@ export default function CartDetails({
         {/* Payment Method Selection */}
         <div className="flex gap-2 mb-1">
           <Select
-            options={
-              PAYMENT_METHODS.map(method => ({
-                label: method.label,
-                value: method.value
-              }))
-            }
+            options={PAYMENT_METHODS.map((method) => ({
+              label: method.label,
+              value: method.value,
+            }))}
             value={paymentMethod}
             onChange={setPaymentMethod}
             className="flex-1 rounded-3xl"

@@ -14,7 +14,6 @@
   scrollbar-width: none;
 }
 
-
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 #f1f5f9;
@@ -36,7 +35,7 @@
   top: 0;
   background: #fff;
   z-index: 2;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 .inventory-table .ant-table-tbody > tr:hover > td {
   background: #f0f6ff !important;
@@ -47,7 +46,7 @@
   justify-content: flex-end;
   padding: 16px 24px 16px 0;
   background: #fff;
-  box-shadow: 0 -2px 8px rgba(0,0,0,0.03);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.03);
 }
 
 /* Custom table styles */

@@ -1,12 +1,12 @@
-import { NextResponse } from 'next/server';
-import { clearAuthCookies } from '@/lib/auth';
+import { NextResponse } from "next/server";
+import { clearAuthCookies } from "@/lib/auth";
 
 export async function POST() {
   try {
     // Create response
     const response = NextResponse.json({
       success: true,
-      message: 'Logout successful'
+      message: "Logout successful",
     });
 
     // Clear authentication cookies
@@ -14,10 +14,10 @@ export async function POST() {
 
     return response;
   } catch (error) {
-    console.error('Logout error:', error);
+    console.error("Logout error:", error);
     return NextResponse.json(
-      { success: false, message: 'Internal server error' },
-      { status: 500 }
+      { success: false, message: "Internal server error" },
+      { status: 500 },
     );
   }
-} 
+}

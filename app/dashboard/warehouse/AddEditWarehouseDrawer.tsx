@@ -3,7 +3,10 @@ import { Icon } from "@iconify/react";
 import { Button, Drawer, Form, Input, message } from "antd";
 import React, { useState, useEffect } from "react";
 import { Warehouse } from "@/types";
-import { useCreateWarehouseMutation, useUpdateWarehouseMutation } from "@/store/api/warehouses";
+import {
+  useCreateWarehouseMutation,
+  useUpdateWarehouseMutation,
+} from "@/store/api/warehouses";
 import toast from "react-hot-toast";
 
 interface Props {
@@ -13,12 +16,19 @@ interface Props {
   onClose?: () => void;
 }
 
-export default function AddEditWarehouseDrawer({ open, setOpen, warehouse, onClose }: Props) {
+export default function AddEditWarehouseDrawer({
+  open,
+  setOpen,
+  warehouse,
+  onClose,
+}: Props) {
   const [form] = Form.useForm<Warehouse>();
-  
+
   // API hooks
-  const [createWarehouse, { isLoading: isCreating }] = useCreateWarehouseMutation();
-  const [updateWarehouse, { isLoading: isUpdating }] = useUpdateWarehouseMutation();
+  const [createWarehouse, { isLoading: isCreating }] =
+    useCreateWarehouseMutation();
+  const [updateWarehouse, { isLoading: isUpdating }] =
+    useUpdateWarehouseMutation();
 
   const isEditing = !!warehouse;
   const isLoading = isCreating || isUpdating;
@@ -50,27 +60,34 @@ export default function AddEditWarehouseDrawer({ open, setOpen, warehouse, onClo
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      
+
       if (isEditing && warehouse) {
         await updateWarehouse({
           _id: warehouse._id,
           warehouse: values,
         }).unwrap();
-        toast.success('Warehouse updated successfully');
+        toast.success("Warehouse updated successfully");
       } else {
         await createWarehouse(values).unwrap();
-        toast.success('Warehouse created successfully');
+        toast.success("Warehouse created successfully");
       }
-      
+
       handleClose();
     } catch (error: unknown) {
-      if (error && typeof error === 'object' && 'data' in error && error.data && typeof error.data === 'object' && 'message' in error.data) {
+      if (
+        error &&
+        typeof error === "object" &&
+        "data" in error &&
+        error.data &&
+        typeof error.data === "object" &&
+        "message" in error.data
+      ) {
         toast.error((error.data as { message: string }).message);
-      } else if (error && typeof error === 'object' && 'errorFields' in error) {
+      } else if (error && typeof error === "object" && "errorFields" in error) {
         // Form validation error
         return;
       } else {
-        toast.error('Failed to save warehouse');
+        toast.error("Failed to save warehouse");
       }
     }
   };
@@ -91,12 +108,8 @@ export default function AddEditWarehouseDrawer({ open, setOpen, warehouse, onClo
             <Button type="default" onClick={handleClose} disabled={isLoading}>
               Discard
             </Button>
-            <Button 
-              type="primary" 
-              onClick={handleSubmit}
-              loading={isLoading}
-            >
-              {isEditing ? 'Update' : 'Save'}
+            <Button type="primary" onClick={handleSubmit} loading={isLoading}>
+              {isEditing ? "Update" : "Save"}
             </Button>
           </div>
         }
@@ -136,4 +149,4 @@ export default function AddEditWarehouseDrawer({ open, setOpen, warehouse, onClo
       </Drawer>
     </div>
   );
-} 
+}

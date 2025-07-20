@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect } from 'react';
-import { notification } from 'antd';
-import { useAppSelector, useAppDispatch } from '@/store/hooks';
-import { removeNotification } from '@/store/slices/uiSlice';
+import React, { useEffect } from "react";
+import { notification } from "antd";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import { removeNotification } from "@/store/slices/uiSlice";
 
 const NotificationContainer: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -17,7 +17,7 @@ const NotificationContainer: React.FC = () => {
           message: notificationItem.title,
           description: notificationItem.message,
           key: notificationItem._id,
-          duration: notificationItem.type === 'error' ? 0 : 4.5, // Error notifications don't auto-close
+          duration: notificationItem.type === "error" ? 0 : 4.5, // Error notifications don't auto-close
           onClose: () => {
             dispatch(removeNotification(notificationItem._id));
           },
@@ -29,4 +29,4 @@ const NotificationContainer: React.FC = () => {
   return null; // This component doesn't render anything visible
 };
 
-export default NotificationContainer; 
+export default NotificationContainer;

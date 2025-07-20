@@ -1,8 +1,8 @@
 "use client";
 
-import React from 'react';
-import { Spin, Alert, Button, Result } from 'antd';
-import { ReloadOutlined } from '@ant-design/icons';
+import React from "react";
+import { Spin, Alert, Button, Result } from "antd";
+import { ReloadOutlined } from "@ant-design/icons";
 
 interface ApiStatusHandlerProps {
   isLoading?: boolean;
@@ -25,14 +25,11 @@ const ApiStatusHandler: React.FC<ApiStatusHandlerProps> = ({
   onRetry,
   children,
   showSpinner = true,
-  minHeight = "200px"
+  minHeight = "200px",
 }) => {
   if (isLoading) {
     return (
-      <div 
-        className="flex items-center justify-center" 
-        style={{ minHeight }}
-      >
+      <div className="flex items-center justify-center" style={{ minHeight }}>
         {showSpinner ? (
           <div className="text-center">
             <Spin size="large" />
@@ -47,7 +44,8 @@ const ApiStatusHandler: React.FC<ApiStatusHandlerProps> = ({
 
   if (error) {
     // Handle different types of errors
-    const isNetworkError = error?.status === 'FETCH_ERROR' || error?.status === 'TIMEOUT_ERROR';
+    const isNetworkError =
+      error?.status === "FETCH_ERROR" || error?.status === "TIMEOUT_ERROR";
     const isServerError = error?.status >= 500;
     const isClientError = error?.status >= 400 && error?.status < 500;
 
@@ -59,9 +57,9 @@ const ApiStatusHandler: React.FC<ApiStatusHandlerProps> = ({
           subTitle="Unable to connect to the server. Please check your internet connection."
           extra={
             onRetry && (
-              <Button 
-                type="primary" 
-                icon={<ReloadOutlined />} 
+              <Button
+                type="primary"
+                icon={<ReloadOutlined />}
                 onClick={onRetry}
               >
                 Try Again
@@ -80,9 +78,9 @@ const ApiStatusHandler: React.FC<ApiStatusHandlerProps> = ({
           subTitle="Something went wrong on our end. Please try again later."
           extra={
             onRetry && (
-              <Button 
-                type="primary" 
-                icon={<ReloadOutlined />} 
+              <Button
+                type="primary"
+                icon={<ReloadOutlined />}
                 onClick={onRetry}
               >
                 Try Again
@@ -101,9 +99,9 @@ const ApiStatusHandler: React.FC<ApiStatusHandlerProps> = ({
           subTitle="You don't have permission to access this resource."
           extra={
             onRetry && (
-              <Button 
-                type="primary" 
-                icon={<ReloadOutlined />} 
+              <Button
+                type="primary"
+                icon={<ReloadOutlined />}
                 onClick={onRetry}
               >
                 Try Again
@@ -123,10 +121,10 @@ const ApiStatusHandler: React.FC<ApiStatusHandlerProps> = ({
         showIcon
         action={
           onRetry && (
-            <Button 
-              size="small" 
-              danger 
-              icon={<ReloadOutlined />} 
+            <Button
+              size="small"
+              danger
+              icon={<ReloadOutlined />}
               onClick={onRetry}
             >
               Retry
@@ -140,4 +138,4 @@ const ApiStatusHandler: React.FC<ApiStatusHandlerProps> = ({
   return <>{children}</>;
 };
 
-export default ApiStatusHandler; 
+export default ApiStatusHandler;

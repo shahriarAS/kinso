@@ -38,17 +38,17 @@ export const ordersApi = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.data.map(({ _id }) => ({ type: "Order" as const, id: _id })),
+              ...result.data.map(({ _id }) => ({
+                type: "Order" as const,
+                id: _id,
+              })),
               { type: "Order", id: "LIST" },
             ]
           : [{ type: "Order", id: "LIST" }],
     }),
 
     // Get single order by ID
-    getOrder: builder.query<
-      { data: Order },
-      string
-    >({
+    getOrder: builder.query<{ data: Order }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "GET",
@@ -57,17 +57,16 @@ export const ordersApi = createApi({
     }),
 
     // Create new order
-    createOrder: builder.mutation<
-      { message: string; data: Order },
-      OrderInput
-    >({
-      query: (order) => ({
-        url: "/",
-        method: "POST",
-        body: order,
-      }),
-      invalidatesTags: [{ type: "Order", id: "LIST" }],
-    }),
+    createOrder: builder.mutation<{ message: string; data: Order }, OrderInput>(
+      {
+        query: (order) => ({
+          url: "/",
+          method: "POST",
+          body: order,
+        }),
+        invalidatesTags: [{ type: "Order", id: "LIST" }],
+      },
+    ),
 
     // Update order
     updateOrder: builder.mutation<
@@ -86,10 +85,7 @@ export const ordersApi = createApi({
     }),
 
     // Delete order
-    deleteOrder: builder.mutation<
-      { message: string },
-      string
-    >({
+    deleteOrder: builder.mutation<{ message: string }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",
@@ -97,7 +93,6 @@ export const ordersApi = createApi({
       invalidatesTags: [{ type: "Order", id: "LIST" }],
     }),
 
-    
     // Get order statistics
     getOrderStats: builder.query<
       {
@@ -125,10 +120,7 @@ export const ordersApi = createApi({
     }),
 
     // Get orders by customer
-    getOrdersByCustomer: builder.query<
-      { data: Order[] },
-      string
-    >({
+    getOrdersByCustomer: builder.query<{ data: Order[] }, string>({
       query: (customerId) => ({
         url: `/customer/${customerId}`,
         method: "GET",
@@ -149,4 +141,4 @@ export const {
   useDeleteOrderMutation,
   useGetOrderStatsQuery,
   useGetOrdersByCustomerQuery,
-} = ordersApi; 
+} = ordersApi;

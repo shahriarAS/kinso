@@ -102,4 +102,4 @@ export type {
   ApiResponse,
   PaginatedResponse,
   QueryParams,
-} from "@/types/api"; 
+} from "@/types/api";

@@ -60,17 +60,17 @@ export const usersApi = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.data.map(({ _id }) => ({ type: "User" as const, id: _id })),
+              ...result.data.map(({ _id }) => ({
+                type: "User" as const,
+                id: _id,
+              })),
               { type: "User", id: "LIST" },
             ]
           : [{ type: "User", id: "LIST" }],
     }),
 
     // Get single user by ID
-    getUser: builder.query<
-      { data: User },
-      string
-    >({
+    getUser: builder.query<{ data: User }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "GET",
@@ -79,10 +79,7 @@ export const usersApi = createApi({
     }),
 
     // Create new user
-    createUser: builder.mutation<
-      { message: string; data: User },
-      UserInput
-    >({
+    createUser: builder.mutation<{ message: string; data: User }, UserInput>({
       query: (user) => ({
         url: "/",
         method: "POST",
@@ -108,10 +105,7 @@ export const usersApi = createApi({
     }),
 
     // Delete user
-    deleteUser: builder.mutation<
-      { message: string },
-      string
-    >({
+    deleteUser: builder.mutation<{ message: string }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",
@@ -142,10 +136,7 @@ export const usersApi = createApi({
     }),
 
     // Search users by name or email
-    searchUsers: builder.query<
-      { data: User[] },
-      string
-    >({
+    searchUsers: builder.query<{ data: User[] }, string>({
       query: (searchTerm) => ({
         url: "/search",
         method: "GET",
@@ -167,4 +158,4 @@ export const {
   useDeleteUserMutation,
   useGetUserStatsQuery,
   useSearchUsersQuery,
-} = usersApi; 
+} = usersApi;

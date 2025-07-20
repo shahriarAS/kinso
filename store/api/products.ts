@@ -36,17 +36,17 @@ export const productsApi = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.data.map(({ _id }) => ({ type: "Product" as const, _id })),
+              ...result.data.map(({ _id }) => ({
+                type: "Product" as const,
+                _id,
+              })),
               { type: "Product", id: "LIST" },
             ]
           : [{ type: "Product", id: "LIST" }],
     }),
 
     // Get single product by ID
-    getProduct: builder.query<
-      { data: Product },
-      string
-    >({
+    getProduct: builder.query<{ data: Product }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "GET",
@@ -84,18 +84,13 @@ export const productsApi = createApi({
     }),
 
     // Delete product
-    deleteProduct: builder.mutation<
-      { message: string },
-      string
-    >({
+    deleteProduct: builder.mutation<{ message: string }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",
       }),
       invalidatesTags: [{ type: "Product", id: "LIST" }],
     }),
-
-
 
     // Update product stock
     updateProductStock: builder.mutation<
@@ -127,4 +122,4 @@ export const {
   useUpdateProductMutation,
   useDeleteProductMutation,
   useUpdateProductStockMutation,
-} = productsApi; 
+} = productsApi;

@@ -4,10 +4,10 @@ import { Icon } from "@iconify/react";
 import { Button, Drawer, Table } from "antd";
 import { useState } from "react";
 import type { Customer } from "@/types/customer";
-import type { Order } from "@/types/order";
+import type { Order } from "@/features/orders/types";
 import { useGetOrdersByCustomerQuery } from "@/store/api/orders";
 import ApiStatusHandler from "@/components/common/ApiStatusHandler";
-import ViewOrderDrawer from "../orders/ViewOrderDrawer";
+import ViewOrderDrawer from "@/features/orders/ViewOrderDrawer";
 
 interface Props {
   customer: Customer;
@@ -182,7 +182,12 @@ export default function ViewCustomerOrdersDrawer({ customer, onClose }: Props) {
           </ApiStatusHandler>
         </div>
       </div>
-      <ViewOrderDrawer viewOrder={viewOrder} setViewOrder={setViewOrder} />
+      <ViewOrderDrawer
+        open={!!viewOrder}
+        setOpen={() => setViewOrder(null)}
+        order={viewOrder}
+        onClose={() => setViewOrder(null)}
+      />
     </Drawer>
   );
 }

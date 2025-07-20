@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useCreateOrderMutation } from "@/store/api/orders";
 import { CartItem, CustomerOption } from "./types";
 import type { InvoiceData } from "./InvoiceTemplate";
-import { PaymentMethod } from "@/types/order";
+import { PaymentMethod } from "@/features/orders/types";
 import { PAYMENT_METHODS } from "@/lib/constraints";
 
 interface OrderCreatePayload {

@@ -1,21 +1,20 @@
 "use client";
-
 import { Table, Button, Tooltip, Pagination } from "antd";
 import { Icon } from "@iconify/react";
 import React, { useState, useEffect } from "react";
-import type { Order } from "@/types/order";
-import { useGetOrdersQuery } from "@/store/api/orders";
-import InvoiceTemplate, { InvoiceData } from "../pos/InvoiceTemplate";
+import { Order } from "@/features/orders/types";
+import { useGetOrdersQuery } from "@/features/orders/api";
+import InvoiceTemplate, { InvoiceData } from "@/app/dashboard/pos/InvoiceTemplate";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import ViewOrderDrawer from "./ViewOrderDrawer";
 
-interface OrderTableProps {
-  filters?: {
-    search?: string;
-    dateRange?: [string, string];
-    paymentMethod?: string;
-  };
+interface Props {
+  searchTerm: string;
+  paymentMethodFilter: string;
+  currentPage: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
 }
 
 function mapOrderToInvoiceData(order: Order): InvoiceData {
@@ -70,9 +69,13 @@ function mapOrderToInvoiceData(order: Order): InvoiceData {
   };
 }
 
-export default function OrderTable({ filters = {} }: OrderTableProps) {
-  const [current, setCurrent] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+export default function OrderTable({
+  searchTerm,
+  paymentMethodFilter,
+  currentPage,
+  pageSize,
+  onPageChange,
+}: Props) {
   const [viewOrder, setViewOrder] = useState<Order | null>(null);
   const [printOrder, setPrintOrder] = useState<Order | null>(null);
   const [printInvoiceData, setPrintInvoiceData] = useState<InvoiceData | null>(
@@ -84,15 +87,12 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
   // Prepare API params
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const params: any = {
-    page: current,
+    page: currentPage,
     limit: pageSize,
   };
-  if (filters.search) params.search = filters.search;
-  if (filters.dateRange && filters.dateRange.length === 2) {
-    params.startDate = filters.dateRange[0];
-    params.endDate = filters.dateRange[1];
-  }
-  if (filters.paymentMethod) params.paymentMethod = filters.paymentMethod;
+  if (searchTerm) params.search = searchTerm;
+  if (paymentMethodFilter) params.paymentMethod = paymentMethodFilter;
+
   const { data, isLoading } = useGetOrdersQuery(params);
 
   const handleView = (order: Order) => setViewOrder(order);
@@ -117,9 +117,6 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
         const pdf = new jsPDF({ orientation: "p", unit: "pt", format: "a4" });
         // Calculate width/height for A4
         const pdfWidth = pdf.internal.pageSize.getWidth();
-        // const pdfHeight = pdf.internal.pageSize.getHeight();
-        // Scale image to fit width
-        // const imgProps = canvas;
         const imgWidth = pdfWidth;
         const imgHeight = (canvas.height * pdfWidth) / canvas.width;
         pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
@@ -221,6 +218,9 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
     },
   ];
 
+  const orders = data?.data || [];
+  const pagination = data?.pagination;
+
   return (
     <>
       <div
@@ -259,7 +259,7 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
         >
           <Table
             columns={columns}
-            dataSource={data?.data || []}
+            dataSource={orders}
             rowKey="_id"
             className="min-w-[700px] !bg-white"
             scroll={{ x: "100%" }}
@@ -268,28 +268,27 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
             loading={isLoading}
           />
         </div>
-        <div className="custom-pagination p-4">
-          <Pagination
-            current={current}
-            pageSize={pageSize}
-            total={data?.pagination?.total || 0}
-            onChange={(page, size) => {
-              setCurrent(page);
-              if (size !== pageSize) {
-                setPageSize(size);
-                setCurrent(1);
+        {pagination && (
+          <div className="custom-pagination">
+            <Pagination
+              current={currentPage}
+              pageSize={pageSize}
+              total={pagination.total}
+              onChange={onPageChange}
+              showSizeChanger={false}
+              showTotal={(total, range) =>
+                `${range[0]}-${range[1]} of ${total} orders`
               }
-            }}
-            showSizeChanger
-            showQuickJumper
-            showTotal={(total, range) =>
-              `${range[0]}-${range[1]} of ${total} orders`
-            }
-            pageSizeOptions={["10", "20", "50", "100"]}
-          />
-        </div>
-        <ViewOrderDrawer viewOrder={viewOrder} setViewOrder={setViewOrder} />
+            />
+          </div>
+        )}
+        <ViewOrderDrawer
+          open={!!viewOrder}
+          setOpen={() => setViewOrder(null)}
+          order={viewOrder}
+          onClose={() => setViewOrder(null)}
+        />
       </div>
     </>
   );
-}
+} 

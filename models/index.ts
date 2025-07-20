@@ -6,5 +6,5 @@ export { default as Warehouse } from "./Warehouse";
 export type { IWarehouse } from "./Warehouse";
 export { default as Customer } from "./Customer";
 export type { ICustomer } from "./Customer";
-export { default as Order } from "./Order";
-export type { IOrder, IOrderItem } from "./Order";
+export { default as Order } from "@/features/orders/model";
+export type { IOrder, IOrderItem } from "@/features/orders/model";

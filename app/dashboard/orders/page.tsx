@@ -1,24 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import OrderFilters from "./OrderFilters";
-import OrderTable from "./OrderTable";
-
-interface OrderFiltersType {
-  search?: string;
-  dateRange?: [string, string];
-  paymentMethod?: string;
-}
+import { OrderFilters, OrderTable } from "@/features/orders";
 
 export default function Orders() {
-  const [filters, setFilters] = useState<OrderFiltersType>({
-    search: "",
-    dateRange: undefined,
-    paymentMethod: "",
-  });
-  const handleFiltersChange = (newFilters: OrderFiltersType) => {
-    console.log(newFilters);
-    setFilters(newFilters);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   return (
@@ -28,9 +20,21 @@ export default function Orders() {
         <h1 className="text-4xl font-semibold">Orders</h1>
       </div>
       {/* Filters */}
-      <OrderFilters onFiltersChange={handleFiltersChange} />
+      <OrderFilters
+        searchTerm={searchTerm}
+        paymentMethodFilter={paymentMethodFilter}
+        onSearchChange={setSearchTerm}
+        onPaymentMethodChange={setPaymentMethodFilter}
+        onPageChange={handlePageChange}
+      />
       {/* Table */}
-      <OrderTable filters={filters} />
+      <OrderTable
+        searchTerm={searchTerm}
+        paymentMethodFilter={paymentMethodFilter}
+        currentPage={currentPage}
+        pageSize={pageSize}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 }

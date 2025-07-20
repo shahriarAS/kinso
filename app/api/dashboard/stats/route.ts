@@ -46,7 +46,8 @@ export async function GET(request: NextRequest) {
       .limit(5)
       .select("_id orderNumber customerName totalAmount createdAt")
       .lean();
-    const recentOrdersFormatted = recentOrders.map((o) => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const recentOrdersFormatted = recentOrders.map((o: any) => ({
       _id: o._id,
       orderNumber: o.orderNumber,
       customerName: o.customerName,

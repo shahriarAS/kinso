@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/database";
 import Product from "./model";
-import Category from "@/models/Category";
-import Warehouse from "@/models/Warehouse";
+import Category from "@/features/categories/model";
+import Warehouse from "@/features/warehouses/model";
 import { authorizeRequest, AuthenticatedRequest } from "@/lib/auth";
 
 // GET /api/products - List all products with pagination, search, and filters

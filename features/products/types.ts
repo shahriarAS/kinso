@@ -1,5 +1,5 @@
-import { Warehouse } from "@/types/warehouse";
-import { Category } from "@/features/categories/types";
+import { Warehouse } from "@/features/warehouses";
+import { Category } from "@/features/categories";
 
 export interface Product {
   _id: string;

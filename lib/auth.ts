@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { User } from "@/models";
+import User from "@/features/users/model";
 import dbConnect from "./database";
 
 export interface AuthenticatedRequest extends NextRequest {

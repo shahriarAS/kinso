@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/database";
-import { Order, Customer } from "@/models";
 import Product from "@/features/products/model";
+import Order from "@/features/orders/model";
+import Customer from "@/features/customers/model";
 import { authorizeRequest, AuthenticatedRequest } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {

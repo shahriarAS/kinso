@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { User } from "@/models";
+import User from "@/features/users/model";
 import dbConnect from "@/lib/database";
 import {
   verifyPassword,

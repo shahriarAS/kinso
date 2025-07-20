@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/database";
 import Order from "./model";
-import { Customer } from "@/models";
+import Customer from "@/features/customers/model";
 import Product from "@/features/products/model";
 import { authorizeRequest, AuthenticatedRequest } from "@/lib/auth";
-import OrderCounter from "@/models/OrderCounter";
+import OrderCounter from "@/features/orders/modelOrderCounter";
 import { PaymentMethod } from "./model";
 
 // GET /api/orders - List all orders with pagination and search

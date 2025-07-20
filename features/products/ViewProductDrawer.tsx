@@ -3,7 +3,7 @@ import { Icon } from "@iconify/react";
 import { Button, Drawer, Descriptions, Table, Tag, Divider } from "antd";
 import React from "react";
 import { Product } from "@/features/products/types";
-import { Warehouse } from "@/types/warehouse";
+import { Warehouse } from "@/features/warehouses";
 
 interface Props {
   open: boolean;

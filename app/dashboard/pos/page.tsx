@@ -13,7 +13,7 @@ import type { InvoiceData } from "./InvoiceTemplate";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { Skeleton } from "antd";
-import { useGetProductsQuery } from "@/hooks/useApi";
+import { useGetProductsQuery } from "@/features/products";
 
 export default function POS() {
   const [cart, setCart] = useState<CartItem[]>([]);

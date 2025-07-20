@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithErrorHandling from "../baseQueryWithErrorHandling";
-import { Warehouse } from "@/types";
+import { Warehouse } from "@/features/warehouses";
 
 export interface WarehouseInput extends Omit<Warehouse, "_id"> {}
 

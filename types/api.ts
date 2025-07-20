@@ -22,20 +22,6 @@ export interface RegisterData {
   password2: string;
 }
 
-// Category API Types
-export interface Category {
-  _id: string;
-  name: string;
-  description?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CategoryInput {
-  name: string;
-  description?: string;
-}
-
 // Customer API Types
 export interface Customer {
   _id: string;
@@ -254,5 +240,7 @@ export interface QueryParams {
   sortBy?: string;
   sortOrder?: "asc" | "desc";
 }
+
+import type { Category, CategoryInput } from "@/features/categories/types";
 
 // All types are already exported above

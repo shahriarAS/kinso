@@ -3,11 +3,11 @@
 import { Table, Button, Tooltip, Pagination, Popconfirm } from "antd";
 import { Icon } from "@iconify/react";
 import { useState } from "react";
+import { Category } from "@/features/categories/types";
 import {
   useGetCategoriesQuery,
   useDeleteCategoryMutation,
-} from "@/store/api/categories";
-import type { Category } from "@/types";
+} from "@/features/categories/api";
 import AddEditCategoryDrawer from "./AddEditCategoryDrawer";
 import toast from "react-hot-toast";
 
@@ -165,4 +165,4 @@ export default function CategoryTable({
       />
     </div>
   );
-}
+} 

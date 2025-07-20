@@ -2,7 +2,7 @@
 import { Input, Select } from "antd";
 import React, { useEffect } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
-import { useGetAllCategoriesQuery } from "@/store/api/categories";
+import { useGetAllCategoriesQuery } from "@/features/categories/api";
 import { useGetWarehousesQuery } from "@/store/api/warehouses";
 
 interface Props {

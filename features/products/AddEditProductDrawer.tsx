@@ -8,7 +8,7 @@ import {
   useCreateProductMutation,
   useUpdateProductMutation,
 } from "@/features/products";
-import { useGetAllCategoriesQuery } from "@/store/api/categories";
+import { useGetAllCategoriesQuery } from "@/features/categories/api";
 import { useGetWarehousesQuery } from "@/store/api/warehouses";
 import StockEntries from "./StockEntries";
 import toast from "react-hot-toast";

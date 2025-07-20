@@ -2,11 +2,11 @@
 import { Icon } from "@iconify/react";
 import { Button, Drawer, Form, Input } from "antd";
 import React, { useEffect } from "react";
-import { Category } from "@/types";
+import { Category } from "@/features/categories/types";
 import {
   useCreateCategoryMutation,
   useUpdateCategoryMutation,
-} from "@/store/api/categories";
+} from "@/features/categories/api";
 import toast from "react-hot-toast";
 
 interface Props {
@@ -143,4 +143,4 @@ export default function AddEditCategoryDrawer({
       </Drawer>
     </div>
   );
-}
+} 

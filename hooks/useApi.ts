@@ -14,7 +14,7 @@ export {
   useUpdateCategoryMutation,
   useDeleteCategoryMutation,
   useGetAllCategoriesQuery,
-} from "@/store/api/categories";
+} from "@/features/categories/api";
 
 export {
   // Customers API hooks
@@ -81,8 +81,6 @@ export type {
   AuthUser,
   LoginCredentials,
   RegisterData,
-  Category,
-  CategoryInput,
   Customer,
   CustomerInput,
   Order,
@@ -104,4 +102,4 @@ export type {
   QueryParams,
 } from "@/types/api";
 
-import type { Product, ProductInput } from "@/features/products/types";
+import type { Category, CategoryInput } from "@/features/categories/types";

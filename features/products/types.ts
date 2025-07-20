@@ -1,11 +1,12 @@
 import { Warehouse } from "@/types/warehouse";
+import { Category } from "@/features/categories/types";
 
 export interface Product {
   _id: string;
   name: string;
   upc: string;
   sku: string;
-  category: string | { _id: string; name: string };
+  category: string | Category;
   stock: {
     warehouse: Warehouse;
     unit: number;

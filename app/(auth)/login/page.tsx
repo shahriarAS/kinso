@@ -33,23 +33,6 @@ function Login() {
       <div className="max-w-md w-full">
         {/* Login Card */}
         <div className="bg-white rounded-2xl shadow-2xl shadow-blue-100/50 p-8 ">
-          {/* Logo */}
-          <div className="flex justify-center mb-8">
-            <Link
-              href={"/"}
-              className="bg-primary-300 rounded-lg p-3 shadow-lg aspect-[3.8] h-20"
-            >
-              <div className="relative w-full h-full">
-                <Image
-                  src={logo}
-                  alt="Logo"
-                  className="w-full h-full object-contain filter brightness-0 invert"
-                  fill
-                />
-              </div>
-            </Link>
-          </div>
-
           {/* Error Alert */}
           {error && (
             <div className="mb-6">

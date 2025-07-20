@@ -120,41 +120,41 @@ const InvoiceTemplate: React.FC<FlowInvoiceProps> = ({ data }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white font-sans text-sm leading-tight">
+    <div className="max-w-4xl mx-auto p-6 font-sans text-sm leading-tight" style={{ background: '#fff' }}>
       {/* Header */}
       <div className="flex justify-between items-start mb-6">
-        <div className="text-xs text-gray-600 space-y-0.5 leading-relaxed">
-          {/* <div className="font-medium text-black">{invoiceData.company.location}</div>
+        <div className="text-xs space-y-0.5 leading-relaxed" style={{ color: '#6b7280' }}>
+          {/* <div style={{ fontWeight: 500, color: '#111827' }}>{invoiceData.company.location}</div>
           <div>{invoiceData.company.address}</div>
           <div>{invoiceData.company.phone}</div>
           <div>{invoiceData.company.email}</div>
-          <div className="pt-1">{invoiceData.company.website}</div> */}
+          <div style={{ paddingTop: 4 }}>{invoiceData.company.website}</div> */}
         </div>
-        <div className="text-right">
-          <div className="w-10 h-10 bg-black flex items-center justify-center mb-2">
-            <span className="text-white font-bold text-base">{invoiceData.company.logo}</span>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ width: 40, height: 40, background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+            <span style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>{invoiceData.company.logo}</span>
           </div>
-          {/* <div className="font-bold text-lg tracking-wider">{invoiceData.company.name}</div> */}
+          {/* <div style={{ fontWeight: 'bold', fontSize: 18, letterSpacing: 2 }}>{invoiceData.company.name}</div> */}
         </div>
       </div>
 
       {/* Invoice Header */}
       <div className="flex mb-6">
-        <div className="bg-gray-800 text-white px-5 py-3 flex-shrink-0">
-          <h1 className="text-base font-semibold tracking-wide">INVOICE</h1>
+        <div style={{ background: '#1f2937', color: '#fff', padding: '12px 20px', flexShrink: 0 }}>
+          <h1 style={{ fontSize: 16, fontWeight: 600, letterSpacing: 1 }}>INVOICE</h1>
         </div>
-        <div className="border border-l-0 border-gray-300 flex-1 grid grid-cols-3 text-xs">
-          <div className="p-2.5 border-r border-gray-300">
-            <div className="text-gray-500 mb-1">Invoice No.</div>
-            <div className="font-medium">{invoiceData.invoiceNumber}</div>
+        <div style={{ border: '1px solid #d1d5db', borderLeft: 0, flex: 1, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', fontSize: 12 }}>
+          <div style={{ padding: 10, borderRight: '1px solid #d1d5db' }}>
+            <div style={{ color: '#6b7280', marginBottom: 4 }}>Invoice No.</div>
+            <div style={{ fontWeight: 500 }}>{invoiceData.invoiceNumber}</div>
           </div>
-          <div className="p-2.5 border-r border-gray-300">
-            <div className="text-gray-500 mb-1">Date:</div>
-            <div className="font-medium">{invoiceData.date}</div>
+          <div style={{ padding: 10, borderRight: '1px solid #d1d5db' }}>
+            <div style={{ color: '#6b7280', marginBottom: 4 }}>Date:</div>
+            <div style={{ fontWeight: 500 }}>{invoiceData.date}</div>
           </div>
-          <div className="p-2.5">
-            <div className="text-gray-500 mb-1">Customer ID:</div>
-            <div className="font-medium">{invoiceData.customerId}</div>
+          <div style={{ padding: 10 }}>
+            <div style={{ color: '#6b7280', marginBottom: 4 }}>Customer ID:</div>
+            <div style={{ fontWeight: 500 }}>{invoiceData.customerId}</div>
           </div>
         </div>
       </div>
@@ -162,48 +162,47 @@ const InvoiceTemplate: React.FC<FlowInvoiceProps> = ({ data }) => {
       {/* Invoice Details */}
       <div className="flex justify-between mb-6">
         <div>
-          <div className="text-xs text-gray-500 mb-1">Invoice to:</div>
-          <div className="font-semibold text-sm">{invoiceData.customer.name}</div>
+          <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 4 }}>Invoice to:</div>
+          <div style={{ fontWeight: 600, fontSize: 14 }}>{invoiceData.customer.name}</div>
         </div>
-        <div className="text-right text-xs">
+        <div style={{ textAlign: 'right', fontSize: 12 }}>
           {invoiceData.customer.email && (
-            <div className="text-gray-600 mb-0.5">{invoiceData.customer.email}</div>
+            <div style={{ color: '#6b7280', marginBottom: 2 }}>{invoiceData.customer.email}</div>
           )}
           {invoiceData.customer.phone && (
-            <div className="text-gray-600">{invoiceData.customer.phone}</div>
+            <div style={{ color: '#6b7280' }}>{invoiceData.customer.phone}</div>
           )}
         </div>
       </div>
 
       {/* Invoice Table */}
-      <div className="mb-5">
+      <div style={{ marginBottom: 20 }}>
         {/* Table Header */}
-        <div className="border-t border-l border-r border-black bg-white">
-          <div className="grid grid-cols-12 text-xs font-medium text-black border-b border-black">
-            <div className="col-span-6 p-2.5 border-r border-black">DESCRIPTION</div>
-            <div className="col-span-2 p-2.5 border-r border-black text-center">QTY.</div>
-            <div className="col-span-2 p-2.5 border-r border-black text-center">RATE</div>
-            <div className="col-span-2 p-2.5 text-center">PRICE</div>
+        <div style={{ borderTop: '1px solid #000', borderLeft: '1px solid #000', borderRight: '1px solid #000', background: '#fff' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '6fr 2fr 2fr 2fr', fontSize: 12, fontWeight: 500, color: '#111', borderBottom: '1px solid #000' }}>
+            <div style={{ padding: 10, borderRight: '1px solid #000' }}>DESCRIPTION</div>
+            <div style={{ padding: 10, borderRight: '1px solid #000', textAlign: 'center' }}>QTY.</div>
+            <div style={{ padding: 10, borderRight: '1px solid #000', textAlign: 'center' }}>RATE</div>
+            <div style={{ padding: 10, textAlign: 'center' }}>PRICE</div>
           </div>
         </div>
-        
         {/* Table Body */}
-        <div className="border-l border-r border-black">
+        <div style={{ borderLeft: '1px solid #000', borderRight: '1px solid #000' }}>
           {invoiceData.items.map((item, index) => (
-            <div key={index} className="grid grid-cols-12 text-xs border-b border-black">
-              <div className="col-span-6 p-2.5 border-r border-black">
-                <div className="font-medium mb-1">{item.description}</div>
+            <div key={index} style={{ display: 'grid', gridTemplateColumns: '6fr 2fr 2fr 2fr', fontSize: 12, borderBottom: '1px solid #000' }}>
+              <div style={{ padding: 10, borderRight: '1px solid #000' }}>
+                <div style={{ fontWeight: 500, marginBottom: 4 }}>{item.description}</div>
                 {item.details && (
-                  <div className="text-gray-600 text-xs leading-snug">{item.details}</div>
+                  <div style={{ color: '#6b7280', fontSize: 12, lineHeight: 1.3 }}>{item.details}</div>
                 )}
               </div>
-              <div className="col-span-2 p-2.5 border-r border-black text-center align-top pt-3">
+              <div style={{ padding: 10, borderRight: '1px solid #000', textAlign: 'center', verticalAlign: 'top', paddingTop: 12 }}>
                 {item.quantity.toString().padStart(2, '0')}
               </div>
-              <div className="col-span-2 p-2.5 border-r border-black text-center align-top pt-3">
+              <div style={{ padding: 10, borderRight: '1px solid #000', textAlign: 'center', verticalAlign: 'top', paddingTop: 12 }}>
                 {formatCurrency(item.rate)}
               </div>
-              <div className="col-span-2 p-2.5 text-center align-top pt-3">
+              <div style={{ padding: 10, textAlign: 'center', verticalAlign: 'top', paddingTop: 12 }}>
                 {formatCurrency(item.price)}
               </div>
             </div>
@@ -213,34 +212,30 @@ const InvoiceTemplate: React.FC<FlowInvoiceProps> = ({ data }) => {
 
       {/* Totals Section */}
       <div className="flex justify-between items-start mb-4">
-        <div className="w-1/3">
-          <div className="text-xs text-gray-500 mb-2">Sincerely,</div>
-          <div className="text-xl text-gray-700 mb-2 font-cursive leading-tight">
-            {invoiceData.signatory.name}
-          </div>
-          <div className="text-xs text-gray-500 uppercase tracking-wide">{invoiceData.signatory.title}</div>
+        <div style={{ width: '33%' }}>
+          <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Sincerely,</div>
+          <div style={{ fontSize: 24, color: '#374151', marginBottom: 8, fontFamily: 'Brush Script MT, cursive', lineHeight: 1 }}>{invoiceData.signatory.name}</div>
+          <div style={{ fontSize: 12, color: '#6b7280', textTransform: 'uppercase', letterSpacing: 1 }}>{invoiceData.signatory.title}</div>
         </div>
-        <div className="w-1/3">
-          <div className="space-y-1.5 text-xs">
-            <div className="flex justify-between">
-              <span className="text-gray-600">SUB TOTAL</span>
-              <span className="font-medium">{formatCurrency(invoiceData.subtotal)}</span>
+        <div style={{ width: '33%' }}>
+          <div style={{ fontSize: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span style={{ color: '#6b7280' }}>SUB TOTAL</span>
+              <span style={{ fontWeight: 500 }}>{formatCurrency(invoiceData.subtotal)}</span>
             </div>
             {typeof invoiceData.discount === 'number' && invoiceData.discount > 0 && (
-              <div className="flex justify-between">
-                <span className="text-gray-600">DISCOUNT</span>
-                <span className="font-medium">- {formatCurrency(invoiceData.discount)}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                <span style={{ color: '#6b7280' }}>DISCOUNT</span>
+                <span style={{ fontWeight: 500, color: '#ef4444' }}>- {formatCurrency(invoiceData.discount)}</span>
               </div>
             )}
           </div>
-
-          <div className="mt-4 text-center bg-gray-50 py-3 px-4 rounded">
-            <div className="text-xl font-bold text-gray-800">{formatCurrency(invoiceData.total)}</div>
-            <div className="text-xs text-gray-500 mt-1 uppercase tracking-wide font-medium">TOTAL AMOUNT</div>
+          <div style={{ marginTop: 16, textAlign: 'center', background: '#f9fafb', padding: '12px 16px', borderRadius: 8 }}>
+            <div style={{ fontSize: 20, fontWeight: 'bold', color: '#1f2937' }}>{formatCurrency(invoiceData.total)}</div>
+            <div style={{ fontSize: 12, color: '#6b7280', marginTop: 4, textTransform: 'uppercase', fontWeight: 500, letterSpacing: 1 }}>TOTAL AMOUNT</div>
           </div>
         </div>
       </div>
-
       <style jsx>{`
         .font-cursive {
           font-family: 'Brush Script MT', cursive;

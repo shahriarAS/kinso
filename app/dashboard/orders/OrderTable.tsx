@@ -6,7 +6,8 @@ import React, { useState, useEffect } from "react";
 import type { Order } from "@/types/order";
 import { useGetOrdersQuery } from "@/store/api/orders";
 import InvoiceTemplate, { InvoiceData } from "../pos/InvoiceTemplate";
-import { printWithTailwind } from "react-tailwind-printer";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 interface OrderTableProps {
   filters?: {
@@ -66,6 +67,9 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
   const [pageSize, setPageSize] = useState(10);
   const [viewOrder, setViewOrder] = useState<Order | null>(null);
   const [printOrder, setPrintOrder] = useState<Order | null>(null);
+  const [printInvoiceData, setPrintInvoiceData] = useState<InvoiceData | null>(null);
+
+  const printContainerRef = React.useRef<HTMLDivElement>(null);
 
   // Prepare API params
   const params: any = {
@@ -82,19 +86,37 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
 
   const handleView = (order: Order) => setViewOrder(order);
   const handlePrint = (order: Order) => {
+    setPrintInvoiceData(mapOrderToInvoiceData(order));
     setPrintOrder(order);
   };
 
   useEffect(() => {
-    if (printOrder) {
-      const invoiceData = mapOrderToInvoiceData(printOrder);
-      printWithTailwind({
-        title: `Invoice #${invoiceData.invoiceNumber}`,
-        component: <InvoiceTemplate data={invoiceData} />,
-      });
-      setPrintOrder(null);
+    if (printOrder && printInvoiceData && printContainerRef.current) {
+      // Wait for the InvoiceTemplate to render
+      setTimeout(async () => {
+        const input = printContainerRef.current;
+        if (!input) return;
+        // Use html2canvas to capture the invoice
+        const canvas = await html2canvas(input, { scale: 2, useCORS: false, backgroundColor: '#fff' });
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF({ orientation: "p", unit: "pt", format: "a4" });
+        // Calculate width/height for A4
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        // Scale image to fit width
+        const imgProps = canvas;
+        const imgWidth = pdfWidth;
+        const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+        pdf.autoPrint();
+        // Open PDF in new window and trigger print
+        const pdfBlob = pdf.output("bloburl");
+        const printWindow = window.open(pdfBlob);
+        setPrintOrder(null);
+        setPrintInvoiceData(null);
+      }, 100); // Wait for DOM update
     }
-  }, [printOrder]);
+  }, [printOrder, printInvoiceData]);
 
   const columns = [
     {
@@ -154,85 +176,95 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
   ];
 
   return (
-    <div className="bg-white border border-gray-300 rounded-3xl shadow-lg overflow-hidden flex flex-col" style={{ maxHeight: 600 }}>
-      <div
-        className="overflow-x-auto custom-scrollbar flex-1"
-        style={{ maxHeight: 500 }}
-      >
-        <Table
-          columns={columns}
-          dataSource={data?.data || []}
-          rowKey="_id"
-          className="min-w-[700px] !bg-white"
-          scroll={{ x: '100%' }}
-          pagination={false}
-          sticky
-          loading={isLoading}
-        />
-      </div>
-      <div className="custom-pagination p-4">
-        <Pagination
-          current={current}
-          pageSize={pageSize}
-          total={data?.pagination?.total || 0}
-          onChange={(page, size) => {
-            setCurrent(page);
-            if (size !== pageSize) {
-              setPageSize(size);
-              setCurrent(1);
-            }
-          }}
-          showSizeChanger
-          showQuickJumper
-          showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} orders`}
-          pageSizeOptions={['10', '20', '50', '100']}
-        />
-      </div>
-      <Drawer
-        title={viewOrder ? `Order #${viewOrder.orderNumber}` : ''}
-        open={!!viewOrder}
-        onClose={() => setViewOrder(null)}
-        width={600}
-        className="rounded-3xl"
-        getContainer={false}
-        destroyOnClose
-        extra={
-          <Button onClick={() => setViewOrder(null)} type="default">
-            Close
-          </Button>
-        }
-      >
-        {viewOrder ? (
-          <div className="space-y-4">
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-              <div className="font-semibold text-lg mb-2">Customer: {viewOrder.customerName}</div>
-              <div className="text-gray-600 text-sm mb-1">Order #: {viewOrder.orderNumber}</div>
-              <div className="text-gray-600 text-sm mb-1">Date: {new Date(viewOrder.createdAt).toLocaleString()}</div>
-              <div className="text-gray-600 text-sm mb-1">Subtotal: ৳{viewOrder.items.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2)}</div>
-              <div className="text-red-500 text-sm mb-1">Discount: ৳{typeof viewOrder.discount === 'number' ? viewOrder.discount.toFixed(2) : (viewOrder.items.reduce((sum, item) => sum + item.totalPrice, 0) - viewOrder.totalAmount).toFixed(2)}</div>
-              <div className="text-green-700 text-base font-bold mb-1">Final Total: ৳{viewOrder.totalAmount.toFixed(2)}</div>
-              {viewOrder.notes && <div className="text-gray-600 text-sm mb-1">Notes: {viewOrder.notes}</div>}
-            </div>
-            <div>
-              <div className="font-semibold mb-2">Items</div>
-              <Table
-                columns={[
-                  { title: 'Product', dataIndex: ['product', 'name'], key: 'product' },
-                  { title: 'UPC', dataIndex: ['product', 'upc'], key: 'upc' },
-                  { title: 'Qty', dataIndex: 'quantity', key: 'quantity' },
-                  { title: 'Unit Price', dataIndex: 'unitPrice', key: 'unitPrice', render: (v: number) => `৳${v.toFixed(2)}` },
-                  { title: 'Total', dataIndex: 'totalPrice', key: 'totalPrice', render: (v: number) => `৳${v.toFixed(2)}` },
-                ]}
-                dataSource={viewOrder.items}
-                rowKey={(_, idx) => String(idx)}
-                pagination={false}
-                size="small"
-                bordered
-              />
-            </div>
+    <>
+      <div style={{ position: "fixed", left: -9999, top: 0, zIndex: -1, width: 794, height: 1123, background: "white" }}>
+        {/* Hidden print container for PDF generation (A4 size: 794x1123 px at 96dpi) */}
+        {printInvoiceData && (
+          <div ref={printContainerRef} style={{ width: 794, minHeight: 1123, background: "white", padding: 24 }}>
+            <InvoiceTemplate data={printInvoiceData} />
           </div>
-        ) : <Spin />}
-      </Drawer>
-    </div>
+        )}
+      </div>
+      <div className="bg-white border border-gray-300 rounded-3xl shadow-lg overflow-hidden flex flex-col" style={{ maxHeight: 600 }}>
+        <div
+          className="overflow-x-auto custom-scrollbar flex-1"
+          style={{ maxHeight: 500 }}
+        >
+          <Table
+            columns={columns}
+            dataSource={data?.data || []}
+            rowKey="_id"
+            className="min-w-[700px] !bg-white"
+            scroll={{ x: '100%' }}
+            pagination={false}
+            sticky
+            loading={isLoading}
+          />
+        </div>
+        <div className="custom-pagination p-4">
+          <Pagination
+            current={current}
+            pageSize={pageSize}
+            total={data?.pagination?.total || 0}
+            onChange={(page, size) => {
+              setCurrent(page);
+              if (size !== pageSize) {
+                setPageSize(size);
+                setCurrent(1);
+              }
+            }}
+            showSizeChanger
+            showQuickJumper
+            showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} orders`}
+            pageSizeOptions={['10', '20', '50', '100']}
+          />
+        </div>
+        <Drawer
+          title={viewOrder ? `Order #${viewOrder.orderNumber}` : ''}
+          open={!!viewOrder}
+          onClose={() => setViewOrder(null)}
+          width={600}
+          className="rounded-3xl"
+          getContainer={false}
+          destroyOnClose
+          extra={
+            <Button onClick={() => setViewOrder(null)} type="default">
+              Close
+            </Button>
+          }
+        >
+          {viewOrder ? (
+            <div className="space-y-4">
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <div className="font-semibold text-lg mb-2">Customer: {viewOrder.customerName}</div>
+                <div className="text-gray-600 text-sm mb-1">Order #: {viewOrder.orderNumber}</div>
+                <div className="text-gray-600 text-sm mb-1">Date: {new Date(viewOrder.createdAt).toLocaleString()}</div>
+                <div className="text-gray-600 text-sm mb-1">Subtotal: ৳{viewOrder.items.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2)}</div>
+                <div className="text-red-500 text-sm mb-1">Discount: ৳{typeof viewOrder.discount === 'number' ? viewOrder.discount.toFixed(2) : (viewOrder.items.reduce((sum, item) => sum + item.totalPrice, 0) - viewOrder.totalAmount).toFixed(2)}</div>
+                <div className="text-green-700 text-base font-bold mb-1">Final Total: ৳{viewOrder.totalAmount.toFixed(2)}</div>
+                {viewOrder.notes && <div className="text-gray-600 text-sm mb-1">Notes: {viewOrder.notes}</div>}
+              </div>
+              <div>
+                <div className="font-semibold mb-2">Items</div>
+                <Table
+                  columns={[
+                    { title: 'Product', dataIndex: ['product', 'name'], key: 'product' },
+                    { title: 'UPC', dataIndex: ['product', 'upc'], key: 'upc' },
+                    { title: 'Qty', dataIndex: 'quantity', key: 'quantity' },
+                    { title: 'Unit Price', dataIndex: 'unitPrice', key: 'unitPrice', render: (v: number) => `৳${v.toFixed(2)}` },
+                    { title: 'Total', dataIndex: 'totalPrice', key: 'totalPrice', render: (v: number) => `৳${v.toFixed(2)}` },
+                  ]}
+                  dataSource={viewOrder.items}
+                  rowKey={(_, idx) => String(idx)}
+                  pagination={false}
+                  size="small"
+                  bordered
+                />
+              </div>
+            </div>
+          ) : <Spin />}
+        </Drawer>
+      </div>
+    </>
   );
 } 

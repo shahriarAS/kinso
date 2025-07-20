@@ -9,9 +9,10 @@ import ProductGrid from "./ProductGrid";
 import CartDetails from "./CartDetails";
 import CustomerModal from "./CustomerModal";
 import { CartItem, DEFAULT_UNIT_PRICE, CustomerOption, WarehouseOption } from "./types";
-import { printWithTailwind } from "react-tailwind-printer";
 import InvoiceTemplate from "./InvoiceTemplate";
 import type { InvoiceData } from "./InvoiceTemplate";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 export default function POS() {
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -23,6 +24,7 @@ export default function POS() {
   const [customerModalOpen, setCustomerModalOpen] = useState(false);
   const [lastInvoiceData, setLastInvoiceData] = useState<InvoiceData | null>(null);
   const searchInputRef = useRef<any>(null);
+  const printContainerRef = useRef<HTMLDivElement>(null);
 
   // API hooks
   const { data: warehousesData, isLoading: warehousesLoading } = useGetWarehousesQuery({
@@ -165,20 +167,23 @@ export default function POS() {
     }, 100);
   };
 
-  const handlePrint = () => {
-    printWithTailwind({
-      title: "Printable Component",
-      component: <InvoiceTemplate />,
-    });
-  };
-
   useEffect(() => {
-    if (lastInvoiceData) {
-      printWithTailwind({
-        title: `Invoice #${lastInvoiceData.invoiceNumber}`,
-        component: <InvoiceTemplate data={lastInvoiceData} />,
-      });
-      setLastInvoiceData(null); // Reset after print
+    if (lastInvoiceData && printContainerRef.current) {
+      setTimeout(async () => {
+        const input = printContainerRef.current;
+        if (!input) return;
+        const canvas = await html2canvas(input, { scale: 2, useCORS: false, backgroundColor: '#fff' });
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF({ orientation: "p", unit: "pt", format: "a4" });
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const imgWidth = pdfWidth;
+        const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+        pdf.autoPrint();
+        const pdfBlob = pdf.output("bloburl");
+        window.open(pdfBlob);
+        setLastInvoiceData(null);
+      }, 100);
     }
   }, [lastInvoiceData]);
 
@@ -191,7 +196,15 @@ export default function POS() {
 
 
   return (
-    <div className="h-full w-full p-6 px-4 relative overflow-x-hidden flex flex-col gap-4 bg-secondary rounded-3xl">
+    <>
+      <div style={{ position: "fixed", left: -9999, top: 0, zIndex: -1, width: 794, height: 1123, background: "white" }}>
+        {lastInvoiceData && (
+          <div ref={printContainerRef} style={{ width: 794, minHeight: 1123, background: "white", padding: 24 }}>
+            <InvoiceTemplate data={lastInvoiceData} />
+          </div>
+        )}
+      </div>
+      <div className="h-full w-full p-6 px-4 relative overflow-x-hidden flex flex-col gap-4 bg-secondary rounded-3xl">
       {/* Header */}
       <div className="flex justify-between items-center mb-2">
         <h1 className="text-4xl font-bold text-primary tracking-tight">
@@ -257,5 +270,6 @@ export default function POS() {
         onCustomerCreated={handleCustomerCreated}
       />
     </div>
+    </>
   );
 }

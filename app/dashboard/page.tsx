@@ -174,7 +174,6 @@ const Dashboard: React.FC = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card
             className="bg-white border rounded-2xl shadow-sm"
-            bodyStyle={{ padding: 20 }}
           >
             <Statistic
               title={<span className="text-primary font-medium">Total Revenue</span>}
@@ -189,7 +188,6 @@ const Dashboard: React.FC = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card
             className="bg-white border rounded-2xl shadow-sm"
-            bodyStyle={{ padding: 20 }}
           >
             <Statistic
               title={<span className="text-primary font-medium">Total Orders</span>}
@@ -202,7 +200,6 @@ const Dashboard: React.FC = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card
             className="bg-white border rounded-2xl shadow-sm"
-            bodyStyle={{ padding: 20 }}
           >
             <Statistic
               title={<span className="text-primary font-medium">Total Customers</span>}
@@ -215,7 +212,6 @@ const Dashboard: React.FC = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card
             className="bg-white border rounded-2xl shadow-sm"
-            bodyStyle={{ padding: 20 }}
           >
             <Statistic
               title={<span className="text-primary font-medium">Total Products</span>}
@@ -304,7 +300,6 @@ const Dashboard: React.FC = () => {
               </Space>
             }
             className="bg-white border rounded-2xl shadow-sm"
-            bodyStyle={{ padding: 20 }}
           >
             <Table
               dataSource={stats.recentOrders}
@@ -326,7 +321,6 @@ const Dashboard: React.FC = () => {
               </Space>
             }
             className="bg-white border rounded-2xl shadow-sm"
-            bodyStyle={{ padding: 20 }}
           >
             <Table
               dataSource={stats.topProducts}

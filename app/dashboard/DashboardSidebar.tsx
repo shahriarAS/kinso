@@ -151,9 +151,9 @@ function ProfileMenu({ collapsed }: { collapsed: boolean }) {
         <Spin size="small" />
       ) : (
         <Dropdown
-          dropdownRender={() => menu}
+          popupRender={() => menu}
           trigger={["click"]}
-          placement="topCenter"
+          placement="top"
         >
           <div
             className={twMerge(

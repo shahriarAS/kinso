@@ -187,10 +187,9 @@ export default function CartDetails({
             options={customers}
             value={customer}
             onChange={setCustomer}
-            className="flex-1"
+            className="flex-1 rounded-3xl"
             size="large"
             placeholder="Select Customer"
-            popupClassName="rounded-xl"
             showSearch
             filterOption={(input, option) =>
               (option?.label ?? "").toLowerCase().includes(input.toLowerCase())

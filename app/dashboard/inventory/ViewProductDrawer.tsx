@@ -105,6 +105,9 @@ export default function ViewProductDrawer({ open, setOpen, product, onClose }: P
             <Descriptions.Item label="Product Name" span={2}>
               <span className="font-medium">{product.name}</span>
             </Descriptions.Item>
+            <Descriptions.Item label="SKU">
+              <span className="font-mono">{product.sku}</span>
+            </Descriptions.Item>
             <Descriptions.Item label="UPC">
               <span className="font-mono">{product.upc}</span>
             </Descriptions.Item>

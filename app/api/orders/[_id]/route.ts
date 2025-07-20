@@ -26,7 +26,7 @@ export async function GET(
     
     const order = await Order.findById(_id)
       .populate('customerId', 'name email phone')
-      .populate('items.product', 'name upc')
+      .populate('items.product', 'name upc sku')
       .lean();
     
     if (!order) {
@@ -214,7 +214,7 @@ export async function PUT(
     // Populate references for response
     const populatedOrder = await Order.findById(updatedOrder._id)
       .populate('customerId', 'name email phone')
-      .populate('items.product', 'name upc')
+      .populate('items.product', 'name upc sku')
       .lean();
     
     return NextResponse.json({

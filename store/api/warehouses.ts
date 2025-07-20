@@ -105,6 +105,7 @@ export const warehousesApi = createApi({
               _id: string;
               name: string;
               upc: string;
+              sku: string;
               category: string;
             };
             quantity: number;

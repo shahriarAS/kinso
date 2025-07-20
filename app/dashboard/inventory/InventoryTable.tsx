@@ -84,6 +84,12 @@ export default function InventoryTable({
       render: (text: string) => <span className="font-medium text-gray-900">{text}</span>,
     },
     {
+      title: <span className="font-medium text-base">SKU</span>,
+      dataIndex: "sku",
+      key: "sku",
+      render: (text: string) => <span className="text-gray-700 font-mono">{text}</span>,
+    },
+    {
       title: <span className="font-medium text-base">UPC</span>,
       dataIndex: "upc",
       key: "upc",

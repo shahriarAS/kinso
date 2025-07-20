@@ -54,6 +54,7 @@ export async function GET(
           _id: product._id,
           name: product.name,
           upc: product.upc,
+          sku: product.sku,
           category: product.category,
         },
         quantity: stockEntry.unit,

@@ -21,7 +21,7 @@ The POS system is now fully functional with API integration, providing a complet
   - Green tag for normal stock levels
   - Red tag for low stock (≤5 items)
   - Disabled "Add to Cart" for out-of-stock items
-- **Product Search**: Search by product name or UPC
+- **Product Search**: Search by product name or SKU or UPC
 - **Category Display**: Color-coded category badges
 
 ### 🛒 Cart Management

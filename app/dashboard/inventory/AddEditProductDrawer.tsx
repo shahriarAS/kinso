@@ -50,6 +50,7 @@ export default function AddEditProductDrawer({
 
       form.setFieldsValue({
         name: product.name,
+        sku: product.sku,
         upc: product.upc,
         category: typeof product.category === 'string' ? product.category : product.category?._id,
         stock: transformedStock,
@@ -158,7 +159,15 @@ export default function AddEditProductDrawer({
             />
           </Form.Item>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-3 gap-6">
+            <Form.Item
+              name="sku"
+              label="SKU"
+              rules={[{ required: true, message: "Please enter SKU" }]}
+              className="font-medium"
+            >
+              <Input size="large" placeholder="Enter SKU" className="w-full" />
+            </Form.Item>
             <Form.Item
               name="upc"
               label="UPC"

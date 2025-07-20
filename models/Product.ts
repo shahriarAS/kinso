@@ -10,6 +10,7 @@ export interface IStock {
 export interface IProduct extends Document {
   name: string;
   upc: string;
+  sku: string;
   category: mongoose.Types.ObjectId;
   stock: IStock[];
   createdAt: Date;
@@ -52,6 +53,12 @@ const ProductSchema: Schema = new Schema({
     unique: true,
     trim: true,
   },
+  sku: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+  },
   category: {
     type: Schema.Types.ObjectId,
     ref: 'Category',
@@ -61,6 +68,9 @@ const ProductSchema: Schema = new Schema({
 }, {
   timestamps: true,
 });
+
+// Index for SKU queries
+ProductSchema.index({ sku: 1 });
 
 // Index for UPC queries
 ProductSchema.index({ upc: 1 });

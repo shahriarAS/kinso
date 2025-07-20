@@ -35,7 +35,8 @@ export async function GET(request: NextRequest) {
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
-        { upc: { $regex: search, $options: 'i' } }
+        { upc: { $regex: search, $options: 'i' } },
+        { sku: { $regex: search, $options: 'i' } }
       ];
     }
     if (category) {
@@ -100,7 +101,7 @@ export async function POST(request: NextRequest) {
     await dbConnect();
     
     const body = await request.json();
-    const { name, upc, category, stock } = body;
+    const { name, sku, upc, category, stock } = body;
     
     // Basic validation
     if (!name || name.trim().length === 0) {
@@ -113,6 +114,13 @@ export async function POST(request: NextRequest) {
     if (!upc || upc.trim().length === 0) {
       return NextResponse.json(
         { success: false, message: 'Product UPC is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!sku || sku.trim().length === 0) {
+      return NextResponse.json(
+        { success: false, message: 'Product SKU is required' },
         { status: 400 }
       );
     }
@@ -155,9 +163,18 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    // Check if product already exists
-    const existingProduct = await Product.findOne({ upc: upc.trim() });
-    if (existingProduct) {
+    // Check if product already exists with same SKU
+    const existingProductWithSku = await Product.findOne({ sku: sku.trim() });
+    if (existingProductWithSku) {
+      return NextResponse.json(
+        { success: false, message: 'Product with this SKU already exists' },
+        { status: 409 }
+      );
+    }
+
+    // Check if product already exists with same UPC
+    const existingProductWithUpc = await Product.findOne({ upc: upc.trim() });
+    if (existingProductWithUpc) {
       return NextResponse.json(
         { success: false, message: 'Product with this UPC already exists' },
         { status: 409 }
@@ -187,6 +204,7 @@ export async function POST(request: NextRequest) {
     const product = await Product.create({
       name: name.trim(),
       upc: upc.trim(),
+      sku: sku.trim(),
       category,
       stock: stock.map((s: any) => ({
         warehouse: s.warehouse,

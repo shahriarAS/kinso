@@ -71,6 +71,7 @@ export default function POS() {
     _id: item.product._id,
     name: item.product.name,
     upc: item.product.upc,
+    sku: item.product.sku,
     category: item.product.category,
     stock: [{
       warehouse: inventoryData.data.warehouse,
@@ -83,7 +84,8 @@ export default function POS() {
   const filteredProducts = products.filter(
     (p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.upc.includes(search)
+      p.upc.includes(search) ||
+      p.sku.includes(search)
   );
 
   const subtotal = cart.reduce(

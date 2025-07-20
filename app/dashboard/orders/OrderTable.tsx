@@ -47,7 +47,7 @@ function mapOrderToInvoiceData(order: Order): InvoiceData {
     },
     items: order.items.map((item) => ({
       description: item.product.name,
-      details: `UPC: ${item.product.upc}`,
+      details: `SKU: ${item.product.sku}; UPC: ${item.product.upc}`,
       quantity: item.quantity,
       rate: item.unitPrice,
       price: item.totalPrice,
@@ -223,7 +223,7 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
           title={viewOrder ? `Order #${viewOrder.orderNumber}` : ''}
           open={!!viewOrder}
           onClose={() => setViewOrder(null)}
-          width={600}
+          width={800}
           className="rounded-3xl"
           getContainer={false}
           destroyOnClose
@@ -249,7 +249,7 @@ export default function OrderTable({ filters = {} }: OrderTableProps) {
                 <Table
                   columns={[
                     { title: 'Product', dataIndex: ['product', 'name'], key: 'product' },
-                    { title: 'UPC', dataIndex: ['product', 'upc'], key: 'upc' },
+                    { title: 'SKU', dataIndex: ['product', 'sku'], key: 'sku' },
                     { title: 'Qty', dataIndex: 'quantity', key: 'quantity' },
                     { title: 'Unit Price', dataIndex: 'unitPrice', key: 'unitPrice', render: (v: number) => `৳${v.toFixed(2)}` },
                     { title: 'Total', dataIndex: 'totalPrice', key: 'totalPrice', render: (v: number) => `৳${v.toFixed(2)}` },

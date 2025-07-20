@@ -35,7 +35,7 @@ export async function GET(
     // Get orders for the specific customer
     const orders = await Order.find({ customerId: _id })
       .populate('customerId', 'name email phone')
-      .populate('items.product', 'name upc')
+      .populate('items.product', 'name upc sku')
       .sort({ createdAt: -1 })
       .lean();
 

@@ -121,12 +121,12 @@ This document provides comprehensive documentation for all API routes available 
 
 ### Create Product
 - **POST** `/api/products`
-- **Body**: `{ name: string, upc: string, category: string, stock: Array<{ warehouse: string, unit: number, dp: number, mrp: number }> }`
+- **Body**: `{ name: string, sku: string, category: string, stock: Array<{ warehouse: string, unit: number, dp: number, mrp: number }> }`
 - **Response**: `{ message: string, data: Product }`
 
 ### Update Product
 - **PUT** `/api/products/[id]`
-- **Body**: `{ name?: string, upc?: string, category?: string, stock?: Array<{ warehouse: string, unit: number, dp: number, mrp: number }> }`
+- **Body**: `{ name?: string, sku?: string, category?: string, stock?: Array<{ warehouse: string, unit: number, dp: number, mrp: number }> }`
 - **Response**: `{ message: string, data: Product }`
 
 ### Delete Product

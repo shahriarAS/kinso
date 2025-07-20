@@ -26,9 +26,9 @@ This directory contains all the MongoDB/Mongoose schemas for the EZ Inventory Ma
 
 #### 4. **Product** (`Product.ts`)
 - **Purpose**: Inventory items with stock management
-- **Key Fields**: name, upc, category, stock[]
+- **Key Fields**: name, upc, sku, category, stock[]
 - **Embedded Schema**: Stock (warehouse, unit, dp, mrp)
-- **Indexes**: upc (unique), name, category, stock.warehouse
+- **Indexes**: sku (unique), upc(unique) name, category, stock.warehouse
 - **Relationships**: References Category, Warehouse; Referenced by Order
 
 #### 5. **Customer** (`Customer.ts`)
@@ -155,7 +155,7 @@ MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/ez-inventory
    - User references are used for audit trails
 
 2. **Indexing Strategy**:
-   - Unique indexes on business keys (email, upc, orderNumber)
+   - Unique indexes on business keys (email, sku, orderNumber)
    - Compound indexes for common query patterns
    - Text indexes for search functionality
 

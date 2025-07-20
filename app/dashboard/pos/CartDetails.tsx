@@ -147,10 +147,10 @@ export default function CartDetails({
           const productObj =
             typeof item.product === "object" && item.product !== null
               ? item.product
-              : { name: "Unknown", upc: "" };
+              : { name: "Unknown", upc: "", sku: "" };
           return {
             description: productObj.name,
-            details: `UPC: ${productObj.upc}`,
+            details: `SKU: ${productObj.sku}; UPC: ${productObj.upc}`,
             quantity: item.quantity,
             rate: item.unitPrice,
             price: item.totalPrice,
@@ -225,7 +225,7 @@ export default function CartDetails({
                       {item.name}
                     </div>
                     <div className="text-xs font-bold text-gray-600">
-                      UPC: {item.upc}
+                      SKU: {item.sku}
                     </div>
                   </div>
                 </div>

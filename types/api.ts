@@ -101,6 +101,7 @@ export interface Product {
   _id: string;
   name: string;
   upc: string;
+  sku: string;
   category: string | Category;
   stock: ProductStock[];
   createdAt: string;
@@ -110,6 +111,7 @@ export interface Product {
 export interface ProductInput {
   name: string;
   upc: string;
+  sku: string;
   category: string;
   stock: Array<{
     warehouse: string;

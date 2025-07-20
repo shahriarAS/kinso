@@ -56,7 +56,7 @@ export default function ProductGrid({ products, onAdd }: ProductGridProps) {
                 <span className="font-semibold text-base text-primary line-clamp-3 leading-tight break-words max-w-full">
                   {product.name}
                 </span>
-                <span className="text-sm text-gray-500">UPC: {product.upc}</span>
+                <span className="text-sm text-gray-500">SKU: {product.sku}</span>
               </div>
             </div>
             <div className="flex items-center gap-2 mb-1">

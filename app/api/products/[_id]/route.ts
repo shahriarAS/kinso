@@ -72,7 +72,7 @@ export async function PUT(
     await dbConnect();
     
     const body = await request.json();
-    const { name, upc, category, stock } = body;
+    const { name, sku, upc, category, stock } = body;
     
     // Check if product exists
     const { _id } = await params;
@@ -92,6 +92,13 @@ export async function PUT(
       );
     }
     
+    if (!sku || sku.trim().length === 0) {
+      return NextResponse.json(
+        { success: false, message: 'Product SKU is required' },
+        { status: 400 }
+      );
+    }
+
     if (!upc || upc.trim().length === 0) {
       return NextResponse.json(
         { success: false, message: 'Product UPC is required' },
@@ -136,7 +143,7 @@ export async function PUT(
         );
       }
     }
-    
+
     // Check if new UPC conflicts with existing product (excluding current one)
     const upcConflict = await Product.findOne({
       _id: { $ne: _id },
@@ -146,6 +153,19 @@ export async function PUT(
     if (upcConflict) {
       return NextResponse.json(
         { success: false, message: 'Product with this UPC already exists' },
+        { status: 409 }
+      );
+    }
+
+    // Check if new SKU conflicts with existing product (excluding current one)
+    const skuConflict = await Product.findOne({
+      _id: { $ne: _id },
+      sku: sku.trim()
+    });
+    
+    if (skuConflict) {
+      return NextResponse.json(
+        { success: false, message: 'Product with this SKU already exists' },
         { status: 409 }
       );
     }
@@ -174,6 +194,7 @@ export async function PUT(
       _id,
       {
         name: name.trim(),
+        sku: sku.trim(),
         upc: upc.trim(),
         category,
         stock: stock.map((s: any) => ({

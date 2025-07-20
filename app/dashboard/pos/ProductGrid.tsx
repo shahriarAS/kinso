@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Tooltip, Tag } from "antd";
+import { Button } from "antd";
 import { Icon } from "@iconify/react";
 import type { Product } from "@/types/product";
 import { categoryColors } from "./types";

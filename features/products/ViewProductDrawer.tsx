@@ -2,7 +2,7 @@
 import { Icon } from "@iconify/react";
 import { Button, Drawer, Descriptions, Table, Tag, Divider } from "antd";
 import React from "react";
-import { Product } from "@/types";
+import { Product } from "@/features/products/types";
 import { Warehouse } from "@/types/warehouse";
 
 interface Props {

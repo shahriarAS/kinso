@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/database";
-import { Warehouse, Product } from "@/models";
+import { Warehouse } from "@/models";
+import Product from "@/features/products/model";
 import { authorizeRequest, AuthenticatedRequest } from "@/lib/auth";
 
 // GET /api/warehouses/[id]/inventory - Get inventory for a specific warehouse

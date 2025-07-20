@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import type { Product } from "@/types/product";
+import type { Product } from "@/features/products/types";
 import { Input, Select, message } from "antd";
 import { useGetWarehousesQuery } from "@/store/api/warehouses";
 import { useGetCustomersQuery } from "@/store/api/customers";

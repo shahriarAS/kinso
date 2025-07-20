@@ -1,6 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { authApi } from "./api/auth";
-import { productsApi } from "./api/products";
 import { customersApi } from "./api/customers";
 import { ordersApi } from "./api/orders";
 import { warehousesApi } from "./api/warehouses";
@@ -8,6 +7,7 @@ import { categoriesApi } from "./api/categories";
 import { usersApi } from "./api/users";
 import { dashboardApi } from "./api/dashboard";
 import uiReducer from "./slices/uiSlice";
+import { productsApi } from "@/features/products";
 
 const store = configureStore({
   reducer: {

@@ -2,12 +2,12 @@
 import { Icon } from "@iconify/react";
 import { Button, Divider, Drawer, Form, Input, Select } from "antd";
 import React, { useEffect } from "react";
-import { Product, ProductInput } from "@/types";
+import type { Product, ProductInput } from "@/features/products/types";
 
 import {
   useCreateProductMutation,
   useUpdateProductMutation,
-} from "@/store/api/products";
+} from "@/features/products";
 import { useGetAllCategoriesQuery } from "@/store/api/categories";
 import { useGetWarehousesQuery } from "@/store/api/warehouses";
 import StockEntries from "./StockEntries";

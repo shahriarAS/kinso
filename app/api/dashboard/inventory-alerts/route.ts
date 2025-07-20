@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/database";
-import { Product } from "@/models";
+import Product from "@/features/products/model";
 import { authorizeRequest, AuthenticatedRequest } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {

@@ -1,4 +1,4 @@
-import { Warehouse } from "./warehouse";
+import { Warehouse } from "@/types/warehouse";
 
 export interface Product {
   _id: string;

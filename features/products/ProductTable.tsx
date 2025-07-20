@@ -5,8 +5,8 @@ import { useState } from "react";
 import {
   useGetProductsQuery,
   useDeleteProductMutation,
-} from "@/store/api/products";
-import type { Product } from "@/types";
+} from "@/features/products";
+import type { Product } from "@/features/products/types";
 import AddEditProductDrawer from "./AddEditProductDrawer";
 import ViewProductDrawer from "./ViewProductDrawer";
 import toast from "react-hot-toast";

@@ -45,7 +45,7 @@ export {
   useUpdateProductMutation,
   useDeleteProductMutation,
   useUpdateProductStockMutation,
-} from "@/store/api/products";
+} from "@/features/products";
 
 export {
   // Users API hooks
@@ -103,3 +103,5 @@ export type {
   PaginatedResponse,
   QueryParams,
 } from "@/types/api";
+
+import type { Product, ProductInput } from "@/features/products/types";

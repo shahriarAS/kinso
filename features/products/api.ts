@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import baseQueryWithErrorHandling from "../baseQueryWithErrorHandling";
-import { Product, ProductInput } from "@/types";
+import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
+import { Product, ProductInput } from "@/features/products/types";
 
 export const productsApi = createApi({
   reducerPath: "productsApi",

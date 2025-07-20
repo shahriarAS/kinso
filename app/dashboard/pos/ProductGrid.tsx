@@ -2,7 +2,7 @@
 
 import { Button } from "antd";
 import { Icon } from "@iconify/react";
-import type { Product } from "@/types/product";
+import type { Product } from "@/features/products/types";
 import { categoryColors } from "./types";
 import { getInitials } from "@/lib/getInitials";
 

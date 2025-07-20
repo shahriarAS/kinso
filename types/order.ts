@@ -1,4 +1,4 @@
-import { Product } from "./product";
+import { Product } from "@/features/products";
 
 export type PaymentMethod = "CASH" | "BKASH" | "ROCKET" | "NAGAD" | "BANK";
 

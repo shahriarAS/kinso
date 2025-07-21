@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useCallback } from "react";
 import { GenericFilters, type FilterField } from "@/components/common";
 import type { UserFilters as UserFiltersType } from "./types";
 
@@ -33,14 +33,14 @@ export default function UserFilters({
     },
   ];
 
-  const handleFiltersChange = (filters: Record<string, unknown>) => {
+  const handleFiltersChange = useCallback((filters: Record<string, unknown>) => {
     // Convert empty role to undefined
     const processedFilters = {
       ...filters,
       role: filters.role === "" ? undefined : filters.role,
     };
     onFiltersChange?.(processedFilters as UserFiltersType);
-  };
+  }, [onFiltersChange]);
 
   return (
     <GenericFilters

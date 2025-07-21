@@ -1,6 +1,6 @@
 "use client";
 import { Form, Input, Select, DatePicker, InputNumber, Button } from "antd";
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 
 export interface FilterField {
@@ -62,12 +62,16 @@ export default function GenericFilters<T = any>({
     }
   }, [initialValues, form]);
 
-  useEffect(() => {
-    const values = form.getFieldsValue();
+  const handleFiltersChange = useCallback((values: T) => {
     if (Object.keys(values as object).length > 0) {
       onFiltersChange(values);
     }
-  }, [debouncedValues, onFiltersChange]);
+  }, [onFiltersChange]);
+
+  useEffect(() => {
+    const values = form.getFieldsValue();
+    handleFiltersChange(values);
+  }, [debouncedValues, handleFiltersChange]);
 
   const handleReset = () => {
     form.resetFields();

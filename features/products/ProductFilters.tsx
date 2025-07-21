@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { GenericFilters, type FilterField } from "@/components/common";
 import { useGetAllCategoriesQuery } from "@/features/categories/api";
 import { useGetWarehousesQuery } from "@/features/warehouses";
@@ -97,7 +97,7 @@ export default function ProductFiltersRefactored({
     },
   ];
 
-  const handleFiltersChange = (filters: ProductFilters) => {
+  const handleFiltersChange = useCallback((filters: ProductFilters) => {
     // Reset to first page when filters change
     onPageChange(1);
 
@@ -114,7 +114,7 @@ export default function ProductFiltersRefactored({
     if (filters.status !== undefined) {
       onStatusChange(filters.status);
     }
-  };
+  }, [onPageChange, onSearchChange, onCategoryChange, onWarehouseChange, onStatusChange]);
 
   const initialValues = {
     search: searchTerm,

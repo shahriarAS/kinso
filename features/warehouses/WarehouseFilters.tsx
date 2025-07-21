@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useCallback } from "react";
 import { GenericFilters, type FilterField } from "@/components/common";
 
 interface WarehouseFilters {
@@ -36,7 +36,7 @@ export default function WarehouseFilters({
     },
   ];
 
-  const handleFiltersChange = (filters: WarehouseFilters) => {
+  const handleFiltersChange = useCallback((filters: WarehouseFilters) => {
     // Reset to first page when filters change
     onPageChange(1);
 
@@ -44,7 +44,7 @@ export default function WarehouseFilters({
     if (filters.search !== undefined) {
       onSearchChange(filters.search);
     }
-  };
+  }, [onPageChange, onSearchChange]);
 
   const initialValues = {
     search: searchTerm,

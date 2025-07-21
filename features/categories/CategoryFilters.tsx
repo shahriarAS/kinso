@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useCallback } from "react";
 import { GenericFilters, type FilterField } from "@/components/common";
 
 interface CategoryFilters {
@@ -28,7 +28,7 @@ export default function CategoryFilters({
     },
   ];
 
-  const handleFiltersChange = (filters: CategoryFilters) => {
+  const handleFiltersChange = useCallback((filters: CategoryFilters) => {
     // Reset to first page when filters change
     onPageChange(1);
 
@@ -36,7 +36,7 @@ export default function CategoryFilters({
     if (filters.search !== undefined) {
       onSearchChange(filters.search);
     }
-  };
+  }, [onPageChange, onSearchChange]);
 
   const initialValues = {
     search: searchTerm,

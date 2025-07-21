@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useCallback } from "react";
 import { PAYMENT_METHODS } from "@/lib/constraints";
 import { GenericFilters, type FilterField } from "@/components/common";
 
@@ -47,7 +47,7 @@ export default function OrderFilters({
     },
   ];
 
-  const handleFiltersChange = (filters: OrderFilters) => {
+  const handleFiltersChange = useCallback((filters: OrderFilters) => {
     // Reset to first page when filters change
     onPageChange(1);
 
@@ -58,7 +58,7 @@ export default function OrderFilters({
     if (filters.paymentMethod !== undefined) {
       onPaymentMethodChange(filters.paymentMethod);
     }
-  };
+  }, [onPageChange, onSearchChange, onPaymentMethodChange]);
 
   const initialValues = {
     search: searchTerm,

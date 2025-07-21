@@ -1,4 +1,5 @@
 "use client";
+import { useCallback } from "react";
 import { CustomerFilters as CustomerFiltersType } from "./types";
 import { GenericFilters, type FilterField } from "@/components/common";
 
@@ -38,7 +39,7 @@ export default function CustomerFilters({
     },
   ];
 
-  const handleFiltersChange = (filters: Record<string, unknown>) => {
+  const handleFiltersChange = useCallback((filters: Record<string, unknown>) => {
     // Convert "all" status to undefined
     const processedFilters = {
       ...filters,
@@ -48,7 +49,7 @@ export default function CustomerFilters({
           : (filters.status as "active" | "inactive" | undefined),
     };
     onFiltersChange?.(processedFilters as CustomerFiltersType);
-  };
+  }, [onFiltersChange]);
 
   return (
     <GenericFilters

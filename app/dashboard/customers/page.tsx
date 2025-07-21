@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "antd";
 import { Icon } from "@iconify/react";
 import {
@@ -17,9 +17,9 @@ export default function Customers() {
     email: "",
   });
   const [open, setOpen] = useState(false);
-  const handleFiltersChange = (newFilters: CustomerFiltersType) => {
+  const handleFiltersChange = useCallback((newFilters: CustomerFiltersType) => {
     setFilters(newFilters);
-  };
+  }, []);
 
   return (
     <div className="h-full w-full p-6 relative overflow-x-hidden flex flex-col gap-10">

@@ -7,7 +7,7 @@ import {
   useCreateWarehouseMutation,
   useUpdateWarehouseMutation,
 } from "@/features/warehouses/api";
-import toast from "react-hot-toast";
+import { useNotification } from "@/hooks/useNotification";
 
 interface Props {
   open: boolean;
@@ -23,6 +23,7 @@ export default function AddEditWarehouseDrawer({
   onClose,
 }: Props) {
   const [form] = Form.useForm<Warehouse>();
+  const { success, error: showError } = useNotification();
 
   // API hooks
   const [createWarehouse, { isLoading: isCreating }] =
@@ -61,10 +62,10 @@ export default function AddEditWarehouseDrawer({
           _id: warehouse._id,
           warehouse: values,
         }).unwrap();
-        toast.success("Warehouse updated successfully");
+        success("Warehouse updated successfully");
       } else {
         await createWarehouse(values).unwrap();
-        toast.success("Warehouse created successfully");
+        success("Warehouse created successfully");
       }
 
       handleClose();
@@ -77,12 +78,12 @@ export default function AddEditWarehouseDrawer({
         typeof error.data === "object" &&
         "message" in error.data
       ) {
-        toast.error((error.data as { message: string }).message);
+        showError("Failed to save warehouse", (error.data as { message: string }).message);
       } else if (error && typeof error === "object" && "errorFields" in error) {
         // Form validation error
         return;
       } else {
-        toast.error("Failed to save warehouse");
+        showError("Failed to save warehouse");
       }
     }
   };

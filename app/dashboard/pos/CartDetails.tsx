@@ -1,9 +1,10 @@
 "use client";
 
-import { Input, Select, Button, Tooltip, Modal, message } from "antd";
+import { Input, Select, Button, Tooltip, Modal } from "antd";
 import { Icon } from "@iconify/react";
 import { useState } from "react";
 import { useCreateOrderMutation } from "@/features/orders";
+import { useNotification } from "@/hooks/useNotification";
 import { CartItem, CustomerOption } from "./types";
 import type { InvoiceData } from "./InvoiceTemplate";
 import { PaymentMethod } from "@/features/orders/types";
@@ -63,6 +64,7 @@ export default function CartDetails({
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CASH");
   const [createOrder, { isLoading: isCreatingOrder }] =
     useCreateOrderMutation();
+  const { success, error } = useNotification();
 
   const subtotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -71,12 +73,12 @@ export default function CartDetails({
 
   const handleCheckout = async () => {
     if (cart.length === 0) {
-      message.error("Cart is empty!");
+      error("Cart is empty!");
       return;
     }
 
     if (!customer) {
-      message.error("Please select a customer!");
+      error("Please select a customer!");
       return;
     }
 
@@ -172,13 +174,13 @@ export default function CartDetails({
           title: "Cashier",
         },
       };
-      message.success("Order created successfully!");
+      success("Order created successfully!");
       setCheckoutModalOpen(false);
       if (onOrderCompleted) onOrderCompleted(invoiceData);
       onCheckoutSuccess();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      message.error(error.data?.message || "Failed to create order");
+      error("Failed to create order", error.data?.message);
     }
   };
 

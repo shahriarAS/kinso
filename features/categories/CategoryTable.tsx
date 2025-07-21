@@ -9,7 +9,7 @@ import {
   useDeleteCategoryMutation,
 } from "@/features/categories/api";
 import AddEditCategoryDrawer from "./AddEditCategoryDrawer";
-import toast from "react-hot-toast";
+import { useNotification } from "@/hooks/useNotification";
 
 interface Props {
   searchTerm: string;
@@ -25,6 +25,7 @@ export default function CategoryTable({
   onPageChange,
 }: Props) {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const { success, error: showError } = useNotification();
 
   // API hooks
   const { data, isLoading } = useGetCategoriesQuery({
@@ -43,7 +44,7 @@ export default function CategoryTable({
   const handleDelete = async (_id: string) => {
     try {
       await deleteCategory(_id).unwrap();
-      toast.success("Category deleted successfully");
+      success("Category deleted successfully");
     } catch (error: unknown) {
       if (
         error &&
@@ -53,9 +54,9 @@ export default function CategoryTable({
         typeof error.data === "object" &&
         "message" in error.data
       ) {
-        toast.error((error.data as { message: string }).message);
+        showError("Failed to delete category", (error.data as { message: string }).message);
       } else {
-        toast.error("Failed to delete category");
+        showError("Failed to delete category");
       }
     }
   };

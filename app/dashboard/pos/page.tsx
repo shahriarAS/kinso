@@ -1,9 +1,10 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import type { Product } from "@/features/products/types";
-import { Input, Select, message } from "antd";
+import { Input, Select } from "antd";
 import { useGetWarehousesQuery } from "@/features/warehouses";
 import { useGetCustomersQuery } from "@/features/customers";
+import { useNotification } from "@/hooks/useNotification";
 import ProductGrid from "./ProductGrid";
 import CartDetails from "./CartDetails";
 import CustomerModal from "./CustomerModal";
@@ -29,6 +30,7 @@ export default function POS() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const searchInputRef = useRef<any>(null);
   const printContainerRef = useRef<HTMLDivElement>(null);
+  const { success } = useNotification();
 
   // API hooks
   const { data: warehousesData, isLoading: warehousesLoading } =
@@ -137,7 +139,7 @@ export default function POS() {
     value: string;
   }) => {
     setCustomer(newCustomer.value);
-    message.success(`Customer ${newCustomer.name} created and selected!`);
+    success(`Customer ${newCustomer.name} created and selected!`);
   };
 
   const handleCheckoutSuccess = () => {
@@ -145,7 +147,7 @@ export default function POS() {
     setDiscount(0);
     setCustomTotal(null);
     setCustomer("");
-    message.success("Cart cleared! Ready for next sale.");
+    success("Cart cleared! Ready for next sale.");
     // Refocus search bar
     setTimeout(() => {
       if (searchInputRef.current) {
@@ -160,7 +162,7 @@ export default function POS() {
     setDiscount(0);
     setCustomTotal(null);
     setCustomer("");
-    message.success("Cart cleared! Ready for next sale.");
+    success("Cart cleared! Ready for next sale.");
     // Refocus search bar
     setTimeout(() => {
       if (searchInputRef.current) {

@@ -7,7 +7,7 @@ import {
   useCreateCategoryMutation,
   useUpdateCategoryMutation,
 } from "@/features/categories/api";
-import toast from "react-hot-toast";
+import { useNotification } from "@/hooks/useNotification";
 
 interface Props {
   open: boolean;
@@ -23,6 +23,7 @@ export default function AddEditCategoryDrawer({
   onClose,
 }: Props) {
   const [form] = Form.useForm<Category>();
+  const { success, error: showError } = useNotification();
 
   // API hooks
   const [createCategory, { isLoading: isCreating }] =
@@ -61,10 +62,10 @@ export default function AddEditCategoryDrawer({
           _id: category._id,
           category: values,
         }).unwrap();
-        toast.success("Category updated successfully");
+        success("Category updated successfully");
       } else {
         await createCategory(values).unwrap();
-        toast.success("Category created successfully");
+        success("Category created successfully");
       }
 
       handleClose();
@@ -77,12 +78,12 @@ export default function AddEditCategoryDrawer({
         typeof error.data === "object" &&
         "message" in error.data
       ) {
-        toast.error((error.data as { message: string }).message);
+        showError("Failed to save category", (error.data as { message: string }).message);
       } else if (error && typeof error === "object" && "errorFields" in error) {
         // Form validation error
         return;
       } else {
-        toast.error("Failed to save category");
+        showError("Failed to save category");
       }
     }
   };

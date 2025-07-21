@@ -9,7 +9,7 @@ import {
 } from "@/features/warehouses/api";
 import type { Warehouse } from "@/features/warehouses/types";
 import AddEditWarehouseDrawer from "./AddEditWarehouseDrawer";
-import toast from "react-hot-toast";
+import { useNotification } from "@/hooks/useNotification";
 
 interface Props {
   searchTerm: string;
@@ -27,6 +27,7 @@ export default function WarehouseTable({
   const [editingWarehouse, setEditingWarehouse] = useState<Warehouse | null>(
     null,
   );
+  const { success, error: showError } = useNotification();
 
   // API hooks
   const { data, isLoading } = useGetWarehousesQuery({
@@ -45,7 +46,7 @@ export default function WarehouseTable({
   const handleDelete = async (_id: string) => {
     try {
       await deleteWarehouse(_id).unwrap();
-      toast.success("Warehouse deleted successfully");
+      success("Warehouse deleted successfully");
     } catch (error: unknown) {
       if (
         error &&
@@ -55,9 +56,9 @@ export default function WarehouseTable({
         typeof error.data === "object" &&
         "message" in error.data
       ) {
-        toast.error((error.data as { message: string }).message);
+        showError("Failed to delete warehouse", (error.data as { message: string }).message);
       } else {
-        toast.error("Failed to delete warehouse");
+        showError("Failed to delete warehouse");
       }
     }
   };

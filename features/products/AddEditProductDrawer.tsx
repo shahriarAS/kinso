@@ -11,7 +11,7 @@ import {
 import { useGetAllCategoriesQuery } from "@/features/categories/api";
 import { useGetWarehousesQuery } from "@/features/warehouses";
 import StockEntries from "./StockEntries";
-import toast from "react-hot-toast";
+import { useNotification } from "@/hooks/useNotification";
 
 interface Props {
   open: boolean;
@@ -27,6 +27,7 @@ export default function AddEditProductDrawer({
   onClose,
 }: Props) {
   const [form] = Form.useForm<ProductInput>();
+  const { success, error: showError } = useNotification();
 
   // API hooks
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
@@ -81,10 +82,10 @@ export default function AddEditProductDrawer({
           _id: product._id,
           product: values,
         }).unwrap();
-        toast.success("Product updated successfully");
+        success("Product updated successfully");
       } else {
         await createProduct(values).unwrap();
-        toast.success("Product created successfully");
+        success("Product created successfully");
       }
 
       handleClose();
@@ -97,12 +98,12 @@ export default function AddEditProductDrawer({
         typeof error.data === "object" &&
         "message" in error.data
       ) {
-        toast.error((error.data as { message: string }).message);
+        showError("Failed to save product", (error.data as { message: string }).message);
       } else if (error && typeof error === "object" && "errorFields" in error) {
         // Form validation error
         return;
       } else {
-        toast.error("Failed to save product");
+        showError("Failed to save product");
       }
     }
   };

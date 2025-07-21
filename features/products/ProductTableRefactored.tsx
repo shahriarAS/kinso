@@ -13,7 +13,7 @@ import {
 import type { Product } from "@/features/products/types";
 import AddEditProductDrawer from "./AddEditProductDrawer";
 import ViewProductDrawer from "./ViewProductDrawer";
-import toast from "react-hot-toast";
+import { useNotification } from "@/hooks/useNotification";
 
 interface Props {
   searchTerm: string;
@@ -37,6 +37,7 @@ export default function ProductTableRefactored({
 }: Props) {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
+  const { success, error: showError } = useNotification();
 
   // API hooks
   const { data, isLoading, error, refetch } = useGetProductsQuery({
@@ -62,7 +63,7 @@ export default function ProductTableRefactored({
   const handleDelete = async (product: Product) => {
     try {
       await deleteProduct(product._id).unwrap();
-      toast.success("Product deleted successfully");
+      success("Product deleted successfully");
     } catch (error: unknown) {
       if (
         error &&
@@ -72,9 +73,9 @@ export default function ProductTableRefactored({
         typeof error.data === "object" &&
         "message" in error.data
       ) {
-        toast.error((error.data as { message: string }).message);
+        showError("Failed to delete product", (error.data as { message: string }).message);
       } else {
-        toast.error("Failed to delete product");
+        showError("Failed to delete product");
       }
     }
   };

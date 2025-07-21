@@ -1,7 +1,11 @@
 "use client";
-import { Table, Button, Tooltip, Pagination, Popconfirm, Tag } from "antd";
-import { Icon } from "@iconify/react";
 import { useState } from "react";
+import { Tag } from "antd";
+import {
+  GenericTable,
+  type TableColumn,
+  type TableAction,
+} from "@/components/common";
 import {
   useGetProductsQuery,
   useDeleteProductMutation,
@@ -23,7 +27,7 @@ interface Props {
   onPageChange: (page: number) => void;
 }
 
-export default function InventoryTable({
+export default function ProductTableRefactored({
   searchTerm,
   categoryFilter,
   warehouseFilter,
@@ -36,7 +40,7 @@ export default function InventoryTable({
   const { success, error: showError } = useNotification();
 
   // API hooks
-  const { data, isLoading } = useGetProductsQuery({
+  const { data, isLoading, error, refetch } = useGetProductsQuery({
     page: currentPage,
     limit: pageSize,
     search: searchTerm,
@@ -56,9 +60,9 @@ export default function InventoryTable({
     setViewingProduct(product);
   };
 
-  const handleDelete = async (_id: string) => {
+  const handleDelete = async (product: Product) => {
     try {
-      await deleteProduct(_id).unwrap();
+      await deleteProduct(product._id).unwrap();
       success("Product deleted successfully");
     } catch (error: unknown) {
       if (
@@ -89,7 +93,8 @@ export default function InventoryTable({
     return stock.reduce((sum, item) => sum + item.unit, 0);
   };
 
-  const columns = [
+  // Define columns using the generic interface
+  const columns: TableColumn<Product>[] = [
     {
       title: <span className="font-medium text-base">Name</span>,
       dataIndex: "name",
@@ -138,52 +143,38 @@ export default function InventoryTable({
         );
       },
     },
+  ];
+
+  // Define actions using the generic interface
+  const actions: TableAction<Product>[] = [
     {
-      title: <span className="font-medium text-base">Action</span>,
-      key: "action",
-      render: (_: unknown, record: Product) => (
-        <div className="flex gap-2">
-          <Tooltip title="View Product">
-            <Button
-              className="inline-flex items-center justify-center rounded-lg bg-green-50 border border-green-200 hover:bg-green-100 transition p-1.5"
-              onClick={() => handleView(record)}
-            >
-              <Icon icon="lineicons:eye" className="text-lg text-green-700" />
-            </Button>
-          </Tooltip>
-          <Tooltip title="Edit">
-            <Button
-              className="inline-flex items-center justify-center rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 transition p-1.5"
-              onClick={() => handleEdit(record)}
-            >
-              <Icon
-                icon="lineicons:pencil-1"
-                className="text-lg text-blue-700"
-              />
-            </Button>
-          </Tooltip>
-          <Tooltip title="Delete">
-            <Popconfirm
-              title="Delete Product"
-              description="Are you sure you want to delete this product?"
-              onConfirm={() => handleDelete(record._id)}
-              okText="Yes"
-              cancelText="No"
-              okButtonProps={{ danger: true }}
-            >
-              <Button
-                className="inline-flex items-center justify-center rounded-lg bg-red-50 border border-red-200 hover:bg-red-100 transition p-1.5"
-                loading={isDeleting}
-              >
-                <Icon
-                  icon="lineicons:trash-3"
-                  className="text-lg text-red-600"
-                />
-              </Button>
-            </Popconfirm>
-          </Tooltip>
-        </div>
-      ),
+      key: "view",
+      label: "View Product",
+      icon: "lineicons:eye",
+      type: "view",
+      color: "green",
+      onClick: handleView,
+    },
+    {
+      key: "edit",
+      label: "Edit",
+      icon: "lineicons:pencil-1",
+      type: "edit",
+      color: "blue",
+      onClick: handleEdit,
+    },
+    {
+      key: "delete",
+      label: "Delete",
+      icon: "lineicons:trash-3",
+      type: "delete",
+      color: "red",
+      onClick: handleDelete,
+      confirm: {
+        title: "Delete Product",
+        description: "Are you sure you want to delete this product?",
+      },
+      loading: isDeleting,
     },
   ];
 
@@ -191,39 +182,28 @@ export default function InventoryTable({
   const pagination = data?.pagination;
 
   return (
-    <div
-      className="bg-white border border-gray-300 rounded-3xl shadow-lg overflow-hidden flex flex-col"
-      style={{ maxHeight: 600 }}
-    >
-      <div
-        className="overflow-x-auto custom-scrollbar flex-1"
-        style={{ maxHeight: 500 }}
-      >
-        <Table
-          columns={columns}
-          dataSource={products}
-          rowKey="_id"
-          className="min-w-[700px] !bg-white"
-          scroll={{ x: "100%" }}
-          pagination={false}
-          loading={isLoading}
-          sticky
-        />
-      </div>
-      {pagination && (
-        <div className="custom-pagination">
-          <Pagination
-            current={currentPage}
-            pageSize={pageSize}
-            total={pagination.total}
-            onChange={onPageChange}
-            showSizeChanger={false}
-            showTotal={(total, range) =>
-              `${range[0]}-${range[1]} of ${total} items`
-            }
-          />
-        </div>
-      )}
+    <>
+      <GenericTable
+        data={products}
+        loading={isLoading}
+        error={error}
+        onRetry={refetch}
+        columns={columns}
+        actions={actions}
+        pagination={
+          pagination
+            ? {
+                current: currentPage,
+                pageSize,
+                total: pagination.total,
+                onChange: onPageChange,
+                showSizeChanger: false,
+                showTotal: (total, range) =>
+                  `${range[0]}-${range[1]} of ${total} items`,
+              }
+            : undefined
+        }
+      />
 
       {/* Edit Drawer */}
       <AddEditProductDrawer
@@ -240,6 +220,6 @@ export default function InventoryTable({
         product={viewingProduct}
         onClose={() => setViewingProduct(null)}
       />
-    </div>
+    </>
   );
 }

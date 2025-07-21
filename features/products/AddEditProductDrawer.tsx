@@ -1,9 +1,8 @@
 "use client";
-import { Icon } from "@iconify/react";
-import { Button, Divider, Drawer, Form, Input, Select } from "antd";
+import { Form } from "antd";
 import React, { useEffect } from "react";
+import { GenericDrawer, type FormField } from "@/components/common";
 import type { Product, ProductInput } from "@/features/products/types";
-
 import {
   useCreateProductMutation,
   useUpdateProductMutation,
@@ -20,7 +19,7 @@ interface Props {
   onClose?: () => void;
 }
 
-export default function AddEditProductDrawer({
+export default function AddEditProductDrawerRefactored({
   open,
   setOpen,
   product,
@@ -38,45 +37,53 @@ export default function AddEditProductDrawer({
   const isEditing = !!product;
   const isLoading = isCreating || isUpdating;
 
-  useEffect(() => {
-    if (product && open) {
-      // Transform stock data to match form structure
-      const transformedStock =
-        product.stock?.map((stockItem) => ({
-          ...stockItem,
-          warehouse:
-            typeof stockItem.warehouse === "string"
-              ? stockItem.warehouse
-              : stockItem.warehouse?._id,
-        })) || [];
+  const categoryOptions =
+    categoriesData?.data?.map((cat: { name: string; _id: string }) => ({
+      label: cat.name,
+      value: cat._id,
+    })) || [];
 
-      form.setFieldsValue({
-        name: product.name,
-        sku: product.sku,
-        upc: product.upc,
-        category:
-          typeof product.category === "string"
-            ? product.category
-            : product.category?._id,
-        stock: transformedStock,
-      });
-    } else if (!open) {
-      form.resetFields();
-    }
-  }, [product, open, form]);
+  const warehouseOptions =
+    warehousesData?.data?.map((warehouse) => ({
+      label: warehouse.name,
+      value: warehouse._id,
+    })) || [];
 
-  const handleClose = () => {
-    setOpen(false);
-    form.resetFields();
-    if (onClose) {
-      onClose();
-    }
-  };
+  // Define form fields using the generic interface
+  const fields: FormField[] = [
+    {
+      name: "name",
+      label: "Product Name",
+      type: "input",
+      placeholder: "Enter Product Name",
+      rules: [{ required: true, message: "Please enter product name" }],
+    },
+    {
+      name: "sku",
+      label: "SKU",
+      type: "input",
+      placeholder: "Enter SKU",
+      rules: [{ required: true, message: "Please enter SKU" }],
+    },
+    {
+      name: "upc",
+      label: "UPC",
+      type: "input",
+      placeholder: "Enter UPC",
+      rules: [{ required: true, message: "Please enter UPC" }],
+    },
+    {
+      name: "category",
+      label: "Category",
+      type: "select",
+      placeholder: "Select Category",
+      options: categoryOptions,
+      rules: [{ required: true, message: "Please select a category" }],
+    },
+  ];
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (values: ProductInput) => {
     try {
-      const values = await form.validateFields();
-
       if (isEditing && product) {
         await updateProduct({
           _id: product._id,
@@ -87,8 +94,6 @@ export default function AddEditProductDrawer({
         await createProduct(values).unwrap();
         success("Product created successfully");
       }
-
-      handleClose();
     } catch (error: unknown) {
       if (
         error &&
@@ -108,98 +113,56 @@ export default function AddEditProductDrawer({
     }
   };
 
-  const categoryOptions =
-    categoriesData?.data?.map((cat: { name: string; _id: string }) => ({
-      label: cat.name,
-      value: cat._id,
-    })) || [];
+  const handleClose = () => {
+    setOpen(false);
+    if (onClose) {
+      onClose();
+    }
+  };
 
-  const warehouseOptions =
-    warehousesData?.data?.map((warehouse) => ({
-      label: warehouse.name,
-      value: warehouse._id,
-    })) || [];
+  // Transform product data for form initialization
+  const getInitialValues = (): Partial<ProductInput> | undefined => {
+    if (!product || !open) return undefined;
+
+    const transformedStock =
+      product.stock?.map((stockItem) => ({
+        ...stockItem,
+        warehouse:
+          typeof stockItem.warehouse === "string"
+            ? stockItem.warehouse
+            : stockItem.warehouse?._id,
+      })) || [];
+
+    return {
+      name: product.name,
+      sku: product.sku,
+      upc: product.upc,
+      category:
+        typeof product.category === "string"
+          ? product.category
+          : product.category?._id,
+      stock: transformedStock,
+    };
+  };
 
   return (
-    <div>
-      <Drawer
-        title={isEditing ? "Edit Product" : "Add New Product"}
-        open={open}
-        onClose={handleClose}
-        width={800}
-        className="rounded-3xl"
-        getContainer={false}
-        destroyOnHidden={true}
-        closeIcon={<Icon icon="lineicons:close" className="font-extrabold" />}
-        extra={
-          <div className="flex gap-4 justify-end">
-            <Button type="default" onClick={handleClose} disabled={isLoading}>
-              Discard
-            </Button>
-            <Button type="primary" onClick={handleSubmit} loading={isLoading}>
-              {isEditing ? "Update" : "Save"}
-            </Button>
-          </div>
-        }
-      >
-        <Form
-          form={form}
-          name="product-add"
-          layout="vertical"
-          requiredMark={false}
-          className="border border-gray-200 shadow-sm rounded-xl p-4 pb-6"
-        >
-          <Form.Item
-            name="name"
-            label="Product Name"
-            rules={[{ required: true, message: "Please enter product name" }]}
-            className="font-medium"
-          >
-            <Input
-              size="large"
-              placeholder="Enter Product Name"
-              className="w-full"
-            />
-          </Form.Item>
-
-          <div className="grid grid-cols-3 gap-6">
-            <Form.Item
-              name="sku"
-              label="SKU"
-              rules={[{ required: true, message: "Please enter SKU" }]}
-              className="font-medium"
-            >
-              <Input size="large" placeholder="Enter SKU" className="w-full" />
-            </Form.Item>
-            <Form.Item
-              name="upc"
-              label="UPC"
-              rules={[{ required: true, message: "Please enter UPC" }]}
-              className="font-medium"
-            >
-              <Input size="large" placeholder="Enter UPC" className="w-full" />
-            </Form.Item>
-            <Form.Item
-              name="category"
-              label="Category"
-              rules={[{ required: true, message: "Please select a category" }]}
-              className="font-medium"
-            >
-              <Select
-                size="large"
-                placeholder="Select Category"
-                options={categoryOptions}
-                className="w-full"
-              />
-            </Form.Item>
-          </div>
-
-          <Divider />
-
-          {/* Stock List Section */}
-          <StockEntries form={form} warehouseOptions={warehouseOptions} />
-        </Form>
-      </Drawer>
-    </div>
+    <GenericDrawer
+      open={open}
+      onClose={handleClose}
+      title={isEditing ? "Edit Product" : "Add New Product"}
+      width={800}
+      form={form}
+      fields={fields}
+      initialValues={getInitialValues()}
+      onSubmit={handleSubmit}
+      submitText={isEditing ? "Update" : "Save"}
+      loading={isLoading}
+      gridCols={3}
+    >
+      {/* Custom Stock Entries Section */}
+      <div className="mt-6">
+        <StockEntries form={form} warehouseOptions={warehouseOptions} />
+      </div>
+    </GenericDrawer>
   );
 }

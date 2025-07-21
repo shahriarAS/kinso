@@ -1,13 +1,13 @@
 "use client";
-import { Icon } from "@iconify/react";
-import { Button, Drawer, Form, Input } from "antd";
-import React, { useEffect } from "react";
+import { Form } from "antd";
+import React from "react";
 import { Category } from "@/features/categories/types";
 import {
   useCreateCategoryMutation,
   useUpdateCategoryMutation,
 } from "@/features/categories/api";
 import { useNotification } from "@/hooks/useNotification";
+import { GenericDrawer, type FormField } from "@/components/common";
 
 interface Props {
   open: boolean;
@@ -34,29 +34,25 @@ export default function AddEditCategoryDrawer({
   const isEditing = !!category;
   const isLoading = isCreating || isUpdating;
 
-  useEffect(() => {
-    if (category && open) {
-      form.setFieldsValue({
-        name: category.name,
-        description: category.description,
-      });
-    } else if (!open) {
-      form.resetFields();
-    }
-  }, [category, open, form]);
+  // Define form fields using the generic interface
+  const fields: FormField[] = [
+    {
+      name: "name",
+      label: "Category Name",
+      type: "input",
+      placeholder: "Enter Category Name",
+      rules: [{ required: true, message: "Please enter category name" }],
+    },
+    {
+      name: "description",
+      label: "Description",
+      type: "textarea",
+      placeholder: "Enter Description",
+    },
+  ];
 
-  const handleClose = () => {
-    setOpen(false);
-    form.resetFields();
-    if (onClose) {
-      onClose();
-    }
-  };
-
-  const handleSubmit = async () => {
+  const handleSubmit = async (values: Category) => {
     try {
-      const values = await form.validateFields();
-
       if (isEditing && category) {
         await updateCategory({
           _id: category._id,
@@ -67,8 +63,6 @@ export default function AddEditCategoryDrawer({
         await createCategory(values).unwrap();
         success("Category created successfully");
       }
-
-      handleClose();
     } catch (error: unknown) {
       if (
         error &&
@@ -79,69 +73,38 @@ export default function AddEditCategoryDrawer({
         "message" in error.data
       ) {
         showError("Failed to save category", (error.data as { message: string }).message);
-      } else if (error && typeof error === "object" && "errorFields" in error) {
-        // Form validation error
-        return;
       } else {
         showError("Failed to save category");
       }
+      throw error; // Re-throw to prevent drawer from closing
+    }
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    if (onClose) {
+      onClose();
     }
   };
 
   return (
-    <div>
-      <Drawer
-        title={isEditing ? "Edit Category" : "Add New Category"}
-        open={open}
-        onClose={handleClose}
-        width={480}
-        className="rounded-3xl"
-        getContainer={false}
-        destroyOnHidden={true}
-        closeIcon={<Icon icon="lineicons:close" className="font-extrabold" />}
-        extra={
-          <div className="flex gap-4 justify-end">
-            <Button type="default" onClick={handleClose} disabled={isLoading}>
-              Discard
-            </Button>
-            <Button type="primary" onClick={handleSubmit} loading={isLoading}>
-              {isEditing ? "Update" : "Save"}
-            </Button>
-          </div>
-        }
-      >
-        <Form
-          form={form}
-          name="category-add"
-          layout="vertical"
-          requiredMark={false}
-          className="border border-gray-200 shadow-sm rounded-xl p-4 pb-6"
-        >
-          <Form.Item
-            name="name"
-            label="Category Name"
-            rules={[{ required: true, message: "Please enter category name" }]}
-            className="font-medium"
-          >
-            <Input
-              size="large"
-              placeholder="Enter Category Name"
-              className="w-full"
-            />
-          </Form.Item>
-          <Form.Item
-            name="description"
-            label="Description"
-            className="font-medium"
-          >
-            <Input.TextArea
-              rows={3}
-              placeholder="Enter Description"
-              className="w-full"
-            />
-          </Form.Item>
-        </Form>
-      </Drawer>
-    </div>
+    <GenericDrawer
+      open={open}
+      onClose={handleClose}
+      title={isEditing ? "Edit Category" : "Add New Category"}
+      form={form}
+      fields={fields}
+      initialValues={
+        category
+          ? {
+              name: category.name,
+              description: category.description,
+            }
+          : undefined
+      }
+      onSubmit={handleSubmit}
+      loading={isLoading}
+      submitText={isEditing ? "Update" : "Save"}
+    />
   );
 }

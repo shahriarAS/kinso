@@ -45,6 +45,11 @@ const menuItems = [
     label: "Customers",
     href: "/dashboard/customers",
   },
+  {
+    icon: "lineicons:user",
+    label: "Users",
+    href: "/dashboard/users",
+  },
 ];
 
 export default function DashboardSidebar() {

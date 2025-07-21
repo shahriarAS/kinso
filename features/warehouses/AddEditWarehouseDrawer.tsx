@@ -1,13 +1,13 @@
 "use client";
-import { Icon } from "@iconify/react";
-import { Button, Drawer, Form, Input } from "antd";
-import React, { useEffect } from "react";
+import { Form } from "antd";
+import React from "react";
 import { Warehouse } from "@/features/warehouses/types";
 import {
   useCreateWarehouseMutation,
   useUpdateWarehouseMutation,
 } from "@/features/warehouses/api";
 import { useNotification } from "@/hooks/useNotification";
+import { GenericDrawer, type FormField } from "@/components/common";
 
 interface Props {
   open: boolean;
@@ -34,29 +34,26 @@ export default function AddEditWarehouseDrawer({
   const isEditing = !!warehouse;
   const isLoading = isCreating || isUpdating;
 
-  useEffect(() => {
-    if (warehouse && open) {
-      form.setFieldsValue({
-        name: warehouse.name,
-        location: warehouse.location,
-      });
-    } else if (!open) {
-      form.resetFields();
-    }
-  }, [warehouse, open, form]);
+  // Define form fields using the generic interface
+  const fields: FormField[] = [
+    {
+      name: "name",
+      label: "Warehouse Name",
+      type: "input",
+      placeholder: "Enter Warehouse Name",
+      rules: [{ required: true, message: "Please enter warehouse name" }],
+    },
+    {
+      name: "location",
+      label: "Location",
+      type: "input",
+      placeholder: "Enter Location",
+      rules: [{ required: true, message: "Please enter location" }],
+    },
+  ];
 
-  const handleClose = () => {
-    setOpen(false);
-    form.resetFields();
-    if (onClose) {
-      onClose();
-    }
-  };
-
-  const handleSubmit = async () => {
+  const handleSubmit = async (values: Warehouse) => {
     try {
-      const values = await form.validateFields();
-
       if (isEditing && warehouse) {
         await updateWarehouse({
           _id: warehouse._id,
@@ -67,8 +64,6 @@ export default function AddEditWarehouseDrawer({
         await createWarehouse(values).unwrap();
         success("Warehouse created successfully");
       }
-
-      handleClose();
     } catch (error: unknown) {
       if (
         error &&
@@ -79,70 +74,38 @@ export default function AddEditWarehouseDrawer({
         "message" in error.data
       ) {
         showError("Failed to save warehouse", (error.data as { message: string }).message);
-      } else if (error && typeof error === "object" && "errorFields" in error) {
-        // Form validation error
-        return;
       } else {
         showError("Failed to save warehouse");
       }
+      throw error; // Re-throw to prevent drawer from closing
+    }
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    if (onClose) {
+      onClose();
     }
   };
 
   return (
-    <div>
-      <Drawer
-        title={isEditing ? "Edit Warehouse" : "Add New Warehouse"}
-        open={open}
-        onClose={handleClose}
-        width={480}
-        className="rounded-3xl"
-        getContainer={false}
-        destroyOnHidden={true}
-        closeIcon={<Icon icon="lineicons:close" className="font-extrabold" />}
-        extra={
-          <div className="flex gap-4 justify-end">
-            <Button type="default" onClick={handleClose} disabled={isLoading}>
-              Discard
-            </Button>
-            <Button type="primary" onClick={handleSubmit} loading={isLoading}>
-              {isEditing ? "Update" : "Save"}
-            </Button>
-          </div>
-        }
-      >
-        <Form
-          form={form}
-          name="warehouse-add"
-          layout="vertical"
-          requiredMark={false}
-          className="border border-gray-200 shadow-sm rounded-xl p-4 pb-6"
-        >
-          <Form.Item
-            name="name"
-            label="Warehouse Name"
-            rules={[{ required: true, message: "Please enter warehouse name" }]}
-            className="font-medium"
-          >
-            <Input
-              size="large"
-              placeholder="Enter Warehouse Name"
-              className="w-full"
-            />
-          </Form.Item>
-          <Form.Item
-            name="location"
-            label="Location"
-            rules={[{ required: true, message: "Please enter location" }]}
-            className="font-medium"
-          >
-            <Input
-              size="large"
-              placeholder="Enter Location"
-              className="w-full"
-            />
-          </Form.Item>
-        </Form>
-      </Drawer>
-    </div>
+    <GenericDrawer
+      open={open}
+      onClose={handleClose}
+      title={isEditing ? "Edit Warehouse" : "Add New Warehouse"}
+      form={form}
+      fields={fields}
+      initialValues={
+        warehouse
+          ? {
+              name: warehouse.name,
+              location: warehouse.location,
+            }
+          : undefined
+      }
+      onSubmit={handleSubmit}
+      loading={isLoading}
+      submitText={isEditing ? "Update" : "Save"}
+    />
   );
 }

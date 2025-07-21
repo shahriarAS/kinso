@@ -24,3 +24,8 @@ export interface UserUpdateInput {
   isActive?: boolean;
   avatar?: string;
 }
+
+export interface UserFilters {
+  search?: string;
+  role?: "admin" | "manager" | "staff";
+}

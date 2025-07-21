@@ -1,7 +1,11 @@
 "use client";
-import { Form, Input } from "antd";
-import React, { useEffect } from "react";
-import { useDebounce } from "@/hooks/useDebounce";
+import React from "react";
+import { GenericFilters, type FilterField } from "@/components/common";
+
+interface WarehouseFilters {
+  search?: string;
+  location?: string;
+}
 
 interface Props {
   searchTerm: string;
@@ -14,39 +18,45 @@ export default function WarehouseFilters({
   onSearchChange,
   onPageChange,
 }: Props) {
-  const [form] = Form.useForm();
-  const debouncedSearch = useDebounce(searchTerm, 500);
+  // Define filter fields using the generic interface
+  const fields: FilterField[] = [
+    {
+      name: "search",
+      label: "Search",
+      type: "input",
+      placeholder: "Search warehouses...",
+      debounce: 500,
+    },
+    {
+      name: "location",
+      label: "Location",
+      type: "input",
+      placeholder: "Location",
+      debounce: 500,
+    },
+  ];
 
-  useEffect(() => {
-    // Reset to first page when search changes
+  const handleFiltersChange = (filters: WarehouseFilters) => {
+    // Reset to first page when filters change
     onPageChange(1);
-  }, [debouncedSearch, onPageChange]);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    onSearchChange(value);
+    // Update search value
+    if (filters.search !== undefined) {
+      onSearchChange(filters.search);
+    }
+  };
+
+  const initialValues = {
+    search: searchTerm,
   };
 
   return (
-    <Form
-      form={form}
-      name="warehouse-filter"
-      layout="vertical"
-      requiredMark={false}
-      className="border border-gray-300 rounded-3xl p-4 bg-white grid grid-cols-4 gap-8"
-    >
-      <Form.Item name="search" label="Search" className="font-medium">
-        <Input
-          size="large"
-          placeholder="Search warehouses..."
-          className="w-full"
-          value={searchTerm}
-          onChange={handleSearchChange}
-        />
-      </Form.Item>
-      <Form.Item name="location" label="Location" className="font-medium">
-        <Input size="large" placeholder="Location" className="w-full" />
-      </Form.Item>
-    </Form>
+    <GenericFilters
+      fields={fields}
+      initialValues={initialValues}
+      onFiltersChange={handleFiltersChange}
+      gridCols={4}
+      debounceDelay={500}
+    />
   );
 }

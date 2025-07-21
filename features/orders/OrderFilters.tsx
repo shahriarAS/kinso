@@ -1,8 +1,12 @@
 "use client";
-import { Form, Input, Select } from "antd";
-import React, { useEffect } from "react";
-import { useDebounce } from "@/hooks/useDebounce";
+import React from "react";
 import { PAYMENT_METHODS } from "@/lib/constraints";
+import { GenericFilters, type FilterField } from "@/components/common";
+
+interface OrderFilters {
+  search?: string;
+  paymentMethod?: string;
+}
 
 interface Props {
   searchTerm: string;
@@ -19,56 +23,55 @@ export default function OrderFilters({
   onPaymentMethodChange,
   onPageChange,
 }: Props) {
-  const [form] = Form.useForm();
-  const debouncedSearch = useDebounce(searchTerm, 500);
+  // Define filter fields using the generic interface
+  const fields: FilterField[] = [
+    {
+      name: "search",
+      label: "Search",
+      type: "input",
+      placeholder: "Search orders...",
+      debounce: 500,
+    },
+    {
+      name: "paymentMethod",
+      label: "Payment Method",
+      type: "select",
+      placeholder: "Select Payment Method",
+      options: [
+        { label: "All", value: "" },
+        ...PAYMENT_METHODS.map((method) => ({
+          label: method.label,
+          value: method.value,
+        })),
+      ],
+    },
+  ];
 
-  useEffect(() => {
+  const handleFiltersChange = (filters: OrderFilters) => {
     // Reset to first page when filters change
     onPageChange(1);
-  }, [debouncedSearch, paymentMethodFilter, onPageChange]);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    onSearchChange(value);
+    // Update individual filter values
+    if (filters.search !== undefined) {
+      onSearchChange(filters.search);
+    }
+    if (filters.paymentMethod !== undefined) {
+      onPaymentMethodChange(filters.paymentMethod);
+    }
+  };
+
+  const initialValues = {
+    search: searchTerm,
+    paymentMethod: paymentMethodFilter,
   };
 
   return (
-    <Form
-      form={form}
-      name="order-filter"
-      layout="vertical"
-      requiredMark={false}
-      className="border border-gray-300 rounded-3xl p-4 bg-white grid grid-cols-4 gap-8"
-    >
-      <Form.Item name="search" label="Search" className="font-medium">
-        <Input
-          size="large"
-          placeholder="Search orders..."
-          className="w-full"
-          value={searchTerm}
-          onChange={handleSearchChange}
-        />
-      </Form.Item>
-      <Form.Item
-        name="paymentMethod"
-        label="Payment Method"
-        className="font-medium"
-      >
-        <Select
-          size="large"
-          placeholder="Select Payment Method"
-          className="w-full"
-          value={paymentMethodFilter}
-          onChange={onPaymentMethodChange}
-          options={[
-            { label: "All", value: "" },
-            ...PAYMENT_METHODS.map((method) => ({
-              label: method.label,
-              value: method.value,
-            })),
-          ]}
-        />
-      </Form.Item>
-    </Form>
+    <GenericFilters
+      fields={fields}
+      initialValues={initialValues}
+      onFiltersChange={handleFiltersChange}
+      gridCols={4}
+      debounceDelay={500}
+    />
   );
 }

@@ -1,6 +1,4 @@
 "use client";
-import { Table, Button, Tooltip, Pagination } from "antd";
-import { Icon } from "@iconify/react";
 import React, { useState, useEffect } from "react";
 import { Order } from "@/features/orders/types";
 import { useGetOrdersQuery } from "@/features/orders/api";
@@ -10,6 +8,11 @@ import InvoiceTemplate, {
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import ViewOrderDrawer from "./ViewOrderDrawer";
+import {
+  GenericTable,
+  type TableColumn,
+  type TableAction,
+} from "@/components/common";
 
 interface Props {
   searchTerm: string;
@@ -95,7 +98,7 @@ export default function OrderTable({
   if (searchTerm) params.search = searchTerm;
   if (paymentMethodFilter) params.paymentMethod = paymentMethodFilter;
 
-  const { data, isLoading } = useGetOrdersQuery(params);
+  const { data, isLoading, error, refetch } = useGetOrdersQuery(params);
 
   const handleView = (order: Order) => setViewOrder(order);
   const handlePrint = (order: Order) => {
@@ -132,7 +135,8 @@ export default function OrderTable({
     }
   }, [printOrder, printInvoiceData]);
 
-  const columns = [
+  // Define columns using the generic interface
+  const columns: TableColumn<Order>[] = [
     {
       title: <span className="font-medium text-base">Order #</span>,
       dataIndex: "orderNumber",
@@ -190,33 +194,25 @@ export default function OrderTable({
         );
       },
     },
+  ];
+
+  // Define actions using the generic interface
+  const actions: TableAction<Order>[] = [
     {
-      title: <span className="font-medium text-base">Action</span>,
-      key: "action",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      render: (_: any, record: Order) => (
-        <div className="flex gap-2">
-          <Tooltip title="View Details">
-            <Button
-              className="inline-flex items-center justify-center rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 transition p-1.5"
-              onClick={() => handleView(record)}
-            >
-              <Icon icon="lineicons:eye" className="text-lg text-blue-700" />
-            </Button>
-          </Tooltip>
-          <Tooltip title="Print">
-            <Button
-              className="inline-flex items-center justify-center rounded-lg bg-gray-50 border border-gray-200 hover:bg-gray-100 transition p-1.5"
-              onClick={() => handlePrint(record)}
-            >
-              <Icon
-                icon="lineicons:printer"
-                className="text-lg text-gray-700"
-              />
-            </Button>
-          </Tooltip>
-        </div>
-      ),
+      key: "view",
+      label: "View Details",
+      icon: "lineicons:eye",
+      type: "view",
+      color: "blue",
+      onClick: handleView,
+    },
+    {
+      key: "print",
+      label: "Print",
+      icon: "lineicons:printer",
+      type: "custom",
+      color: "purple",
+      onClick: handlePrint,
     },
   ];
 
@@ -251,46 +247,35 @@ export default function OrderTable({
           </div>
         )}
       </div>
-      <div
-        className="bg-white border border-gray-300 rounded-3xl shadow-lg overflow-hidden flex flex-col"
-        style={{ maxHeight: 600 }}
-      >
-        <div
-          className="overflow-x-auto custom-scrollbar flex-1"
-          style={{ maxHeight: 500 }}
-        >
-          <Table
-            columns={columns}
-            dataSource={orders}
-            rowKey="_id"
-            className="min-w-[700px] !bg-white"
-            scroll={{ x: "100%" }}
-            pagination={false}
-            sticky
-            loading={isLoading}
-          />
-        </div>
-        {pagination && (
-          <div className="custom-pagination">
-            <Pagination
-              current={currentPage}
-              pageSize={pageSize}
-              total={pagination.total}
-              onChange={onPageChange}
-              showSizeChanger={false}
-              showTotal={(total, range) =>
-                `${range[0]}-${range[1]} of ${total} orders`
+
+      <GenericTable
+        data={orders}
+        loading={isLoading}
+        error={error}
+        onRetry={refetch}
+        columns={columns}
+        actions={actions}
+        pagination={
+          pagination
+            ? {
+                current: currentPage,
+                pageSize,
+                total: pagination.total,
+                onChange: onPageChange,
+                showSizeChanger: false,
+                showTotal: (total, range) =>
+                  `${range[0]}-${range[1]} of ${total} orders`,
               }
-            />
-          </div>
-        )}
-        <ViewOrderDrawer
-          open={!!viewOrder}
-          setOpen={() => setViewOrder(null)}
-          order={viewOrder}
-          onClose={() => setViewOrder(null)}
-        />
-      </div>
+            : undefined
+        }
+      />
+
+      <ViewOrderDrawer
+        open={!!viewOrder}
+        setOpen={() => setViewOrder(null)}
+        order={viewOrder}
+        onClose={() => setViewOrder(null)}
+      />
     </>
   );
 }

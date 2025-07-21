@@ -1,9 +1,17 @@
 "use client";
-import { Input, Select } from "antd";
-import React, { useEffect } from "react";
-import { useDebounce } from "@/hooks/useDebounce";
+import { useEffect } from "react";
+import { GenericFilters, type FilterField } from "@/components/common";
 import { useGetAllCategoriesQuery } from "@/features/categories/api";
 import { useGetWarehousesQuery } from "@/features/warehouses";
+
+interface ProductFilters {
+  search?: string;
+  category?: string;
+  warehouse?: string;
+  status?: string;
+  minPrice?: number;
+  maxPrice?: number;
+}
 
 interface Props {
   searchTerm: string;
@@ -21,7 +29,7 @@ interface Props {
   onPageChange: (page: number) => void;
 }
 
-export default function InventoryFilters({
+export default function ProductFiltersRefactored({
   searchTerm,
   categoryFilter,
   warehouseFilter,
@@ -32,33 +40,13 @@ export default function InventoryFilters({
   onCategoryChange,
   onWarehouseChange,
   onStatusChange,
-  // onMinPriceChange,
-  // onMaxPriceChange,
+  onMinPriceChange,
+  onMaxPriceChange,
   onPageChange,
 }: Props) {
-  const debouncedSearch = useDebounce(searchTerm, 500);
-
   // API hooks
   const { data: categoriesData } = useGetAllCategoriesQuery();
   const { data: warehousesData } = useGetWarehousesQuery({});
-
-  useEffect(() => {
-    // Reset to first page when filters change
-    onPageChange(1);
-  }, [
-    debouncedSearch,
-    categoryFilter,
-    warehouseFilter,
-    statusFilter,
-    minPrice,
-    maxPrice,
-    onPageChange,
-  ]);
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    onSearchChange(value);
-  };
 
   const categoryOptions =
     categoriesData?.data?.map((cat: { name: string; _id: string }) => ({
@@ -72,87 +60,76 @@ export default function InventoryFilters({
       value: warehouse._id,
     })) || [];
 
+  // Define filter fields using the generic interface
+  const fields: FilterField[] = [
+    {
+      name: "search",
+      label: "Search",
+      type: "input",
+      placeholder: "Search products...",
+      debounce: 500,
+    },
+    {
+      name: "category",
+      label: "Category",
+      type: "select",
+      placeholder: "Select Category",
+      options: [{ label: "All Categories", value: "" }, ...categoryOptions],
+    },
+    {
+      name: "warehouse",
+      label: "Warehouse",
+      type: "select",
+      placeholder: "Select Warehouse",
+      options: [{ label: "All Warehouses", value: "" }, ...warehouseOptions],
+    },
+    {
+      name: "status",
+      label: "Status",
+      type: "select",
+      placeholder: "Select Status",
+      options: [
+        { label: "All", value: "" },
+        { label: "In Stock", value: "in_stock" },
+        { label: "Out of Stock", value: "out_of_stock" },
+        { label: "Low Stock", value: "low_stock" },
+      ],
+    },
+  ];
+
+  const handleFiltersChange = (filters: ProductFilters) => {
+    // Reset to first page when filters change
+    onPageChange(1);
+
+    // Update individual filter values
+    if (filters.search !== undefined) {
+      onSearchChange(filters.search);
+    }
+    if (filters.category !== undefined) {
+      onCategoryChange(filters.category);
+    }
+    if (filters.warehouse !== undefined) {
+      onWarehouseChange(filters.warehouse);
+    }
+    if (filters.status !== undefined) {
+      onStatusChange(filters.status);
+    }
+  };
+
+  const initialValues = {
+    search: searchTerm,
+    category: categoryFilter,
+    warehouse: warehouseFilter,
+    status: statusFilter,
+  };
+
   return (
-    <div className="border border-gray-300 rounded-3xl p-4 bg-white grid grid-cols-4 gap-8">
-      <div className="flex flex-col">
-        <label className="font-medium mb-2">Search</label>
-        <Input
-          size="large"
-          placeholder="Search products..."
-          className="w-full"
-          value={searchTerm}
-          onChange={handleSearchChange}
-        />
-      </div>
-
-      <div className="flex flex-col">
-        <label className="font-medium mb-2">Category</label>
-        <Select
-          size="large"
-          placeholder="Select Category"
-          options={[{ label: "All Categories", value: "" }, ...categoryOptions]}
-          value={categoryFilter}
-          onChange={onCategoryChange}
-          className="w-full"
-        />
-      </div>
-
-      <div className="flex flex-col">
-        <label className="font-medium mb-2">Warehouse</label>
-        <Select
-          size="large"
-          placeholder="Select Warehouse"
-          options={[
-            { label: "All Warehouses", value: "" },
-            ...warehouseOptions,
-          ]}
-          value={warehouseFilter}
-          onChange={onWarehouseChange}
-          className="w-full"
-        />
-      </div>
-
-      <div className="flex flex-col">
-        <label className="font-medium mb-2">Status</label>
-        <Select
-          size="large"
-          placeholder="Select Status"
-          options={[
-            { label: "All", value: "" },
-            { label: "In Stock", value: "in_stock" },
-            { label: "Out of Stock", value: "out_of_stock" },
-            { label: "Low Stock", value: "low_stock" },
-          ]}
-          value={statusFilter}
-          onChange={onStatusChange}
-          className="w-full"
-        />
-      </div>
-
-      {/* <div className="flex flex-col">
-        <label className="font-medium mb-2">Price Range</label>
-        <div className="flex gap-2">
-          <Input
-            size="large"
-            type="number"
-            placeholder="Min"
-            className="w-1/2"
-            min={0}
-            value={minPrice}
-            onChange={(e) => onMinPriceChange(e.target.value)}
-          />
-          <span className="self-center">-</span>
-          <Input
-            size="large"
-            type="number"
-            placeholder="Max"
-            className="w-1/2"
-            min={0}
-            value={maxPrice}
-            onChange={(e) => onMaxPriceChange(e.target.value)}
-          />
-        </div>
-      </div> */}
-    </div>
+    <GenericFilters
+      fields={fields}
+      initialValues={initialValues}
+      onFiltersChange={handleFiltersChange}
+      gridCols={4}
+      debounceDelay={500}
+    />
   );
 }

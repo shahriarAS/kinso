@@ -1,6 +1,6 @@
 "use client";
-import { Form, Input, Select } from "antd";
 import { CustomerFilters as CustomerFiltersType } from "./types";
+import { GenericFilters, type FilterField } from "@/components/common";
 
 interface CustomerFiltersProps {
   onFiltersChange?: (filters: CustomerFiltersType) => void;
@@ -9,58 +9,53 @@ interface CustomerFiltersProps {
 export default function CustomerFilters({
   onFiltersChange,
 }: CustomerFiltersProps) {
-  const [form] = Form.useForm();
+  // Define filter fields using the generic interface
+  const fields: FilterField[] = [
+    {
+      name: "status",
+      label: "Status",
+      type: "select",
+      placeholder: "Select Status",
+      options: [
+        { label: "All", value: "all" },
+        { label: "Active", value: "active" },
+        { label: "Inactive", value: "inactive" },
+      ],
+    },
+    {
+      name: "search",
+      label: "Search",
+      type: "input",
+      placeholder: "Search customers...",
+      debounce: 500,
+    },
+    {
+      name: "email",
+      label: "Email",
+      type: "input",
+      placeholder: "Search by email...",
+      debounce: 500,
+    },
+  ];
 
-  const handleValuesChange = (
-    changedValues: Record<string, unknown>,
-    allValues: Record<string, unknown>,
-  ) => {
+  const handleFiltersChange = (filters: Record<string, unknown>) => {
     // Convert "all" status to undefined
-    const filters = {
-      ...allValues,
+    const processedFilters = {
+      ...filters,
       status:
-        allValues.status === "all"
+        filters.status === "all"
           ? undefined
-          : (allValues.status as "active" | "inactive" | undefined),
+          : (filters.status as "active" | "inactive" | undefined),
     };
-    onFiltersChange?.(filters);
+    onFiltersChange?.(processedFilters as CustomerFiltersType);
   };
 
   return (
-    <Form
-      form={form}
-      name="customer-filter"
-      layout="vertical"
-      requiredMark={false}
-      className="border border-gray-300 rounded-3xl p-4 bg-white grid grid-cols-4 gap-8"
-      onValuesChange={handleValuesChange}
-    >
-      <Form.Item name="status" label="Status" className="font-medium">
-        <Select
-          size="large"
-          placeholder="Select Status"
-          options={[
-            { label: "All", value: "all" },
-            { label: "Active", value: "active" },
-            { label: "Inactive", value: "inactive" },
-          ]}
-          className="w-full"
-        />
-      </Form.Item>
-      <Form.Item name="search" label="Search" className="font-medium">
-        <Input
-          size="large"
-          placeholder="Search customers..."
-          className="w-full"
-        />
-      </Form.Item>
-      <Form.Item name="email" label="Email" className="font-medium">
-        <Input
-          size="large"
-          placeholder="Search by email..."
-          className="w-full"
-        />
-      </Form.Item>
-    </Form>
+    <GenericFilters
+      fields={fields}
+      onFiltersChange={handleFiltersChange}
+      gridCols={4}
+      debounceDelay={500}
+    />
   );
 }

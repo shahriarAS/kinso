@@ -1,20 +1,15 @@
 "use client";
 
-import {
-  Table,
-  Button,
-  Tooltip,
-  Pagination,
-  Tag,
-  Space,
-  Popconfirm,
-} from "antd";
-import { Icon } from "@iconify/react";
 import React, { useState, useEffect } from "react";
+import { Tag } from "antd";
 import type { Customer, CustomerFilters } from "./types";
 import { useGetCustomersQuery, useDeleteCustomerMutation } from "./api";
 import { useNotification } from "@/hooks/useNotification";
-import ApiStatusHandler from "@/components/common/ApiStatusHandler";
+import {
+  GenericTable,
+  type TableColumn,
+  type TableAction,
+} from "@/components/common";
 import AddEditCustomerDrawer from "./AddEditCustomerDrawer";
 import ViewCustomerOrdersDrawer from "./ViewCustomerOrdersDrawer";
 
@@ -53,9 +48,9 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
     setCurrent(1); // Reset to first page when filters change
   }, [filters]);
 
-  const handleDelete = async (customerId: string) => {
+  const handleDelete = async (customer: Customer) => {
     try {
-      await deleteCustomer(customerId).unwrap();
+      await deleteCustomer(customer._id).unwrap();
       success("Customer deleted successfully");
     } catch (err: unknown) {
       const error = err as { data?: { message?: string } };
@@ -83,7 +78,8 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
     setViewingCustomer(null);
   };
 
-  const columns = [
+  // Define columns using the generic interface
+  const columns: TableColumn<Customer>[] = [
     {
       title: <span className="font-medium text-base">Name</span>,
       dataIndex: "name",
@@ -133,57 +129,38 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
         </Tag>
       ),
     },
+  ];
+
+  // Define actions using the generic interface
+  const actions: TableAction<Customer>[] = [
     {
-      title: <span className="font-medium text-base">Action</span>,
-      key: "action",
-      fixed: "right" as const,
-      width: 150,
-      render: (_: unknown, record: Customer) => (
-        <Space size="small">
-          <Tooltip title="View Orders">
-            <Button
-              className="inline-flex items-center justify-center rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 transition p-1.5"
-              size="small"
-              onClick={() => handleViewOrders(record)}
-            >
-              <Icon icon="lineicons:eye" className="text-lg text-blue-700" />
-            </Button>
-          </Tooltip>
-          <Tooltip title="Edit">
-            <Button
-              className="inline-flex items-center justify-center rounded-lg bg-green-50 border border-green-200 hover:bg-green-100 transition p-1.5"
-              size="small"
-              onClick={() => handleEdit(record)}
-            >
-              <Icon
-                icon="lineicons:pencil-1"
-                className="text-lg text-green-700"
-              />
-            </Button>
-          </Tooltip>
-          <Popconfirm
-            title="Delete Customer"
-            description="Are you sure you want to delete this customer? This action cannot be undone."
-            onConfirm={() => handleDelete(record._id)}
-            okText="Yes"
-            cancelText="No"
-            okButtonProps={{ danger: true, loading: isDeleting }}
-          >
-            <Tooltip title="Delete">
-              <Button
-                className="inline-flex items-center justify-center rounded-lg bg-red-50 border border-red-200 hover:bg-red-100 transition p-1.5"
-                size="small"
-                danger
-              >
-                <Icon
-                  icon="lineicons:trash-3"
-                  className="text-lg text-red-600"
-                />
-              </Button>
-            </Tooltip>
-          </Popconfirm>
-        </Space>
-      ),
+      key: "view-orders",
+      label: "View Orders",
+      icon: "lineicons:eye",
+      type: "view",
+      color: "blue",
+      onClick: handleViewOrders,
+    },
+    {
+      key: "edit",
+      label: "Edit",
+      icon: "lineicons:pencil-1",
+      type: "edit",
+      color: "green",
+      onClick: handleEdit,
+    },
+    {
+      key: "delete",
+      label: "Delete",
+      icon: "lineicons:trash-3",
+      type: "delete",
+      color: "red",
+      onClick: handleDelete,
+      confirm: {
+        title: "Delete Customer",
+        description: "Are you sure you want to delete this customer? This action cannot be undone.",
+      },
+      loading: isDeleting,
     },
   ];
 
@@ -213,54 +190,32 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
 
   return (
     <>
-      <ApiStatusHandler
-        isLoading={isLoading}
+      <GenericTable
+        data={data?.data || []}
+        loading={isLoading}
         error={error}
         onRetry={refetch}
-        minHeight="400px"
-      >
-        <div
-          className="bg-white border border-gray-300 rounded-3xl shadow-lg overflow-hidden flex flex-col"
-          style={{ maxHeight: 600 }}
-        >
-          <div
-            className="overflow-x-auto custom-scrollbar flex-1"
-            style={{ maxHeight: 500 }}
-          >
-            <Table
-              columns={columns}
-              dataSource={data?.data || []}
-              rowKey="_id"
-              className="min-w-[700px] !bg-white"
-              scroll={{ x: "100%" }}
-              pagination={false}
-              sticky
-              onChange={handleTableChange}
-              loading={isLoading}
-            />
-          </div>
-          <div className="custom-pagination p-4">
-            <Pagination
-              current={current}
-              pageSize={pageSize}
-              total={data?.pagination?.total || 0}
-              onChange={(page, size) => {
-                setCurrent(page);
-                if (size !== pageSize) {
-                  setPageSize(size);
-                  setCurrent(1);
-                }
-              }}
-              showSizeChanger
-              showQuickJumper
-              showTotal={(total, range) =>
-                `${range[0]}-${range[1]} of ${total} customers`
-              }
-              pageSizeOptions={["10", "20", "50", "100"]}
-            />
-          </div>
-        </div>
-      </ApiStatusHandler>
+        columns={columns}
+        actions={actions}
+        pagination={{
+          current,
+          pageSize,
+          total: data?.pagination?.total || 0,
+          onChange: (page, size) => {
+            setCurrent(page);
+            if (size && size !== pageSize) {
+              setPageSize(size);
+              setCurrent(1);
+            }
+          },
+          showSizeChanger: true,
+          showQuickJumper: true,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} customers`,
+          pageSizeOptions: ["10", "20", "50", "100"],
+        }}
+        onTableChange={handleTableChange}
+      />
 
       {/* Edit Customer Drawer */}
       <AddEditCustomerDrawer

@@ -1,10 +1,9 @@
 "use client";
-import { Icon } from "@iconify/react";
-import { Button, Drawer, Form, Input, Select, Spin } from "antd";
-import { useEffect } from "react";
+import { Form } from "antd";
 import { CustomerInput, Customer } from "./types";
 import { useCreateCustomerMutation, useUpdateCustomerMutation } from "./api";
 import { useNotification } from "@/hooks/useNotification";
+import { GenericDrawer, type FormField } from "@/components/common";
 
 interface Props {
   open: boolean;
@@ -30,28 +29,53 @@ export default function AddEditCustomerDrawer({
 
   const isLoading = isCreating || isUpdating;
 
-  useEffect(() => {
-    if (customer && open) {
-      form.setFieldsValue({
-        name: customer.name,
-        email: customer.email,
-        phone: customer.phone,
-        status: customer.status,
-        notes: customer.notes,
-      });
-    }
-  }, [customer, open, form]);
+  // Define form fields using the generic interface
+  const fields: FormField[] = [
+    {
+      name: "name",
+      label: "Full Name",
+      type: "input",
+      placeholder: "Enter Full Name",
+      rules: [{ required: true, message: "Please enter customer name" }],
+    },
+    {
+      name: "email",
+      label: "Email",
+      type: "email",
+      placeholder: "Enter Email",
+      rules: [
+        { required: true, message: "Please enter email" },
+        { type: "email", message: "Please enter a valid email" },
+      ],
+    },
+    {
+      name: "phone",
+      label: "Phone",
+      type: "input",
+      placeholder: "Enter Phone",
+      rules: [{ required: true, message: "Please enter phone number" }],
+    },
+    {
+      name: "status",
+      label: "Status",
+      type: "select",
+      placeholder: "Select Status",
+      rules: [{ required: true, message: "Please select status" }],
+      options: [
+        { label: "Active", value: "active" },
+        { label: "Inactive", value: "inactive" },
+      ],
+    },
+    {
+      name: "notes",
+      label: "Notes",
+      type: "textarea",
+      placeholder: "Enter Notes",
+    },
+  ];
 
-  const onClose = () => {
-    setOpen(false);
-    form.resetFields();
-    onSuccess?.();
-  };
-
-  const handleSubmit = async () => {
+  const handleSubmit = async (values: CustomerInput) => {
     try {
-      const values = await form.validateFields();
-
       if (isEditing && customer) {
         await updateCustomer({ _id: customer._id, customer: values }).unwrap();
         success("Customer updated successfully");
@@ -59,8 +83,6 @@ export default function AddEditCustomerDrawer({
         await createCustomer(values).unwrap();
         success("Customer created successfully");
       }
-
-      onClose();
     } catch (err: unknown) {
       const error = err as {
         data?: { message?: string };
@@ -72,113 +94,37 @@ export default function AddEditCustomerDrawer({
         // Only show error if it's not a form validation error
         showError("Failed to save customer", "An unexpected error occurred");
       }
+      throw error; // Re-throw to prevent drawer from closing
     }
   };
 
+  const handleClose = () => {
+    setOpen(false);
+    onSuccess?.();
+  };
+
   return (
-    <div>
-      <Drawer
-        title={isEditing ? "Edit Customer" : "Add New Customer"}
-        open={open}
-        onClose={onClose}
-        width={480}
-        className="rounded-3xl"
-        getContainer={false}
-        destroyOnHidden={true}
-        closeIcon={<Icon icon="lineicons:close" className="font-extrabold" />}
-        extra={
-          <div className="flex gap-4 justify-end">
-            <Button type="default" onClick={onClose} disabled={isLoading}>
-              Discard
-            </Button>
-            <Button
-              type="primary"
-              onClick={handleSubmit}
-              loading={isLoading}
-              icon={isLoading ? <Spin size="small" /> : undefined}
-            >
-              {isLoading ? "Saving..." : "Save"}
-            </Button>
-          </div>
-        }
-      >
-        <Form
-          form={form}
-          name="customer-form"
-          layout="vertical"
-          requiredMark={false}
-          className="border border-gray-200 shadow-sm rounded-xl p-4 pb-6"
-          disabled={isLoading}
-        >
-          <Form.Item
-            name="name"
-            label="Full Name"
-            rules={[{ required: true, message: "Please enter customer name" }]}
-            className="font-medium"
-          >
-            <Input
-              size="large"
-              placeholder="Enter Full Name"
-              className="w-full"
-            />
-          </Form.Item>
-
-          <div className="grid grid-cols-2 gap-6">
-            <Form.Item
-              name="email"
-              label="Email"
-              rules={[
-                { required: true, message: "Please enter email" },
-                { type: "email", message: "Please enter a valid email" },
-              ]}
-              className="font-medium"
-            >
-              <Input
-                size="large"
-                placeholder="Enter Email"
-                className="w-full"
-              />
-            </Form.Item>
-            <Form.Item
-              name="phone"
-              label="Phone"
-              rules={[{ required: true, message: "Please enter phone number" }]}
-              className="font-medium"
-            >
-              <Input
-                size="large"
-                placeholder="Enter Phone"
-                className="w-full"
-              />
-            </Form.Item>
-          </div>
-
-          <Form.Item
-            name="status"
-            label="Status"
-            rules={[{ required: true, message: "Please select status" }]}
-            className="font-medium"
-          >
-            <Select
-              size="large"
-              placeholder="Select Status"
-              options={[
-                { label: "Active", value: "active" },
-                { label: "Inactive", value: "inactive" },
-              ]}
-              className="w-full"
-            />
-          </Form.Item>
-
-          <Form.Item name="notes" label="Notes" className="font-medium">
-            <Input.TextArea
-              rows={2}
-              placeholder="Enter Notes"
-              className="w-full"
-            />
-          </Form.Item>
-        </Form>
-      </Drawer>
-    </div>
+    <GenericDrawer
+      open={open}
+      onClose={handleClose}
+      title={isEditing ? "Edit Customer" : "Add New Customer"}
+      form={form}
+      fields={fields}
+      initialValues={
+        customer
+          ? {
+              name: customer.name,
+              email: customer.email,
+              phone: customer.phone,
+              status: customer.status,
+              notes: customer.notes,
+            }
+          : undefined
+      }
+      onSubmit={handleSubmit}
+      loading={isLoading}
+      submitText={isLoading ? "Saving..." : "Save"}
+      gridCols={2}
+    />
   );
 }

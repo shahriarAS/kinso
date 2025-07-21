@@ -1,7 +1,5 @@
 "use client";
 
-import { Table, Button, Tooltip, Pagination, Popconfirm } from "antd";
-import { Icon } from "@iconify/react";
 import { useState } from "react";
 import {
   useGetWarehousesQuery,
@@ -10,6 +8,11 @@ import {
 import type { Warehouse } from "@/features/warehouses/types";
 import AddEditWarehouseDrawer from "./AddEditWarehouseDrawer";
 import { useNotification } from "@/hooks/useNotification";
+import {
+  GenericTable,
+  type TableColumn,
+  type TableAction,
+} from "@/components/common";
 
 interface Props {
   searchTerm: string;
@@ -30,7 +33,7 @@ export default function WarehouseTable({
   const { success, error: showError } = useNotification();
 
   // API hooks
-  const { data, isLoading } = useGetWarehousesQuery({
+  const { data, isLoading, error, refetch } = useGetWarehousesQuery({
     page: currentPage,
     limit: pageSize,
     search: searchTerm,
@@ -43,9 +46,9 @@ export default function WarehouseTable({
     setEditingWarehouse(warehouse);
   };
 
-  const handleDelete = async (_id: string) => {
+  const handleDelete = async (warehouse: Warehouse) => {
     try {
-      await deleteWarehouse(_id).unwrap();
+      await deleteWarehouse(warehouse._id).unwrap();
       success("Warehouse deleted successfully");
     } catch (error: unknown) {
       if (
@@ -63,7 +66,8 @@ export default function WarehouseTable({
     }
   };
 
-  const columns = [
+  // Define columns using the generic interface
+  const columns: TableColumn<Warehouse>[] = [
     {
       title: <span className="font-medium text-base">Name</span>,
       dataIndex: "name",
@@ -78,44 +82,30 @@ export default function WarehouseTable({
       key: "location",
       render: (text: string) => <span className="text-gray-700">{text}</span>,
     },
+  ];
+
+  // Define actions using the generic interface
+  const actions: TableAction<Warehouse>[] = [
     {
-      title: <span className="font-medium text-base">Action</span>,
-      key: "action",
-      render: (_: unknown, record: Warehouse) => (
-        <div className="flex gap-2">
-          <Tooltip title="Edit">
-            <Button
-              className="inline-flex items-center justify-center rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 transition p-1.5"
-              onClick={() => handleEdit(record)}
-            >
-              <Icon
-                icon="lineicons:pencil-1"
-                className="text-lg text-blue-700"
-              />
-            </Button>
-          </Tooltip>
-          <Tooltip title="Delete">
-            <Popconfirm
-              title="Delete Warehouse"
-              description="Are you sure you want to delete this warehouse?"
-              onConfirm={() => handleDelete(record._id)}
-              okText="Yes"
-              cancelText="No"
-              okButtonProps={{ danger: true }}
-            >
-              <Button
-                className="inline-flex items-center justify-center rounded-lg bg-red-50 border border-red-200 hover:bg-red-100 transition p-1.5"
-                loading={isDeleting}
-              >
-                <Icon
-                  icon="lineicons:trash-3"
-                  className="text-lg text-red-600"
-                />
-              </Button>
-            </Popconfirm>
-          </Tooltip>
-        </div>
-      ),
+      key: "edit",
+      label: "Edit",
+      icon: "lineicons:pencil-1",
+      type: "edit",
+      color: "blue",
+      onClick: handleEdit,
+    },
+    {
+      key: "delete",
+      label: "Delete",
+      icon: "lineicons:trash-3",
+      type: "delete",
+      color: "red",
+      onClick: handleDelete,
+      confirm: {
+        title: "Delete Warehouse",
+        description: "Are you sure you want to delete this warehouse?",
+      },
+      loading: isDeleting,
     },
   ];
 
@@ -123,39 +113,28 @@ export default function WarehouseTable({
   const pagination = data?.pagination;
 
   return (
-    <div
-      className="bg-white border border-gray-300 rounded-3xl shadow-lg overflow-hidden flex flex-col"
-      style={{ maxHeight: 600 }}
-    >
-      <div
-        className="overflow-x-auto custom-scrollbar flex-1"
-        style={{ maxHeight: 500 }}
-      >
-        <Table
-          columns={columns}
-          dataSource={warehouses}
-          rowKey="_id"
-          className="min-w-[700px] !bg-white"
-          scroll={{ x: "100%" }}
-          pagination={false}
-          loading={isLoading}
-          sticky
-        />
-      </div>
-      {pagination && (
-        <div className="custom-pagination">
-          <Pagination
-            current={currentPage}
-            pageSize={pageSize}
-            total={pagination.total}
-            onChange={onPageChange}
-            showSizeChanger={false}
-            showTotal={(total, range) =>
-              `${range[0]}-${range[1]} of ${total} items`
-            }
-          />
-        </div>
-      )}
+    <>
+      <GenericTable
+        data={warehouses}
+        loading={isLoading}
+        error={error}
+        onRetry={refetch}
+        columns={columns}
+        actions={actions}
+        pagination={
+          pagination
+            ? {
+                current: currentPage,
+                pageSize,
+                total: pagination.total,
+                onChange: onPageChange,
+                showSizeChanger: false,
+                showTotal: (total, range) =>
+                  `${range[0]}-${range[1]} of ${total} items`,
+              }
+            : undefined
+        }
+      />
 
       {/* Edit Drawer */}
       <AddEditWarehouseDrawer
@@ -164,6 +143,6 @@ export default function WarehouseTable({
         warehouse={editingWarehouse}
         onClose={() => setEditingWarehouse(null)}
       />
-    </div>
+    </>
   );
 }

@@ -124,7 +124,7 @@ export async function handlePost(request: NextRequest) {
       items,
       notes,
       discount = 0,
-      paymentMethod,
+      payments,
       warehouse, // Add warehouse from body
     } = body;
 
@@ -166,11 +166,21 @@ export async function handlePost(request: NextRequest) {
       );
     }
 
-    if (!paymentMethod) {
+    if (!payments || !Array.isArray(payments) || payments.length === 0) {
       return NextResponse.json(
-        { success: false, message: "Payment method is required" },
+        { success: false, message: "At least one payment is required" },
         { status: 400 },
       );
+    }
+    let paid = 0;
+    for (const payment of payments) {
+      if (!payment.method || typeof payment.amount !== 'number' || payment.amount < 0) {
+        return NextResponse.json(
+          { success: false, message: "Each payment must have a valid method and a non-negative amount" },
+          { status: 400 },
+        );
+      }
+      paid += payment.amount;
     }
 
     // Validate customer exists
@@ -250,6 +260,13 @@ export async function handlePost(request: NextRequest) {
 
     // Apply discount
     const finalTotal = Math.max(0, totalAmount - discount);
+    const due = finalTotal - paid;
+    if (paid > finalTotal) {
+      return NextResponse.json(
+        { success: false, message: "Total paid amount cannot exceed order total" },
+        { status: 400 },
+      );
+    }
 
     // Generate order number (date + daily sequence)
     const now = new Date();
@@ -276,7 +293,7 @@ export async function handlePost(request: NextRequest) {
       totalAmount: finalTotal,
       discount,
       notes: notes?.trim() || "",
-      paymentMethod: paymentMethod.toUpperCase() as PaymentMethod,
+      payments,
       warehouse, // Store warehouse
     });
 
@@ -393,7 +410,7 @@ export async function handleUpdateById(
       items,
       notes,
       discount = 0,
-      paymentMethod,
+      payments,
     } = body;
 
     // Check if order exists
@@ -427,11 +444,21 @@ export async function handleUpdateById(
       );
     }
 
-    if (!paymentMethod) {
+    if (!payments || !Array.isArray(payments) || payments.length === 0) {
       return NextResponse.json(
-        { success: false, message: "Payment method is required" },
+        { success: false, message: "At least one payment is required" },
         { status: 400 },
       );
+    }
+    let paidUpdate = 0;
+    for (const payment of payments) {
+      if (!payment.method || typeof payment.amount !== 'number' || payment.amount < 0) {
+        return NextResponse.json(
+          { success: false, message: "Each payment must have a valid method and a non-negative amount" },
+          { status: 400 },
+        );
+      }
+      paidUpdate += payment.amount;
     }
 
     // Validate customer exists
@@ -497,6 +524,13 @@ export async function handleUpdateById(
 
     // Apply discount
     const finalTotal = Math.max(0, totalAmount - discount);
+    const dueUpdate = finalTotal - paidUpdate;
+    if (paidUpdate > finalTotal) {
+      return NextResponse.json(
+        { success: false, message: "Total paid amount cannot exceed order total" },
+        { status: 400 },
+      );
+    }
 
     // Update order
     const updatedOrder = await Order.findByIdAndUpdate(
@@ -508,7 +542,7 @@ export async function handleUpdateById(
         totalAmount: finalTotal,
         discount,
         notes: notes?.trim() || "",
-        paymentMethod: paymentMethod.toUpperCase() as PaymentMethod,
+        payments,
       },
       { new: true, runValidators: true },
     );

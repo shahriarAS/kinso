@@ -3,6 +3,11 @@ import { Warehouse } from "../warehouses";
 
 export type PaymentMethod = "CASH" | "BKASH" | "ROCKET" | "NAGAD" | "BANK";
 
+export interface Payment {
+  method: PaymentMethod;
+  amount: number;
+}
+
 export interface Order {
   _id: string;
   orderNumber: string;
@@ -15,16 +20,18 @@ export interface Order {
     totalPrice: number;
   }[];
   totalAmount: number;
-  paymentMethod: PaymentMethod;
+  payments: Payment[];
   discount?: number;
   notes?: string;
   createdAt: string;
   updatedAt: string;
-  warehouse: Warehouse
+  warehouse: Warehouse;
+  paid: number; // Computed: sum of payments
+  due: number; // Computed: totalAmount - paid
 }
 
 export interface OrderInput
-  extends Omit<Order, "_id" | "orderNumber" | "createdAt" | "updatedAt" | "items" | "warehouse"> {
+  extends Omit<Order, "_id" | "orderNumber" | "createdAt" | "updatedAt" | "items" | "warehouse" | "paid" | "due"> {
     items: {
       product: string;
       quantity: number;

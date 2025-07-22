@@ -1,6 +1,6 @@
 "use client";
 import { Icon } from "@iconify/react";
-import { Button, Drawer, Descriptions, Table } from "antd";
+import { Button, Drawer, Table, Descriptions, Divider, Tag, Statistic } from "antd";
 import React from "react";
 import { Order } from "@/features/orders/types";
 
@@ -59,42 +59,118 @@ export default function ViewOrderDrawer({
       }
     >
       <div className="space-y-4">
-        <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-          <div className="font-semibold text-lg mb-2">
-            Customer: {order.customerName}
-          </div>
-          <div className="text-gray-600 text-sm mb-1">
-            Order #: {order.orderNumber}
-          </div>
-          <div className="text-gray-600 text-sm mb-1">
-            Date: {new Date(order.createdAt).toLocaleString()}
-          </div>
-          <div className="text-gray-600 text-sm mb-1">
-            Payment Method:{" "}
-            <span className="font-medium text-blue-600">
-              {order.paymentMethod}
-            </span>
-          </div>
-          <div className="text-gray-600 text-sm mb-1">
-            Subtotal: ৳{subtotal.toFixed(2)}
-          </div>
-          <div className="text-red-500 text-sm mb-1">
-            Discount: ৳{discount.toFixed(2)}
-          </div>
-          <div className="text-green-700 text-base font-bold mb-1">
-            Final Total: ৳{order.totalAmount.toFixed(2)}
-          </div>
-          {order.notes && (
-            <div className="text-gray-600 text-sm mb-1">
-              Notes: {order.notes}
-            </div>
-          )}
-          {order.warehouse && (
-            <div className="text-gray-600 text-sm mb-1">
-              Warehouse: {isWarehouseObj(order.warehouse) ? (order.warehouse.name || order.warehouse._id) : order.warehouse}
-            </div>
-          )}
+        {/* Customer Info Section */}
+        <div className="mb-4">
+          <Descriptions
+            title={<span className="font-semibold text-lg flex items-center gap-2"><Icon icon="mdi:account" /> Customer Details</span>}
+            column={2}
+            size="small"
+            bordered
+            labelStyle={{ width: 120 }}
+            contentStyle={{ fontWeight: 500 }}
+          >
+            <Descriptions.Item label={<span className="flex items-center gap-1"><Icon icon="mdi:identifier" /> Order #</span>}>
+              {order.orderNumber}
+            </Descriptions.Item>
+            {order.warehouse && (
+              <Descriptions.Item label={<span className="flex items-center gap-1"><Icon icon="mdi:warehouse" /> Warehouse</span>}>
+                {isWarehouseObj(order.warehouse) ? (order.warehouse.name || order.warehouse._id) : order.warehouse}
+              </Descriptions.Item>
+            )}
+            {/* Get customer object if populated */}
+            {(() => {
+              const customerObj = typeof order.customerId === "object" && order.customerId !== null
+                ? order.customerId as { name?: string; email?: string; phone?: string }
+                : null;
+              return [
+                <Descriptions.Item label={<span className="flex items-center gap-1"><Icon icon="mdi:account" /> Name</span>} key="name">
+                  {customerObj?.name || order.customerName}
+                </Descriptions.Item>,
+                <Descriptions.Item label={<span className="flex items-center gap-1"><Icon icon="mdi:email-outline" /> Email</span>} key="email">
+                  {customerObj?.email || <span className="text-gray-400">N/A</span>}
+                </Descriptions.Item>,
+                <Descriptions.Item label={<span className="flex items-center gap-1"><Icon icon="mdi:phone-outline" /> Phone</span>} key="phone">
+                  {customerObj?.phone || <span className="text-gray-400">N/A</span>}
+                </Descriptions.Item>,
+              ];
+            })()}
+            <Descriptions.Item label={<span className="flex items-center gap-1"><Icon icon="mdi:calendar" /> Date</span>}>
+              {new Date(order.createdAt).toLocaleString()}
+            </Descriptions.Item>
+            {order.notes && (
+              <Descriptions.Item label={<span className="flex items-center gap-1"><Icon icon="mdi:note-text-outline" /> Notes</span>}>
+                {order.notes}
+              </Descriptions.Item>
+            )}
+          </Descriptions>
         </div>
+
+        {/* Payments & Summary Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Payments Section */}
+          <div>
+            <Divider className="my-3" orientation="left">Payments</Divider>
+            {order.payments && order.payments.length > 0 ? (
+              <Table
+                columns={[
+                  {
+                    title: "Method",
+                    dataIndex: "method",
+                    key: "method",
+                    render: (method: string) => (
+                      <span className="flex items-center gap-1">
+                        <Icon icon="mdi:credit-card-outline" className="text-gray-400" />
+                        <span className="text-gray-700">{method}</span>
+                      </span>
+                    ),
+                  },
+                  {
+                    title: "Amount",
+                    dataIndex: "amount",
+                    key: "amount",
+                    render: (amount: number) => <span className="font-semibold">৳{Number(amount).toFixed(2)}</span>,
+                  },
+                ]}
+                dataSource={order.payments.map((p, idx) => ({ ...p, key: idx }))}
+                pagination={false}
+                size="small"
+                bordered
+                showHeader={true}
+              />
+            ) : (
+              <span className="text-gray-400">No payments</span>
+            )}
+          </div>
+
+          {/* Summary Section */}
+          <div>
+            <Divider className="my-3" orientation="left">Summary</Divider>
+            <Descriptions column={1} size="small" bordered>
+              <Descriptions.Item label={<span className="text-gray-600">Subtotal</span>}>
+                <span className="font-semibold">৳{subtotal.toFixed(2)}</span>
+              </Descriptions.Item>
+              <Descriptions.Item label={<span className="text-red-500">Discount</span>}>
+                <span className="font-semibold text-red-500">৳{discount.toFixed(2)}</span>
+              </Descriptions.Item>
+              <Descriptions.Item label={<span className="text-green-700">Final Total</span>}>
+                <span className="font-bold text-green-700">৳{order.totalAmount.toFixed(2)}</span>
+              </Descriptions.Item>
+              <Descriptions.Item label={<span className="text-green-700">Paid</span>}>
+                <span className="font-semibold">৳{order.payments?.reduce((sum, p) => sum + (Number(p.amount) || 0), 0).toFixed(2)}</span>
+              </Descriptions.Item>
+              <Descriptions.Item label={<span className="text-red-500">Due</span>}>
+                <span className={
+                  Math.max(0, order.totalAmount - (order.payments?.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) || 0)) > 0
+                    ? "font-semibold text-red-500"
+                    : "font-semibold text-green-700"
+                }>
+                  ৳{Math.max(0, order.totalAmount - (order.payments?.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) || 0)).toFixed(2)}
+                </span>
+              </Descriptions.Item>
+            </Descriptions>
+          </div>
+        </div>
+
         <div>
           <div className="font-semibold mb-2">Items</div>
           <Table

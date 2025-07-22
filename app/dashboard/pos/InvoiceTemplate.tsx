@@ -33,6 +33,9 @@ export interface InvoiceData {
     name: string;
     title: string;
   };
+  payments?: { method: string; amount: number }[];
+  paid?: number;
+  due?: number;
 }
 
 interface InvoiceTemplateProps {
@@ -42,6 +45,8 @@ interface InvoiceTemplateProps {
 const formatCurrency = (amount: number) => `৳${amount.toFixed(2)}`;
 
 const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ data }) => {
+  const paid = data.paid !== undefined ? data.paid : (data.payments ? data.payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) : data.total);
+  const due = data.due !== undefined ? data.due : Math.max(0, data.total - paid);
   return (
     <div className="max-w-4xl mx-auto p-6 font-sans text-sm leading-tight" style={{ background: "#fff" }}>
       {/* Header */}
@@ -119,6 +124,25 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ data }) => {
                 <span style={{ fontWeight: 500, color: "#ef4444" }}>- {formatCurrency(data.discount)}</span>
               </div>
             )}
+            {data.payments && data.payments.length > 0 && (
+              <div style={{ marginBottom: 6 }}>
+                <div style={{ color: "#6b7280", marginBottom: 2 }}>PAYMENTS</div>
+                {data.payments.map((p, idx) => (
+                  <div key={idx} style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+                    <span>{p.method}</span>
+                    <span>{formatCurrency(Number(p.amount))}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+              <span style={{ color: "#16a34a", fontWeight: 600 }}>PAID</span>
+              <span style={{ color: "#16a34a", fontWeight: 600 }}>{formatCurrency(paid)}</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+              <span style={{ color: "#ef4444", fontWeight: 600 }}>DUE</span>
+              <span style={{ color: "#ef4444", fontWeight: 600 }}>{formatCurrency(due)}</span>
+            </div>
           </div>
           <div style={{ marginTop: 16, textAlign: "center", background: "#f9fafb", padding: "12px 16px", borderRadius: 8 }}>
             <div style={{ fontSize: 20, fontWeight: "bold", color: "#1f2937" }}>{formatCurrency(data.total)}</div>

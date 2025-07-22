@@ -151,12 +151,23 @@ export default function OrderTable({
       render: (text: string) => <span className="text-gray-700">{text}</span>,
     },
     {
-      title: <span className="font-medium text-base">Payment Method</span>,
-      dataIndex: "paymentMethod",
-      key: "paymentMethod",
-      render: (method: string) => (
-        <span className="font-medium text-blue-600">{method}</span>
-      ),
+      title: <span className="font-medium text-base">Paid</span>,
+      dataIndex: "paid",
+      key: "paid",
+      render: (_: any, record: Order) => {
+        const paid = record.payments?.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) || 0;
+        return <span className="font-semibold text-green-700">৳{paid.toFixed(2)}</span>;
+      },
+    },
+    {
+      title: <span className="font-medium text-base">Due</span>,
+      dataIndex: "due",
+      key: "due",
+      render: (_: any, record: Order) => {
+        const paid = record.payments?.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) || 0;
+        const due = Math.max(0, record.totalAmount - paid);
+        return <span className="font-semibold text-red-500">৳{due.toFixed(2)}</span>;
+      },
     },
     {
       title: <span className="font-medium text-base">Total Amount</span>,
@@ -181,16 +192,6 @@ export default function OrderTable({
             ? record.discount
             : subtotal - record.totalAmount;
         return <span className="text-red-500">৳{discount.toFixed(2)}</span>;
-      },
-    },
-    {
-      title: <span className="font-medium text-base">Final Total</span>,
-      dataIndex: "totalAmount",
-      key: "finalTotal",
-      render: (amount: number) => {
-        return (
-          <span className="font-bold text-green-700">৳{amount.toFixed(2)}</span>
-        );
       },
     },
     {

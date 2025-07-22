@@ -54,9 +54,9 @@ export default function ProductGrid({ products, onAdd, selectedWarehouse }: Prod
             className="bg-white rounded-xl p-6 min-h-[220px] flex flex-col gap-3 border border-gray-200 hover:border-primary/30 transition-all duration-200 shadow-lg cursor-pointer group relative"
           >
             <div className="flex items-center gap-3 mb-1">
-              <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-lg font-semibold text-primary/70 border border-gray-100">
+              {/* <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-lg font-semibold text-primary/70 border border-gray-100">
                 {getInitials(product.name)}
-              </div>
+              </div> */}
               <div className="flex flex-col flex-1">
                 <span className="font-semibold text-base text-primary line-clamp-3 leading-tight break-words max-w-full">
                   {product.name}

@@ -9,13 +9,18 @@ export interface IOrderItem {
   totalPrice: number;
 }
 
+export interface IPayment {
+  method: PaymentMethod;
+  amount: number;
+}
+
 export interface IOrder extends Document {
   orderNumber: string;
   customerId: mongoose.Types.ObjectId;
   customerName: string;
   items: IOrderItem[];
   totalAmount: number;
-  paymentMethod: PaymentMethod;
+  payments: IPayment[];
   discount?: number; // Discount amount for the order
   notes?: string;
   createdAt: Date;
@@ -49,6 +54,22 @@ const OrderItemSchema: Schema = new Schema(
   { _id: false },
 );
 
+const PaymentSchema: Schema = new Schema(
+  {
+    method: {
+      type: String,
+      required: true,
+      enum: ["CASH", "BKASH", "ROCKET", "NAGAD", "BANK"],
+    },
+    amount: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+  },
+  { _id: false },
+);
+
 const OrderSchema: Schema = new Schema(
   {
     orderNumber: {
@@ -73,10 +94,10 @@ const OrderSchema: Schema = new Schema(
       required: true,
       min: 0,
     },
-    paymentMethod: {
-      type: String,
+    payments: {
+      type: [PaymentSchema],
       required: true,
-      enum: ["CASH", "BKASH", "ROCKET", "NAGAD", "BANK"],
+      default: [],
     },
     discount: {
       type: Number,

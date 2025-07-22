@@ -119,11 +119,8 @@ export default function CartDetails({
         date: order.createdAt
           ? new Date(order.createdAt).toLocaleDateString()
           : new Date().toLocaleDateString(),
-        customerId: customerObj._id,
         customer: {
           name: customerObj.name,
-          location: "",
-          id: customerObj._id,
           email:
             typeof customerObj.email === "string"
               ? customerObj.email
@@ -135,11 +132,7 @@ export default function CartDetails({
         },
         company: {
           name: "EZ POS",
-          location: "Your City, Country",
           address: "123 Main St, Suite 100",
-          phone: "+1-555-123-4567",
-          email: "info@ezpos.com",
-          website: "www.ezpos.com",
           logo: "EZ",
         },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -150,8 +143,8 @@ export default function CartDetails({
               ? item.product
               : { name: "Unknown", upc: "", sku: "" };
           return {
-            description: productObj.name,
-            details: `SKU: ${productObj.sku}; UPC: ${productObj.upc}`,
+            title: productObj.name,
+            description: `SKU: ${item.product.sku}; UPC: ${item.product.upc}${item.product.warranty ? `; Warranty: ${item.product.warranty.value} ${item.product.warranty.unit}` : ""}`,
             quantity: item.quantity,
             rate: item.unitPrice,
             price: item.totalPrice,

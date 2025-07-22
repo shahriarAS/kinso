@@ -1,6 +1,6 @@
 "use client";
 import { Form } from "antd";
-import React, { useEffect } from "react";
+import React from "react";
 import { GenericDrawer, type FormField } from "@/components/common";
 import type { Product, ProductInput } from "@/features/products/types";
 import {
@@ -11,6 +11,14 @@ import { useGetAllCategoriesQuery } from "@/features/categories/api";
 import { useGetWarehousesQuery } from "@/features/warehouses";
 import StockEntries from "./StockEntries";
 import { useNotification } from "@/hooks/useNotification";
+import WarrantyInput from "./WarrantyInput";
+import type { FormInstance } from "antd";
+
+// Extend FormField type to allow custom render
+export type CustomFormField = FormField & {
+  type?: string;
+  render?: (form: FormInstance) => React.ReactNode;
+};
 
 interface Props {
   open: boolean;
@@ -50,7 +58,7 @@ export default function AddEditProductDrawerRefactored({
     })) || [];
 
   // Define form fields using the generic interface
-  const fields: FormField[] = [
+  const fields: CustomFormField[] = [
     {
       name: "name",
       label: "Product Name",
@@ -80,18 +88,34 @@ export default function AddEditProductDrawerRefactored({
       options: categoryOptions,
       rules: [{ required: true, message: "Please select a category" }],
     },
+    {
+      name: "warranty",
+      label: "Warranty",
+      type: "custom",
+      render: (form: FormInstance) => <WarrantyInput form={form} />, // Use the custom component
+      rules: [], // No required rule, so it's optional
+    },
   ];
 
   const handleSubmit = async (values: ProductInput) => {
     try {
+      // If warranty is empty or has no value, remove it from payload
+      const submitValues = { ...values };
+      if (
+        !submitValues.warranty ||
+        submitValues.warranty.value === undefined ||
+        submitValues.warranty.value === null
+      ) {
+        delete submitValues.warranty;
+      }
       if (isEditing && product) {
         await updateProduct({
           _id: product._id,
-          product: values,
+          product: submitValues,
         }).unwrap();
         success("Product updated successfully");
       } else {
-        await createProduct(values).unwrap();
+        await createProduct(submitValues).unwrap();
         success("Product created successfully");
       }
     } catch (error: unknown) {
@@ -133,6 +157,11 @@ export default function AddEditProductDrawerRefactored({
             : stockItem.warehouse?._id,
       })) || [];
 
+    let initialWarranty: { value: number; unit: string } | undefined = undefined;
+    if (product.warranty && typeof product.warranty === "object" && product.warranty.value !== undefined && product.warranty.value !== null) {
+      initialWarranty = { value: product.warranty.value, unit: product.warranty.unit };
+    }
+
     return {
       name: product.name,
       sku: product.sku,
@@ -141,6 +170,7 @@ export default function AddEditProductDrawerRefactored({
         typeof product.category === "string"
           ? product.category
           : product.category?._id,
+      warranty: initialWarranty,
       stock: transformedStock,
     };
   };

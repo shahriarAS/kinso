@@ -24,6 +24,7 @@ export interface FormField {
   component?: React.ReactNode;
   className?: string;
   span?: number; // For grid layout
+  render?: (form: FormInstance) => React.ReactNode; // New property for custom rendering
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -100,19 +101,20 @@ export default function GenericDrawer<T = any>({
   };
 
   const renderField = (field: FormField) => {
-    const { type, component } = field;
-
-    if (type === "custom" && component) {
-      return component;
+    // Support custom render function
+    // @ts-ignore: render is allowed for custom fields
+    if (typeof field.render === "function") {
+      return field.render(form);
     }
-
+    if (field.type === "custom" && field.component) {
+      return field.component;
+    }
     const commonProps = {
       size: "large" as const,
       placeholder: field.placeholder,
       className: `w-full ${field.className || ""}`,
     };
-
-    switch (type) {
+    switch (field.type) {
       case "input":
         return <Input {...commonProps} />;
       case "textarea":

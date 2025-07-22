@@ -67,7 +67,7 @@ export async function handleGet(request: NextRequest) {
     const [orders, total] = await Promise.all([
       Order.find(query)
         .populate("customerId", "name email phone")
-        .populate("items.product", "name upc sku")
+        .populate("items.product", "name upc sku warranty")
         .populate("warehouse", "name location")
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -291,7 +291,7 @@ export async function handlePost(request: NextRequest) {
     // Populate references for response
     const populatedOrder = await Order.findById(order._id)
       .populate("customerId", "name email phone")
-      .populate("items.product", "name upc sku")
+      .populate("items.product", "name upc sku warranty")
       .populate("warehouse", "name location")
       .lean();
 
@@ -338,7 +338,7 @@ export async function handleGetById(
 
     const order = await Order.findById(_id)
       .populate("customerId", "name email phone")
-      .populate("items.product", "name upc sku")
+      .populate("items.product", "name upc sku warranty")
       .populate("warehouse", "name location")
       .lean();
 

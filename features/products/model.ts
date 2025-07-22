@@ -12,6 +12,10 @@ export interface IProduct extends Document {
   upc: string;
   sku: string;
   category: mongoose.Types.ObjectId;
+  warranty?: {
+    value: number;
+    unit: string;
+  };
   stock: IStock[];
   createdAt: Date;
   updatedAt: Date;
@@ -66,6 +70,16 @@ const ProductSchema: Schema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Category",
       required: true,
+    },
+    warranty: {
+      value: {
+        type: Number,
+        required: false,
+      },
+      unit: {
+        type: String,
+        required: false,
+      },
     },
     stock: [StockSchema],
   },

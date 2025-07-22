@@ -110,7 +110,7 @@ export async function handlePost(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { name, sku, upc, category, stock } = body;
+    const { name, sku, upc, category, warranty, stock } = body;
 
     // Basic validation
     if (!name || name.trim().length === 0) {
@@ -219,6 +219,7 @@ export async function handlePost(request: NextRequest) {
       upc: upc.trim(),
       sku: sku.trim(),
       category,
+      warranty,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       stock: stock.map((s: any) => ({
         warehouse: s.warehouse,
@@ -314,7 +315,7 @@ export async function handleUpdateById(
     }
     await dbConnect();
     const body = await request.json();
-    const { name, sku, upc, category, stock } = body;
+    const { name, sku, upc, category, warranty, stock } = body;
     const { _id } = await params;
     const existingProduct = await Product.findById(_id);
     if (!existingProduct) {
@@ -418,6 +419,7 @@ export async function handleUpdateById(
         sku: sku.trim(),
         upc: upc.trim(),
         category,
+        warranty,
         stock: stock.map((s: any) => ({
           warehouse: s.warehouse,
           unit: s.unit || 0,

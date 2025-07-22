@@ -143,6 +143,13 @@ export default function ViewProductDrawer({
                   : product.category?.name || ""}
               </span>
             </Descriptions.Item>
+            <Descriptions.Item label="Warranty">
+              <span className="capitalize">
+                {product?.warranty && product.warranty.value
+                  ? `${product.warranty.value} ${product.warranty.unit}`
+                  : "N/A"}
+              </span>
+            </Descriptions.Item>
             <Descriptions.Item label="Total Stock">
               <div className="flex items-center gap-2">
                 <span className="font-medium">{totalStock}</span>

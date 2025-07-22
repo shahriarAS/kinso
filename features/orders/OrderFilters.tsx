@@ -3,11 +3,14 @@ import React, { useCallback } from "react";
 import { PAYMENT_METHODS } from "@/lib/constraints";
 import { GenericFilters, type FilterField } from "@/components/common";
 import { useGetWarehousesQuery } from "@/features/warehouses";
+import { Product } from "@/features/products";
+import ProductSelect from "@/features/products/ProductSelect";
 
 interface OrderFilters {
   search?: string;
   paymentMethod?: string;
   warehouse?: string;
+  product?: string;
 }
 
 interface Props {
@@ -18,6 +21,8 @@ interface Props {
   onPageChange: (page: number) => void;
   onWarehouseChange: (value: string) => void;
   warehouseFilter: string;
+  productFilter: string;
+  onProductChange: (value: string) => void;
 }
 
 export default function OrderFilters({
@@ -28,8 +33,13 @@ export default function OrderFilters({
   onPageChange,
   onWarehouseChange,
   warehouseFilter,
+  productFilter,
+  onProductChange,
 }: Props) {
   const { data: warehousesData } = useGetWarehousesQuery({ limit: 100 });
+  const { useGetProductsQuery } = require("@/features/products");
+  const { data: productsData } = useGetProductsQuery({ limit: 100 });
+  const productOptions = productsData?.data.map((p: Product) => ({ label: p.name, value: p._id })) || [];
   const warehouseOptions =
     warehousesData?.data.map((w) => ({ label: w.name, value: w._id })) || [];
   // Define filter fields using the generic interface
@@ -64,6 +74,18 @@ export default function OrderFilters({
         ...warehouseOptions,
       ],
     },
+    {
+      name: "product",
+      label: "Product",
+      type: "custom",
+      component: (
+        <ProductSelect
+          value={productFilter}
+          onChange={onProductChange}
+          placeholder="Select Product"
+        />
+      ),
+    },
   ];
 
   const handleFiltersChange = useCallback((filters: OrderFilters) => {
@@ -72,8 +94,9 @@ export default function OrderFilters({
     const searchChanged = filters.search !== undefined && filters.search !== searchTerm;
     const paymentMethodChanged = filters.paymentMethod !== undefined && filters.paymentMethod !== paymentMethodFilter;
     const warehouseChanged = filters.warehouse !== undefined && filters.warehouse !== warehouseFilter;
+    const productChanged = filters.product !== undefined && filters.product !== productFilter;
 
-    if (searchChanged || paymentMethodChanged || warehouseChanged) {
+    if (searchChanged || paymentMethodChanged || warehouseChanged || productChanged) {
       onPageChange(1);
     }
 
@@ -87,12 +110,16 @@ export default function OrderFilters({
     if (warehouseChanged) {
       onWarehouseChange(filters.warehouse || "");
     }
+    if (productChanged) {
+      onProductChange(filters.product || "");
+    }
   }, []);
 
   const initialValues = {
     search: searchTerm,
     paymentMethod: paymentMethodFilter,
     warehouse: warehouseFilter,
+    product: productFilter,
   };
 
   return (

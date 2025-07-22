@@ -24,6 +24,7 @@ export const ordersApi = createApi({
         search?: string;
         paymentMethod?: string;
         warehouse?: string;
+        product?: string;
       }
     >({
       query: (params) => ({

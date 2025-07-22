@@ -36,6 +36,7 @@ export async function handleGet(request: NextRequest) {
     const customerId = searchParams.get("customerId") || "";
     const paymentMethod = searchParams.get("paymentMethod") || "";
     const warehouse = searchParams.get("warehouse") || "";
+    const product = searchParams.get("product") || "";
 
     const skip = (page - 1) * limit;
 
@@ -57,6 +58,9 @@ export async function handleGet(request: NextRequest) {
     }
     if (warehouse) {
       query.warehouse = warehouse;
+    }
+    if (product) {
+      query["items.product"] = product;
     }
 
     // Execute query

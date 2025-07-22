@@ -7,6 +7,7 @@ export default function Orders() {
   const [searchTerm, setSearchTerm] = useState("");
   const [paymentMethodFilter, setPaymentMethodFilter] = useState("");
   const [warehouseFilter, setWarehouseFilter] = useState("");
+  const [productFilter, setProductFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
 
@@ -29,6 +30,8 @@ export default function Orders() {
         onPageChange={handlePageChange}
         onWarehouseChange={setWarehouseFilter}
         warehouseFilter={warehouseFilter}
+        productFilter={productFilter}
+        onProductChange={setProductFilter}
       />
       {/* Table */}
       <OrderTable
@@ -38,6 +41,7 @@ export default function Orders() {
         pageSize={pageSize}
         onPageChange={handlePageChange}
         warehouseFilter={warehouseFilter}
+        productFilter={productFilter}
       />
     </div>
   );

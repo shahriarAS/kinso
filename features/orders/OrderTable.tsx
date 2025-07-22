@@ -21,6 +21,7 @@ interface Props {
   pageSize: number;
   onPageChange: (page: number) => void;
   warehouseFilter?: string;
+  productFilter?: string;
 }
 
 function mapOrderToInvoiceData(order: Order): InvoiceData {
@@ -82,6 +83,7 @@ export default function OrderTable({
   pageSize,
   onPageChange,
   warehouseFilter,
+  productFilter,
 }: Props) {
   const [viewOrder, setViewOrder] = useState<Order | null>(null);
   const [printOrder, setPrintOrder] = useState<Order | null>(null);
@@ -100,6 +102,7 @@ export default function OrderTable({
   if (searchTerm) params.search = searchTerm;
   if (paymentMethodFilter) params.paymentMethod = paymentMethodFilter;
   if (warehouseFilter) params.warehouse = warehouseFilter;
+  if (productFilter) params.product = productFilter;
 
   const { data, isLoading, error, refetch } = useGetOrdersQuery(params);
 

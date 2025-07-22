@@ -7,23 +7,9 @@ import { useCreateOrderMutation } from "@/features/orders";
 import { useNotification } from "@/hooks/useNotification";
 import { CartItem, CustomerOption } from "./types";
 import type { InvoiceData } from "./InvoiceTemplate";
-import { PaymentMethod } from "@/features/orders/types";
+import { OrderInput, PaymentMethod } from "@/features/orders/types";
 import { PAYMENT_METHODS } from "@/lib/constraints";
-
-interface OrderCreatePayload {
-  customerId: string;
-  customerName: string;
-  items: {
-    product: string;
-    quantity: number;
-    unitPrice: number;
-    totalPrice: number;
-  }[];
-  totalAmount: number;
-  paymentMethod: PaymentMethod;
-  discount?: number;
-  notes?: string;
-}
+import { Product } from "@/features/products/types";
 
 interface CartDetailsProps {
   cart: CartItem[];
@@ -41,6 +27,8 @@ interface CartDetailsProps {
   onCreateCustomer: () => void;
   onCheckoutSuccess: () => void;
   onOrderCompleted?: (invoiceData: InvoiceData) => void;
+  selectedWarehouse: string;
+  products: Product[];
 }
 
 export default function CartDetails({
@@ -59,6 +47,8 @@ export default function CartDetails({
   onCreateCustomer,
   onCheckoutSuccess,
   onOrderCompleted,
+  selectedWarehouse,
+  products,
 }: CartDetailsProps) {
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CASH");
@@ -89,7 +79,7 @@ export default function CartDetails({
     try {
       const selectedCustomer = customers.find((c) => c.value === customer);
       // Prepare payload for backend (product: string)
-      const orderPayload: OrderCreatePayload = {
+      const orderPayload: OrderInput = {
         customerId: customer,
         customerName: selectedCustomer?.label || "Unknown Customer",
         items: cart.map((item) => ({
@@ -102,6 +92,7 @@ export default function CartDetails({
         paymentMethod,
         discount,
         notes: discount > 0 ? `Discount applied: ৳${discount}` : undefined,
+        warehouse: selectedWarehouse, // Pass warehouse
       };
       // The API slice expects the wrong type for createOrder, but our payload matches the backend expectation.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -237,72 +228,81 @@ export default function CartDetails({
               No items in cart
             </div>
           ) : (
-            cart.map((item) => (
-              <div
-                key={item._id}
-                className="flex items-center justify-between border-b border-gray-100 py-4 last:border-b-0 gap-4 bg-white/80 rounded-xl px-2"
-              >
-                <div className="flex items-center gap-3 w-1/3">
-                  {/* <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-lg font-bold text-primary/60 border border-gray-200">
-                    {getInitials(item.name)}
-                  </div> */}
-                  <div>
-                    <div className="font-medium text-primary text-sm line-clamp-2">
-                      {item.name}
-                    </div>
-                    <div className="text-xs font-bold text-gray-600">
-                      SKU: {item.sku}
+            cart.map((item) => {
+              const product = products.find(p => p._id === item._id);
+              const stockItem = product?.stock.find(s => s.warehouse._id === selectedWarehouse);
+              const maxQty = stockItem ? stockItem.unit : 0;
+              return (
+                <div
+                  key={item._id}
+                  className="flex items-center justify-between border-b border-gray-100 py-4 last:border-b-0 gap-4 bg-white/80 rounded-xl px-2"
+                >
+                  <div className="flex items-center gap-3 w-1/3">
+                    {/* <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-lg font-bold text-primary/60 border border-gray-200">
+                      {getInitials(item.name)}
+                    </div> */}
+                    <div>
+                      <div className="font-medium text-primary text-sm line-clamp-2">
+                        {item.name}
+                      </div>
+                      <div className="text-xs font-bold text-gray-600">
+                        SKU: {item.sku}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        Stock: {maxQty}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-3 w-2/3">
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="small"
-                      shape="circle"
-                      onClick={() => onQty(item._id, item.quantity - 1)}
-                      disabled={item.quantity <= 1}
-                      className="border-gray-300"
-                    >
-                      <Icon icon="mdi:minus" />
-                    </Button>
-                    <span className="w-7 text-center font-semibold text-base">
-                      {item.quantity}
-                    </span>
-                    <Button
-                      size="small"
-                      shape="circle"
-                      onClick={() => onQty(item._id, item.quantity + 1)}
-                      className="border-gray-300"
-                    >
-                      <Icon icon="mdi:plus" />
-                    </Button>
-                  </div>
-                  <Input
-                    type="number"
-                    min={0}
-                    value={item.price}
-                    size="large"
-                    className="w-60 text-right font-semibold text-green-600"
-                    onChange={(e) => onPrice(item._id, Number(e.target.value))}
-                    prefix="৳"
-                    style={{ textAlign: "right" }}
-                  />
-                  <span className="font-semibold text-green-700 text-base w-20 text-right">
-                    ৳{item.price * item.quantity}
-                  </span>
-                  <Tooltip title="Remove">
-                    <Button
-                      type="text"
-                      danger
-                      size="small"
-                      onClick={() => onRemove(item._id)}
-                      icon={<Icon icon="lineicons:close" />}
+                  <div className="flex items-center gap-3 w-2/3">
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="small"
+                        shape="circle"
+                        onClick={() => onQty(item._id, item.quantity - 1)}
+                        disabled={item.quantity <= 1}
+                        className="border-gray-300"
+                      >
+                        <Icon icon="mdi:minus" />
+                      </Button>
+                      <span className="w-7 text-center font-semibold text-base">
+                        {item.quantity}
+                      </span>
+                      <Button
+                        size="small"
+                        shape="circle"
+                        onClick={() => onQty(item._id, item.quantity + 1)}
+                        disabled={item.quantity >= maxQty}
+                        className="border-gray-300"
+                      >
+                        <Icon icon="mdi:plus" />
+                      </Button>
+                    </div>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={item.price}
+                      size="large"
+                      className="w-60 text-right font-semibold text-green-600"
+                      onChange={(e) => onPrice(item._id, Number(e.target.value))}
+                      prefix="৳"
+                      style={{ textAlign: "right" }}
                     />
-                  </Tooltip>
+                    <span className="font-semibold text-green-700 text-base w-20 text-right">
+                      ৳{item.price * item.quantity}
+                    </span>
+                    <Tooltip title="Remove">
+                      <Button
+                        type="text"
+                        danger
+                        size="small"
+                        onClick={() => onRemove(item._id)}
+                        icon={<Icon icon="lineicons:close" />}
+                      />
+                    </Tooltip>
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
         {/* Cart summary */}

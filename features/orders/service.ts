@@ -3,6 +3,7 @@ import dbConnect from "@/lib/database";
 import Order from "./model";
 import Customer from "@/features/customers/model";
 import Product from "@/features/products/model";
+import Warehouse from "@/features/warehouses/model";
 import { authorizeRequest } from "@/lib/auth";
 import OrderCounter from "@/features/orders/modelOrderCounter";
 import { PaymentMethod } from "./model";
@@ -34,6 +35,7 @@ export async function handleGet(request: NextRequest) {
     const search = searchParams.get("search") || "";
     const customerId = searchParams.get("customerId") || "";
     const paymentMethod = searchParams.get("paymentMethod") || "";
+    const warehouse = searchParams.get("warehouse") || "";
 
     const skip = (page - 1) * limit;
 
@@ -53,12 +55,16 @@ export async function handleGet(request: NextRequest) {
     if (paymentMethod) {
       query.paymentMethod = paymentMethod.toUpperCase();
     }
+    if (warehouse) {
+      query.warehouse = warehouse;
+    }
 
     // Execute query
     const [orders, total] = await Promise.all([
       Order.find(query)
         .populate("customerId", "name email phone")
         .populate("items.product", "name upc sku")
+        .populate("warehouse", "name location")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -115,6 +121,7 @@ export async function handlePost(request: NextRequest) {
       notes,
       discount = 0,
       paymentMethod,
+      warehouse, // Add warehouse from body
     } = body;
 
     // Basic validation
@@ -122,6 +129,22 @@ export async function handlePost(request: NextRequest) {
       return NextResponse.json(
         { success: false, message: "Customer ID is required" },
         { status: 400 },
+      );
+    }
+
+    if (!warehouse) {
+      return NextResponse.json(
+        { success: false, message: "Warehouse is required" },
+        { status: 400 },
+      );
+    }
+
+    // Validate warehouse exists
+    const warehouseDoc = await Warehouse.findById(warehouse);
+    if (!warehouseDoc) {
+      return NextResponse.json(
+        { success: false, message: "Warehouse not found" },
+        { status: 404 },
       );
     }
 
@@ -195,6 +218,20 @@ export async function handlePost(request: NextRequest) {
           { status: 404 },
         );
       }
+      // Find stock for this warehouse
+      const stockEntry = product.stock.find((s: any) => s.warehouse.toString() === warehouse);
+      if (!stockEntry || stockEntry.unit < item.quantity) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `Insufficient stock for product ${product.name} in selected warehouse`,
+          },
+          { status: 400 },
+        );
+      }
+      // Deduct stock for this warehouse only
+      stockEntry.unit -= item.quantity;
+      await product.save();
 
       const totalPrice = item.quantity * item.unitPrice;
       totalAmount += totalPrice;
@@ -236,6 +273,7 @@ export async function handlePost(request: NextRequest) {
       discount,
       notes: notes?.trim() || "",
       paymentMethod: paymentMethod.toUpperCase() as PaymentMethod,
+      warehouse, // Store warehouse
     });
 
     // Update customer statistics
@@ -250,6 +288,7 @@ export async function handlePost(request: NextRequest) {
     const populatedOrder = await Order.findById(order._id)
       .populate("customerId", "name email phone")
       .populate("items.product", "name upc sku")
+      .populate("warehouse", "name location")
       .lean();
 
     return NextResponse.json(
@@ -296,6 +335,7 @@ export async function handleGetById(
     const order = await Order.findById(_id)
       .populate("customerId", "name email phone")
       .populate("items.product", "name upc sku")
+      .populate("warehouse", "name location")
       .lean();
 
     if (!order) {
@@ -480,6 +520,7 @@ export async function handleUpdateById(
     const populatedOrder = await Order.findById(updatedOrder._id)
       .populate("customerId", "name email phone")
       .populate("items.product", "name upc sku")
+      .populate("warehouse", "name location")
       .lean();
 
     return NextResponse.json({
@@ -571,6 +612,7 @@ export async function handleGetByCustomer(
     const orders = await Order.find({ customerId: _id })
       .populate("customerId", "name email phone")
       .populate("items.product", "name upc sku")
+      .populate("warehouse", "name location")
       .sort({ createdAt: -1 })
       .lean();
 

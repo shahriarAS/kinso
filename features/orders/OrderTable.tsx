@@ -20,6 +20,7 @@ interface Props {
   currentPage: number;
   pageSize: number;
   onPageChange: (page: number) => void;
+  warehouseFilter?: string;
 }
 
 function mapOrderToInvoiceData(order: Order): InvoiceData {
@@ -80,6 +81,7 @@ export default function OrderTable({
   currentPage,
   pageSize,
   onPageChange,
+  warehouseFilter,
 }: Props) {
   const [viewOrder, setViewOrder] = useState<Order | null>(null);
   const [printOrder, setPrintOrder] = useState<Order | null>(null);
@@ -97,6 +99,7 @@ export default function OrderTable({
   };
   if (searchTerm) params.search = searchTerm;
   if (paymentMethodFilter) params.paymentMethod = paymentMethodFilter;
+  if (warehouseFilter) params.warehouse = warehouseFilter;
 
   const { data, isLoading, error, refetch } = useGetOrdersQuery(params);
 
@@ -193,6 +196,16 @@ export default function OrderTable({
           <span className="font-bold text-green-700">৳{amount.toFixed(2)}</span>
         );
       },
+    },
+    {
+      title: <span className="font-medium text-base">Warehouse</span>,
+      dataIndex: "warehouse",
+      key: "warehouse",
+      render: (warehouse: string | { _id: string; name: string } | undefined) => (
+        <span className="text-gray-700">
+          {typeof warehouse === "string" ? warehouse : warehouse?.name || "N/A"}
+        </span>
+      ),
     },
   ];
 

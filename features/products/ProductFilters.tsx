@@ -99,7 +99,13 @@ export default function ProductFiltersRefactored({
 
   const handleFiltersChange = useCallback((filters: ProductFilters) => {
     // Reset to first page when filters change
-    onPageChange(1);
+    const searchChanged = filters.search !== undefined && filters.search !== searchTerm;
+    const categoryChanged = filters.category !== undefined && filters.category !== categoryFilter;
+    const warehouseChanged = filters.warehouse !== undefined && filters.warehouse !== warehouseFilter;
+    const statusChanged = filters.status !== undefined && filters.status !== statusFilter;
+    if (searchChanged || categoryChanged || warehouseChanged || statusChanged) {
+      onPageChange(1);
+    }
 
     // Update individual filter values
     if (filters.search !== undefined) {

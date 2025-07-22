@@ -20,6 +20,7 @@ export interface IOrder extends Document {
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
+  warehouse: mongoose.Types.ObjectId; // Added warehouse property
 }
 
 const OrderItemSchema: Schema = new Schema(
@@ -86,6 +87,11 @@ const OrderSchema: Schema = new Schema(
     notes: {
       type: String,
       trim: true,
+    },
+    warehouse: {
+      type: Schema.Types.ObjectId,
+      ref: "Warehouse",
+      required: true,
     },
   },
   {

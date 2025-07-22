@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import type { Product } from "@/features/products/types";
-import { Input, Select } from "antd";
+import { Input, Select, Modal } from "antd";
 import { useGetWarehousesQuery } from "@/features/warehouses";
 import { useGetCustomersQuery } from "@/features/customers";
 import { useNotification } from "@/hooks/useNotification";
@@ -27,10 +27,12 @@ export default function POS() {
   const [lastInvoiceData, setLastInvoiceData] = useState<InvoiceData | null>(
     null,
   );
+  const [pendingWarehouse, setPendingWarehouse] = useState<string | null>(null);
+  const [showWarehouseModal, setShowWarehouseModal] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const searchInputRef = useRef<any>(null);
   const printContainerRef = useRef<HTMLDivElement>(null);
-  const { success } = useNotification();
+  const { success, error } = useNotification();
 
   // API hooks
   const { data: warehousesData, isLoading: warehousesLoading } =
@@ -42,7 +44,7 @@ export default function POS() {
     limit: 100,
   });
 
-  const { data: inventoryData, isLoading: inventoryLoading } =
+  const { data: inventoryData, isLoading: inventoryLoading, refetch: refetchProducts } =
     useGetProductsQuery({
       limit: 10000,
       warehouse: selectedWarehouse || undefined,
@@ -96,27 +98,37 @@ export default function POS() {
       ? Number(customTotal)
       : computedTotal;
 
+  // In handleAddToCart, use warehouse-specific stock/price
   const handleAddToCart = (product: Product) => {
+    const stockItem = product.stock.find(s => s.warehouse._id === selectedWarehouse);
+    if (!stockItem || stockItem.unit === 0) return;
     setCart((prev) => {
       const found = prev.find((item) => item._id === product._id);
       if (found) {
+        // Cap at max stock
+        const newQty = Math.min(found.quantity + 1, stockItem.unit);
         return prev.map((item) =>
           item._id === product._id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: newQty, price: Number(stockItem.mrp) }
             : item,
         );
       }
-      // Use the actual MRP price from warehouse inventory
-      const stockItem = product.stock[0];
-      const price = stockItem?.mrp || 0;
-      return [...prev, { ...product, quantity: 1, price: Number(price) }];
+      return [
+        ...prev,
+        { ...product, quantity: 1, price: Number(stockItem.mrp) },
+      ];
     });
   };
 
+  // In handleQtyChange, cap at warehouse stock
   const handleQtyChange = (_id: string, qty: number) => {
+    const product = products.find(p => p._id === _id);
+    if (!product) return;
+    const stockItem = product.stock.find(s => s.warehouse._id === selectedWarehouse);
+    const maxQty = stockItem ? stockItem.unit : 0;
     setCart((prev) =>
       prev.map((item) =>
-        item._id === _id ? { ...item, quantity: Math.max(1, qty) } : item,
+        item._id === _id ? { ...item, quantity: Math.max(1, Math.min(qty, maxQty)) } : item,
       ),
     );
   };
@@ -148,6 +160,7 @@ export default function POS() {
     setCustomTotal(null);
     setCustomer("");
     success("Cart cleared! Ready for next sale.");
+    refetchProducts(); // Refetch products after order
     // Refocus search bar
     setTimeout(() => {
       if (searchInputRef.current) {
@@ -163,6 +176,7 @@ export default function POS() {
     setCustomTotal(null);
     setCustomer("");
     success("Cart cleared! Ready for next sale.");
+    refetchProducts(); // Refetch products after order
     // Refocus search bar
     setTimeout(() => {
       if (searchInputRef.current) {
@@ -202,6 +216,18 @@ export default function POS() {
     }
   }, []);
 
+  // Clear cart on warehouse change
+  useEffect(() => {
+    if (warehousesData && warehousesData.data.length > 0) {
+      if (localStorage.getItem("selectedWarehouse")) {
+        setSelectedWarehouse(localStorage.getItem("selectedWarehouse") || "");
+      } else {
+        setSelectedWarehouse(warehousesData.data[0]._id);
+        localStorage.setItem("selectedWarehouse", warehousesData.data[0]._id);
+      }
+    }
+  }, [warehousesData]);
+
   return (
     <>
       <div
@@ -237,15 +263,17 @@ export default function POS() {
           </h1>
           <Select
             size="large"
-            options={[
-              {
-                label: "All Warehouses",
-                value: "",
-              },
-              ...warehouseOptions,
-            ]}
+            options={warehouseOptions}
             value={selectedWarehouse}
-            onChange={setSelectedWarehouse}
+            onChange={(value) => {
+              if (cart.length > 0 && value !== selectedWarehouse) {
+                setPendingWarehouse(value);
+                setShowWarehouseModal(true);
+              } else {
+                setSelectedWarehouse(value);
+                localStorage.setItem("selectedWarehouse", value);
+              }
+            }}
             className="w-52"
             placeholder="Select Warehouse"
             loading={warehousesLoading}
@@ -529,6 +557,7 @@ export default function POS() {
                   <ProductGrid
                     products={filteredProducts}
                     onAdd={handleAddToCart}
+                    selectedWarehouse={selectedWarehouse}
                   />
                 )}
               </div>
@@ -541,7 +570,13 @@ export default function POS() {
                   customer={customer}
                   setCustomer={setCustomer}
                   discount={discount}
-                  setDiscount={setDiscount}
+                  setDiscount={(v) => {
+                    if (v > subtotal) {
+                      error("Discount cannot exceed subtotal");
+                      return;
+                    }
+                    setDiscount(v);
+                  }}
                   total={total}
                   setCustomTotal={setCustomTotal}
                   computedTotal={computedTotal}
@@ -549,6 +584,8 @@ export default function POS() {
                   onCreateCustomer={() => setCustomerModalOpen(true)}
                   onCheckoutSuccess={handleCheckoutSuccess}
                   onOrderCompleted={handleOrderCompleted}
+                  selectedWarehouse={selectedWarehouse}
+                  products={products}
                 />
               </div>
             </div>
@@ -560,6 +597,24 @@ export default function POS() {
           onClose={() => setCustomerModalOpen(false)}
           onCustomerCreated={handleCustomerCreated}
         />
+        <Modal
+          open={showWarehouseModal}
+          onCancel={() => setShowWarehouseModal(false)}
+          onOk={() => {
+            if (pendingWarehouse) {
+              setSelectedWarehouse(pendingWarehouse);
+              localStorage.setItem("selectedWarehouse", pendingWarehouse);
+              setCart([]);
+            }
+            setShowWarehouseModal(false);
+            setPendingWarehouse(null);
+          }}
+          okText="Continue"
+          cancelText="Cancel"
+          title="Switch Warehouse?"
+        >
+          Switching warehouse will clear your cart. Continue?
+        </Modal>
       </div>
     </>
   );

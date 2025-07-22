@@ -6,6 +6,7 @@ import { OrderFilters, OrderTable } from "@/features/orders";
 export default function Orders() {
   const [searchTerm, setSearchTerm] = useState("");
   const [paymentMethodFilter, setPaymentMethodFilter] = useState("");
+  const [warehouseFilter, setWarehouseFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
 
@@ -26,6 +27,8 @@ export default function Orders() {
         onSearchChange={setSearchTerm}
         onPaymentMethodChange={setPaymentMethodFilter}
         onPageChange={handlePageChange}
+        onWarehouseChange={setWarehouseFilter}
+        warehouseFilter={warehouseFilter}
       />
       {/* Table */}
       <OrderTable
@@ -34,6 +37,7 @@ export default function Orders() {
         currentPage={currentPage}
         pageSize={pageSize}
         onPageChange={handlePageChange}
+        warehouseFilter={warehouseFilter}
       />
     </div>
   );

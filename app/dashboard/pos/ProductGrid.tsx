@@ -9,9 +9,10 @@ import { getInitials } from "@/lib/getInitials";
 interface ProductGridProps {
   products: Product[];
   onAdd: (p: Product) => void;
+  selectedWarehouse: string;
 }
 
-export default function ProductGrid({ products, onAdd }: ProductGridProps) {
+export default function ProductGrid({ products, onAdd, selectedWarehouse }: ProductGridProps) {
   const getCategoryName = (
     category: string | { _id: string; name: string },
   ) => {
@@ -29,15 +30,12 @@ export default function ProductGrid({ products, onAdd }: ProductGridProps) {
   };
 
   const getStockQuantity = (product: Product) => {
-    return product.stock.reduce(
-      (total, stockItem) => total + stockItem.unit,
-      0,
-    );
+    const stockItem = product.stock.find(s => s.warehouse._id === selectedWarehouse);
+    return stockItem ? stockItem.unit : 0;
   };
 
   const getProductPrice = (product: Product) => {
-    // Get the MRP from the first stock item (warehouse inventory)
-    const stockItem = product.stock[0];
+    const stockItem = product.stock.find(s => s.warehouse._id === selectedWarehouse);
     return stockItem?.mrp || 0;
   };
 

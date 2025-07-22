@@ -2,10 +2,12 @@
 import React, { useCallback } from "react";
 import { PAYMENT_METHODS } from "@/lib/constraints";
 import { GenericFilters, type FilterField } from "@/components/common";
+import { useGetWarehousesQuery } from "@/features/warehouses";
 
 interface OrderFilters {
   search?: string;
   paymentMethod?: string;
+  warehouse?: string;
 }
 
 interface Props {
@@ -14,6 +16,8 @@ interface Props {
   onSearchChange: (value: string) => void;
   onPaymentMethodChange: (value: string) => void;
   onPageChange: (page: number) => void;
+  onWarehouseChange: (value: string) => void;
+  warehouseFilter: string;
 }
 
 export default function OrderFilters({
@@ -22,7 +26,12 @@ export default function OrderFilters({
   onSearchChange,
   onPaymentMethodChange,
   onPageChange,
+  onWarehouseChange,
+  warehouseFilter,
 }: Props) {
+  const { data: warehousesData } = useGetWarehousesQuery({ limit: 100 });
+  const warehouseOptions =
+    warehousesData?.data.map((w) => ({ label: w.name, value: w._id })) || [];
   // Define filter fields using the generic interface
   const fields: FilterField[] = [
     {
@@ -45,24 +54,45 @@ export default function OrderFilters({
         })),
       ],
     },
+    {
+      name: "warehouse",
+      label: "Warehouse",
+      type: "select",
+      placeholder: "Select Warehouse",
+      options: [
+        { label: "All", value: "" },
+        ...warehouseOptions,
+      ],
+    },
   ];
 
   const handleFiltersChange = useCallback((filters: OrderFilters) => {
+    console.log(filters)
     // Reset to first page when filters change
-    onPageChange(1);
+    const searchChanged = filters.search !== undefined && filters.search !== searchTerm;
+    const paymentMethodChanged = filters.paymentMethod !== undefined && filters.paymentMethod !== paymentMethodFilter;
+    const warehouseChanged = filters.warehouse !== undefined && filters.warehouse !== warehouseFilter;
+
+    if (searchChanged || paymentMethodChanged || warehouseChanged) {
+      onPageChange(1);
+    }
 
     // Update individual filter values
-    if (filters.search !== undefined) {
-      onSearchChange(filters.search);
+    if (searchChanged) {
+      onSearchChange(filters.search || "");
     }
-    if (filters.paymentMethod !== undefined) {
-      onPaymentMethodChange(filters.paymentMethod);
+    if (paymentMethodChanged) {
+      onPaymentMethodChange(filters.paymentMethod || "");
     }
-  }, [onPageChange, onSearchChange, onPaymentMethodChange]);
+    if (warehouseChanged) {
+      onWarehouseChange(filters.warehouse || "");
+    }
+  }, []);
 
   const initialValues = {
     search: searchTerm,
     paymentMethod: paymentMethodFilter,
+    warehouse: warehouseFilter,
   };
 
   return (

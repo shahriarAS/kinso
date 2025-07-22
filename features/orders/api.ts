@@ -5,7 +5,7 @@ import { Order, OrderInput } from "@/features/orders/types";
 export const ordersApi = createApi({
   reducerPath: "ordersApi",
   baseQuery: baseQueryWithErrorHandling("/api/orders"),
-  tagTypes: ["Order"],
+  tagTypes: ["Order", "Product"],
   endpoints: (builder) => ({
     // Get all orders with pagination and filters
     getOrders: builder.query<
@@ -22,12 +22,8 @@ export const ordersApi = createApi({
         page?: number;
         limit?: number;
         search?: string;
-        customerId?: string;
-        startDate?: string;
-        endDate?: string;
-        sortBy?: string;
-        sortOrder?: "asc" | "desc";
         paymentMethod?: string;
+        warehouse?: string;
       }
     >({
       query: (params) => ({
@@ -64,7 +60,10 @@ export const ordersApi = createApi({
           method: "POST",
           body: order,
         }),
-        invalidatesTags: [{ type: "Order", id: "LIST" }],
+        invalidatesTags: [
+          { type: "Order", id: "LIST" },
+          { type: "Product", id: "LIST" }, // Invalidate products list cache after order creation
+        ],
       },
     ),
 

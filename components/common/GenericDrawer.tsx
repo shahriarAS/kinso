@@ -204,7 +204,8 @@ export default function GenericDrawer<T = any>({
         className={formClassName}
         disabled={loading}
       >
-        {children || renderFields()}
+        {renderFields()}
+        {children}
       </Form>
     </Drawer>
   );

@@ -1,45 +1,33 @@
-"use client";
-import { Form, Input, Select, DatePicker, InputNumber, Button } from "antd";
 import React, { useEffect, useCallback } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
+import isEqual from "fast-deep-equal/react";
+import { Form, Input, Select, DatePicker, InputNumber, Button } from "antd";
 
 export interface FilterField {
   name: string;
   label: string;
   type: "input" | "select" | "date" | "number" | "range" | "custom";
   placeholder?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   options?: { label: string; value: any }[];
   component?: React.ReactNode;
   className?: string;
-  span?: number; // For grid layout
-  debounce?: number; // For input fields that need debouncing
+  span?: number;
+  debounce?: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface GenericFiltersProps<T = any> {
-  // Filter configuration
   fields: FilterField[];
   initialValues?: Partial<T>;
   onFiltersChange: (filters: T) => void;
-
-  // Layout
   gridCols?: number;
   className?: string;
-
-  // Actions
   showReset?: boolean;
   resetText?: string;
   onReset?: () => void;
-
-  // Custom content
   children?: React.ReactNode;
-
-  // Debounce configuration
   debounceDelay?: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function GenericFilters<T = any>({
   fields,
   initialValues,
@@ -53,44 +41,47 @@ export default function GenericFilters<T = any>({
   debounceDelay = 500,
 }: GenericFiltersProps<T>) {
   const [form] = Form.useForm<T>();
-  const debouncedValues = useDebounce(form.getFieldsValue(), debounceDelay);
+  const lastInitialValues = React.useRef<Partial<T> | undefined>(undefined);
+
+  // State to hold current form values
+  const [formValues, setFormValues] = React.useState<T>({} as T);
+  // Debounce the form values
+  const debouncedValues = useDebounce(formValues, debounceDelay);
 
   useEffect(() => {
-    if (initialValues) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
+    onFiltersChange(debouncedValues);
+  }, [debouncedValues, onFiltersChange]);
+
+  useEffect(() => {
+    if (
+      initialValues &&
+      !isEqual(initialValues, lastInitialValues.current)
+    ) {
       form.setFieldsValue(initialValues as any);
+      setFormValues((initialValues || {}) as T);
+      lastInitialValues.current = initialValues;
     }
-  }, [initialValues, form]);
+  }, [initialValues]);
 
-  const handleFiltersChange = useCallback((values: T) => {
-    if (Object.keys(values as object).length > 0) {
-      onFiltersChange(values);
-    }
-  }, [onFiltersChange]);
-
-  useEffect(() => {
-    const values = form.getFieldsValue();
-    handleFiltersChange(values);
-  }, [debouncedValues, handleFiltersChange]);
+  const handleValuesChange = useCallback((_changedValues: any, allValues: T) => {
+    setFormValues(allValues);
+  }, []);
 
   const handleReset = () => {
     form.resetFields();
+    setFormValues({} as T);
     onReset?.();
   };
 
   const renderField = (field: FilterField) => {
     const { type, component } = field;
-
-    if (type === "custom" && component) {
-      return component;
-    }
-
+    if (type === "custom" && component) return component;
     const commonProps = {
       size: "large" as const,
       placeholder: field.placeholder,
       className: `w-full ${field.className || ""}`,
     };
-
     switch (type) {
       case "input":
         return <Input {...commonProps} />;
@@ -126,13 +117,10 @@ export default function GenericFilters<T = any>({
         </Form.Item>
       ));
     }
-
-    // Grid layout
     const rows: FilterField[][] = [];
     for (let i = 0; i < fields.length; i += gridCols) {
       rows.push(fields.slice(i, i + gridCols));
     }
-
     return rows.map((row, rowIndex) => (
       <div key={rowIndex} className={`grid grid-cols-${gridCols} gap-8`}>
         {row.map((field) => (
@@ -156,9 +144,9 @@ export default function GenericFilters<T = any>({
       layout="vertical"
       requiredMark={false}
       className={`${className} ${showReset ? "grid grid-cols-4 gap-8" : ""}`}
+      onValuesChange={handleValuesChange}
     >
       {children || renderFields()}
-
       {showReset && (
         <div className="flex items-end">
           <Button type="default" onClick={handleReset} className="h-10">

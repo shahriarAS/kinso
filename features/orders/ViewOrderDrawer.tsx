@@ -32,6 +32,16 @@ export default function ViewOrderDrawer({
       ? order.discount
       : subtotal - order.totalAmount;
 
+  // Add type guard for warehouse
+  function isWarehouseObj(warehouse: unknown): warehouse is { _id: string; name: string } {
+    return (
+      typeof warehouse === "object" &&
+      warehouse !== null &&
+      "_id" in warehouse &&
+      "name" in warehouse
+    );
+  }
+
   return (
     <Drawer
       title={order ? `Order #${order.orderNumber}` : ""}
@@ -77,6 +87,11 @@ export default function ViewOrderDrawer({
           {order.notes && (
             <div className="text-gray-600 text-sm mb-1">
               Notes: {order.notes}
+            </div>
+          )}
+          {order.warehouse && (
+            <div className="text-gray-600 text-sm mb-1">
+              Warehouse: {isWarehouseObj(order.warehouse) ? (order.warehouse.name || order.warehouse._id) : order.warehouse}
             </div>
           )}
         </div>

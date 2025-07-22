@@ -30,7 +30,10 @@ export default function CategoryFilters({
 
   const handleFiltersChange = useCallback((filters: CategoryFilters) => {
     // Reset to first page when filters change
-    onPageChange(1);
+    const searchChanged = filters.search !== undefined && filters.search !== searchTerm;
+    if (searchChanged) {
+      onPageChange(1);
+    }
 
     // Update search value
     if (filters.search !== undefined) {

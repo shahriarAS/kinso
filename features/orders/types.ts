@@ -1,4 +1,5 @@
 import { Product } from "@/features/products/types";
+import { Warehouse } from "../warehouses";
 
 export type PaymentMethod = "CASH" | "BKASH" | "ROCKET" | "NAGAD" | "BANK";
 
@@ -19,7 +20,16 @@ export interface Order {
   notes?: string;
   createdAt: string;
   updatedAt: string;
+  warehouse: Warehouse
 }
 
 export interface OrderInput
-  extends Omit<Order, "_id" | "orderNumber" | "createdAt" | "updatedAt"> {}
+  extends Omit<Order, "_id" | "orderNumber" | "createdAt" | "updatedAt" | "items" | "warehouse"> {
+    items: {
+      product: string;
+      quantity: number;
+      unitPrice: number;
+      totalPrice: number;
+    }[];
+    warehouse: string;
+  }

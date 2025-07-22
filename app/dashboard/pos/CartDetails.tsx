@@ -128,72 +128,91 @@ export default function CartDetails({
       const response = await createOrder(orderPayload as any).unwrap();
       const order = response.data;
 
-      // Handle customerId (string or object)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let customerObj: any;
-      if (typeof order.customerId === "object" && order.customerId !== null) {
-        customerObj = order.customerId;
-      } else {
-        customerObj = {
-          _id: order.customerId,
-          name: order.customerName,
-          email: undefined,
-          phone: undefined,
-        };
+      // Fallback numberToWords if not available
+      function numberToWords(num: number): string {
+        if (num === 0) return "zero";
+        const belowTwenty = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
+        const tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+        const thousand = 1000;
+        const lakh = 100000;
+        function helper(n: number): string {
+          if (n < 20) return belowTwenty[n];
+          if (n < 100) return tens[Math.floor(n / 10)] + (n % 10 ? " " + belowTwenty[n % 10] : "");
+          if (n < thousand) return belowTwenty[Math.floor(n / 100)] + " hundred" + (n % 100 ? " " + helper(n % 100) : "");
+          if (n < lakh) return helper(Math.floor(n / thousand)) + " thousand" + (n % thousand ? " " + helper(n % thousand) : "");
+          return helper(Math.floor(n / lakh)) + " lakh" + (n % lakh ? " " + helper(n % lakh) : "");
+        }
+        return helper(num);
       }
 
-      // Build InvoiceData from server order
+      const customerObj =
+        typeof order.customerId === "object" && order.customerId !== null
+          ? order.customerId
+          : {
+              _id: order.customerId,
+              name: order.customerName,
+              email: undefined,
+              phone: undefined,
+            };
+
+      const subtotal = order.items.reduce((sum: number, item: any) => sum + item.totalPrice, 0);
+      const orderDiscount = typeof order.discount === "number" ? order.discount : subtotal - order.totalAmount;
+      const orderPayments = order.payments?.map((p: any) => ({
+        method: p.method || "Cash",
+        amount: Number(p.amount) || 0,
+        date: p.date || "-",
+        by: p.by || "-",
+      })) || [];
+      const paid = orderPayments.reduce((sum: number, p: any) => sum + (Number(p.amount) || 0), 0);
+      const due = Math.max(0, order.totalAmount - paid);
+      const inWords = numberToWords(order.totalAmount) + " Taka Only";
+
       const invoiceData: InvoiceData = {
-        invoiceNumber: order.orderNumber,
+        invoiceNumber: order.orderNumber || "N/A",
         date: order.createdAt
           ? new Date(order.createdAt).toLocaleDateString()
           : new Date().toLocaleDateString(),
         customer: {
           name: customerObj.name,
-          email:
-            typeof customerObj.email === "string"
-              ? customerObj.email
-              : undefined,
-          phone:
-            typeof customerObj.phone === "string"
-              ? customerObj.phone
-              : undefined,
+          email: customerObj.email || "dummy@email.com",
+          phone: customerObj.phone || "0123456789",
         },
         company: {
           name: "EZ POS",
-          address: "123 Main St, Suite 100",
+          address: "123 Main St, Suite 100, Dhaka",
           logo: "EZ",
+          mobile: "01700000000",
+          email: "info@ezpos.com",
+          soldBy: "Cashier Name",
         },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        items: order.items.map((item: any) => {
-          // Handle product (string or object)
-          const productObj =
-            typeof item.product === "object" && item.product !== null
-              ? item.product
-              : { name: "Unknown", upc: "", sku: "" };
-          return {
-            title: productObj.name,
-            description: `SKU: ${item.product.sku}; UPC: ${item.product.upc}${item.product.warranty ? `; Warranty: ${item.product.warranty.value} ${item.product.warranty.unit}` : ""}`,
-            quantity: item.quantity,
-            rate: item.unitPrice,
-            price: item.totalPrice,
-          };
-        }),
-        subtotal: (order.totalAmount || 0) + (order.discount || 0),
-        discount: order.discount || 0,
+        items: order.items.map((item: any) => ({
+          title: item.product.name,
+          description: `SKU: ${item.product.sku}; UPC: ${item.product.upc}`,
+          quantity: item.quantity,
+          rate: item.unitPrice,
+          price: item.totalPrice,
+          warranty: item.product.warranty ? `${item.product.warranty.value} ${item.product.warranty.unit}` : "N/A",
+          serial: (item.product as any).serial || "N/A",
+        })),
+        subtotal,
+        discount: orderDiscount,
         total: order.totalAmount,
         signatory: {
-          name: "EZ POS",
+          name: "Cashier Name",
           title: "Cashier",
         },
+        payments: orderPayments,
+        paid,
+        due,
+        inWords,
       };
       success("Order created successfully!");
       setCheckoutModalOpen(false);
       if (onOrderCompleted) onOrderCompleted(invoiceData);
       onCheckoutSuccess();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      error("Failed to create order", error.data?.message);
+    } catch (err: any) {
+      error("Failed to create order", err.data?.message);
     }
   };
 

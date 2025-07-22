@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 
 interface InvoiceItem {
   title: string;
@@ -6,17 +6,22 @@ interface InvoiceItem {
   quantity: number;
   rate: number;
   price: number;
+  warranty?: string;
+  serial?: string;
 }
 
 interface CompanyInfo {
   name: string;
   address: string;
   logo: string;
+  mobile?: string;
+  email?: string;
+  soldBy?: string;
 }
 
 interface CustomerInfo {
   name: string;
-  email: string;
+  email?: string;
   phone: string;
 }
 
@@ -33,140 +38,299 @@ export interface InvoiceData {
     name: string;
     title: string;
   };
-  payments?: { method: string; amount: number }[];
+  payments?: { method: string; amount: number; date?: string; by?: string }[];
   paid?: number;
   due?: number;
+  inWords?: string;
 }
 
 interface InvoiceTemplateProps {
   data: InvoiceData;
 }
 
-const formatCurrency = (amount: number) => `৳${amount.toFixed(2)}`;
+const formatCurrency = (amount: number) =>
+  `TK ${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
-const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ data }) => {
-  const paid = data.paid !== undefined ? data.paid : (data.payments ? data.payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) : data.total);
-  const due = data.due !== undefined ? data.due : Math.max(0, data.total - paid);
+// Simple number to words (supports up to 999,999)
+function numberToWords(num: number): string {
+  if (num === 0) return "zero";
+  const belowTwenty = [
+    "",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+    "ten",
+    "eleven",
+    "twelve",
+    "thirteen",
+    "fourteen",
+    "fifteen",
+    "sixteen",
+    "seventeen",
+    "eighteen",
+    "nineteen",
+  ];
+  const tens = [
+    "",
+    "",
+    "twenty",
+    "thirty",
+    "forty",
+    "fifty",
+    "sixty",
+    "seventy",
+    "eighty",
+    "ninety",
+  ];
+  const thousand = 1000;
+  const lakh = 100000;
+
+  function helper(n: number): string {
+    if (n < 20) return belowTwenty[n];
+    if (n < 100)
+      return (
+        tens[Math.floor(n / 10)] + (n % 10 ? " " + belowTwenty[n % 10] : "")
+      );
+    if (n < thousand)
+      return (
+        belowTwenty[Math.floor(n / 100)] +
+        " hundred" +
+        (n % 100 ? " " + helper(n % 100) : "")
+      );
+    if (n < lakh)
+      return (
+        helper(Math.floor(n / thousand)) +
+        " thousand" +
+        (n % thousand ? " " + helper(n % thousand) : "")
+      );
+    return (
+      helper(Math.floor(n / lakh)) +
+      " lakh" +
+      (n % lakh ? " " + helper(n % lakh) : "")
+    );
+  }
+  return helper(num);
+}
+
+const InvoiceTemplate: React.FC<InvoiceTemplateProps> = React.memo(({ data }) => {
+  const paid = useMemo(() => (
+    data.paid !== undefined
+      ? data.paid
+      : data.payments
+        ? data.payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0)
+        : data.total
+  ), [data.paid, data.payments, data.total]);
+
+  const due = useMemo(() => (
+    data.due !== undefined ? data.due : Math.max(0, data.total - paid)
+  ), [data.due, data.total, paid]);
+
+  const totalQty = useMemo(() => (
+    data.items.reduce((sum, item) => sum + item.quantity, 0)
+  ), [data.items]);
+
+  // Common style objects
+  const borderColor = { borderColor: "#e5e7eb" };
+  const textGray = { color: "#374151" };
+  const textPrimary = { color: "#2563eb" };
+  const textDanger = { color: "#ef4444" };
+  const logoBg = { backgroundColor: "#18181b" };
+  const logoText = { color: "#fff" };
+  const companyName = { color: "#18181b" };
+  const signatureBorder = { borderColor: "#9ca3af" };
+  const tableHeaderBg = { backgroundColor: "#f9fafb" };
+  const paymentBox = { borderColor: "#e5e7eb", backgroundColor: "#f9fafb", marginTop: 16, marginBottom: 16, paddingTop: 10, paddingBottom: 10 };
+
   return (
-    <div className="max-w-4xl mx-auto p-6 font-sans text-sm leading-tight" style={{ background: "#fff" }}>
-      {/* Header */}
-      <div className="flex justify-between items-start mb-6">
-        <div></div>
-        <div style={{ textAlign: "right" }}>
-          <div style={{ width: 40, height: 40, background: "#000", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 8 }}>
-            <span style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>{data.company.logo}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Invoice Header */}
-      <div className="flex mb-6">
-        <div style={{ background: "#1f2937", color: "#fff", padding: "12px 20px", flexShrink: 0 }}>
-          <h1 style={{ fontSize: 16, fontWeight: 600, letterSpacing: 1 }}>INVOICE</h1>
-        </div>
-        <div style={{ border: "1px solid #d1d5db", borderLeft: 0, flex: 1, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", fontSize: 12 }}>
-          <div style={{ padding: 10, borderRight: "1px solid #d1d5db" }}>
-            <div style={{ color: "#6b7280", marginBottom: 4 }}>Invoice No.</div>
-            <div style={{ fontWeight: 500 }}>{data.invoiceNumber}</div>
-          </div>
-          <div style={{ padding: 10, borderRight: "1px solid #d1d5db" }}>
-            <div style={{ color: "#6b7280", marginBottom: 4 }}>Date:</div>
-            <div style={{ fontWeight: 500 }}>{data.date}</div>
-          </div>
-          <div style={{ padding: 10 }}>
-            <div style={{ color: "#6b7280", marginBottom: 4 }}>Customer</div>
-            <div style={{ fontWeight: 500 }}>{data.customer.name}</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Invoice Table */}
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ borderTop: "1px solid #000", borderLeft: "1px solid #000", borderRight: "1px solid #000", background: "#fff" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "6fr 2fr 2fr 2fr", fontSize: 12, fontWeight: 500, color: "#111", borderBottom: "1px solid #000" }}>
-            <div style={{ padding: 10, borderRight: "1px solid #000" }}>DESCRIPTION</div>
-            <div style={{ padding: 10, borderRight: "1px solid #000", textAlign: "center" }}>QTY.</div>
-            <div style={{ padding: 10, borderRight: "1px solid #000", textAlign: "center" }}>RATE</div>
-            <div style={{ padding: 10, textAlign: "center" }}>PRICE</div>
-          </div>
-        </div>
-        <div style={{ borderLeft: "1px solid #000", borderRight: "1px solid #000" }}>
-          {data.items.map((item, idx) => (
-            <div key={idx} style={{ display: "grid", gridTemplateColumns: "6fr 2fr 2fr 2fr", fontSize: 12, borderBottom: "1px solid #000" }}>
-              <div style={{ padding: 10, borderRight: "1px solid #000" }}>
-                <div style={{ fontWeight: 500, marginBottom: 4 }}>{item.title}</div>
-                {item.description && <div style={{ color: "#6b7280", fontSize: 12, lineHeight: 1.3 }}>{item.description}</div>}
+    <>
+      {/* Print styles for invoice */}
+      <div className="print-invoice-wrapper">
+        <div
+          className="print-invoice min-h-screen max-w-3xl mx-auto p-6 font-sans text-sm bg-white relative"
+          style={{ fontSize: 13, ...borderColor, backgroundColor: "#fff" }}
+        >
+          {/* Header: Logo + Company Info + Invoice Title/No/Date */}
+          <div className="flex justify-between items-start mb-4 gap-4">
+            {/* Logo and Company Info */}
+            <div className="flex flex-col items-start min-w-[120px]">
+              <div className="w-14 h-14 rounded flex items-center justify-center mb-2" style={logoBg}>
+                <span className="font-bold text-xl" style={logoText}>
+                  {data.company.logo || "Ez"}
+                </span>
               </div>
-              <div style={{ padding: 10, borderRight: "1px solid #000", textAlign: "center", verticalAlign: "top", paddingTop: 12 }}>{item.quantity.toString().padStart(2, "0")}</div>
-              <div style={{ padding: 10, borderRight: "1px solid #000", textAlign: "center", verticalAlign: "top", paddingTop: 12 }}>{formatCurrency(item.rate)}</div>
-              <div style={{ padding: 10, textAlign: "center", verticalAlign: "top", paddingTop: 12 }}>{formatCurrency(item.price)}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Totals Section */}
-      <div className="flex justify-between items-start mb-4">
-        <div style={{ width: "33%" }}>
-          <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 8 }}>Sincerely,</div>
-          <div style={{ fontSize: 24, color: "#374151", marginBottom: 8, fontFamily: "Brush Script MT, cursive", lineHeight: 1 }}>{data.signatory.name}</div>
-          <div style={{ fontSize: 12, color: "#6b7280", textTransform: "uppercase", letterSpacing: 1 }}>{data.signatory.title}</div>
-        </div>
-        <div style={{ width: "33%" }}>
-          <div style={{ fontSize: 12 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-              <span style={{ color: "#6b7280" }}>SUB TOTAL</span>
-              <span style={{ fontWeight: 500 }}>{formatCurrency(data.subtotal)}</span>
-            </div>
-            {data.discount > 0 && (
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ color: "#6b7280" }}>DISCOUNT</span>
-                <span style={{ fontWeight: 500, color: "#ef4444" }}>- {formatCurrency(data.discount)}</span>
-              </div>
-            )}
-            {data.payments && data.payments.length > 0 && (
-              <div style={{ marginBottom: 6 }}>
-                <div style={{ color: "#6b7280", marginBottom: 2 }}>PAYMENTS</div>
-                {data.payments.map((p, idx) => (
-                  <div key={idx} style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
-                    <span>{p.method}</span>
-                    <span>{formatCurrency(Number(p.amount))}</span>
+              <div className="space-y-0.5 text-xs" style={textGray}>
+                <div className="font-bold text-base mb-0.5" style={companyName}>
+                  {data.company.name}
+                </div>
+                <div>
+                  <span className="font-semibold">Address:</span> {data.company.address}
+                </div>
+                {data.company.mobile && (
+                  <div>
+                    <span className="font-semibold">Mobile:</span> {data.company.mobile}
                   </div>
-                ))}
+                )}
+                {data.company.email && (
+                  <div>
+                    <span className="font-semibold">Email:</span> {data.company.email}
+                  </div>
+                )}
+                {data.company.soldBy && (
+                  <div>
+                    <span className="font-semibold">Sold By:</span> {data.company.soldBy}
+                  </div>
+                )}
               </div>
-            )}
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-              <span style={{ color: "#16a34a", fontWeight: 600 }}>PAID</span>
-              <span style={{ color: "#16a34a", fontWeight: 600 }}>{formatCurrency(paid)}</span>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-              <span style={{ color: "#ef4444", fontWeight: 600 }}>DUE</span>
-              <span style={{ color: "#ef4444", fontWeight: 600 }}>{formatCurrency(due)}</span>
+            <div className="flex flex-col gap-4">
+              {/* Invoice Title/No/Date */}
+              <div className="flex-1 flex flex-col items-end">
+                <h1 className="text-3xl font-bold mb-1 tracking-tight" style={textPrimary}>
+                  INVOICE
+                </h1>
+                <div className="text-xs space-y-0.5 text-right">
+                  <div>
+                    <span className="font-semibold">Invoice No:</span> {data.invoiceNumber}
+                  </div>
+                  <div>
+                    <span className="font-semibold">Date:</span> {data.date}
+                  </div>
+                </div>
+              </div>
+              {/* Billing To Section */}
+              <div className="mb-4 mt-2 text-right w-full">
+                <p className="text-xs font-semibold mb-1">Billing To</p>
+                <div className="text-xs space-y-0.5">
+                  <div>{data.customer.name}</div>
+                  {data.customer.phone && <div>{data.customer.phone}</div>}
+                  {data.customer.email && <div>{data.customer.email}</div>}
+                </div>
+              </div>
             </div>
           </div>
-          <div style={{ marginTop: 16, textAlign: "center", background: "#f9fafb", padding: "12px 16px", borderRadius: 8 }}>
-            <div style={{ fontSize: 20, fontWeight: "bold", color: "#1f2937" }}>{formatCurrency(data.total)}</div>
-            <div style={{ fontSize: 12, color: "#6b7280", marginTop: 4, textTransform: "uppercase", fontWeight: 500, letterSpacing: 1 }}>TOTAL AMOUNT</div>
+
+          {/* Items Table */}
+          <div className="border rounded mb-4 overflow-hidden" style={borderColor}>
+            <table className="w-full text-xs">
+              <thead>
+                <tr style={tableHeaderBg}>
+                  <th className="border-r px-2 py-3 text-left font-semibold align-middle" style={borderColor}>SL.</th>
+                  <th className="border-r px-2 py-3 text-left font-semibold align-middle" style={borderColor}>Item Description</th>
+                  <th className="border-r px-2 py-3 text-center font-semibold align-middle" style={borderColor}>Warranty</th>
+                  <th className="border-r px-2 py-3 text-right font-semibold align-middle" style={borderColor}>Price</th>
+                  <th className="border-r px-2 py-3 text-center font-semibold align-middle" style={borderColor}>Qty</th>
+                  <th className="px-2 py-3 text-right font-semibold align-middle">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.items.map((item, idx) => (
+                  <tr key={idx} className="border-t" style={borderColor}>
+                    <td className="border-r px-2 py-3 align-middle" style={borderColor}>{idx + 1}</td>
+                    <td className="border-r px-2 py-3 align-middle" style={borderColor}>
+                      {item.title}
+                      {item.description && (
+                        <span className="block text-[11px]" style={{ color: "#6b7280" }}>
+                          ({item.description})
+                        </span>
+                      )}
+                    </td>
+                    <td className="border-r px-2 py-3 text-center align-middle" style={borderColor}>{item.warranty || "N/A"}</td>
+                    <td className="border-r px-2 py-3 text-right align-middle" style={borderColor}>{item.rate}</td>
+                    <td className="border-r px-2 py-3 text-center align-middle" style={borderColor}>{item.quantity}</td>
+                    <td className="px-2 py-3 text-right align-middle" style={borderColor}>{item.price}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Totals */}
+          <div className="flex justify-end mb-3">
+            <div className="w-56 text-xs flex flex-col gap-1">
+              <div className="flex justify-between">
+                <span className="font-semibold">Subtotal :</span>
+                <span>{formatCurrency(data.subtotal)}</span>
+              </div>
+              {data.discount > 0 && (
+                <div className="flex justify-between">
+                  <span className="font-semibold">Discount :</span>
+                  <span>- {formatCurrency(data.discount)}</span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span className="font-semibold">Total:</span>
+                <span>{formatCurrency(data.total)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold">Paid:</span>
+                <span>{formatCurrency(paid)}</span>
+              </div>
+              {due > 0 && (
+                <div className="flex justify-between">
+                  <span className="font-semibold">Due:</span>
+                  <span style={textDanger}>{formatCurrency(due)}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Amount in Words */}
+          <div className="mb-3 text-xs">
+            <span className="font-semibold">In Words:</span>{" "}
+            <span className="font-normal capitalize">{data.inWords || ""}</span>
+          </div>
+
+          {/* Payment Details */}
+          {data.payments && data.payments.length > 0 && (
+            <div className="mb-4">
+              {/* <div className="font-semibold mb-1 text-[11px]">Payment Details</div> */}
+              <table className="border w-full text-[11px]" style={borderColor}>
+                <thead>
+                  <tr style={tableHeaderBg}>
+                    <th className="border-r px-1 py-1 text-left font-semibold align-middle" style={borderColor}>Payment Method</th>
+                    <th className="px-1 py-1 text-left font-semibold align-middle">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.payments.map((p, idx) => (
+                    <tr key={idx}>
+                      <td className="border-r border-t px-1 py-1 align-middle" style={borderColor}>{p.method}</td>
+                      <td className="border-t px-1 py-1 align-middle" style={borderColor}>{formatCurrency(Number(p.amount))}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="flex justify-end mt-1">
+                <div className="border px-2 py-1 font-semibold text-[11px] payment-total-box" style={paymentBox}>
+                  Paid: {formatCurrency(paid)}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Signature Section */}
+          <div className="flex flex-col flex-grow justify-end min-h-[80px] absolute bottom-0 left-0 right-0 w-full p-6">
+            <div className="flex justify-between items-end mt-8 mb-2 print-invoice-signature-section w-full">
+              <div className="text-center">
+                <div className="h-12 border-b w-40 mb-1" style={signatureBorder}></div>
+                <div className="font-semibold text-xs">Received By</div>
+              </div>
+              <div className="text-center">
+                <div className="h-12 border-b w-40 mb-1" style={signatureBorder}></div>
+                <div className="font-semibold text-xs">Authorised By</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .font-cursive {
-          font-family: "Brush Script MT", cursive;
-        }
-        .font-sans {
-          font-family:
-            "Inter",
-            -apple-system,
-            BlinkMacSystemFont,
-            "Segoe UI",
-            Roboto,
-            sans-serif;
-        }
-      `}</style>
-    </div>
+    </>
   );
-};
+});
 
 export default InvoiceTemplate;

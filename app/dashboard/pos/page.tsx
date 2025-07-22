@@ -9,12 +9,12 @@ import ProductGrid from "./ProductGrid";
 import CartDetails from "./CartDetails";
 import CustomerModal from "./CustomerModal";
 import { CartItem, CustomerOption, WarehouseOption } from "./types";
-import InvoiceTemplate from "./InvoiceTemplate";
-import type { InvoiceData } from "./InvoiceTemplate";
+import InvoiceTemplate, { InvoiceData } from "./InvoiceTemplate";
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+import html2canvas from "html2canvas-pro";
 import { Skeleton } from "antd";
 import { useGetProductsQuery } from "@/features/products";
+import { ToWords } from "to-words";
 
 export default function POS() {
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -71,15 +71,16 @@ export default function POS() {
   ];
 
   // Get products from inventory
+  // Cast to Product[] for POS context (only required fields used)
   const products: Product[] =
-    inventoryData?.data.map((item: Product) => ({
+    (inventoryData?.data.map((item: Product) => ({
       _id: item._id,
       name: item.name,
       upc: item.upc,
       sku: item.sku,
       category: item.category,
       stock: item.stock,
-    })) || [];
+    })) as Product[]) || [];
 
   const filteredProducts = products.filter(
     (p) =>
@@ -227,6 +228,71 @@ export default function POS() {
       }
     }
   }, [warehousesData]);
+
+  const toWords = new ToWords({
+    localeCode: 'en-IN',
+    converterOptions: {
+      currency: true,
+      currencyOptions: {
+        name: 'Taka',
+        plural: 'Taka',
+        symbol: '৳',
+        fractionalUnit: {
+          name: 'Poisha',
+          plural: 'Poisha',
+          symbol: '',
+        },
+      },
+      doNotAddOnly: false,
+    },
+  });
+
+  function createInvoiceData({cart, customer, discount, total, computedTotal, customers, selectedWarehouse}: any): InvoiceData {
+    const customerObj = customers.find((c: any) => c.value === customer);
+    const subtotal = cart.reduce((sum: number, item: any) => sum + item.price * item.quantity, 0);
+    const payments = [
+      { method: "Cash", amount: total, date: new Date().toLocaleDateString(), by: customerObj?.label || "Walk-in" }
+    ];
+    const paid = total;
+    const due = 0;
+    return {
+      invoiceNumber: `POS-${Date.now()}`,
+      date: new Date().toLocaleDateString(),
+      customer: {
+        name: customerObj?.label || "Walk-in Customer",
+        email: customerObj?.email || "dummy@email.com",
+        phone: customerObj?.phone || "0123456789",
+      },
+      company: {
+        name: "EZ POS",
+        address: "123 Main St, Suite 100, Dhaka",
+        logo: "EZ",
+        mobile: "01700000000",
+        email: "info@ezpos.com",
+        soldBy: "POS Operator",
+      },
+      items: cart.map((item: any) => ({
+        title: item.name,
+        description: `SKU: ${item.sku}; UPC: ${item.upc}`,
+        quantity: item.quantity,
+        rate: item.price,
+        price: item.price * item.quantity,
+        warranty: item.warranty ? `${item.warranty.value} ${item.warranty.unit}` : "N/A",
+        serial: item.serial || "N/A",
+      })),
+      subtotal,
+      discount,
+      total,
+      signatory: {
+        name: "POS Operator",
+        title: "Cashier",
+      },
+      payments,
+      paid,
+      due,
+      inWords: toWords.convert(total, { currency: true }) || "",
+    };
+  }
 
   return (
     <>

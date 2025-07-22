@@ -37,29 +37,82 @@ function mapOrderToInvoiceData(order: Order): InvoiceData {
       : null;
 
   const subtotal = order.items.reduce((sum, item) => sum + item.totalPrice, 0);
-  const discount = typeof order.discount === "number" ? order.discount : subtotal - order.totalAmount;
-  const payments = order.payments?.map((p) => ({
-    method: p.method || "Cash",
-    amount: Number(p.amount) || 0,
-    date: (p as any).date || "-", // fallback to dummy
-    by: (p as any).by || "-", // fallback to dummy
-  })) || [];
+  const discount =
+    typeof order.discount === "number"
+      ? order.discount
+      : subtotal - order.totalAmount;
+  const payments =
+    order.payments?.map((p) => ({
+      method: p.method || "Cash",
+      amount: Number(p.amount) || 0,
+      date: (p as any).date || "-", // fallback to dummy
+      by: (p as any).by || "-", // fallback to dummy
+    })) || [];
   const paid = payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
   const due = Math.max(0, order.totalAmount - paid);
 
   // Fallback numberToWords if not available
   function numberToWords(num: number): string {
     if (num === 0) return "zero";
-    const belowTwenty = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
-    const tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+    const belowTwenty = [
+      "",
+      "one",
+      "two",
+      "three",
+      "four",
+      "five",
+      "six",
+      "seven",
+      "eight",
+      "nine",
+      "ten",
+      "eleven",
+      "twelve",
+      "thirteen",
+      "fourteen",
+      "fifteen",
+      "sixteen",
+      "seventeen",
+      "eighteen",
+      "nineteen",
+    ];
+    const tens = [
+      "",
+      "",
+      "twenty",
+      "thirty",
+      "forty",
+      "fifty",
+      "sixty",
+      "seventy",
+      "eighty",
+      "ninety",
+    ];
     const thousand = 1000;
     const lakh = 100000;
     function helper(n: number): string {
       if (n < 20) return belowTwenty[n];
-      if (n < 100) return tens[Math.floor(n / 10)] + (n % 10 ? " " + belowTwenty[n % 10] : "");
-      if (n < thousand) return belowTwenty[Math.floor(n / 100)] + " hundred" + (n % 100 ? " " + helper(n % 100) : "");
-      if (n < lakh) return helper(Math.floor(n / thousand)) + " thousand" + (n % thousand ? " " + helper(n % thousand) : "");
-      return helper(Math.floor(n / lakh)) + " lakh" + (n % lakh ? " " + helper(n % lakh) : "");
+      if (n < 100)
+        return (
+          tens[Math.floor(n / 10)] + (n % 10 ? " " + belowTwenty[n % 10] : "")
+        );
+      if (n < thousand)
+        return (
+          belowTwenty[Math.floor(n / 100)] +
+          " hundred" +
+          (n % 100 ? " " + helper(n % 100) : "")
+        );
+      if (n < lakh)
+        return (
+          helper(Math.floor(n / thousand)) +
+          " thousand" +
+          (n % thousand ? " " + helper(n % thousand) : "")
+        );
+      return (
+        helper(Math.floor(n / lakh)) +
+        " lakh" +
+        (n % lakh ? " " + helper(n % lakh) : "")
+      );
     }
     return helper(num);
   }
@@ -70,7 +123,9 @@ function mapOrderToInvoiceData(order: Order): InvoiceData {
     date: new Date(order.createdAt).toLocaleDateString(),
     customer: {
       name: customerObj ? customerObj.name : order.customerName || "N/A",
-      email: customerObj ? customerObj.email || "dummy@email.com" : "dummy@email.com",
+      email: customerObj
+        ? customerObj.email || "dummy@email.com"
+        : "dummy@email.com",
       phone: customerObj ? customerObj.phone || "0123456789" : "0123456789",
     },
     company: {
@@ -87,7 +142,9 @@ function mapOrderToInvoiceData(order: Order): InvoiceData {
       quantity: item.quantity,
       rate: item.unitPrice,
       price: item.totalPrice,
-      warranty: item.product.warranty ? `${item.product.warranty.value} ${item.product.warranty.unit}` : "N/A",
+      warranty: item.product.warranty
+        ? `${item.product.warranty.value} ${item.product.warranty.unit}`
+        : "N/A",
       serial: (item.product as any).serial || "N/A",
     })),
     subtotal,
@@ -190,8 +247,16 @@ export default function OrderTable({
       dataIndex: "paid",
       key: "paid",
       render: (_: any, record: Order) => {
-        const paid = record.payments?.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) || 0;
-        return <span className="font-semibold text-green-700">৳{paid.toFixed(2)}</span>;
+        const paid =
+          record.payments?.reduce(
+            (sum, p) => sum + (Number(p.amount) || 0),
+            0,
+          ) || 0;
+        return (
+          <span className="font-semibold text-green-700">
+            ৳{paid.toFixed(2)}
+          </span>
+        );
       },
     },
     {
@@ -199,9 +264,15 @@ export default function OrderTable({
       dataIndex: "due",
       key: "due",
       render: (_: any, record: Order) => {
-        const paid = record.payments?.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) || 0;
+        const paid =
+          record.payments?.reduce(
+            (sum, p) => sum + (Number(p.amount) || 0),
+            0,
+          ) || 0;
         const due = Math.max(0, record.totalAmount - paid);
-        return <span className="font-semibold text-red-500">৳{due.toFixed(2)}</span>;
+        return (
+          <span className="font-semibold text-red-500">৳{due.toFixed(2)}</span>
+        );
       },
     },
     {
@@ -233,7 +304,9 @@ export default function OrderTable({
       title: <span className="font-medium text-base">Warehouse</span>,
       dataIndex: "warehouse",
       key: "warehouse",
-      render: (warehouse: string | { _id: string; name: string } | undefined) => (
+      render: (
+        warehouse: string | { _id: string; name: string } | undefined,
+      ) => (
         <span className="text-gray-700">
           {typeof warehouse === "string" ? warehouse : warehouse?.name || "N/A"}
         </span>

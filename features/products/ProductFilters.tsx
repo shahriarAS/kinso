@@ -97,30 +97,49 @@ export default function ProductFiltersRefactored({
     },
   ];
 
-  const handleFiltersChange = useCallback((filters: ProductFilters) => {
-    // Reset to first page when filters change
-    const searchChanged = filters.search !== undefined && filters.search !== searchTerm;
-    const categoryChanged = filters.category !== undefined && filters.category !== categoryFilter;
-    const warehouseChanged = filters.warehouse !== undefined && filters.warehouse !== warehouseFilter;
-    const statusChanged = filters.status !== undefined && filters.status !== statusFilter;
-    if (searchChanged || categoryChanged || warehouseChanged || statusChanged) {
-      onPageChange(1);
-    }
+  const handleFiltersChange = useCallback(
+    (filters: ProductFilters) => {
+      // Reset to first page when filters change
+      const searchChanged =
+        filters.search !== undefined && filters.search !== searchTerm;
+      const categoryChanged =
+        filters.category !== undefined && filters.category !== categoryFilter;
+      const warehouseChanged =
+        filters.warehouse !== undefined &&
+        filters.warehouse !== warehouseFilter;
+      const statusChanged =
+        filters.status !== undefined && filters.status !== statusFilter;
+      if (
+        searchChanged ||
+        categoryChanged ||
+        warehouseChanged ||
+        statusChanged
+      ) {
+        onPageChange(1);
+      }
 
-    // Update individual filter values
-    if (filters.search !== undefined) {
-      onSearchChange(filters.search);
-    }
-    if (filters.category !== undefined) {
-      onCategoryChange(filters.category);
-    }
-    if (filters.warehouse !== undefined) {
-      onWarehouseChange(filters.warehouse);
-    }
-    if (filters.status !== undefined) {
-      onStatusChange(filters.status);
-    }
-  }, [onPageChange, onSearchChange, onCategoryChange, onWarehouseChange, onStatusChange]);
+      // Update individual filter values
+      if (filters.search !== undefined) {
+        onSearchChange(filters.search);
+      }
+      if (filters.category !== undefined) {
+        onCategoryChange(filters.category);
+      }
+      if (filters.warehouse !== undefined) {
+        onWarehouseChange(filters.warehouse);
+      }
+      if (filters.status !== undefined) {
+        onStatusChange(filters.status);
+      }
+    },
+    [
+      onPageChange,
+      onSearchChange,
+      onCategoryChange,
+      onWarehouseChange,
+      onStatusChange,
+    ],
+  );
 
   const initialValues = {
     search: searchTerm,

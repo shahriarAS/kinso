@@ -2,10 +2,7 @@
 import { Form } from "antd";
 import React from "react";
 import { User, UserInput, UserUpdateInput } from "./types";
-import {
-  useCreateUserMutation,
-  useUpdateUserMutation,
-} from "./api";
+import { useCreateUserMutation, useUpdateUserMutation } from "./api";
 import { useNotification } from "@/hooks/useNotification";
 import { GenericDrawer, type FormField } from "@/components/common";
 
@@ -56,7 +53,9 @@ export default function AddEditUserDrawer({
       label: "Password",
       type: "password",
       placeholder: "Enter Password",
-      rules: isEditing ? [] : [{ required: true, message: "Please enter password" }],
+      rules: isEditing
+        ? []
+        : [{ required: true, message: "Please enter password" }],
     },
     {
       name: "role",
@@ -70,7 +69,6 @@ export default function AddEditUserDrawer({
         { label: "Staff", value: "staff" },
       ],
     },
-
   ];
 
   const handleSubmit = async (values: UserInput) => {
@@ -99,7 +97,10 @@ export default function AddEditUserDrawer({
         typeof error.data === "object" &&
         "message" in error.data
       ) {
-        showError("Failed to save user", (error.data as { message: string }).message);
+        showError(
+          "Failed to save user",
+          (error.data as { message: string }).message,
+        );
       } else {
         showError("Failed to save user");
       }
@@ -136,4 +137,4 @@ export default function AddEditUserDrawer({
       gridCols={2}
     />
   );
-} 
+}

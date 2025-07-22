@@ -58,7 +58,10 @@ export default function UserTable({ filters = {} }: UserTableProps) {
         typeof error.data === "object" &&
         "message" in error.data
       ) {
-        showError("Failed to delete user", (error.data as { message: string }).message);
+        showError(
+          "Failed to delete user",
+          (error.data as { message: string }).message,
+        );
       } else {
         showError("Failed to delete user");
       }
@@ -162,4 +165,4 @@ export default function UserTable({ filters = {} }: UserTableProps) {
       />
     </>
   );
-} 
+}

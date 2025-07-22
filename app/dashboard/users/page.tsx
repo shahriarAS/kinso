@@ -3,11 +3,7 @@
 import { useState, useCallback } from "react";
 import { Button } from "antd";
 import { Icon } from "@iconify/react";
-import {
-  AddEditUserDrawer,
-  UserFilters,
-  UserTable,
-} from "@/features/users";
+import { AddEditUserDrawer, UserFilters, UserTable } from "@/features/users";
 import type { UserFilters as UserFiltersType } from "@/features/users/types";
 
 export default function Users() {
@@ -16,7 +12,7 @@ export default function Users() {
     role: undefined,
   });
   const [open, setOpen] = useState(false);
-  
+
   const handleFiltersChange = useCallback((newFilters: UserFiltersType) => {
     setFilters(newFilters);
   }, []);
@@ -42,4 +38,4 @@ export default function Users() {
       <UserTable filters={filters} />
     </div>
   );
-} 
+}

@@ -73,7 +73,10 @@ export default function AddEditWarehouseDrawer({
         typeof error.data === "object" &&
         "message" in error.data
       ) {
-        showError("Failed to save warehouse", (error.data as { message: string }).message);
+        showError(
+          "Failed to save warehouse",
+          (error.data as { message: string }).message,
+        );
       } else {
         showError("Failed to save warehouse");
       }

@@ -73,7 +73,10 @@ export default function ProductTableRefactored({
         typeof error.data === "object" &&
         "message" in error.data
       ) {
-        showError("Failed to delete product", (error.data as { message: string }).message);
+        showError(
+          "Failed to delete product",
+          (error.data as { message: string }).message,
+        );
       } else {
         showError("Failed to delete product");
       }

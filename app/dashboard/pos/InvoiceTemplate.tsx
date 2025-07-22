@@ -7,7 +7,6 @@ interface InvoiceItem {
   rate: number;
   price: number;
   warranty?: string;
-  serial?: string;
 }
 
 interface CompanyInfo {
@@ -38,7 +37,7 @@ export interface InvoiceData {
     name: string;
     title: string;
   };
-  payments?: { method: string; amount: number; date?: string; by?: string }[];
+  payments?: { method: string; amount: number }[];
   paid?: number;
   due?: number;
   inWords?: string;
@@ -51,89 +50,25 @@ interface InvoiceTemplateProps {
 const formatCurrency = (amount: number) =>
   `TK ${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
-// Simple number to words (supports up to 999,999)
-function numberToWords(num: number): string {
-  if (num === 0) return "zero";
-  const belowTwenty = [
-    "",
-    "one",
-    "two",
-    "three",
-    "four",
-    "five",
-    "six",
-    "seven",
-    "eight",
-    "nine",
-    "ten",
-    "eleven",
-    "twelve",
-    "thirteen",
-    "fourteen",
-    "fifteen",
-    "sixteen",
-    "seventeen",
-    "eighteen",
-    "nineteen",
-  ];
-  const tens = [
-    "",
-    "",
-    "twenty",
-    "thirty",
-    "forty",
-    "fifty",
-    "sixty",
-    "seventy",
-    "eighty",
-    "ninety",
-  ];
-  const thousand = 1000;
-  const lakh = 100000;
+const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ data }) => {
+  const paid = useMemo(
+    () =>
+      data.paid !== undefined
+        ? data.paid
+        : data.payments
+          ? data.payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0)
+          : data.total,
+    [data.paid, data.payments, data.total],
+  );
 
-  function helper(n: number): string {
-    if (n < 20) return belowTwenty[n];
-    if (n < 100)
-      return (
-        tens[Math.floor(n / 10)] + (n % 10 ? " " + belowTwenty[n % 10] : "")
-      );
-    if (n < thousand)
-      return (
-        belowTwenty[Math.floor(n / 100)] +
-        " hundred" +
-        (n % 100 ? " " + helper(n % 100) : "")
-      );
-    if (n < lakh)
-      return (
-        helper(Math.floor(n / thousand)) +
-        " thousand" +
-        (n % thousand ? " " + helper(n % thousand) : "")
-      );
-    return (
-      helper(Math.floor(n / lakh)) +
-      " lakh" +
-      (n % lakh ? " " + helper(n % lakh) : "")
-    );
-  }
-  return helper(num);
-}
+  const due = useMemo(
+    () => (data.due !== undefined ? data.due : Math.max(0, data.total - paid)),
+    [data.due, data.total, paid],
+  );
 
-const InvoiceTemplate: React.FC<InvoiceTemplateProps> = React.memo(({ data }) => {
-  const paid = useMemo(() => (
-    data.paid !== undefined
-      ? data.paid
-      : data.payments
-        ? data.payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0)
-        : data.total
-  ), [data.paid, data.payments, data.total]);
-
-  const due = useMemo(() => (
-    data.due !== undefined ? data.due : Math.max(0, data.total - paid)
-  ), [data.due, data.total, paid]);
-
-  const totalQty = useMemo(() => (
-    data.items.reduce((sum, item) => sum + item.quantity, 0)
-  ), [data.items]);
+  // const totalQty = useMemo(() => (
+  //   data.items.reduce((sum, item) => sum + item.quantity, 0)
+  // ), [data.items]);
 
   // Common style objects
   const borderColor = { borderColor: "#e5e7eb" };
@@ -145,7 +80,14 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = React.memo(({ data }) =>
   const companyName = { color: "#18181b" };
   const signatureBorder = { borderColor: "#9ca3af" };
   const tableHeaderBg = { backgroundColor: "#f9fafb" };
-  const paymentBox = { borderColor: "#e5e7eb", backgroundColor: "#f9fafb", marginTop: 16, marginBottom: 16, paddingTop: 10, paddingBottom: 10 };
+  const paymentBox = {
+    borderColor: "#e5e7eb",
+    backgroundColor: "#f9fafb",
+    marginTop: 16,
+    marginBottom: 16,
+    paddingTop: 10,
+    paddingBottom: 10,
+  };
 
   return (
     <>
@@ -159,7 +101,10 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = React.memo(({ data }) =>
           <div className="flex justify-between items-start mb-4 gap-4">
             {/* Logo and Company Info */}
             <div className="flex flex-col items-start min-w-[120px]">
-              <div className="w-14 h-14 rounded flex items-center justify-center mb-2" style={logoBg}>
+              <div
+                className="w-14 h-14 rounded flex items-center justify-center mb-2"
+                style={logoBg}
+              >
                 <span className="font-bold text-xl" style={logoText}>
                   {data.company.logo || "Ez"}
                 </span>
@@ -169,21 +114,25 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = React.memo(({ data }) =>
                   {data.company.name}
                 </div>
                 <div>
-                  <span className="font-semibold">Address:</span> {data.company.address}
+                  <span className="font-semibold">Address:</span>{" "}
+                  {data.company.address}
                 </div>
                 {data.company.mobile && (
                   <div>
-                    <span className="font-semibold">Mobile:</span> {data.company.mobile}
+                    <span className="font-semibold">Mobile:</span>{" "}
+                    {data.company.mobile}
                   </div>
                 )}
                 {data.company.email && (
                   <div>
-                    <span className="font-semibold">Email:</span> {data.company.email}
+                    <span className="font-semibold">Email:</span>{" "}
+                    {data.company.email}
                   </div>
                 )}
                 {data.company.soldBy && (
                   <div>
-                    <span className="font-semibold">Sold By:</span> {data.company.soldBy}
+                    <span className="font-semibold">Sold By:</span>{" "}
+                    {data.company.soldBy}
                   </div>
                 )}
               </div>
@@ -191,12 +140,16 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = React.memo(({ data }) =>
             <div className="flex flex-col gap-4">
               {/* Invoice Title/No/Date */}
               <div className="flex-1 flex flex-col items-end">
-                <h1 className="text-3xl font-bold mb-1 tracking-tight" style={textPrimary}>
+                <h1
+                  className="text-3xl font-bold mb-1 tracking-tight"
+                  style={textPrimary}
+                >
                   INVOICE
                 </h1>
                 <div className="text-xs space-y-0.5 text-right">
                   <div>
-                    <span className="font-semibold">Invoice No:</span> {data.invoiceNumber}
+                    <span className="font-semibold">Invoice No:</span>{" "}
+                    {data.invoiceNumber}
                   </div>
                   <div>
                     <span className="font-semibold">Date:</span> {data.date}
@@ -216,34 +169,95 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = React.memo(({ data }) =>
           </div>
 
           {/* Items Table */}
-          <div className="border rounded mb-4 overflow-hidden" style={borderColor}>
+          <div
+            className="border rounded mb-4 overflow-hidden"
+            style={borderColor}
+          >
             <table className="w-full text-xs">
               <thead>
                 <tr style={tableHeaderBg}>
-                  <th className="border-r px-2 py-3 text-left font-semibold align-middle" style={borderColor}>SL.</th>
-                  <th className="border-r px-2 py-3 text-left font-semibold align-middle" style={borderColor}>Item Description</th>
-                  <th className="border-r px-2 py-3 text-center font-semibold align-middle" style={borderColor}>Warranty</th>
-                  <th className="border-r px-2 py-3 text-right font-semibold align-middle" style={borderColor}>Price</th>
-                  <th className="border-r px-2 py-3 text-center font-semibold align-middle" style={borderColor}>Qty</th>
-                  <th className="px-2 py-3 text-right font-semibold align-middle">Total</th>
+                  <th
+                    className="border-r px-2 py-3 text-left font-semibold align-middle"
+                    style={borderColor}
+                  >
+                    SL.
+                  </th>
+                  <th
+                    className="border-r px-2 py-3 text-left font-semibold align-middle"
+                    style={borderColor}
+                  >
+                    Item Description
+                  </th>
+                  <th
+                    className="border-r px-2 py-3 text-center font-semibold align-middle"
+                    style={borderColor}
+                  >
+                    Warranty
+                  </th>
+                  <th
+                    className="border-r px-2 py-3 text-right font-semibold align-middle"
+                    style={borderColor}
+                  >
+                    Price
+                  </th>
+                  <th
+                    className="border-r px-2 py-3 text-center font-semibold align-middle"
+                    style={borderColor}
+                  >
+                    Qty
+                  </th>
+                  <th className="px-2 py-3 text-right font-semibold align-middle">
+                    Total
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {data.items.map((item, idx) => (
                   <tr key={idx} className="border-t" style={borderColor}>
-                    <td className="border-r px-2 py-3 align-middle" style={borderColor}>{idx + 1}</td>
-                    <td className="border-r px-2 py-3 align-middle" style={borderColor}>
+                    <td
+                      className="border-r px-2 py-3 align-middle"
+                      style={borderColor}
+                    >
+                      {idx + 1}
+                    </td>
+                    <td
+                      className="border-r px-2 py-3 align-middle"
+                      style={borderColor}
+                    >
                       {item.title}
                       {item.description && (
-                        <span className="block text-[11px]" style={{ color: "#6b7280" }}>
+                        <span
+                          className="block text-[11px]"
+                          style={{ color: "#6b7280" }}
+                        >
                           ({item.description})
                         </span>
                       )}
                     </td>
-                    <td className="border-r px-2 py-3 text-center align-middle" style={borderColor}>{item.warranty || "N/A"}</td>
-                    <td className="border-r px-2 py-3 text-right align-middle" style={borderColor}>{item.rate}</td>
-                    <td className="border-r px-2 py-3 text-center align-middle" style={borderColor}>{item.quantity}</td>
-                    <td className="px-2 py-3 text-right align-middle" style={borderColor}>{item.price}</td>
+                    <td
+                      className="border-r px-2 py-3 text-center align-middle"
+                      style={borderColor}
+                    >
+                      {item.warranty || "N/A"}
+                    </td>
+                    <td
+                      className="border-r px-2 py-3 text-right align-middle"
+                      style={borderColor}
+                    >
+                      {item.rate}
+                    </td>
+                    <td
+                      className="border-r px-2 py-3 text-center align-middle"
+                      style={borderColor}
+                    >
+                      {item.quantity}
+                    </td>
+                    <td
+                      className="px-2 py-3 text-right align-middle"
+                      style={borderColor}
+                    >
+                      {item.price}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -293,21 +307,41 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = React.memo(({ data }) =>
               <table className="border w-full text-[11px]" style={borderColor}>
                 <thead>
                   <tr style={tableHeaderBg}>
-                    <th className="border-r px-1 py-1 text-left font-semibold align-middle" style={borderColor}>Payment Method</th>
-                    <th className="px-1 py-1 text-left font-semibold align-middle">Amount</th>
+                    <th
+                      className="border-r px-1 py-1 text-left font-semibold align-middle"
+                      style={borderColor}
+                    >
+                      Payment Method
+                    </th>
+                    <th className="px-1 py-1 text-left font-semibold align-middle">
+                      Amount
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.payments.map((p, idx) => (
                     <tr key={idx}>
-                      <td className="border-r border-t px-1 py-1 align-middle" style={borderColor}>{p.method}</td>
-                      <td className="border-t px-1 py-1 align-middle" style={borderColor}>{formatCurrency(Number(p.amount))}</td>
+                      <td
+                        className="border-r border-t px-1 py-1 align-middle"
+                        style={borderColor}
+                      >
+                        {p.method}
+                      </td>
+                      <td
+                        className="border-t px-1 py-1 align-middle"
+                        style={borderColor}
+                      >
+                        {formatCurrency(Number(p.amount))}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
               <div className="flex justify-end mt-1">
-                <div className="border px-2 py-1 font-semibold text-[11px] payment-total-box" style={paymentBox}>
+                <div
+                  className="border px-2 py-1 font-semibold text-[11px] payment-total-box"
+                  style={paymentBox}
+                >
                   Paid: {formatCurrency(paid)}
                 </div>
               </div>
@@ -318,11 +352,17 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = React.memo(({ data }) =>
           <div className="flex flex-col flex-grow justify-end min-h-[80px] absolute bottom-0 left-0 right-0 w-full p-6">
             <div className="flex justify-between items-end mt-8 mb-2 print-invoice-signature-section w-full">
               <div className="text-center">
-                <div className="h-12 border-b w-40 mb-1" style={signatureBorder}></div>
+                <div
+                  className="h-12 border-b w-40 mb-1"
+                  style={signatureBorder}
+                ></div>
                 <div className="font-semibold text-xs">Received By</div>
               </div>
               <div className="text-center">
-                <div className="h-12 border-b w-40 mb-1" style={signatureBorder}></div>
+                <div
+                  className="h-12 border-b w-40 mb-1"
+                  style={signatureBorder}
+                ></div>
                 <div className="font-semibold text-xs">Authorised By</div>
               </div>
             </div>
@@ -331,6 +371,6 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = React.memo(({ data }) =>
       </div>
     </>
   );
-});
+};
 
 export default InvoiceTemplate;

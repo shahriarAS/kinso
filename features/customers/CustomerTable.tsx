@@ -158,7 +158,8 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
       onClick: handleDelete,
       confirm: {
         title: "Delete Customer",
-        description: "Are you sure you want to delete this customer? This action cannot be undone.",
+        description:
+          "Are you sure you want to delete this customer? This action cannot be undone.",
       },
       loading: isDeleting,
     },

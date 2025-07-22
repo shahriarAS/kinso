@@ -7,9 +7,7 @@ interface UserFiltersProps {
   onFiltersChange?: (filters: UserFiltersType) => void;
 }
 
-export default function UserFilters({
-  onFiltersChange,
-}: UserFiltersProps) {
+export default function UserFilters({ onFiltersChange }: UserFiltersProps) {
   // Define filter fields using the generic interface
   const fields: FilterField[] = [
     {
@@ -33,14 +31,17 @@ export default function UserFilters({
     },
   ];
 
-  const handleFiltersChange = useCallback((filters: Record<string, unknown>) => {
-    // Convert empty role to undefined
-    const processedFilters = {
-      ...filters,
-      role: filters.role === "" ? undefined : filters.role,
-    };
-    onFiltersChange?.(processedFilters as UserFiltersType);
-  }, [onFiltersChange]);
+  const handleFiltersChange = useCallback(
+    (filters: Record<string, unknown>) => {
+      // Convert empty role to undefined
+      const processedFilters = {
+        ...filters,
+        role: filters.role === "" ? undefined : filters.role,
+      };
+      onFiltersChange?.(processedFilters as UserFiltersType);
+    },
+    [onFiltersChange],
+  );
 
   return (
     <GenericFilters
@@ -50,4 +51,4 @@ export default function UserFilters({
       debounceDelay={500}
     />
   );
-} 
+}

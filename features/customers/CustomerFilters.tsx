@@ -39,17 +39,20 @@ export default function CustomerFilters({
     },
   ];
 
-  const handleFiltersChange = useCallback((filters: Record<string, unknown>) => {
-    // Convert "all" status to undefined
-    const processedFilters = {
-      ...filters,
-      status:
-        filters.status === "all"
-          ? undefined
-          : (filters.status as "active" | "inactive" | undefined),
-    };
-    onFiltersChange?.(processedFilters as CustomerFiltersType);
-  }, [onFiltersChange]);
+  const handleFiltersChange = useCallback(
+    (filters: Record<string, unknown>) => {
+      // Convert "all" status to undefined
+      const processedFilters = {
+        ...filters,
+        status:
+          filters.status === "all"
+            ? undefined
+            : (filters.status as "active" | "inactive" | undefined),
+      };
+      onFiltersChange?.(processedFilters as CustomerFiltersType);
+    },
+    [onFiltersChange],
+  );
 
   return (
     <GenericFilters

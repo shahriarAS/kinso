@@ -8,17 +8,19 @@ export interface Payment {
   amount: number;
 }
 
+export interface OrderItem {
+  product: Product;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+}
+
 export interface Order {
   _id: string;
   orderNumber: string;
   customerId: string;
   customerName: string;
-  items: {
-    product: Product;
-    quantity: number;
-    unitPrice: number;
-    totalPrice: number;
-  }[];
+  items: OrderItem[];
   totalAmount: number;
   payments: Payment[];
   discount?: number;
@@ -31,12 +33,22 @@ export interface Order {
 }
 
 export interface OrderInput
-  extends Omit<Order, "_id" | "orderNumber" | "createdAt" | "updatedAt" | "items" | "warehouse" | "paid" | "due"> {
-    items: {
-      product: string;
-      quantity: number;
-      unitPrice: number;
-      totalPrice: number;
-    }[];
-    warehouse: string;
-  }
+  extends Omit<
+    Order,
+    | "_id"
+    | "orderNumber"
+    | "createdAt"
+    | "updatedAt"
+    | "items"
+    | "warehouse"
+    | "paid"
+    | "due"
+  > {
+  items: {
+    product: string;
+    quantity: number;
+    unitPrice: number;
+    totalPrice: number;
+  }[];
+  warehouse: string;
+}

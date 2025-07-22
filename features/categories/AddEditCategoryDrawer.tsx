@@ -72,7 +72,10 @@ export default function AddEditCategoryDrawer({
         typeof error.data === "object" &&
         "message" in error.data
       ) {
-        showError("Failed to save category", (error.data as { message: string }).message);
+        showError(
+          "Failed to save category",
+          (error.data as { message: string }).message,
+        );
       } else {
         showError("Failed to save category");
       }

@@ -102,7 +102,6 @@ export default function GenericDrawer<T = any>({
 
   const renderField = (field: FormField) => {
     // Support custom render function
-    // @ts-ignore: render is allowed for custom fields
     if (typeof field.render === "function") {
       return field.render(form);
     }

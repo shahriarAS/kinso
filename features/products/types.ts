@@ -21,12 +21,15 @@ export interface Product {
   updatedAt: string;
 }
 export interface ProductInput
-  extends Omit<Product, "_id" | "createdAt" | "updatedAt" | "stock" | "category"> {
-    category: string;
-    stock: {
-      warehouse: string;
-      unit: number;
-      dp?: number;
-      mrp: number;
-    }[];
-  }
+  extends Omit<
+    Product,
+    "_id" | "createdAt" | "updatedAt" | "stock" | "category"
+  > {
+  category: string;
+  stock: {
+    warehouse: string;
+    unit: number;
+    dp?: number;
+    mrp: number;
+  }[];
+}

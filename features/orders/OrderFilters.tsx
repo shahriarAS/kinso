@@ -39,7 +39,9 @@ export default function OrderFilters({
   const { data: warehousesData } = useGetWarehousesQuery({ limit: 100 });
   const { useGetProductsQuery } = require("@/features/products");
   const { data: productsData } = useGetProductsQuery({ limit: 100 });
-  const productOptions = productsData?.data.map((p: Product) => ({ label: p.name, value: p._id })) || [];
+  const productOptions =
+    productsData?.data.map((p: Product) => ({ label: p.name, value: p._id })) ||
+    [];
   const warehouseOptions =
     warehousesData?.data.map((w) => ({ label: w.name, value: w._id })) || [];
   // Define filter fields using the generic interface
@@ -69,10 +71,7 @@ export default function OrderFilters({
       label: "Warehouse",
       type: "select",
       placeholder: "Select Warehouse",
-      options: [
-        { label: "All", value: "" },
-        ...warehouseOptions,
-      ],
+      options: [{ label: "All", value: "" }, ...warehouseOptions],
     },
     {
       name: "product",
@@ -89,14 +88,24 @@ export default function OrderFilters({
   ];
 
   const handleFiltersChange = useCallback((filters: OrderFilters) => {
-    console.log(filters)
+    console.log(filters);
     // Reset to first page when filters change
-    const searchChanged = filters.search !== undefined && filters.search !== searchTerm;
-    const paymentMethodChanged = filters.paymentMethod !== undefined && filters.paymentMethod !== paymentMethodFilter;
-    const warehouseChanged = filters.warehouse !== undefined && filters.warehouse !== warehouseFilter;
-    const productChanged = filters.product !== undefined && filters.product !== productFilter;
+    const searchChanged =
+      filters.search !== undefined && filters.search !== searchTerm;
+    const paymentMethodChanged =
+      filters.paymentMethod !== undefined &&
+      filters.paymentMethod !== paymentMethodFilter;
+    const warehouseChanged =
+      filters.warehouse !== undefined && filters.warehouse !== warehouseFilter;
+    const productChanged =
+      filters.product !== undefined && filters.product !== productFilter;
 
-    if (searchChanged || paymentMethodChanged || warehouseChanged || productChanged) {
+    if (
+      searchChanged ||
+      paymentMethodChanged ||
+      warehouseChanged ||
+      productChanged
+    ) {
       onPageChange(1);
     }
 

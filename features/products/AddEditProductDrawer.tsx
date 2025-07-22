@@ -127,7 +127,10 @@ export default function AddEditProductDrawerRefactored({
         typeof error.data === "object" &&
         "message" in error.data
       ) {
-        showError("Failed to save product", (error.data as { message: string }).message);
+        showError(
+          "Failed to save product",
+          (error.data as { message: string }).message,
+        );
       } else if (error && typeof error === "object" && "errorFields" in error) {
         // Form validation error
         return;
@@ -157,9 +160,18 @@ export default function AddEditProductDrawerRefactored({
             : stockItem.warehouse?._id,
       })) || [];
 
-    let initialWarranty: { value: number; unit: string } | undefined = undefined;
-    if (product.warranty && typeof product.warranty === "object" && product.warranty.value !== undefined && product.warranty.value !== null) {
-      initialWarranty = { value: product.warranty.value, unit: product.warranty.unit };
+    let initialWarranty: { value: number; unit: string } | undefined =
+      undefined;
+    if (
+      product.warranty &&
+      typeof product.warranty === "object" &&
+      product.warranty.value !== undefined &&
+      product.warranty.value !== null
+    ) {
+      initialWarranty = {
+        value: product.warranty.value,
+        unit: product.warranty.unit,
+      };
     }
 
     return {

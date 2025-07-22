@@ -174,9 +174,17 @@ export async function handlePost(request: NextRequest) {
     }
     let paid = 0;
     for (const payment of payments) {
-      if (!payment.method || typeof payment.amount !== 'number' || payment.amount < 0) {
+      if (
+        !payment.method ||
+        typeof payment.amount !== "number" ||
+        payment.amount < 0
+      ) {
         return NextResponse.json(
-          { success: false, message: "Each payment must have a valid method and a non-negative amount" },
+          {
+            success: false,
+            message:
+              "Each payment must have a valid method and a non-negative amount",
+          },
           { status: 400 },
         );
       }
@@ -233,7 +241,9 @@ export async function handlePost(request: NextRequest) {
         );
       }
       // Find stock for this warehouse
-      const stockEntry = product.stock.find((s: any) => s.warehouse.toString() === warehouse);
+      const stockEntry = product.stock.find(
+        (s: any) => s.warehouse.toString() === warehouse,
+      );
       if (!stockEntry || stockEntry.unit < item.quantity) {
         return NextResponse.json(
           {
@@ -263,7 +273,10 @@ export async function handlePost(request: NextRequest) {
     const due = finalTotal - paid;
     if (paid > finalTotal) {
       return NextResponse.json(
-        { success: false, message: "Total paid amount cannot exceed order total" },
+        {
+          success: false,
+          message: "Total paid amount cannot exceed order total",
+        },
         { status: 400 },
       );
     }
@@ -452,9 +465,17 @@ export async function handleUpdateById(
     }
     let paidUpdate = 0;
     for (const payment of payments) {
-      if (!payment.method || typeof payment.amount !== 'number' || payment.amount < 0) {
+      if (
+        !payment.method ||
+        typeof payment.amount !== "number" ||
+        payment.amount < 0
+      ) {
         return NextResponse.json(
-          { success: false, message: "Each payment must have a valid method and a non-negative amount" },
+          {
+            success: false,
+            message:
+              "Each payment must have a valid method and a non-negative amount",
+          },
           { status: 400 },
         );
       }
@@ -527,7 +548,10 @@ export async function handleUpdateById(
     const dueUpdate = finalTotal - paidUpdate;
     if (paidUpdate > finalTotal) {
       return NextResponse.json(
-        { success: false, message: "Total paid amount cannot exceed order total" },
+        {
+          success: false,
+          message: "Total paid amount cannot exceed order total",
+        },
         { status: 400 },
       );
     }

@@ -59,7 +59,10 @@ export default function WarehouseTable({
         typeof error.data === "object" &&
         "message" in error.data
       ) {
-        showError("Failed to delete warehouse", (error.data as { message: string }).message);
+        showError(
+          "Failed to delete warehouse",
+          (error.data as { message: string }).message,
+        );
       } else {
         showError("Failed to delete warehouse");
       }

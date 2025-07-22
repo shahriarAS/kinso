@@ -8,6 +8,7 @@ export interface FilterField {
   label: string;
   type: "input" | "select" | "date" | "number" | "range" | "custom";
   placeholder?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   options?: { label: string; value: any }[];
   component?: React.ReactNode;
   className?: string;
@@ -15,6 +16,7 @@ export interface FilterField {
   debounce?: number;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface GenericFiltersProps<T = any> {
   fields: FilterField[];
   initialValues?: Partial<T>;
@@ -28,6 +30,7 @@ export interface GenericFiltersProps<T = any> {
   debounceDelay?: number;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function GenericFilters<T = any>({
   fields,
   initialValues,
@@ -49,24 +52,25 @@ export default function GenericFilters<T = any>({
   const debouncedValues = useDebounce(formValues, debounceDelay);
 
   useEffect(() => {
-    
     onFiltersChange(debouncedValues);
   }, [debouncedValues, onFiltersChange]);
 
   useEffect(() => {
-    if (
-      initialValues &&
-      !isEqual(initialValues, lastInitialValues.current)
-    ) {
+    if (initialValues && !isEqual(initialValues, lastInitialValues.current)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       form.setFieldsValue(initialValues as any);
       setFormValues((initialValues || {}) as T);
       lastInitialValues.current = initialValues;
     }
   }, [initialValues]);
 
-  const handleValuesChange = useCallback((_changedValues: any, allValues: T) => {
-    setFormValues(allValues);
-  }, []);
+  const handleValuesChange = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (_changedValues: any, allValues: T) => {
+      setFormValues(allValues);
+    },
+    [],
+  );
 
   const handleReset = () => {
     form.resetFields();

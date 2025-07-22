@@ -14,7 +14,6 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
 import { Skeleton } from "antd";
 import { useGetProductsQuery } from "@/features/products";
-import { ToWords } from "to-words";
 
 export default function POS() {
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -44,11 +43,14 @@ export default function POS() {
     limit: 100,
   });
 
-  const { data: inventoryData, isLoading: inventoryLoading, refetch: refetchProducts } =
-    useGetProductsQuery({
-      limit: 10000,
-      warehouse: selectedWarehouse || undefined,
-    });
+  const {
+    data: inventoryData,
+    isLoading: inventoryLoading,
+    refetch: refetchProducts,
+  } = useGetProductsQuery({
+    limit: 10000,
+    warehouse: selectedWarehouse || undefined,
+  });
 
   // Prepare warehouse options
   const warehouseOptions: WarehouseOption[] =
@@ -101,7 +103,9 @@ export default function POS() {
 
   // In handleAddToCart, use warehouse-specific stock/price
   const handleAddToCart = (product: Product) => {
-    const stockItem = product.stock.find(s => s.warehouse._id === selectedWarehouse);
+    const stockItem = product.stock.find(
+      (s) => s.warehouse._id === selectedWarehouse,
+    );
     if (!stockItem || stockItem.unit === 0) return;
     setCart((prev) => {
       const found = prev.find((item) => item._id === product._id);
@@ -123,13 +127,17 @@ export default function POS() {
 
   // In handleQtyChange, cap at warehouse stock
   const handleQtyChange = (_id: string, qty: number) => {
-    const product = products.find(p => p._id === _id);
+    const product = products.find((p) => p._id === _id);
     if (!product) return;
-    const stockItem = product.stock.find(s => s.warehouse._id === selectedWarehouse);
+    const stockItem = product.stock.find(
+      (s) => s.warehouse._id === selectedWarehouse,
+    );
     const maxQty = stockItem ? stockItem.unit : 0;
     setCart((prev) =>
       prev.map((item) =>
-        item._id === _id ? { ...item, quantity: Math.max(1, Math.min(qty, maxQty)) } : item,
+        item._id === _id
+          ? { ...item, quantity: Math.max(1, Math.min(qty, maxQty)) }
+          : item,
       ),
     );
   };
@@ -228,71 +236,6 @@ export default function POS() {
       }
     }
   }, [warehousesData]);
-
-  const toWords = new ToWords({
-    localeCode: 'en-IN',
-    converterOptions: {
-      currency: true,
-      currencyOptions: {
-        name: 'Taka',
-        plural: 'Taka',
-        symbol: '৳',
-        fractionalUnit: {
-          name: 'Poisha',
-          plural: 'Poisha',
-          symbol: '',
-        },
-      },
-      doNotAddOnly: false,
-    },
-  });
-
-  function createInvoiceData({cart, customer, discount, total, computedTotal, customers, selectedWarehouse}: any): InvoiceData {
-    const customerObj = customers.find((c: any) => c.value === customer);
-    const subtotal = cart.reduce((sum: number, item: any) => sum + item.price * item.quantity, 0);
-    const payments = [
-      { method: "Cash", amount: total, date: new Date().toLocaleDateString(), by: customerObj?.label || "Walk-in" }
-    ];
-    const paid = total;
-    const due = 0;
-    return {
-      invoiceNumber: `POS-${Date.now()}`,
-      date: new Date().toLocaleDateString(),
-      customer: {
-        name: customerObj?.label || "Walk-in Customer",
-        email: customerObj?.email || "dummy@email.com",
-        phone: customerObj?.phone || "0123456789",
-      },
-      company: {
-        name: "EZ POS",
-        address: "123 Main St, Suite 100, Dhaka",
-        logo: "EZ",
-        mobile: "01700000000",
-        email: "info@ezpos.com",
-        soldBy: "POS Operator",
-      },
-      items: cart.map((item: any) => ({
-        title: item.name,
-        description: `SKU: ${item.sku}; UPC: ${item.upc}`,
-        quantity: item.quantity,
-        rate: item.price,
-        price: item.price * item.quantity,
-        warranty: item.warranty ? `${item.warranty.value} ${item.warranty.unit}` : "N/A",
-        serial: item.serial || "N/A",
-      })),
-      subtotal,
-      discount,
-      total,
-      signatory: {
-        name: "POS Operator",
-        title: "Cashier",
-      },
-      payments,
-      paid,
-      due,
-      inWords: toWords.convert(total, { currency: true }) || "",
-    };
-  }
 
   return (
     <>

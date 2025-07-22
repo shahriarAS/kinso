@@ -21,9 +21,13 @@ interface WarrantyInputProps {
 export default function WarrantyInput({ form }: WarrantyInputProps) {
   const value: WarrantyValue = Form.useWatch("warranty", form) || {};
   const effectiveValue = value.value;
-  const effectiveUnit = value.value === undefined ? undefined : (value.unit || "months");
+  const effectiveUnit =
+    value.value === undefined ? undefined : value.unit || "months";
 
-  const handleChange = (field: keyof WarrantyValue, val: WarrantyFieldValue) => {
+  const handleChange = (
+    field: keyof WarrantyValue,
+    val: WarrantyFieldValue,
+  ) => {
     form.setFieldsValue({ warranty: { ...value, [field]: val } });
   };
 
@@ -34,7 +38,14 @@ export default function WarrantyInput({ form }: WarrantyInputProps) {
           <Form.Item
             name={["warranty", "value"]}
             noStyle
-            rules={[{ required: false, type: "number", min: 0, message: "Enter warranty duration" }]}
+            rules={[
+              {
+                required: false,
+                type: "number",
+                min: 0,
+                message: "Enter warranty duration",
+              },
+            ]}
           >
             <InputNumber
               min={0}
@@ -63,9 +74,9 @@ export default function WarrantyInput({ form }: WarrantyInputProps) {
           </Form.Item>
         </Col>
       </Row>
-      <div style={{ color: '#888', fontSize: 12, marginTop: 4 }}>
+      <div style={{ color: "#888", fontSize: 12, marginTop: 4 }}>
         Leave blank to clear warranty.
       </div>
     </>
   );
-} 
+}

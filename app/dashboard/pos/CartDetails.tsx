@@ -1,13 +1,22 @@
 "use client";
 
-import { Input, Select, Button, Tooltip, Modal, Divider, Card, Typography } from "antd";
+import {
+  Input,
+  Select,
+  Button,
+  Tooltip,
+  Modal,
+  Divider,
+  Card,
+  Typography,
+} from "antd";
 import { Icon } from "@iconify/react";
 import { useState } from "react";
 import { useCreateOrderMutation } from "@/features/orders";
 import { useNotification } from "@/hooks/useNotification";
 import { CartItem, CustomerOption } from "./types";
 import type { InvoiceData } from "./InvoiceTemplate";
-import { OrderInput, Payment } from "@/features/orders/types";
+import { OrderInput, OrderItem, Payment } from "@/features/orders/types";
 import { PAYMENT_METHODS } from "@/lib/constraints";
 import { Product } from "@/features/products/types";
 import { UserOutlined } from "@ant-design/icons";
@@ -72,7 +81,9 @@ export default function CartDetails({
   products,
 }: CartDetailsProps) {
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
-  const [payments, setPayments] = useState<Payment[]>([{ method: "CASH", amount: 0 }]);
+  const [payments, setPayments] = useState<Payment[]>([
+    { method: "CASH", amount: 0 },
+  ]);
   const [createOrder, { isLoading: isCreatingOrder }] =
     useCreateOrderMutation();
   const { success, error } = useNotification();
@@ -131,16 +142,66 @@ export default function CartDetails({
       // Fallback numberToWords if not available
       function numberToWords(num: number): string {
         if (num === 0) return "zero";
-        const belowTwenty = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
-        const tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+        const belowTwenty = [
+          "",
+          "one",
+          "two",
+          "three",
+          "four",
+          "five",
+          "six",
+          "seven",
+          "eight",
+          "nine",
+          "ten",
+          "eleven",
+          "twelve",
+          "thirteen",
+          "fourteen",
+          "fifteen",
+          "sixteen",
+          "seventeen",
+          "eighteen",
+          "nineteen",
+        ];
+        const tens = [
+          "",
+          "",
+          "twenty",
+          "thirty",
+          "forty",
+          "fifty",
+          "sixty",
+          "seventy",
+          "eighty",
+          "ninety",
+        ];
         const thousand = 1000;
         const lakh = 100000;
         function helper(n: number): string {
           if (n < 20) return belowTwenty[n];
-          if (n < 100) return tens[Math.floor(n / 10)] + (n % 10 ? " " + belowTwenty[n % 10] : "");
-          if (n < thousand) return belowTwenty[Math.floor(n / 100)] + " hundred" + (n % 100 ? " " + helper(n % 100) : "");
-          if (n < lakh) return helper(Math.floor(n / thousand)) + " thousand" + (n % thousand ? " " + helper(n % thousand) : "");
-          return helper(Math.floor(n / lakh)) + " lakh" + (n % lakh ? " " + helper(n % lakh) : "");
+          if (n < 100)
+            return (
+              tens[Math.floor(n / 10)] +
+              (n % 10 ? " " + belowTwenty[n % 10] : "")
+            );
+          if (n < thousand)
+            return (
+              belowTwenty[Math.floor(n / 100)] +
+              " hundred" +
+              (n % 100 ? " " + helper(n % 100) : "")
+            );
+          if (n < lakh)
+            return (
+              helper(Math.floor(n / thousand)) +
+              " thousand" +
+              (n % thousand ? " " + helper(n % thousand) : "")
+            );
+          return (
+            helper(Math.floor(n / lakh)) +
+            " lakh" +
+            (n % lakh ? " " + helper(n % lakh) : "")
+          );
         }
         return helper(num);
       }
@@ -155,15 +216,23 @@ export default function CartDetails({
               phone: undefined,
             };
 
-      const subtotal = order.items.reduce((sum: number, item: any) => sum + item.totalPrice, 0);
-      const orderDiscount = typeof order.discount === "number" ? order.discount : subtotal - order.totalAmount;
-      const orderPayments = order.payments?.map((p: any) => ({
-        method: p.method || "Cash",
-        amount: Number(p.amount) || 0,
-        date: p.date || "-",
-        by: p.by || "-",
-      })) || [];
-      const paid = orderPayments.reduce((sum: number, p: any) => sum + (Number(p.amount) || 0), 0);
+      const subtotal = order.items.reduce(
+        (sum: number, item: { totalPrice: number }) => sum + item.totalPrice,
+        0,
+      );
+      const orderDiscount =
+        typeof order.discount === "number"
+          ? order.discount
+          : subtotal - order.totalAmount;
+      const orderPayments =
+        order.payments?.map((p: { method: string; amount: number }) => ({
+          method: p.method || "Cash",
+          amount: Number(p.amount) || 0,
+        })) || [];
+      const paid = orderPayments.reduce(
+        (sum: number, p: { amount: number }) => sum + (Number(p.amount) || 0),
+        0,
+      );
       const due = Math.max(0, order.totalAmount - paid);
       const inWords = numberToWords(order.totalAmount) + " Taka Only";
 
@@ -185,14 +254,15 @@ export default function CartDetails({
           email: "info@ezpos.com",
           soldBy: "Cashier Name",
         },
-        items: order.items.map((item: any) => ({
+        items: order.items.map((item: OrderItem) => ({
           title: item.product.name,
           description: `SKU: ${item.product.sku}; UPC: ${item.product.upc}`,
           quantity: item.quantity,
           rate: item.unitPrice,
           price: item.totalPrice,
-          warranty: item.product.warranty ? `${item.product.warranty.value} ${item.product.warranty.unit}` : "N/A",
-          serial: (item.product as any).serial || "N/A",
+          warranty: item.product.warranty
+            ? `${item.product.warranty.value} ${item.product.warranty.unit}`
+            : "N/A",
         })),
         subtotal,
         discount: orderDiscount,
@@ -221,7 +291,9 @@ export default function CartDetails({
       <Card className="border-none shadow-md mb-2" bodyStyle={{ padding: 16 }}>
         <div className="flex items-center mb-2">
           <UserOutlined className="text-primary text-lg mr-2" />
-          <Typography.Title level={5} className="!mb-0">Bill Details</Typography.Title>
+          <Typography.Title level={5} className="!mb-0">
+            Bill Details
+          </Typography.Title>
           <span className="ml-auto text-xs text-gray-400 font-normal">
             {new Date().toLocaleDateString()}
           </span>
@@ -250,15 +322,18 @@ export default function CartDetails({
         </div>
       </Card>
       <SectionHeader label="Cart Items" />
-      <Card className="border-none shadow-sm mb-2" bodyStyle={{ padding: 12, minHeight: 120 }}>
+      <Card
+        className="border-none shadow-sm mb-2"
+        bodyStyle={{ padding: 12, minHeight: 120 }}
+      >
         {cart.length === 0 ? (
-          <div className="text-gray-400 text-center py-4">
-            No items in cart
-          </div>
+          <div className="text-gray-400 text-center py-4">No items in cart</div>
         ) : (
           cart.map((item) => {
-            const product = products.find(p => p._id === item._id);
-            const stockItem = product?.stock.find(s => s.warehouse._id === selectedWarehouse);
+            const product = products.find((p) => p._id === item._id);
+            const stockItem = product?.stock.find(
+              (s) => s.warehouse._id === selectedWarehouse,
+            );
             const maxQty = stockItem ? stockItem.unit : 0;
             return (
               <div
@@ -268,12 +343,13 @@ export default function CartDetails({
                 <div className="flex items-center gap-2 w-[40%]">
                   {/* <Avatar shape="square" size={40} icon={<ShoppingCartOutlined />} className="bg-gray-200" /> */}
                   <div>
-                    <Typography.Text strong className="text-primary text-sm line-clamp-2">
+                    <Typography.Text
+                      strong
+                      className="text-primary text-sm line-clamp-2"
+                    >
                       {item.name}
                     </Typography.Text>
-                    <div className="text-xs text-gray-600">
-                      SKU: {item.sku}
-                    </div>
+                    <div className="text-xs text-gray-600">SKU: {item.sku}</div>
                     {/* <div className="text-xs text-gray-500">
                       Stock: {maxQty}
                     </div> */}
@@ -336,11 +412,15 @@ export default function CartDetails({
         <div className="flex flex-col gap-1">
           <div className="flex justify-between">
             <Typography.Text type="secondary">Items</Typography.Text>
-            <Typography.Text className="font-medium text-base">{cart.reduce((sum, item) => sum + item.quantity, 0)}</Typography.Text>
+            <Typography.Text className="font-medium text-base">
+              {cart.reduce((sum, item) => sum + item.quantity, 0)}
+            </Typography.Text>
           </div>
           <div className="flex justify-between">
             <Typography.Text type="secondary">Subtotal</Typography.Text>
-            <Typography.Text className="font-medium text-base">৳{subtotal.toFixed(2)}</Typography.Text>
+            <Typography.Text className="font-medium text-base">
+              ৳{subtotal.toFixed(2)}
+            </Typography.Text>
           </div>
           <div className="flex justify-between items-center">
             <Typography.Text type="danger">Discount</Typography.Text>
@@ -377,7 +457,10 @@ export default function CartDetails({
       {cart.length > 0 && (
         <>
           <SectionHeader label="Payments" />
-          <Card className="border-none shadow-sm mb-2" bodyStyle={{ padding: 16 }}>
+          <Card
+            className="border-none shadow-sm mb-2"
+            bodyStyle={{ padding: 16 }}
+          >
             {/* Payment Summary Chips */}
             <div className="mb-4">
               <div className="flex gap-2 justify-between w-full">
@@ -389,7 +472,9 @@ export default function CartDetails({
                   <Icon icon="mdi:check-circle" className="mr-2 text-lg" />
                   Paid: <span className="ml-2">৳{paid.toFixed(2)}</span>
                 </div>
-                <div className={`rounded-full px-4 py-2 text-base font-bold flex items-center min-h-[36px] ${due > 0 ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-700'}`}> 
+                <div
+                  className={`rounded-full px-4 py-2 text-base font-bold flex items-center min-h-[36px] ${due > 0 ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-700"}`}
+                >
                   <Icon icon="mdi:alert-circle" className="mr-2 text-lg" />
                   Due: <span className="ml-2">৳{due.toFixed(2)}</span>
                 </div>
@@ -408,14 +493,25 @@ export default function CartDetails({
                         options={PAYMENT_METHODS.map((method) => ({
                           label: (
                             <span className="flex items-center gap-1">
-                              <Icon icon={PAYMENT_METHOD_ICONS[method.value] || 'mdi:credit-card'} />
+                              <Icon
+                                icon={
+                                  PAYMENT_METHOD_ICONS[method.value] ||
+                                  "mdi:credit-card"
+                                }
+                              />
                               {method.label}
                             </span>
                           ),
                           value: method.value,
                         }))}
                         value={payment.method}
-                        onChange={(val) => setPayments(payments.map((p, i) => i === idx ? { ...p, method: val } : p))}
+                        onChange={(val) =>
+                          setPayments(
+                            payments.map((p, i) =>
+                              i === idx ? { ...p, method: val } : p,
+                            ),
+                          )
+                        }
                         className="w-36"
                         size="middle"
                         placeholder="Method"
@@ -427,11 +523,19 @@ export default function CartDetails({
                         value={payment.amount}
                         size="middle"
                         className="w-36 text-right font-semibold"
-                        onChange={e => setPayments(payments.map((p, i) => i === idx ? { ...p, amount: Number(e.target.value) } : p))}
+                        onChange={(e) =>
+                          setPayments(
+                            payments.map((p, i) =>
+                              i === idx
+                                ? { ...p, amount: Number(e.target.value) }
+                                : p,
+                            ),
+                          )
+                        }
                         prefix="৳"
                         style={{ textAlign: "right" }}
                         placeholder="Amount"
-                        status={payment.amount <= 0 ? 'error' : undefined}
+                        status={payment.amount <= 0 ? "error" : undefined}
                       />
                     </div>
                     {/* Remove button only if more than 1 payment */}
@@ -442,14 +546,18 @@ export default function CartDetails({
                           danger
                           size="small"
                           icon={<Icon icon="lineicons:close" />}
-                          onClick={() => setPayments(payments.filter((_, i) => i !== idx))}
+                          onClick={() =>
+                            setPayments(payments.filter((_, i) => i !== idx))
+                          }
                           className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 -translate-y-1/2"
                         />
                       </Tooltip>
                     )}
                     {/* Inline validation */}
                     {payment.amount <= 0 && (
-                      <span className="text-xs text-red-500 mt-1 sm:mt-0 sm:ml-2">Enter a valid amount</span>
+                      <span className="text-xs text-red-500 mt-1 sm:mt-0 sm:ml-2">
+                        Enter a valid amount
+                      </span>
                     )}
                   </div>
                 );
@@ -460,7 +568,12 @@ export default function CartDetails({
                   options={PAYMENT_METHODS.map((method) => ({
                     label: (
                       <span className="flex items-center gap-1">
-                        <Icon icon={PAYMENT_METHOD_ICONS[method.value] || 'mdi:credit-card'} />
+                        <Icon
+                          icon={
+                            PAYMENT_METHOD_ICONS[method.value] ||
+                            "mdi:credit-card"
+                          }
+                        />
                         {method.label}
                       </span>
                     ),
@@ -468,7 +581,8 @@ export default function CartDetails({
                   }))}
                   value={null}
                   onChange={(val) => {
-                    if (val) setPayments([...payments, { method: val, amount: 0 }]);
+                    if (val)
+                      setPayments([...payments, { method: val, amount: 0 }]);
                   }}
                   className="w-36"
                   size="middle"
@@ -478,7 +592,7 @@ export default function CartDetails({
                 <Input
                   type="number"
                   min={0}
-                  value={''}
+                  value={""}
                   size="middle"
                   className="w-36 text-right font-semibold"
                   disabled
@@ -490,7 +604,9 @@ export default function CartDetails({
             </div>
             {/* Overpayment validation */}
             {paid > total && (
-              <div className="text-xs text-red-500 mt-2">Total paid cannot exceed total amount.</div>
+              <div className="text-xs text-red-500 mt-2">
+                Total paid cannot exceed total amount.
+              </div>
             )}
           </Card>
         </>
@@ -530,23 +646,31 @@ export default function CartDetails({
             </div>
             <div className="text-gray-500">Total Amount</div>
           </div>
-         <div className="border-t pt-4">
-           <div className="mb-2 font-semibold">Payments:</div>
-           {payments.map((p, idx) => (
-             <div key={idx} className="flex justify-between mb-1">
-               <span>{PAYMENT_METHODS.find(m => m.value === p.method)?.label || p.method}:</span>
-               <span>৳{Number(p.amount).toFixed(2)}</span>
-             </div>
-           ))}
-           <div className="flex justify-between mt-2">
-             <span className="text-green-700 font-semibold">Paid:</span>
-             <span className="text-green-700 font-semibold">৳{paid.toFixed(2)}</span>
-           </div>
-           <div className="flex justify-between">
-             <span className="text-red-500 font-semibold">Due:</span>
-             <span className="text-red-500 font-semibold">৳{due.toFixed(2)}</span>
-           </div>
-         </div>
+          <div className="border-t pt-4">
+            <div className="mb-2 font-semibold">Payments:</div>
+            {payments.map((p, idx) => (
+              <div key={idx} className="flex justify-between mb-1">
+                <span>
+                  {PAYMENT_METHODS.find((m) => m.value === p.method)?.label ||
+                    p.method}
+                  :
+                </span>
+                <span>৳{Number(p.amount).toFixed(2)}</span>
+              </div>
+            ))}
+            <div className="flex justify-between mt-2">
+              <span className="text-green-700 font-semibold">Paid:</span>
+              <span className="text-green-700 font-semibold">
+                ৳{paid.toFixed(2)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-red-500 font-semibold">Due:</span>
+              <span className="text-red-500 font-semibold">
+                ৳{due.toFixed(2)}
+              </span>
+            </div>
+          </div>
           <div className="border-t pt-4">
             <div className="flex justify-between mb-2">
               <span>Items:</span>

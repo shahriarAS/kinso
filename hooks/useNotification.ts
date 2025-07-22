@@ -1,72 +1,40 @@
 import { useCallback } from "react";
-import { useAppDispatch } from "@/store/hooks";
-import { addNotification, removeNotification } from "@/store/slices/uiSlice";
-import { Notification } from "@/types";
-
-type NotificationType = Notification["type"];
-type NotificationTitle = string;
-type NotificationMessage = string;
+import toast from "react-hot-toast";
 
 export const useNotification = () => {
-  const dispatch = useAppDispatch();
+  const success = useCallback((title: string, message?: string) => {
+    toast.success(message || title);
+  }, []);
 
-  const showNotification = useCallback(
-    (
-      type: NotificationType,
-      title: NotificationTitle,
-      message: NotificationMessage,
-    ) => {
-      dispatch(
-        addNotification({
-          type,
-          title,
-          message,
-          _id: Date.now().toString(),
-          read: false,
-        }),
-      );
-    },
-    [dispatch],
-  );
+  const error = useCallback((title: string, message?: string) => {
+    toast.error(message || title);
+  }, []);
 
-  const removeNotificationById = useCallback(
-    (_id: string) => {
-      dispatch(removeNotification(_id));
-    },
-    [dispatch],
-  );
+  const warning = useCallback((title: string, message?: string) => {
+    toast(message || title, {
+      icon: "⚠️",
+      style: {
+        borderRadius: "10px",
+        background: "#fff3cd",
+        color: "#856404",
+        border: "1px solid #ffeaa7",
+      },
+    });
+  }, []);
 
-  const success = useCallback(
-    (title: string, message?: string) => {
-      showNotification("success", title, message || title);
-    },
-    [showNotification],
-  );
-
-  const error = useCallback(
-    (title: string, message?: string) => {
-      showNotification("error", title, message || title);
-    },
-    [showNotification],
-  );
-
-  const warning = useCallback(
-    (title: string, message?: string) => {
-      showNotification("warning", title, message || title);
-    },
-    [showNotification],
-  );
-
-  const info = useCallback(
-    (title: string, message?: string) => {
-      showNotification("info", title, message || title);
-    },
-    [showNotification],
-  );
+  const info = useCallback((title: string, message?: string) => {
+    toast(message || title, {
+      icon: "ℹ️",
+      style: {
+        borderRadius: "10px",
+        background: "#d1ecf1",
+        color: "#0c5460",
+        border: "1px solid #bee5eb",
+      },
+    });
+  }, []);
 
   return {
-    showNotification,
-    removeNotification: removeNotificationById,
     success,
     error,
     warning,

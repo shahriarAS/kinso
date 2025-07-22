@@ -1,7 +1,8 @@
 "use client";
-import { Modal, Form, Input, Button, Select, message } from "antd";
-import { useCreateCustomerMutation } from "@/store/api/customers";
-import { CustomerInput } from "@/types";
+import { Modal, Form, Input, Button, Select } from "antd";
+import { useCreateCustomerMutation } from "@/features/customers";
+import type { CustomerInput } from "@/features/customers";
+import { useNotification } from "@/hooks/useNotification";
 
 interface CustomerModalProps {
   open: boolean;
@@ -20,11 +21,12 @@ export default function CustomerModal({
 }: CustomerModalProps) {
   const [form] = Form.useForm();
   const [createCustomer, { isLoading }] = useCreateCustomerMutation();
+  const { success, error: showError } = useNotification();
 
   const handleSubmit = async (values: CustomerInput) => {
     try {
       const result = await createCustomer(values).unwrap();
-      message.success("Customer created successfully!");
+      success("Customer created successfully!");
       onCustomerCreated({
         _id: result.data._id,
         name: result.data.name,
@@ -34,7 +36,7 @@ export default function CustomerModal({
       onClose();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      message.error(error.data?.message || "Failed to create customer");
+      showError("Failed to create customer", error.data?.message);
     }
   };
 

@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
-import AddEditProductDrawer from "./AddEditProductDrawer";
-import InventoryFilters from "./InventoryFilters";
-import InventoryTable from "./InventoryTable";
+import AddEditProductDrawer from "@/features/products/AddEditProductDrawer";
+import ProductFilters from "@/features/products/ProductFilters";
+import ProductTable from "@/features/products/ProductTable";
 import { Button } from "antd";
 import { Icon } from "@iconify/react";
 
@@ -29,7 +29,7 @@ export default function Inventory() {
       </div>
       <AddEditProductDrawer open={open} setOpen={setOpen} />
       {/* Filters */}
-      <InventoryFilters
+      <ProductFilters
         searchTerm={searchTerm}
         categoryFilter={categoryFilter}
         warehouseFilter={warehouseFilter}
@@ -45,7 +45,7 @@ export default function Inventory() {
         onPageChange={setCurrentPage}
       />
       {/* Table */}
-      <InventoryTable
+      <ProductTable
         searchTerm={searchTerm}
         categoryFilter={categoryFilter}
         warehouseFilter={warehouseFilter}

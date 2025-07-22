@@ -1,12 +1,8 @@
-export * from "./product";
-export * from "./warehouse";
-export * from "./order";
-export * from "./customer";
-export * from "./user";
-export * from "./common";
-
-export interface Category {
+export interface Notification {
   _id: string;
-  name: string;
-  description?: string;
+  type: "success" | "error" | "warning" | "info";
+  title: string;
+  message: string;
+  timestamp: string;
+  read?: boolean;
 }

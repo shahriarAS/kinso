@@ -1,8 +1,10 @@
 "use client";
 import { useState } from "react";
-import AddEditWarehouseDrawer from "./AddEditWarehouseDrawer";
-import WarehouseFilters from "./WarehouseFilters";
-import WarehouseTable from "./WarehouseTable";
+import {
+  AddEditWarehouseDrawer,
+  WarehouseFilters,
+  WarehouseTable,
+} from "@/features/warehouses";
 import { Button } from "antd";
 import { Icon } from "@iconify/react";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useLoginUserMutation } from "@/store/api/auth";
+import { useLoginUserMutation } from "@/features/auth";
 import { LockOutlined, MailOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Alert, Spin } from "antd";
 import { useRouter, useSearchParams } from "next/navigation";

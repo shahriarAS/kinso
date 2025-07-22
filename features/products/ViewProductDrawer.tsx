@@ -65,8 +65,10 @@ export default function ViewProductDrawer({
       title: <span className="font-medium text-base">DP</span>,
       dataIndex: "dp",
       key: "dp",
-      render: (text: number) => (
-        <span className="text-gray-700">৳{text.toFixed(2)}</span>
+      render: (text: number | undefined) => (
+        <span className="text-gray-700">
+          {text ? `৳${text.toFixed(2)}` : "N/A"}
+        </span>
       ),
     },
     {

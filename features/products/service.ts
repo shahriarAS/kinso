@@ -150,17 +150,17 @@ export async function handlePost(request: NextRequest) {
 
     // Validate stock data
     for (const stockItem of stock) {
-      if (!stockItem.warehouse || !stockItem.dp || !stockItem.mrp) {
+      if (!stockItem.warehouse || !stockItem.mrp) {
         return NextResponse.json(
           {
             success: false,
-            message: "Each stock item must have warehouse, dp, and mrp",
+            message: "Each stock item must have warehouse and mrp",
           },
           { status: 400 },
         );
       }
 
-      if (stockItem.dp < 0 || stockItem.mrp < 0) {
+      if ((stockItem.dp && stockItem.dp < 0) || stockItem.mrp < 0) {
         return NextResponse.json(
           { success: false, message: "Prices cannot be negative" },
           { status: 400 },
@@ -354,11 +354,11 @@ export async function handleUpdateById(
       );
     }
     for (const stockItem of stock) {
-      if (!stockItem.warehouse || !stockItem.dp || !stockItem.mrp) {
+      if (!stockItem.warehouse || !stockItem.mrp) {
         return NextResponse.json(
           {
             success: false,
-            message: "Each stock item must have warehouse, dp, and mrp",
+            message: "Each stock item must have warehouse and mrp",
           },
           { status: 400 },
         );

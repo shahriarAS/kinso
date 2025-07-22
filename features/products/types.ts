@@ -10,7 +10,7 @@ export interface Product {
   stock: {
     warehouse: Warehouse;
     unit: number;
-    dp: number;
+    dp?: number;
     mrp: number;
   }[];
 }
@@ -23,7 +23,7 @@ export interface ProductInput {
   stock: {
     warehouse: string; // API expects warehouse ID as string
     unit: number;
-    dp: number;
+    dp?: number;
     mrp: number;
   }[];
 }

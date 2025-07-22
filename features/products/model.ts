@@ -3,7 +3,7 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface IStock {
   warehouse: mongoose.Types.ObjectId;
   unit: number;
-  dp: number; // Dealer Price
+  dp?: number; // Dealer Price
   mrp: number; // Maximum Retail Price
 }
 
@@ -32,7 +32,6 @@ const StockSchema: Schema = new Schema(
     },
     dp: {
       type: Number,
-      required: true,
       min: 0,
     },
     mrp: {

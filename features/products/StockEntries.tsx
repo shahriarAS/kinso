@@ -51,14 +51,13 @@ export default function StockEntries({ form, warehouseOptions = [] }: Props) {
                     </Form.Item>
                     <Form.Item
                       name={[field.name, "dp"]}
-                      label="DP"
-                      rules={[{ required: true, message: "Enter DP" }]}
+                      label="DP (Optional)"
                       className="font-medium"
                     >
                       <Input
                         type="number"
                         size="large"
-                        placeholder="DP"
+                        placeholder="DP (Optional)"
                         min={0}
                         className="w-full"
                       />

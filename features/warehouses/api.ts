@@ -105,7 +105,7 @@ export const warehousesApi = createApi({
             };
             quantity: number;
             unit: string;
-            dp: number;
+            dp?: number;
             mrp: number;
           }>;
           totalProducts: number;

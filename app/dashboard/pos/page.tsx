@@ -14,7 +14,6 @@ import { pdf } from "@react-pdf/renderer";
 import { useGetOrderQuery } from "@/features/orders/api";
 import { useGetSettingsQuery } from "@/features/settings";
 import { mapOrderToInvoiceDataWithSettings } from "@/features/orders/utils";
-import { Modal, Button } from "antd";
 import { Skeleton } from "antd";
 import { useGetProductsQuery } from "@/features/products";
 import { InvoiceData } from "./InvoiceTemplate";
@@ -28,9 +27,13 @@ export default function POS() {
   const [selectedWarehouse, setSelectedWarehouse] = useState<string>("");
   const [customerModalOpen, setCustomerModalOpen] = useState(false);
   const [printOrderId, setPrintOrderId] = useState<string | null>(null);
-  const { data: orderData, isLoading: orderLoading } = useGetOrderQuery(printOrderId || "", { skip: !printOrderId });
-  const { data: settingsData } = useGetSettingsQuery(undefined, { skip: !printOrderId });
-  const invoiceData = printOrderId && orderData ? mapOrderToInvoiceDataWithSettings(orderData.data, settingsData?.data) : null;
+  const { data: orderData, isLoading: orderLoading } = useGetOrderQuery(
+    printOrderId || "",
+    { skip: !printOrderId },
+  );
+  const { data: settingsData } = useGetSettingsQuery(undefined, {
+    skip: !printOrderId,
+  });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const searchInputRef = useRef<any>(null);
   const { success, error } = useNotification();
@@ -39,7 +42,10 @@ export default function POS() {
     const downloadPDF = async () => {
       if (printOrderId && orderData && settingsData) {
         try {
-          const invoiceData = mapOrderToInvoiceDataWithSettings(orderData.data, settingsData?.data);
+          const invoiceData = mapOrderToInvoiceDataWithSettings(
+            orderData.data,
+            settingsData?.data,
+          );
           const blob = await pdf(<InvoicePDF data={invoiceData} />).toBlob();
           const url = URL.createObjectURL(blob);
           const a = document.createElement("a");
@@ -50,7 +56,6 @@ export default function POS() {
           a.remove();
           URL.revokeObjectURL(url);
         } catch (err) {
-          // eslint-disable-next-line no-console
           console.error("Failed to generate/download invoice PDF", err);
         } finally {
           setPrintOrderId(null);
@@ -58,7 +63,6 @@ export default function POS() {
       }
     };
     downloadPDF();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [printOrderId, orderData, settingsData]);
 
   // API hooks
@@ -206,7 +210,9 @@ export default function POS() {
     }, 100);
   };
 
-  const handleOrderCompleted = (invoiceData: InvoiceData & { orderId?: string; _id?: string }) => {
+  const handleOrderCompleted = (
+    invoiceData: InvoiceData & { orderId?: string; _id?: string },
+  ) => {
     const id = invoiceData._id || invoiceData.orderId;
     if (id) {
       setPrintOrderId(id);

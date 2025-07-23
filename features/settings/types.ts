@@ -4,4 +4,4 @@ export interface Settings {
   invoiceFooterTitle?: string;
   createdAt: string;
   updatedAt: string;
-} 
+}

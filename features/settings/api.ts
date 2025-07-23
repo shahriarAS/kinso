@@ -25,4 +25,4 @@ export const settingsApi = createApi({
   }),
 });
 
-export const { useGetSettingsQuery, useUpdateSettingsMutation } = settingsApi; 
+export const { useGetSettingsQuery, useUpdateSettingsMutation } = settingsApi;

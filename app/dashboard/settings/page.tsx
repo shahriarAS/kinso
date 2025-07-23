@@ -1,4 +1,4 @@
-"use client";;
+"use client";
 import {
   Tabs,
   Form,
@@ -36,7 +36,10 @@ export default function SettingsPage() {
     }
   }, [data, form]);
 
-  const handleFinish = async (values: any) => {
+  const handleFinish = async (values: {
+    invoiceFooter: string;
+    invoiceFooterTitle: string;
+  }) => {
     try {
       await updateSettings({
         invoiceFooter: values.invoiceFooter,
@@ -85,12 +88,19 @@ export default function SettingsPage() {
                     <div className="font-semibold text-base mb-1 flex items-center">
                       Invoice Footer
                       <Tooltip title="This policy will appear on all customer invoices.">
-                        <span className="ml-1 text-gray-400 cursor-pointer">?</span>
+                        <span className="ml-1 text-gray-400 cursor-pointer">
+                          ?
+                        </span>
                       </Tooltip>
                     </div>
                     <Form.Item
                       name="invoiceFooterTitle"
-                      rules={[{ required: true, message: "Please enter the warranty policy title." }]}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please enter the warranty policy title.",
+                        },
+                      ]}
                       extra="This title will appear above the warranty policy on invoices."
                       className="mb-2"
                     >
@@ -102,7 +112,12 @@ export default function SettingsPage() {
                     </Form.Item>
                     <Form.Item
                       name="invoiceFooter"
-                      rules={[{ required: true, message: "Please enter the warranty policy." }]}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please enter the warranty policy.",
+                        },
+                      ]}
                       extra="This policy will be printed at the bottom of every invoice."
                       className="mb-0"
                     >

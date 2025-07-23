@@ -37,7 +37,8 @@ SettingsSchema.statics.getSingleton = async function () {
   return settings;
 };
 
-const Settings = (mongoose.models.Settings as ISettingsModel) ||
+const Settings =
+  (mongoose.models.Settings as ISettingsModel) ||
   mongoose.model<ISettings, ISettingsModel>("Settings", SettingsSchema);
 
-export default Settings; 
+export default Settings;

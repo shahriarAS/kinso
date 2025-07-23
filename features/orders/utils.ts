@@ -2,7 +2,10 @@ import { Order } from "./types";
 import { InvoiceData } from "@/app/dashboard/pos/InvoiceTemplate";
 
 // Accepts order and settings (with invoiceFooter)
-export function mapOrderToInvoiceDataWithSettings(order: Order, settings?: { invoiceFooter?: string; invoiceFooterTitle?: string }): InvoiceData {
+export function mapOrderToInvoiceDataWithSettings(
+  order: Order,
+  settings?: { invoiceFooter?: string; invoiceFooterTitle?: string },
+): InvoiceData {
   // Support both string and populated object for customerId
   const customerObj =
     typeof order.customerId === "object" && order.customerId !== null
@@ -139,4 +142,4 @@ export function mapOrderToInvoiceDataWithSettings(order: Order, settings?: { inv
     invoiceFooter: settings?.invoiceFooter,
     invoiceFooterTitle: settings?.invoiceFooterTitle,
   };
-} 
+}

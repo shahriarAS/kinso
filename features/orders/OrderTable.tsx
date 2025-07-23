@@ -36,13 +36,20 @@ export default function OrderTable({
 }: Props) {
   const [viewOrder, setViewOrder] = useState<Order | null>(null);
   const [printOrderId, setPrintOrderId] = useState<string | null>(null);
-  const { data: orderData } = useGetOrderQuery(printOrderId || "", { skip: !printOrderId });
-  const { data: settingsData } = useGetSettingsQuery(undefined, { skip: !printOrderId });
+  const { data: orderData } = useGetOrderQuery(printOrderId || "", {
+    skip: !printOrderId,
+  });
+  const { data: settingsData } = useGetSettingsQuery(undefined, {
+    skip: !printOrderId,
+  });
 
   useEffect(() => {
     const downloadPDF = async () => {
       if (printOrderId && orderData && settingsData) {
-        const invoiceData = mapOrderToInvoiceDataWithSettings(orderData.data, settingsData.data);
+        const invoiceData = mapOrderToInvoiceDataWithSettings(
+          orderData.data,
+          settingsData.data,
+        );
         const blob = await pdf(<InvoicePDF data={invoiceData} />).toBlob();
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");

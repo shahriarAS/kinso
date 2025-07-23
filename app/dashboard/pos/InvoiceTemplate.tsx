@@ -353,8 +353,13 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ data }) => {
 
           {/* Warranty Policy Section */}
           {data.invoiceFooter && (
-            <div style={borderColor} className="mt-6 mb-2 p-4 border rounded text-xs">
-              <div className="font-semibold mb-2">{data.invoiceFooterTitle || 'Warranty Policy'}</div>
+            <div
+              style={borderColor}
+              className="mt-6 mb-2 p-4 border rounded text-xs"
+            >
+              <div className="font-semibold mb-2">
+                {data.invoiceFooterTitle || "Warranty Policy"}
+              </div>
               <div style={{ whiteSpace: "pre-line" }}>{data.invoiceFooter}</div>
             </div>
           )}

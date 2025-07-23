@@ -422,7 +422,7 @@ export default function CartDetails({
       <Card
         className="border-none shadow-sm mb-2"
         styles={{
-          body: { padding: 12},
+          body: { padding: 12 },
         }}
       >
         <div className="flex flex-col gap-1">

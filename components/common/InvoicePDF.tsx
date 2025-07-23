@@ -6,7 +6,6 @@ import {
   Text,
   StyleSheet,
   Image,
-  Font,
 } from "@react-pdf/renderer";
 import type { InvoiceData } from "@/app/dashboard/pos/InvoiceTemplate";
 
@@ -130,13 +129,13 @@ const styles = StyleSheet.create({
     width: 120,
     fontSize: 10,
     marginBottom: 8,
-    textAlign:"right"
+    textAlign: "right",
   },
   totalsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 2,
-    textAlign:"right"
+    textAlign: "right",
   },
   textDanger: {
     color: "#ef4444",
@@ -144,7 +143,7 @@ const styles = StyleSheet.create({
   inWords: {
     fontSize: 10,
     marginBottom: 8,
-    marginTop: 12
+    marginTop: 12,
   },
   paymentTable: {
     width: "auto",
@@ -221,8 +220,13 @@ const formatCurrency = (amount: number, showCurrency: boolean = false) =>
   `${showCurrency ? "BDT" : ""} ${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
 const InvoicePDF: React.FC<{ data: InvoiceData }> = ({ data }) => {
-  const paid = data.paid !== undefined ? data.paid : data.payments?.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) || data.total;
-  const due = data.due !== undefined ? data.due : Math.max(0, data.total - paid);
+  const paid =
+    data.paid !== undefined
+      ? data.paid
+      : data.payments?.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) ||
+        data.total;
+  const due =
+    data.due !== undefined ? data.due : Math.max(0, data.total - paid);
 
   return (
     <Document>
@@ -239,27 +243,62 @@ const InvoicePDF: React.FC<{ data: InvoiceData }> = ({ data }) => {
               </View>
             )}
             <Text style={styles.companyName}>{data.company.name}</Text>
-            <Text style={styles.companyInfo}>Address: {data.company.address}</Text>
+            <Text style={styles.companyInfo}>
+              Address: {data.company.address}
+            </Text>
             {data.company.mobile && (
-              <Text style={styles.companyInfo}>Mobile: {data.company.mobile}</Text>
+              <Text style={styles.companyInfo}>
+                Mobile: {data.company.mobile}
+              </Text>
             )}
             {data.company.email && (
-              <Text style={styles.companyInfo}>Email: {data.company.email}</Text>
+              <Text style={styles.companyInfo}>
+                Email: {data.company.email}
+              </Text>
             )}
             {data.company.soldBy && (
-              <Text style={styles.companyInfo}>Sold By: {data.company.soldBy}</Text>
+              <Text style={styles.companyInfo}>
+                Sold By: {data.company.soldBy}
+              </Text>
             )}
           </View>
           {/* Invoice Title/No/Date and Billing To */}
-          <View style={{ flex: 1, flexDirection: "column", alignItems: "flex-end", textAlign:"right" }}>
+          <View
+            style={{
+              flex: 1,
+              flexDirection: "column",
+              alignItems: "flex-end",
+              textAlign: "right",
+            }}
+          >
             <Text style={styles.invoiceTitle}>INVOICE</Text>
-            <Text style={styles.invoiceMeta}>Invoice No: {data.invoiceNumber}</Text>
+            <Text style={styles.invoiceMeta}>
+              Invoice No: {data.invoiceNumber}
+            </Text>
             <Text style={styles.invoiceMeta}>Date: {data.date}</Text>
             <View style={styles.billingTo}>
-              <Text style={{ fontWeight: "bold", textAlign: "right", marginBottom: 4 }}>Billing To</Text>
-              <Text style={{ textAlign: "right", marginBottom:2 }}>{data.customer.name}</Text>
-              {data.customer.phone && <Text style={{ textAlign: "right", marginBottom: 2 }}>{data.customer.phone}</Text>}
-              {data.customer.email && <Text style={{ textAlign: "right", marginBottom: 2 }}>{data.customer.email}</Text>}
+              <Text
+                style={{
+                  fontWeight: "bold",
+                  textAlign: "right",
+                  marginBottom: 4,
+                }}
+              >
+                Billing To
+              </Text>
+              <Text style={{ textAlign: "right", marginBottom: 2 }}>
+                {data.customer.name}
+              </Text>
+              {data.customer.phone && (
+                <Text style={{ textAlign: "right", marginBottom: 2 }}>
+                  {data.customer.phone}
+                </Text>
+              )}
+              {data.customer.email && (
+                <Text style={{ textAlign: "right", marginBottom: 2 }}>
+                  {data.customer.email}
+                </Text>
+              )}
             </View>
           </View>
         </View>
@@ -269,26 +308,76 @@ const InvoicePDF: React.FC<{ data: InvoiceData }> = ({ data }) => {
           {/* Table Header */}
           <View style={[styles.tableRow, styles.tableHeader]} fixed>
             <Text style={[styles.tableCell, { flex: 0.25 }]}>SL.</Text>
-            <Text style={[styles.tableCell, { flex: 3 }]}>Item Description</Text>
-            <Text style={[styles.tableCell, styles.tableCellCenter, { flex: 1 }]}>Warranty</Text>
-            <Text style={[styles.tableCell, styles.tableCellRight, { flex: 1 }]}>Price</Text>
-            <Text style={[styles.tableCell, styles.tableCellCenter, { flex: 0.25 }]}>Qty</Text>
-            <Text style={[styles.tableCell, styles.tableCellRight, styles.tableCellLast, { flex: 1 }]}>Total</Text>
+            <Text style={[styles.tableCell, { flex: 3 }]}>
+              Item Description
+            </Text>
+            <Text
+              style={[styles.tableCell, styles.tableCellCenter, { flex: 1 }]}
+            >
+              Warranty
+            </Text>
+            <Text
+              style={[styles.tableCell, styles.tableCellRight, { flex: 1 }]}
+            >
+              Price
+            </Text>
+            <Text
+              style={[styles.tableCell, styles.tableCellCenter, { flex: 0.25 }]}
+            >
+              Qty
+            </Text>
+            <Text
+              style={[
+                styles.tableCell,
+                styles.tableCellRight,
+                styles.tableCellLast,
+                { flex: 1 },
+              ]}
+            >
+              Total
+            </Text>
           </View>
           {/* Table Body */}
           {data.items.map((item, idx) => (
             <View style={styles.tableRow} key={idx} wrap={false}>
               <Text style={[styles.tableCell, { flex: 0.25 }]}>{idx + 1}</Text>
-              <View style={[styles.tableCell, { flex: 3 }]}> 
+              <View style={[styles.tableCell, { flex: 3 }]}>
                 <Text style={styles.itemTitle}>{item.title}</Text>
                 {item.description && (
-                  <Text style={styles.itemDescription}>({item.description})</Text>
+                  <Text style={styles.itemDescription}>
+                    ({item.description})
+                  </Text>
                 )}
               </View>
-              <Text style={[styles.tableCell, styles.tableCellCenter, { flex: 1 }]}>{item.warranty || "N/A"}</Text>
-              <Text style={[styles.tableCell, styles.tableCellRight, { flex: 1 }]}>{formatCurrency(item.rate, false)}</Text>
-              <Text style={[styles.tableCell, styles.tableCellCenter, { flex: 0.25 }]}>{item.quantity}</Text>
-              <Text style={[styles.tableCell, styles.tableCellRight, styles.tableCellLast, { flex: 1 }]}>{formatCurrency(item.price, false)}</Text>
+              <Text
+                style={[styles.tableCell, styles.tableCellCenter, { flex: 1 }]}
+              >
+                {item.warranty || "N/A"}
+              </Text>
+              <Text
+                style={[styles.tableCell, styles.tableCellRight, { flex: 1 }]}
+              >
+                {formatCurrency(item.rate, false)}
+              </Text>
+              <Text
+                style={[
+                  styles.tableCell,
+                  styles.tableCellCenter,
+                  { flex: 0.25 },
+                ]}
+              >
+                {item.quantity}
+              </Text>
+              <Text
+                style={[
+                  styles.tableCell,
+                  styles.tableCellRight,
+                  styles.tableCellLast,
+                  { flex: 1 },
+                ]}
+              >
+                {formatCurrency(item.price, false)}
+              </Text>
             </View>
           ))}
         </View>
@@ -297,20 +386,26 @@ const InvoicePDF: React.FC<{ data: InvoiceData }> = ({ data }) => {
         <View style={[styles.totalsBox]}>
           <View style={styles.totalsRow}>
             <Text style={{ fontWeight: "400" }}>Subtotal :</Text>
-            <Text style={{ textAlign: "right" }}>{formatCurrency(data.subtotal)}</Text>
+            <Text style={{ textAlign: "right" }}>
+              {formatCurrency(data.subtotal)}
+            </Text>
           </View>
           {data.discount > 0 && (
             <View style={styles.totalsRow}>
               <Text style={{ fontWeight: "400" }}>Discount :</Text>
-              <Text style={{ textAlign: "right" }}>- {formatCurrency(data.discount)}</Text>
+              <Text style={{ textAlign: "right" }}>
+                - {formatCurrency(data.discount)}
+              </Text>
             </View>
           )}
-          <View style={{paddingTop:4, paddingBottom:4}}/>
+          <View style={{ paddingTop: 4, paddingBottom: 4 }} />
           <View style={styles.totalsRow}>
             <Text style={{ fontWeight: "400" }}>Total:</Text>
-            <Text style={{ textAlign: "right" }}>{formatCurrency(data.total)}</Text>
+            <Text style={{ textAlign: "right" }}>
+              {formatCurrency(data.total)}
+            </Text>
           </View>
-          <View style={{paddingTop:4, paddingBottom:4}}/>
+          <View style={{ paddingTop: 4, paddingBottom: 4 }} />
           <View style={styles.totalsRow}>
             <Text style={{ fontWeight: "400" }}>Paid:</Text>
             <Text style={{ textAlign: "right" }}>{formatCurrency(paid)}</Text>
@@ -318,7 +413,9 @@ const InvoicePDF: React.FC<{ data: InvoiceData }> = ({ data }) => {
           {due > 0 && (
             <View style={styles.totalsRow}>
               <Text style={{ fontWeight: "400" }}>Due:</Text>
-              <Text style={[styles.textDanger, { textAlign: "right" }]}>{formatCurrency(due)}</Text>
+              <Text style={[styles.textDanger, { textAlign: "right" }]}>
+                {formatCurrency(due)}
+              </Text>
             </View>
           )}
         </View>
@@ -327,7 +424,9 @@ const InvoicePDF: React.FC<{ data: InvoiceData }> = ({ data }) => {
         <View style={[styles.inWords, styles.sectionGap]}>
           <Text>
             <Text style={{ fontWeight: "bold" }}>Total in Words: </Text>
-            <Text style={{ textTransform: "capitalize" }}>{data.inWords || ""}</Text>
+            <Text style={{ textTransform: "capitalize" }}>
+              {data.inWords || ""}
+            </Text>
           </Text>
         </View>
 
@@ -336,14 +435,34 @@ const InvoicePDF: React.FC<{ data: InvoiceData }> = ({ data }) => {
           <View style={[styles.paymentTable, styles.sectionGap]}>
             {/* Table Header */}
             <View style={[styles.tableRow, styles.tableHeader]} fixed>
-              <Text style={[styles.paymentCell, { flex: 1 }]}>Payment Method</Text>
-              <Text style={[styles.paymentCell, styles.paymentCellLast, { flex: 1 }]}>Amount</Text>
+              <Text style={[styles.paymentCell, { flex: 1 }]}>
+                Payment Method
+              </Text>
+              <Text
+                style={[
+                  styles.paymentCell,
+                  styles.paymentCellLast,
+                  { flex: 1 },
+                ]}
+              >
+                Amount
+              </Text>
             </View>
             {/* Table Body */}
             {data.payments.map((p, idx) => (
               <View style={styles.tableRow} key={idx} wrap={false}>
-                <Text style={[styles.paymentCell, { flex: 1 }]}>{p.method}</Text>
-                <Text style={[styles.paymentCell, styles.paymentCellLast, { flex: 1 }]}>{formatCurrency(Number(p.amount))}</Text>
+                <Text style={[styles.paymentCell, { flex: 1 }]}>
+                  {p.method}
+                </Text>
+                <Text
+                  style={[
+                    styles.paymentCell,
+                    styles.paymentCellLast,
+                    { flex: 1 },
+                  ]}
+                >
+                  {formatCurrency(Number(p.amount))}
+                </Text>
               </View>
             ))}
             <View style={styles.paymentTotalBox}>
@@ -355,7 +474,9 @@ const InvoicePDF: React.FC<{ data: InvoiceData }> = ({ data }) => {
         {/* Warranty Policy Section */}
         {data.invoiceFooter && (
           <View style={[styles.warrantyBox, styles.sectionGap]}>
-            <Text style={styles.warrantyTitle}>{data.invoiceFooterTitle || "Warranty Policy"}</Text>
+            <Text style={styles.warrantyTitle}>
+              {data.invoiceFooterTitle || "Warranty Policy"}
+            </Text>
             <Text>{data.invoiceFooter}</Text>
           </View>
         )}
@@ -376,4 +497,4 @@ const InvoicePDF: React.FC<{ data: InvoiceData }> = ({ data }) => {
   );
 };
 
-export default InvoicePDF; 
+export default InvoicePDF;

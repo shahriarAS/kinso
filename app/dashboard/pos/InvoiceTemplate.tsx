@@ -41,6 +41,7 @@ export interface InvoiceData {
   paid?: number;
   due?: number;
   inWords?: string;
+  warrantyPolicy?: string; // <-- add this
 }
 
 interface InvoiceTemplateProps {
@@ -348,6 +349,14 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ data }) => {
             </div>
           )}
 
+          {/* Warranty Policy Section */}
+          {data.warrantyPolicy && (
+            <div className="mt-6 mb-2 p-4 border rounded bg-gray-50 text-xs text-gray-700">
+              <div className="font-semibold mb-1">Warranty Policy</div>
+              <div style={{ whiteSpace: "pre-line" }}>{data.warrantyPolicy}</div>
+            </div>
+          )}
+
           {/* Signature Section */}
           <div className="flex flex-col flex-grow justify-end min-h-[80px] absolute bottom-0 left-0 right-0 w-full p-6">
             <div className="flex justify-between items-end mt-8 mb-2 print-invoice-signature-section w-full">
@@ -363,7 +372,7 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ data }) => {
                   className="h-12 border-b w-40 mb-1"
                   style={signatureBorder}
                 ></div>
-                <div className="font-semibold text-xs">Authorised By</div>
+                <div className="font-semibold text-xs">Authorized By</div>
               </div>
             </div>
           </div>

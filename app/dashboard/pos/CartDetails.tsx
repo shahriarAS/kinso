@@ -20,6 +20,7 @@ import { OrderInput, OrderItem, Payment } from "@/features/orders/types";
 import { PAYMENT_METHODS } from "@/lib/constraints";
 import { Product } from "@/features/products/types";
 import { UserOutlined } from "@ant-design/icons";
+import { useGetSettingsQuery } from "@/features/settings";
 
 interface CartDetailsProps {
   cart: CartItem[];
@@ -87,6 +88,7 @@ export default function CartDetails({
   const [createOrder, { isLoading: isCreatingOrder }] =
     useCreateOrderMutation();
   const { success, error } = useNotification();
+  const { data: settingsData } = useGetSettingsQuery();
 
   const subtotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -275,6 +277,7 @@ export default function CartDetails({
         paid,
         due,
         inWords,
+        warrantyPolicy: settingsData?.data?.warrantyPolicy || undefined,
       };
       success("Order created successfully!");
       setCheckoutModalOpen(false);

@@ -8,6 +8,7 @@ import { usersApi } from "@/features/users";
 import { dashboardApi } from "@/features/dashboard";
 import uiReducer from "./slices/uiSlice";
 import { productsApi } from "@/features/products";
+import { settingsApi } from "@/features/settings";
 
 const store = configureStore({
   reducer: {
@@ -20,6 +21,7 @@ const store = configureStore({
     [categoriesApi.reducerPath]: categoriesApi.reducer,
     [usersApi.reducerPath]: usersApi.reducer,
     [dashboardApi.reducerPath]: dashboardApi.reducer,
+    [settingsApi.reducerPath]: settingsApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -35,6 +37,7 @@ const store = configureStore({
       categoriesApi.middleware,
       usersApi.middleware,
       dashboardApi.middleware,
+      settingsApi.middleware,
     ),
 });
 

@@ -239,6 +239,7 @@ export default function CartDetails({
       const inWords = numberToWords(order.totalAmount) + " Taka Only";
 
       const invoiceData: InvoiceData = {
+        _id: order._id,
         invoiceNumber: order.orderNumber || "N/A",
         date: order.createdAt
           ? new Date(order.createdAt).toLocaleDateString()
@@ -291,7 +292,12 @@ export default function CartDetails({
 
   return (
     <>
-      <Card className="border-none shadow-md mb-2" bodyStyle={{ padding: 16 }}>
+      <Card
+        className="border-none shadow-md mb-2"
+        styles={{
+          body: { padding: 16 },
+        }}
+      >
         <div className="flex items-center mb-2">
           <UserOutlined className="text-primary text-lg mr-2" />
           <Typography.Title level={5} className="!mb-0">
@@ -327,7 +333,9 @@ export default function CartDetails({
       <SectionHeader label="Cart Items" />
       <Card
         className="border-none shadow-sm mb-2"
-        bodyStyle={{ padding: 12, minHeight: 120 }}
+        styles={{
+          body: { padding: 12, minHeight: 120 },
+        }}
       >
         {cart.length === 0 ? (
           <div className="text-gray-400 text-center py-4">No items in cart</div>
@@ -411,7 +419,12 @@ export default function CartDetails({
         )}
       </Card>
       <SectionHeader label="Summary" />
-      <Card className="border-none shadow-sm mb-2" bodyStyle={{ padding: 12 }}>
+      <Card
+        className="border-none shadow-sm mb-2"
+        styles={{
+          body: { padding: 12},
+        }}
+      >
         <div className="flex flex-col gap-1">
           <div className="flex justify-between">
             <Typography.Text type="secondary">Items</Typography.Text>
@@ -462,7 +475,9 @@ export default function CartDetails({
           <SectionHeader label="Payments" />
           <Card
             className="border-none shadow-sm mb-2"
-            bodyStyle={{ padding: 16 }}
+            styles={{
+              body: { padding: 16 },
+            }}
           >
             {/* Payment Summary Chips */}
             <div className="mb-4">

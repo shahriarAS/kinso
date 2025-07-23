@@ -9,7 +9,12 @@ import ProductGrid from "./ProductGrid";
 import CartDetails from "./CartDetails";
 import CustomerModal from "./CustomerModal";
 import { CartItem, CustomerOption, WarehouseOption } from "./types";
-import InvoicePrinter from "@/components/common/InvoicePrinter";
+import InvoicePDF from "@/components/common/InvoicePDF";
+import { pdf } from "@react-pdf/renderer";
+import { useGetOrderQuery } from "@/features/orders/api";
+import { useGetSettingsQuery } from "@/features/settings";
+import { mapOrderToInvoiceDataWithSettings } from "@/features/orders/utils";
+import { Modal, Button } from "antd";
 import { Skeleton } from "antd";
 import { useGetProductsQuery } from "@/features/products";
 import { InvoiceData } from "./InvoiceTemplate";
@@ -23,9 +28,38 @@ export default function POS() {
   const [selectedWarehouse, setSelectedWarehouse] = useState<string>("");
   const [customerModalOpen, setCustomerModalOpen] = useState(false);
   const [printOrderId, setPrintOrderId] = useState<string | null>(null);
+  const { data: orderData, isLoading: orderLoading } = useGetOrderQuery(printOrderId || "", { skip: !printOrderId });
+  const { data: settingsData } = useGetSettingsQuery(undefined, { skip: !printOrderId });
+  const invoiceData = printOrderId && orderData ? mapOrderToInvoiceDataWithSettings(orderData.data, settingsData?.data) : null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const searchInputRef = useRef<any>(null);
   const { success, error } = useNotification();
+
+  useEffect(() => {
+    const downloadPDF = async () => {
+      if (printOrderId && orderData && settingsData) {
+        try {
+          const invoiceData = mapOrderToInvoiceDataWithSettings(orderData.data, settingsData?.data);
+          const blob = await pdf(<InvoicePDF data={invoiceData} />).toBlob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `invoice-${invoiceData.invoiceNumber}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error("Failed to generate/download invoice PDF", err);
+        } finally {
+          setPrintOrderId(null);
+        }
+      }
+    };
+    downloadPDF();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [printOrderId, orderData, settingsData]);
 
   // API hooks
   const { data: warehousesData, isLoading: warehousesLoading } =
@@ -173,7 +207,10 @@ export default function POS() {
   };
 
   const handleOrderCompleted = (invoiceData: InvoiceData & { orderId?: string; _id?: string }) => {
-    setPrintOrderId(invoiceData._id || invoiceData.orderId || "");
+    const id = invoiceData._id || invoiceData.orderId;
+    if (id) {
+      setPrintOrderId(id);
+    }
     setCart([]);
     setDiscount(0);
     setCustomTotal(null);
@@ -208,7 +245,7 @@ export default function POS() {
 
   return (
     <>
-      <InvoicePrinter orderId={printOrderId || ""} open={!!printOrderId} onClose={() => setPrintOrderId(null)} />
+      {/* No modal or PDFDownloadLink needed */}
       <div className="h-full w-full p-6 px-4 relative overflow-x-hidden flex flex-col gap-4 bg-secondary rounded-3xl">
         {/* Header */}
         <div className="flex justify-between items-center mb-2">

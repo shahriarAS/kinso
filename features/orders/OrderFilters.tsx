@@ -88,7 +88,6 @@ export default function OrderFilters({
   ];
 
   const handleFiltersChange = useCallback((filters: OrderFilters) => {
-    console.log(filters);
     // Reset to first page when filters change
     const searchChanged =
       filters.search !== undefined && filters.search !== searchTerm;

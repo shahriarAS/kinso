@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Order } from "@/features/orders/types";
 import { useGetOrdersQuery } from "@/features/orders/api";
 import ViewOrderDrawer from "./ViewOrderDrawer";
@@ -8,7 +8,12 @@ import {
   type TableColumn,
   type TableAction,
 } from "@/components/common";
-import InvoicePrinter from "@/components/common/InvoicePrinter";
+import InvoicePDF from "@/components/common/InvoicePDF";
+import { pdf } from "@react-pdf/renderer";
+import { useGetOrderQuery } from "@/features/orders/api";
+import { useGetSettingsQuery } from "@/features/settings";
+import { mapOrderToInvoiceDataWithSettings } from "@/features/orders/utils";
+import { Modal, Button } from "antd";
 
 interface Props {
   searchTerm: string;
@@ -31,6 +36,28 @@ export default function OrderTable({
 }: Props) {
   const [viewOrder, setViewOrder] = useState<Order | null>(null);
   const [printOrderId, setPrintOrderId] = useState<string | null>(null);
+  const { data: orderData } = useGetOrderQuery(printOrderId || "", { skip: !printOrderId });
+  const { data: settingsData } = useGetSettingsQuery(undefined, { skip: !printOrderId });
+
+  useEffect(() => {
+    const downloadPDF = async () => {
+      if (printOrderId && orderData && settingsData) {
+        const invoiceData = mapOrderToInvoiceDataWithSettings(orderData.data, settingsData.data);
+        const blob = await pdf(<InvoicePDF data={invoiceData} />).toBlob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `invoice-${invoiceData.invoiceNumber}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        setPrintOrderId(null);
+      }
+    };
+    downloadPDF();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [printOrderId, orderData, settingsData]);
 
   // Prepare API params
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -161,7 +188,7 @@ export default function OrderTable({
 
   return (
     <>
-      <InvoicePrinter orderId={printOrderId || ""} open={!!printOrderId} onClose={() => setPrintOrderId(null)} />
+      {/* No modal or PDFDownloadLink needed */}
       <GenericTable
         data={orders}
         loading={isLoading}

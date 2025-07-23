@@ -25,6 +25,7 @@ interface CustomerInfo {
 }
 
 export interface InvoiceData {
+  _id?: string;
   invoiceNumber: string;
   date: string;
   customer: CustomerInfo;

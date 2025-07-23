@@ -1,5 +1,4 @@
-"use client";
-
+"use client";;
 import {
   Tabs,
   Form,
@@ -15,12 +14,12 @@ import {
   Tooltip,
 } from "antd";
 import { useEffect, useRef } from "react";
-import { message } from "antd";
 import {
   useGetSettingsQuery,
   useUpdateSettingsMutation,
 } from "@/features/settings";
 import DashboardHeader from "@/features/dashboard/components/DashboardHeader";
+import toast from "react-hot-toast";
 
 export default function SettingsPage() {
   const [form] = Form.useForm();
@@ -30,17 +29,23 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (data?.data) {
-      form.setFieldsValue({ warrantyPolicy: data.data.warrantyPolicy || "" });
+      form.setFieldsValue({
+        invoiceFooter: data.data.invoiceFooter || "",
+        invoiceFooterTitle: data.data.invoiceFooterTitle || "Warranty Policy",
+      });
     }
   }, [data, form]);
 
   const handleFinish = async (values: any) => {
     try {
-      await updateSettings({ warrantyPolicy: values.warrantyPolicy }).unwrap();
-      message.success("Warranty policy saved");
+      await updateSettings({
+        invoiceFooter: values.invoiceFooter,
+        invoiceFooterTitle: values.invoiceFooterTitle,
+      }).unwrap();
+      toast.success("Warranty policy saved");
       refetch();
     } catch {
-      message.error("Failed to save warranty policy");
+      toast.error("Failed to save warranty policy");
     }
   };
 
@@ -71,38 +76,44 @@ export default function SettingsPage() {
                   layout="vertical"
                   form={form}
                   onFinish={handleFinish}
-                  initialValues={{ warrantyPolicy: "" }}
+                  initialValues={{ invoiceFooter: "", invoiceFooterTitle: "" }}
                 >
                   <Divider orientation="left" className="!mb-2">
                     Invoice Settings
                   </Divider>
-                  <Form.Item
-                    label={
-                      <span>
-                        Invoice Warranty Policy
-                        <Tooltip title="This policy will appear on all customer invoices.">
-                          <span className="ml-1 text-gray-400 cursor-pointer">
-                            ?
-                          </span>
-                        </Tooltip>
-                      </span>
-                    }
-                    name="warrantyPolicy"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Please enter the warranty policy.",
-                      },
-                    ]}
-                    extra="This policy will be printed at the bottom of every invoice."
-                  >
-                    <Input.TextArea
-                      rows={6}
-                      placeholder="Enter warranty policy for invoices..."
-                      disabled={isLoading || isSaving}
-                      className="transition-all duration-200"
-                    />
-                  </Form.Item>
+                  <div className="mb-4">
+                    <div className="font-semibold text-base mb-1 flex items-center">
+                      Invoice Footer
+                      <Tooltip title="This policy will appear on all customer invoices.">
+                        <span className="ml-1 text-gray-400 cursor-pointer">?</span>
+                      </Tooltip>
+                    </div>
+                    <Form.Item
+                      name="invoiceFooterTitle"
+                      rules={[{ required: true, message: "Please enter the warranty policy title." }]}
+                      extra="This title will appear above the warranty policy on invoices."
+                      className="mb-2"
+                    >
+                      <Input
+                        placeholder="Enter warranty policy title (e.g. Warranty Policy)"
+                        disabled={isLoading || isSaving}
+                        className="transition-all duration-200"
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      name="invoiceFooter"
+                      rules={[{ required: true, message: "Please enter the warranty policy." }]}
+                      extra="This policy will be printed at the bottom of every invoice."
+                      className="mb-0"
+                    >
+                      <Input.TextArea
+                        rows={6}
+                        placeholder="Enter warranty policy for invoices..."
+                        disabled={isLoading || isSaving}
+                        className="transition-all duration-200"
+                      />
+                    </Form.Item>
+                  </div>
                   <div
                     ref={saveButtonRef}
                     className="flex justify-end gap-2 sticky bottom-0 bg-white py-3 z-10 mt-6"

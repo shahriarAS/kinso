@@ -46,10 +46,13 @@ export async function handlePost(request: NextRequest) {
     }
     await dbConnect();
     const body = await request.json();
-    const { warrantyPolicy } = body;
+    const { invoiceFooter, invoiceFooterTitle } = body;
     const settings = await Settings.getSingleton();
-    if (typeof warrantyPolicy === "string") {
-      settings.warrantyPolicy = warrantyPolicy;
+    if (typeof invoiceFooter === "string") {
+      settings.invoiceFooter = invoiceFooter;
+    }
+    if (typeof invoiceFooterTitle === "string") {
+      settings.invoiceFooterTitle = invoiceFooterTitle;
     }
     await settings.save();
     return NextResponse.json({ success: true, data: settings });

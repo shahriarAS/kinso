@@ -1,7 +1,8 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface ISettings extends Document {
-  warrantyPolicy?: string;
+  invoiceFooter?: string;
+  invoiceFooterTitle?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -12,10 +13,15 @@ interface ISettingsModel extends Model<ISettings> {
 
 const SettingsSchema: Schema<ISettings> = new Schema(
   {
-    warrantyPolicy: {
+    invoiceFooter: {
       type: String,
       trim: true,
       default: "",
+    },
+    invoiceFooterTitle: {
+      type: String,
+      trim: true,
+      default: "Warranty Policy",
     },
   },
   {

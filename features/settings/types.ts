@@ -1,6 +1,7 @@
 export interface Settings {
   _id: string;
-  warrantyPolicy?: string;
+  invoiceFooter?: string;
+  invoiceFooterTitle?: string;
   createdAt: string;
   updatedAt: string;
 } 

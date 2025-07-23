@@ -277,7 +277,7 @@ export default function CartDetails({
         paid,
         due,
         inWords,
-        warrantyPolicy: settingsData?.data?.warrantyPolicy || undefined,
+        invoiceFooter: settingsData?.data?.invoiceFooter || undefined,
       };
       success("Order created successfully!");
       setCheckoutModalOpen(false);

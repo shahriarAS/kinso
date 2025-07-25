@@ -136,6 +136,7 @@ export const ordersApi = createApi({
 export const {
   useGetOrdersQuery,
   useGetOrderQuery,
+  useLazyGetOrderQuery,
   useCreateOrderMutation,
   useUpdateOrderMutation,
   useDeleteOrderMutation,

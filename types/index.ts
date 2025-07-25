@@ -6,3 +6,5 @@ export interface Notification {
   timestamp: string;
   read?: boolean;
 }
+
+export * from "./invoice";

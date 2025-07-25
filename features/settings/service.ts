@@ -46,13 +46,25 @@ export async function handlePost(request: NextRequest) {
     }
     await dbConnect();
     const body = await request.json();
-    const { invoiceFooter, invoiceFooterTitle } = body;
+    const { invoiceFooter, invoiceFooterTitle, companyName, companyEmail, companyPhone, companyAddress } = body;
     const settings = await Settings.getSingleton();
     if (typeof invoiceFooter === "string") {
       settings.invoiceFooter = invoiceFooter;
     }
     if (typeof invoiceFooterTitle === "string") {
       settings.invoiceFooterTitle = invoiceFooterTitle;
+    }
+    if (typeof companyName === "string") {
+      settings.companyName = companyName;
+    }
+    if (typeof companyEmail === "string") {
+      settings.companyEmail = companyEmail;
+    }
+    if (typeof companyPhone === "string") {
+      settings.companyPhone = companyPhone;
+    }
+    if (typeof companyAddress === "string") {
+      settings.companyAddress = companyAddress;
     }
     await settings.save();
     return NextResponse.json({ success: true, data: settings });

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import type { Product } from "@/features/products/types";
 import { Input, Select } from "antd";
 import { useGetWarehousesQuery } from "@/features/warehouses";
@@ -11,12 +11,14 @@ import CustomerModal from "./CustomerModal";
 import { CartItem, CustomerOption, WarehouseOption } from "./types";
 import InvoicePDF from "@/components/common/InvoicePDF";
 import { pdf } from "@react-pdf/renderer";
-import { useGetOrderQuery } from "@/features/orders/api";
+import { useLazyGetOrderQuery } from "@/features/orders/api";
 import { useGetSettingsQuery } from "@/features/settings";
 import { mapOrderToInvoiceDataWithSettings } from "@/features/orders/utils";
 import { Skeleton } from "antd";
 import { useGetProductsQuery } from "@/features/products";
-import { InvoiceData } from "./InvoiceTemplate";
+import { InvoiceData } from "@/types";
+import { useFetchAuthUserQuery } from "@/features/auth";
+import toast from "react-hot-toast";
 
 export default function POS() {
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -26,44 +28,46 @@ export default function POS() {
   const [customTotal, setCustomTotal] = useState<string | null>(null);
   const [selectedWarehouse, setSelectedWarehouse] = useState<string>("");
   const [customerModalOpen, setCustomerModalOpen] = useState(false);
-  const [printOrderId, setPrintOrderId] = useState<string | null>(null);
-  const { data: orderData, isLoading: orderLoading } = useGetOrderQuery(
-    printOrderId || "",
-    { skip: !printOrderId },
-  );
-  const { data: settingsData } = useGetSettingsQuery(undefined, {
-    skip: !printOrderId,
-  });
+  const { data: userData } = useFetchAuthUserQuery();
+  const { data: settingsData } = useGetSettingsQuery(undefined);
+  const [getOrder] = useLazyGetOrderQuery();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const searchInputRef = useRef<any>(null);
   const { success, error } = useNotification();
 
-  useEffect(() => {
-    const downloadPDF = async () => {
-      if (printOrderId && orderData && settingsData) {
-        try {
-          const invoiceData = mapOrderToInvoiceDataWithSettings(
-            orderData.data,
-            settingsData?.data,
-          );
-          const blob = await pdf(<InvoicePDF data={invoiceData} />).toBlob();
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `invoice-${invoiceData.invoiceNumber}.pdf`;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          URL.revokeObjectURL(url);
-        } catch (err) {
-          console.error("Failed to generate/download invoice PDF", err);
-        } finally {
-          setPrintOrderId(null);
-        }
+  const downloadPDF = useCallback(
+    async (orderId: string) => {
+      if (!orderId || !settingsData) {
+        toast.error("Order or settings not found");
+        return;
       }
-    };
-    downloadPDF();
-  }, [printOrderId, orderData, settingsData]);
+      try {
+        const orderRes = await getOrder(orderId).unwrap();
+        if (!orderRes?.data) {
+          toast.error("Order not found");
+          return;
+        }
+        const invoiceData = mapOrderToInvoiceDataWithSettings(
+          orderRes.data,
+          settingsData.data,
+          userData?.user?.name,
+        );
+        const blob = await pdf(<InvoicePDF data={invoiceData} />).toBlob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `invoice-${invoiceData.invoiceNumber}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        toast.error("Failed to download Invoice");
+        console.error("Failed to download PDF", err);
+      }
+    },
+    [getOrder, settingsData, userData]
+  );
 
   // API hooks
   const { data: warehousesData, isLoading: warehousesLoading } =
@@ -215,7 +219,7 @@ export default function POS() {
   ) => {
     const id = invoiceData._id || invoiceData.orderId;
     if (id) {
-      setPrintOrderId(id);
+      downloadPDF(id);
     }
     setCart([]);
     setDiscount(0);

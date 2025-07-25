@@ -1,7 +1,7 @@
-"use client";
-import React, { useState, useEffect } from "react";
+"use client";;
+import { useState, useCallback } from "react";
 import { Order } from "@/features/orders/types";
-import { useGetOrdersQuery } from "@/features/orders/api";
+import { useGetOrdersQuery, useLazyGetOrderQuery } from "@/features/orders/api";
 import ViewOrderDrawer from "./ViewOrderDrawer";
 import {
   GenericTable,
@@ -10,10 +10,10 @@ import {
 } from "@/components/common";
 import InvoicePDF from "@/components/common/InvoicePDF";
 import { pdf } from "@react-pdf/renderer";
-import { useGetOrderQuery } from "@/features/orders/api";
 import { useGetSettingsQuery } from "@/features/settings";
 import { mapOrderToInvoiceDataWithSettings } from "@/features/orders/utils";
-import { Modal, Button } from "antd";
+import toast from "react-hot-toast";
+import { useFetchAuthUserQuery } from "../auth";
 
 interface Props {
   searchTerm: string;
@@ -34,21 +34,27 @@ export default function OrderTable({
   warehouseFilter,
   productFilter,
 }: Props) {
+  const { data: userData } = useFetchAuthUserQuery();
   const [viewOrder, setViewOrder] = useState<Order | null>(null);
-  const [printOrderId, setPrintOrderId] = useState<string | null>(null);
-  const { data: orderData } = useGetOrderQuery(printOrderId || "", {
-    skip: !printOrderId,
-  });
-  const { data: settingsData } = useGetSettingsQuery(undefined, {
-    skip: !printOrderId,
-  });
+  const { data: settingsData } = useGetSettingsQuery(undefined);
+  const [getOrder] = useLazyGetOrderQuery();
 
-  useEffect(() => {
-    const downloadPDF = async () => {
-      if (printOrderId && orderData && settingsData) {
+  const downloadPDF = useCallback(
+    async (orderId: string) => {
+      if (!orderId || !settingsData) {
+        toast.error("Order or settings not found");
+        return;
+      }
+      try {
+        const orderRes = await getOrder(orderId).unwrap();
+        if (!orderRes?.data) {
+          toast.error("Order not found");
+          return;
+        }
         const invoiceData = mapOrderToInvoiceDataWithSettings(
-          orderData.data,
+          orderRes.data,
           settingsData.data,
+          userData?.user?.name,
         );
         const blob = await pdf(<InvoicePDF data={invoiceData} />).toBlob();
         const url = URL.createObjectURL(blob);
@@ -59,12 +65,13 @@ export default function OrderTable({
         a.click();
         a.remove();
         URL.revokeObjectURL(url);
-        setPrintOrderId(null);
+      } catch (err) {
+        toast.error("Failed to download Invoice");
+        console.error("Failed to download PDF", err);
       }
-    };
-    downloadPDF();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [printOrderId, orderData, settingsData]);
+    },
+    [getOrder, settingsData, userData]
+  );
 
   // Prepare API params
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -80,7 +87,9 @@ export default function OrderTable({
   const { data, isLoading, error, refetch } = useGetOrdersQuery(params);
 
   const handleView = (order: Order) => setViewOrder(order);
-  const handlePrint = (order: Order) => setPrintOrderId(order._id);
+  const handlePrint = (order: Order) => {
+    downloadPDF(order._id);
+  };
 
   // Define columns using the generic interface
   const columns: TableColumn<Order>[] = [

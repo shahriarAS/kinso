@@ -12,8 +12,9 @@ import {
   Skeleton,
   Divider,
   Tooltip,
+  Modal,
 } from "antd";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   useGetSettingsQuery,
   useUpdateSettingsMutation,
@@ -22,21 +23,34 @@ import DashboardHeader from "@/features/dashboard/components/DashboardHeader";
 import toast from "react-hot-toast";
 
 export default function SettingsPage() {
-  const [form] = Form.useForm();
+  const [generalForm] = Form.useForm();
+  const [businessForm] = Form.useForm();
   const { data, isLoading, refetch } = useGetSettingsQuery();
   const [updateSettings, { isLoading: isSaving }] = useUpdateSettingsMutation();
+  const [activeTab, setActiveTab] = useState("general");
+  const [pendingTab, setPendingTab] = useState<string | null>(null);
   const saveButtonRef = useRef<HTMLDivElement>(null);
+  const [generalTouched, setGeneralTouched] = useState(false);
+  const [businessTouched, setBusinessTouched] = useState(false);
 
   useEffect(() => {
     if (data?.data) {
-      form.setFieldsValue({
+      generalForm.setFieldsValue({
         invoiceFooter: data.data.invoiceFooter || "",
         invoiceFooterTitle: data.data.invoiceFooterTitle || "Warranty Policy",
       });
+      businessForm.setFieldsValue({
+        companyName: data.data.companyName || "",
+        companyEmail: data.data.companyEmail || "",
+        companyPhone: data.data.companyPhone || "",
+        companyAddress: data.data.companyAddress || "",
+      });
+      setGeneralTouched(false);
+      setBusinessTouched(false);
     }
-  }, [data, form]);
+  }, [data, generalForm, businessForm]);
 
-  const handleFinish = async (values: {
+  const handleGeneralSave = async (values: {
     invoiceFooter: string;
     invoiceFooterTitle: string;
   }) => {
@@ -47,13 +61,60 @@ export default function SettingsPage() {
       }).unwrap();
       toast.success("Warranty policy saved");
       refetch();
+      setGeneralTouched(false);
     } catch {
       toast.error("Failed to save warranty policy");
     }
   };
 
+  const handleBusinessSave = async (values: {
+    companyName: string;
+    companyEmail: string;
+    companyPhone: string;
+    companyAddress: string;
+  }) => {
+    try {
+      await updateSettings({
+        companyName: values.companyName,
+        companyEmail: values.companyEmail,
+        companyPhone: values.companyPhone,
+        companyAddress: values.companyAddress,
+      }).unwrap();
+      toast.success("Company info saved");
+      refetch();
+      setBusinessTouched(false);
+    } catch {
+      toast.error("Failed to save company info");
+    }
+  };
+
   // Responsive: stack fields vertically on mobile
   const colProps = { xs: 24, md: 12 };
+
+  const handleTabChange = (key: string) => {
+    if (key === activeTab) return;
+    if (
+      (activeTab === "general" && generalTouched) ||
+      (activeTab === "business" && businessTouched)
+    ) {
+      setPendingTab(key);
+      Modal.confirm({
+        title: "Unsaved Changes",
+        content: "You have unsaved changes. Are you sure you want to switch tabs and lose your changes?",
+        okText: "Switch Tab",
+        cancelText: "Stay",
+        onOk: () => {
+          setActiveTab(key);
+          setPendingTab(null);
+        },
+        onCancel: () => {
+          setPendingTab(null);
+        },
+      });
+    } else {
+      setActiveTab(key);
+    }
+  };
 
   return (
     <div className="h-full w-full min-h-screen p-0">
@@ -66,10 +127,11 @@ export default function SettingsPage() {
         </div>
         <Card className="w-full bg-white border rounded-2xl shadow-sm p-0 relative overflow-visible">
           <Tabs
-            defaultActiveKey="general"
+            activeKey={activeTab}
             type="card"
             className="settings-tabs transition-all duration-300"
             tabBarGutter={32}
+            onChange={handleTabChange}
           >
             <Tabs.TabPane tab={"General"} key="general">
               {isLoading ? (
@@ -77,9 +139,10 @@ export default function SettingsPage() {
               ) : (
                 <Form
                   layout="vertical"
-                  form={form}
-                  onFinish={handleFinish}
+                  form={generalForm}
+                  onFinish={handleGeneralSave}
                   initialValues={{ invoiceFooter: "", invoiceFooterTitle: "" }}
+                  onValuesChange={() => setGeneralTouched(true)}
                 >
                   <Divider orientation="left" className="!mb-2">
                     Invoice Settings
@@ -137,7 +200,7 @@ export default function SettingsPage() {
                       type="default"
                       size="large"
                       disabled={isLoading || isSaving}
-                      onClick={() => form.resetFields()}
+                      onClick={() => { generalForm.resetFields(); setGeneralTouched(false); }}
                       className="transition-all duration-200"
                     >
                       Reset
@@ -160,66 +223,95 @@ export default function SettingsPage() {
               <Divider orientation="left" className="!mb-2">
                 Business Information
               </Divider>
-              <Form layout="vertical" disabled>
-                <Row gutter={16}>
-                  <Col {...colProps}>
-                    <Form.Item
-                      label={"Business Name"}
-                      extra="Your registered business name."
+              {isLoading ? (
+                <Skeleton active paragraph={{ rows: 6 }} />
+              ) : (
+                <Form
+                  layout="vertical"
+                  form={businessForm}
+                  onFinish={handleBusinessSave}
+                  initialValues={{ companyName: "", companyEmail: "", companyPhone: "", companyAddress: "" }}
+                  onValuesChange={() => setBusinessTouched(true)}
+                >
+                  <Row gutter={16}>
+                    <Col {...colProps}>
+                      <Form.Item
+                        name="companyName"
+                        label="Business Name"
+                        rules={[
+                          { required: true, message: "Please enter the business name." },
+                        ]}
+                        extra="Your registered business name."
+                      >
+                        <Input placeholder="Business Name" disabled={isLoading || isSaving} />
+                      </Form.Item>
+                    </Col>
+                    <Col {...colProps}>
+                      <Form.Item
+                        name="companyEmail"
+                        label="Business Email"
+                        rules={[
+                          { required: true, message: "Please enter the business email." },
+                          { type: "email", message: "Please enter a valid email address." },
+                        ]}
+                        extra="Official email for business communication."
+                      >
+                        <Input placeholder="Business Email" disabled={isLoading || isSaving} />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Row gutter={16}>
+                    <Col {...colProps}>
+                      <Form.Item
+                        name="companyPhone"
+                        label="Phone"
+                        rules={[
+                          { required: true, message: "Please enter the phone number." },
+                        ]}
+                        extra="Primary contact number."
+                      >
+                        <Input placeholder="Phone Number" disabled={isLoading || isSaving} />
+                      </Form.Item>
+                    </Col>
+                    <Col {...colProps}>
+                      <Form.Item
+                        name="companyAddress"
+                        label="Address"
+                        rules={[
+                          { required: true, message: "Please enter the business address." },
+                        ]}
+                        extra="Business address for invoices."
+                      >
+                        <Input placeholder="Business Address" disabled={isLoading || isSaving} />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <div
+                    ref={saveButtonRef}
+                    className="flex justify-end gap-2 sticky bottom-0 bg-white py-3 z-10 mt-6"
+                  >
+                    <Button
+                      type="default"
+                      size="large"
+                      disabled={isLoading || isSaving}
+                      onClick={() => { businessForm.resetFields(); setBusinessTouched(false); }}
+                      className="transition-all duration-200"
                     >
-                      <Input placeholder="Business Name" />
-                    </Form.Item>
-                  </Col>
-                  <Col {...colProps}>
-                    <Form.Item
-                      label={"Business Email"}
-                      extra="Official email for business communication."
+                      Reset
+                    </Button>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      loading={isSaving}
+                      disabled={isLoading}
+                      size="large"
+                      className="transition-all duration-200"
                     >
-                      <Input placeholder="Business Email" />
-                    </Form.Item>
-                  </Col>
-                </Row>
-                <Row gutter={16}>
-                  <Col {...colProps}>
-                    <Form.Item label={"Phone"} extra="Primary contact number.">
-                      <Input placeholder="Phone Number" />
-                    </Form.Item>
-                  </Col>
-                  <Col {...colProps}>
-                    <Form.Item
-                      label={"Address"}
-                      extra="Business address for invoices."
-                    >
-                      <Input placeholder="Business Address" />
-                    </Form.Item>
-                  </Col>
-                </Row>
-                <Divider orientation="left" className="!mb-2">
-                  Preferences
-                </Divider>
-                <Row gutter={16}>
-                  <Col {...colProps}>
-                    <Form.Item
-                      label={"Dark Mode"}
-                      extra="Toggle dark mode for the dashboard."
-                    >
-                      <Switch checkedChildren="On" unCheckedChildren="Off" />
-                    </Form.Item>
-                  </Col>
-                  <Col {...colProps}>
-                    <Form.Item
-                      label={"Currency"}
-                      extra="Default currency for transactions."
-                    >
-                      <Select placeholder="Select Currency">
-                        <Select.Option value="usd">USD</Select.Option>
-                        <Select.Option value="eur">EUR</Select.Option>
-                        <Select.Option value="bdt">BDT</Select.Option>
-                      </Select>
-                    </Form.Item>
-                  </Col>
-                </Row>
-              </Form>
+                      Save
+                    </Button>
+                  </div>
+                </Form>
+              )}
             </Tabs.TabPane>
             <Tabs.TabPane tab={"Security"} key="security">
               <Divider orientation="left" className="!mb-2">

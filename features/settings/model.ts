@@ -3,6 +3,10 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 export interface ISettings extends Document {
   invoiceFooter?: string;
   invoiceFooterTitle?: string;
+  companyName?: string;
+  companyEmail?: string;
+  companyPhone?: string;
+  companyAddress?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -22,6 +26,26 @@ const SettingsSchema: Schema<ISettings> = new Schema(
       type: String,
       trim: true,
       default: "Warranty Policy",
+    },
+    companyName: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    companyEmail: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    companyPhone: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    companyAddress: {
+      type: String,
+      trim: true,
+      default: "",
     },
   },
   {

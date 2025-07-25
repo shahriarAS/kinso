@@ -7,214 +7,7 @@ import {
   StyleSheet,
   Image,
 } from "@react-pdf/renderer";
-import type { InvoiceData } from "@/app/dashboard/pos/InvoiceTemplate";
-
-// Register a font for better PDF rendering (optional)
-// Font.register({
-//   family: "Inter",
-//   fonts: [
-//     { src: "https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTcviYw.woff2" },
-//   ],
-// });
-
-const styles = StyleSheet.create({
-  page: {
-    padding: 24,
-    paddingBottom: 100, // Reserve space for signature section
-    fontSize: 12,
-    // fontFamily: "Inter",
-    backgroundColor: "#fff",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 16,
-    gap: 16,
-  },
-  logoBox: {
-    width: 56,
-    height: 56,
-    borderRadius: 8,
-    backgroundColor: "#18181b",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 8,
-  },
-  logoText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 20,
-  },
-  companyInfo: {
-    fontSize: 10,
-    color: "#374151",
-    marginBottom: 2,
-  },
-  companyName: {
-    fontWeight: "bold",
-    fontSize: 13,
-    color: "#18181b",
-    marginBottom: 2,
-  },
-  // Add section gap utility
-  sectionGap: {
-    marginTop: 18,
-  },
-  // Add line gap for item description
-  itemTitle: {
-    marginBottom: 2,
-    // lineHeight: 1.2,
-  },
-  itemDescription: {
-    fontSize: 9,
-    color: "#6b7280",
-    lineHeight: 1.3,
-  },
-  invoiceTitle: {
-    color: "#2563eb",
-    fontWeight: "bold",
-    fontSize: 24,
-    marginBottom: 2,
-    textAlign: "right",
-  },
-  invoiceMeta: {
-    fontSize: 10,
-    color: "#374151",
-    textAlign: "right",
-    marginBottom: 2,
-  },
-  billingTo: {
-    fontSize: 10,
-    textAlign: "right",
-    marginTop: 8,
-    marginBottom: 2,
-    alignItems: "flex-end",
-  },
-  table: {
-    width: "auto",
-    borderStyle: "solid",
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    borderRadius: 4,
-    marginBottom: 4,
-  },
-  tableRow: {
-    flexDirection: "row",
-  },
-  tableHeader: {
-    backgroundColor: "#f9fafb",
-    fontWeight: "bold",
-  },
-  tableCell: {
-    borderRightWidth: 1,
-    borderRightColor: "#e5e7eb",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-    padding: 6,
-    fontSize: 10,
-    flexGrow: 1,
-  },
-  tableCellLast: {
-    borderRightWidth: 0,
-  },
-  tableCellCenter: {
-    textAlign: "center",
-  },
-  tableCellRight: {
-    textAlign: "right",
-  },
-  totalsBox: {
-    alignSelf: "flex-end",
-    width: 120,
-    fontSize: 10,
-    marginBottom: 8,
-    textAlign: "right",
-  },
-  totalsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 2,
-    textAlign: "right",
-  },
-  textDanger: {
-    color: "#ef4444",
-  },
-  inWords: {
-    fontSize: 10,
-    marginBottom: 8,
-    marginTop: 12,
-  },
-  paymentTable: {
-    width: "auto",
-    borderStyle: "solid",
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    borderRadius: 4,
-    marginBottom: 8,
-  },
-  paymentCell: {
-    borderRightWidth: 1,
-    borderRightColor: "#e5e7eb",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-    padding: 4,
-    fontSize: 9,
-    flexGrow: 1,
-  },
-  paymentCellLast: {
-    borderRightWidth: 0,
-  },
-  paymentTotalBox: {
-    // borderWidth: 1,
-    // borderColor: "#e5e7eb",
-    // backgroundColor: "#f9fafb",
-    padding: 4,
-    fontWeight: "bold",
-    fontSize: 9,
-    alignSelf: "flex-end",
-    marginTop: 2,
-    marginBottom: 2,
-  },
-  warrantyBox: {
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    borderRadius: 4,
-    padding: 8,
-    fontSize: 10,
-    marginTop: 12,
-    marginBottom: 8,
-  },
-  warrantyTitle: {
-    fontWeight: "bold",
-    marginBottom: 2,
-  },
-  signatureSection: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    position: "absolute",
-    left: 24,
-    right: 24,
-    bottom: 24,
-    marginTop: 0,
-    marginBottom: 0,
-  },
-  signatureBox: {
-    alignItems: "center",
-    width: 160,
-  },
-  signatureLine: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#9ca3af",
-    height: 24,
-    width: 160,
-    marginBottom: 2,
-  },
-  signatureLabel: {
-    fontSize: 10,
-    fontWeight: "bold",
-  },
-});
+import type { InvoiceData } from "@/types";
 
 const formatCurrency = (amount: number, showCurrency: boolean = false) =>
   `${showCurrency ? "BDT" : ""} ${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
@@ -236,9 +29,9 @@ const InvoicePDF: React.FC<{ data: InvoiceData }> = ({ data }) => {
           {/* Logo and Company Info */}
           <View>
             {data.company.logo && data.company.logo !== "EZ" ? (
-              <Image src={data.company.logo} style={styles.logoBox} />
+              <Image src={data.company.logo} style={styles.logoBoxImage} />
             ) : (
-              <View style={styles.logoBox}>
+              <View style={styles.logoBoxText}>
                 <Text style={styles.logoText}>EZ</Text>
               </View>
             )}
@@ -498,3 +291,209 @@ const InvoicePDF: React.FC<{ data: InvoiceData }> = ({ data }) => {
 };
 
 export default InvoicePDF;
+
+const styles = StyleSheet.create({
+  page: {
+    padding: 24,
+    paddingBottom: 100, // Reserve space for signature section
+    fontSize: 12,
+    // fontFamily: "Inter",
+    backgroundColor: "#fff",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 16,
+    gap: 16,
+  },
+  logoBoxImage: {
+    width: 56,
+    height: 56,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+  logoBoxText: {
+    width: 56,
+    height: 56,
+    borderRadius: 8,
+    backgroundColor: "#18181b",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+  logoText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 20,
+  },
+  companyInfo: {
+    fontSize: 10,
+    color: "#374151",
+    marginBottom: 2,
+  },
+  companyName: {
+    fontWeight: "bold",
+    fontSize: 13,
+    color: "#18181b",
+    marginBottom: 2,
+  },
+  // Add section gap utility
+  sectionGap: {
+    marginTop: 18,
+  },
+  // Add line gap for item description
+  itemTitle: {
+    marginBottom: 2,
+    // lineHeight: 1.2,
+  },
+  itemDescription: {
+    fontSize: 9,
+    color: "#6b7280",
+    lineHeight: 1.3,
+  },
+  invoiceTitle: {
+    color: "#2563eb",
+    fontWeight: "bold",
+    fontSize: 24,
+    marginBottom: 2,
+    textAlign: "right",
+  },
+  invoiceMeta: {
+    fontSize: 10,
+    color: "#374151",
+    textAlign: "right",
+    marginBottom: 2,
+  },
+  billingTo: {
+    fontSize: 10,
+    textAlign: "right",
+    marginTop: 8,
+    marginBottom: 2,
+    alignItems: "flex-end",
+  },
+  table: {
+    width: "auto",
+    borderStyle: "solid",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    borderRadius: 4,
+    marginBottom: 4,
+  },
+  tableRow: {
+    flexDirection: "row",
+  },
+  tableHeader: {
+    backgroundColor: "#f9fafb",
+    fontWeight: "bold",
+  },
+  tableCell: {
+    borderRightWidth: 1,
+    borderRightColor: "#e5e7eb",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+    padding: 6,
+    fontSize: 10,
+    flexGrow: 1,
+  },
+  tableCellLast: {
+    borderRightWidth: 0,
+  },
+  tableCellCenter: {
+    textAlign: "center",
+  },
+  tableCellRight: {
+    textAlign: "right",
+  },
+  totalsBox: {
+    alignSelf: "flex-end",
+    width: 120,
+    fontSize: 10,
+    marginBottom: 8,
+    textAlign: "right",
+  },
+  totalsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 2,
+    textAlign: "right",
+  },
+  textDanger: {
+    color: "#ef4444",
+  },
+  inWords: {
+    fontSize: 10,
+    marginBottom: 8,
+    marginTop: 12,
+  },
+  paymentTable: {
+    width: "auto",
+    borderStyle: "solid",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    borderRadius: 4,
+    marginBottom: 8,
+  },
+  paymentCell: {
+    borderRightWidth: 1,
+    borderRightColor: "#e5e7eb",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+    padding: 4,
+    fontSize: 9,
+    flexGrow: 1,
+  },
+  paymentCellLast: {
+    borderRightWidth: 0,
+  },
+  paymentTotalBox: {
+    // borderWidth: 1,
+    // borderColor: "#e5e7eb",
+    // backgroundColor: "#f9fafb",
+    padding: 4,
+    fontWeight: "bold",
+    fontSize: 9,
+    alignSelf: "flex-end",
+    marginTop: 2,
+    marginBottom: 2,
+  },
+  warrantyBox: {
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    borderRadius: 4,
+    padding: 8,
+    fontSize: 10,
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  warrantyTitle: {
+    fontWeight: "bold",
+    marginBottom: 2,
+  },
+  signatureSection: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    position: "absolute",
+    left: 24,
+    right: 24,
+    bottom: 24,
+    marginTop: 0,
+    marginBottom: 0,
+  },
+  signatureBox: {
+    alignItems: "center",
+    width: 160,
+  },
+  signatureLine: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#9ca3af",
+    height: 24,
+    width: 160,
+    marginBottom: 2,
+  },
+  signatureLabel: {
+    fontSize: 10,
+    fontWeight: "bold",
+  },
+});

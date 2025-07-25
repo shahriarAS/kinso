@@ -51,14 +51,14 @@ const UserSchema: Schema = new Schema(
   },
 );
 
-// Index for email queries
-UserSchema.index({ email: 1 });
-
 // Index for role-based queries
 UserSchema.index({ role: 1 });
 
 // Index for active users
 UserSchema.index({ isActive: 1 });
+
+// Add index for createdAt
+UserSchema.index({ createdAt: -1 });
 
 // Check if model already exists to prevent overwrite error
 export default mongoose.models.User ||

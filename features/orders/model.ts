@@ -120,14 +120,17 @@ const OrderSchema: Schema = new Schema(
   },
 );
 
-// Index for order number queries
-OrderSchema.index({ orderNumber: 1 });
-
 // Index for customer queries
 OrderSchema.index({ customerId: 1 });
 
-// Compound index for customer and status
-OrderSchema.index({ customerId: 1 });
+// Add index for createdAt
+OrderSchema.index({ createdAt: -1 });
+
+// Add index for items.product
+OrderSchema.index({ "items.product": 1 });
+
+// Add index for payments.method
+OrderSchema.index({ "payments.method": 1 });
 
 // Check if model already exists to prevent overwrite error
 export default mongoose.models.Order ||

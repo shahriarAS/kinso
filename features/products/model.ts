@@ -88,12 +88,6 @@ const ProductSchema: Schema = new Schema(
   },
 );
 
-// Index for SKU queries
-ProductSchema.index({ sku: 1 });
-
-// Index for UPC queries
-ProductSchema.index({ upc: 1 });
-
 // Index for name queries
 ProductSchema.index({ name: 1 });
 
@@ -102,6 +96,12 @@ ProductSchema.index({ category: 1 });
 
 // Index for stock queries
 ProductSchema.index({ "stock.warehouse": 1 });
+
+// Add index for createdAt
+ProductSchema.index({ createdAt: -1 });
+
+// Add compound index for stock.warehouse and stock.unit
+ProductSchema.index({ "stock.warehouse": 1, "stock.unit": 1 });
 
 // Check if model already exists to prevent overwrite error
 export default mongoose.models.Product ||

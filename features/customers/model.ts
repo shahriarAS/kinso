@@ -67,6 +67,9 @@ CustomerSchema.index({ name: 1 });
 // Index for status queries
 CustomerSchema.index({ status: 1 });
 
+// Add index for createdAt
+CustomerSchema.index({ createdAt: -1 });
+
 // Check if model already exists to prevent overwrite error
 export default mongoose.models.Customer ||
   mongoose.model<ICustomer>("Customer", CustomerSchema);

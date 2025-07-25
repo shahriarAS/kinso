@@ -25,8 +25,8 @@ const CategorySchema: Schema = new Schema(
   },
 );
 
-// Index for name queries
-CategorySchema.index({ name: 1 });
+// Add index for createdAt
+CategorySchema.index({ createdAt: -1 });
 
 // Check if model already exists to prevent overwrite error
 export default mongoose.models.Category ||

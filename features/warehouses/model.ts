@@ -30,6 +30,9 @@ WarehouseSchema.index({ name: 1 });
 // Index for location queries
 WarehouseSchema.index({ location: 1 });
 
+// Add index for createdAt
+WarehouseSchema.index({ createdAt: -1 });
+
 // Check if model already exists to prevent overwrite error
 export default mongoose.models.Warehouse ||
   mongoose.model<IWarehouse>("Warehouse", WarehouseSchema);

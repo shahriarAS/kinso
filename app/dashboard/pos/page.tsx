@@ -214,12 +214,9 @@ export default function POS() {
     }, 100);
   };
 
-  const handleOrderCompleted = (
-    invoiceData: InvoiceData & { orderId?: string; _id?: string },
-  ) => {
-    const id = invoiceData._id || invoiceData.orderId;
-    if (id) {
-      downloadPDF(id);
+  const handleOrderCompleted = (orderId: string) => {
+    if (orderId) {
+      downloadPDF(orderId);
     }
     setCart([]);
     setDiscount(0);
@@ -268,18 +265,6 @@ export default function POS() {
             value={selectedWarehouse}
             onChange={(value) => {
               if (cart.length > 0 && value !== selectedWarehouse) {
-                // setPendingWarehouse(value); // Removed as per new_code
-                // setShowWarehouseModal(true); // Removed as per new_code
-                // The original code had a Modal for warehouse switch, but the new_code removed the print container.
-                // If warehouse switch is still desired, it needs to be re-introduced or handled differently.
-                // For now, removing the Modal as it's tied to the print container.
-                // If the intent was to clear cart on warehouse change, it should be handled here.
-                // However, the new_code removed the print container, so this logic is now redundant.
-                // The original code had a Modal for warehouse switch, but the new_code removed the print container.
-                // If warehouse switch is still desired, it needs to be re-introduced or handled differently.
-                // For now, removing the Modal as it's tied to the print container.
-                // If the intent was to clear cart on warehouse change, it should be handled here.
-                // However, the new_code removed the print container, so this logic is now redundant.
               } else {
                 setSelectedWarehouse(value);
                 localStorage.setItem("selectedWarehouse", value);

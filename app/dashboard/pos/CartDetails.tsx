@@ -15,8 +15,7 @@ import { useState } from "react";
 import { useCreateOrderMutation } from "@/features/orders";
 import { useNotification } from "@/hooks/useNotification";
 import { CartItem, CustomerOption } from "./types";
-import type { InvoiceData } from "./InvoiceTemplate";
-import { OrderInput, OrderItem, Payment } from "@/features/orders/types";
+import { OrderInput, Payment } from "@/features/orders/types";
 import { PAYMENT_METHODS } from "@/lib/constraints";
 import { Product } from "@/features/products/types";
 import { UserOutlined } from "@ant-design/icons";
@@ -37,7 +36,7 @@ interface CartDetailsProps {
   customers: CustomerOption[];
   onCreateCustomer: () => void;
   onCheckoutSuccess: () => void;
-  onOrderCompleted?: (invoiceData: InvoiceData) => void;
+  onOrderCompleted?: (orderId: string) => void;
   selectedWarehouse: string;
   products: Product[];
 }
@@ -141,148 +140,9 @@ export default function CartDetails({
       const response = await createOrder(orderPayload as any).unwrap();
       const order = response.data;
 
-      // Fallback numberToWords if not available
-      function numberToWords(num: number): string {
-        if (num === 0) return "zero";
-        const belowTwenty = [
-          "",
-          "one",
-          "two",
-          "three",
-          "four",
-          "five",
-          "six",
-          "seven",
-          "eight",
-          "nine",
-          "ten",
-          "eleven",
-          "twelve",
-          "thirteen",
-          "fourteen",
-          "fifteen",
-          "sixteen",
-          "seventeen",
-          "eighteen",
-          "nineteen",
-        ];
-        const tens = [
-          "",
-          "",
-          "twenty",
-          "thirty",
-          "forty",
-          "fifty",
-          "sixty",
-          "seventy",
-          "eighty",
-          "ninety",
-        ];
-        const thousand = 1000;
-        const lakh = 100000;
-        function helper(n: number): string {
-          if (n < 20) return belowTwenty[n];
-          if (n < 100)
-            return (
-              tens[Math.floor(n / 10)] +
-              (n % 10 ? " " + belowTwenty[n % 10] : "")
-            );
-          if (n < thousand)
-            return (
-              belowTwenty[Math.floor(n / 100)] +
-              " hundred" +
-              (n % 100 ? " " + helper(n % 100) : "")
-            );
-          if (n < lakh)
-            return (
-              helper(Math.floor(n / thousand)) +
-              " thousand" +
-              (n % thousand ? " " + helper(n % thousand) : "")
-            );
-          return (
-            helper(Math.floor(n / lakh)) +
-            " lakh" +
-            (n % lakh ? " " + helper(n % lakh) : "")
-          );
-        }
-        return helper(num);
-      }
-
-      const customerObj =
-        typeof order.customerId === "object" && order.customerId !== null
-          ? order.customerId
-          : {
-              _id: order.customerId,
-              name: order.customerName,
-              email: undefined,
-              phone: undefined,
-            };
-
-      const subtotal = order.items.reduce(
-        (sum: number, item: { totalPrice: number }) => sum + item.totalPrice,
-        0,
-      );
-      const orderDiscount =
-        typeof order.discount === "number"
-          ? order.discount
-          : subtotal - order.totalAmount;
-      const orderPayments =
-        order.payments?.map((p: { method: string; amount: number }) => ({
-          method: p.method || "Cash",
-          amount: Number(p.amount) || 0,
-        })) || [];
-      const paid = orderPayments.reduce(
-        (sum: number, p: { amount: number }) => sum + (Number(p.amount) || 0),
-        0,
-      );
-      const due = Math.max(0, order.totalAmount - paid);
-      const inWords = numberToWords(order.totalAmount) + " Taka Only";
-
-      const invoiceData: InvoiceData = {
-        _id: order._id,
-        invoiceNumber: order.orderNumber || "N/A",
-        date: order.createdAt
-          ? new Date(order.createdAt).toLocaleDateString()
-          : new Date().toLocaleDateString(),
-        customer: {
-          name: customerObj.name,
-          email: customerObj.email || "dummy@email.com",
-          phone: customerObj.phone || "0123456789",
-        },
-        company: {
-          name: "EZ POS",
-          address: "123 Main St, Suite 100, Dhaka",
-          logo: "EZ",
-          mobile: "01700000000",
-          email: "info@ezpos.com",
-          soldBy: "Cashier Name",
-        },
-        items: order.items.map((item: OrderItem) => ({
-          title: item.product.name,
-          description: `SKU: ${item.product.sku}; UPC: ${item.product.upc}`,
-          quantity: item.quantity,
-          rate: item.unitPrice,
-          price: item.totalPrice,
-          warranty: item.product.warranty
-            ? `${item.product.warranty.value} ${item.product.warranty.unit}`
-            : "N/A",
-        })),
-        subtotal,
-        discount: orderDiscount,
-        total: order.totalAmount,
-        signatory: {
-          name: "Cashier Name",
-          title: "Cashier",
-        },
-        payments: orderPayments,
-        paid,
-        due,
-        inWords,
-        invoiceFooter: settingsData?.data?.invoiceFooter || undefined,
-      };
       success("Order created successfully!");
       setCheckoutModalOpen(false);
-      if (onOrderCompleted) onOrderCompleted(invoiceData);
+      if (onOrderCompleted) onOrderCompleted(order._id);
       onCheckoutSuccess();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
@@ -533,7 +393,6 @@ export default function CartDetails({
                         className="w-36"
                         size="middle"
                         placeholder="Method"
-                        dropdownMatchSelectWidth={false}
                       />
                       <Input
                         type="number"
@@ -605,7 +464,6 @@ export default function CartDetails({
                   className="w-36"
                   size="middle"
                   placeholder="Add Payment Method"
-                  dropdownMatchSelectWidth={false}
                 />
                 <Input
                   type="number"

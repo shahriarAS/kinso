@@ -8,7 +8,6 @@ import {
   Row,
   Col,
   Switch,
-  Select,
   Skeleton,
   Divider,
   Tooltip,

@@ -1,18 +1,8 @@
 "use client";
 import React from "react";
 import { Row, Col, Alert } from "antd";
-import {
-  useGetDashboardStatsQuery,
-  useGetInventoryAlertsQuery,
-} from "@/features/dashboard";
-import {
-  DashboardHeader,
-  DashboardSkeleton,
-  InventoryAlerts,
-  RecentOrders,
-  StatsCards,
-  TopProducts,
-} from "@/features/dashboard/components";
+import { useGetDashboardStatsQuery } from "@/features/dashboard";
+import { DashboardHeader, DashboardSkeleton, RecentOrders, StatsCards, TopProducts } from "@/features/dashboard/components";
 import {
   InventoryAlerts as InventoryAlertsType,
   DashboardStats,
@@ -24,7 +14,7 @@ const Dashboard: React.FC = () => {
     isLoading: statsLoading,
     error: statsError,
   } = useGetDashboardStatsQuery({});
-  const { data: inventoryAlerts } = useGetInventoryAlertsQuery();
+  // const { data: inventoryAlerts } = useGetInventoryAlertsQuery();
 
   if (statsLoading) {
     return <DashboardSkeleton />;
@@ -55,12 +45,12 @@ const Dashboard: React.FC = () => {
     revenueChart: [],
   };
 
-  let alerts: InventoryAlertsType = {
-    lowStockProducts: [],
-    outOfStockProducts: [],
-    expiringProducts: [],
-  };
-  if (inventoryAlerts) alerts = inventoryAlerts;
+  // let alerts: InventoryAlertsType = {
+  //   lowStockProducts: [],
+  //   outOfStockProducts: [],
+  //   expiringProducts: [],
+  // };
+  // if (inventoryAlerts) alerts = inventoryAlerts;
 
   return (
     <div className="p-6 space-y-6">
@@ -71,7 +61,7 @@ const Dashboard: React.FC = () => {
 
       <StatsCards stats={stats} />
 
-      <InventoryAlerts alerts={alerts} />
+      {/* <InventoryAlerts alerts={alerts} /> */}
 
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={12}>

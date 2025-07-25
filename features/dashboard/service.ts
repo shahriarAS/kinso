@@ -23,6 +23,10 @@ export async function handleGetStats(request: NextRequest) {
     }
     await dbConnect();
 
+    // Parse low stock threshold from query, default to 5
+    const { searchParams } = new URL(request.url);
+    const threshold = parseInt(searchParams.get("threshold") || "5", 10);
+
     // Total revenue
     const totalRevenueAgg = await Order.aggregate([
       { $group: { _id: null, total: { $sum: "$totalAmount" } } },
@@ -38,13 +42,16 @@ export async function handleGetStats(request: NextRequest) {
     // Total products
     const totalProducts = await Product.countDocuments();
 
-    // Low stock products (threshold: 5)
-    const lowStockProductsAgg = await Product.aggregate([
-      { $unwind: "$stock" },
-      { $match: { "stock.unit": { $gt: 0, $lt: 5 } } },
-      { $group: { _id: "$name" } },
-    ]);
-    const lowStockProducts = lowStockProductsAgg.length;
+    // Low stock products (dynamic threshold)
+    const products = await Product.find({}, { stock: 1, name: 1 }).lean();
+    let lowStockProducts = 0;
+    for (const product of products) {
+      if (Array.isArray(product.stock)) {
+        if (product.stock.some((s: any) => typeof s.unit === 'number' && s.unit > 0 && s.unit < threshold)) {
+          lowStockProducts++;
+        }
+      }
+    }
 
     // Recent orders (last 5)
     const recentOrders = await Order.find()
@@ -154,10 +161,14 @@ export async function handleGetInventoryAlerts(request: NextRequest) {
     }
     await dbConnect();
 
-    // Low stock products (unit < 5)
+    // Parse low stock threshold from query, default to 5
+    const { searchParams } = new URL(request.url);
+    const threshold = parseInt(searchParams.get("threshold") || "5", 10);
+
+    // Low stock products (dynamic threshold)
     const lowStockProductsAgg = await Product.aggregate([
       { $unwind: "$stock" },
-      { $match: { "stock.unit": { $gt: 0, $lt: 5 } } },
+      { $match: { "stock.unit": { $gt: 0, $lt: threshold } } },
       {
         $lookup: {
           from: "warehouses",
@@ -172,7 +183,7 @@ export async function handleGetInventoryAlerts(request: NextRequest) {
           _id: 1,
           name: 1,
           currentStock: "$stock.unit",
-          minStock: { $literal: 5 },
+          minStock: { $literal: threshold },
           warehouse: "$warehouse.name",
         },
       },

@@ -1,4 +1,4 @@
-"use client";
+"use client";;
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { Product } from "@/features/products/types";
 import { Input, Select } from "antd";
@@ -16,7 +16,6 @@ import { useGetSettingsQuery } from "@/features/settings";
 import { mapOrderToInvoiceDataWithSettings } from "@/features/orders/utils";
 import { Skeleton } from "antd";
 import { useGetProductsQuery } from "@/features/products";
-import { InvoiceData } from "@/types";
 import { useFetchAuthUserQuery } from "@/features/auth";
 import toast from "react-hot-toast";
 

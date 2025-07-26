@@ -1,38 +1,50 @@
 export interface Vendor {
   _id: string;
   vendorId: string;
-  vendorName: string;
+  name: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface ICreateVendorRequest {
+export interface VendorInput {
   vendorId: string;
-  vendorName: string;
+  name: string;
 }
 
-export interface IUpdateVendorRequest {
+export interface VendorUpdateInput {
   vendorId?: string;
-  vendorName?: string;
+  name?: string;
 }
 
-export interface IVendorFilters {
+export interface VendorFilters {
   vendorId?: string;
-  vendorName?: string;
+  name?: string;
   search?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
 }
 
-export interface IVendorResponse {
+export interface VendorResponse {
   success: boolean;
   data?: Vendor;
   message?: string;
 }
 
-export interface IVendorsResponse {
+export interface VendorsResponse {
   success: boolean;
   data?: Vendor[];
   message?: string;
   total?: number;
   page?: number;
   limit?: number;
+}
+
+export interface VendorStats {
+  totalVendors: number;
+  vendorsWithBrands: number;
+  topVendors: Array<{
+    vendorId: string;
+    name: string;
+    brandCount: number;
+  }>;
 } 

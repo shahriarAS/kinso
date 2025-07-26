@@ -4,6 +4,7 @@ export interface User {
   email: string;
   role: "admin" | "manager" | "staff";
   avatar?: string;
+  outletId?: string;
   createdAt: string;
   updatedAt: string;
   lastLoginAt?: string;
@@ -15,6 +16,8 @@ export interface UserInput {
   email: string;
   password: string;
   role?: "admin" | "manager" | "staff";
+  outletId?: string;
+  avatar?: string;
 }
 
 export interface UserUpdateInput {
@@ -23,9 +26,65 @@ export interface UserUpdateInput {
   role?: "admin" | "manager" | "staff";
   isActive?: boolean;
   avatar?: string;
+  outletId?: string;
 }
 
 export interface UserFilters {
   search?: string;
   role?: "admin" | "manager" | "staff";
+  isActive?: boolean;
+  outletId?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  page?: number;
+  limit?: number;
+}
+
+export interface UserResponse {
+  success: boolean;
+  data?: User;
+  message?: string;
+}
+
+export interface UsersResponse {
+  success: boolean;
+  data?: User[];
+  message?: string;
+  total?: number;
+  page?: number;
+  limit?: number;
+}
+
+export interface UserStats {
+  totalUsers: number;
+  activeUsers: number;
+  inactiveUsers: number;
+  usersByRole: Array<{
+    role: "admin" | "manager" | "staff";
+    count: number;
+  }>;
+  usersByOutlet: Array<{
+    outletId: string;
+    outletName: string;
+    userCount: number;
+  }>;
+}
+
+export interface UserProfile {
+  _id: string;
+  name: string;
+  email: string;
+  role: "admin" | "manager" | "staff";
+  avatar?: string;
+  outletId?: string;
+  isActive: boolean;
+  lastLoginAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
 }

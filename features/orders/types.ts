@@ -52,3 +52,70 @@ export interface OrderInput
   }[];
   warehouse: string;
 }
+
+export interface OrderUpdateInput {
+  customerId?: string;
+  customerName?: string;
+  items?: {
+    product: string;
+    quantity: number;
+    unitPrice: number;
+    totalPrice: number;
+  }[];
+  totalAmount?: number;
+  payments?: Payment[];
+  discount?: number;
+  notes?: string;
+  warehouse?: string;
+}
+
+export interface OrderFilters {
+  orderNumber?: string;
+  customerId?: string;
+  customerName?: string;
+  warehouse?: string;
+  startDate?: string;
+  endDate?: string;
+  paymentMethod?: PaymentMethod;
+  minAmount?: number;
+  maxAmount?: number;
+  search?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  page?: number;
+  limit?: number;
+}
+
+export interface OrderResponse {
+  success: boolean;
+  data?: Order;
+  message?: string;
+}
+
+export interface OrdersResponse {
+  success: boolean;
+  data?: Order[];
+  message?: string;
+  total?: number;
+  page?: number;
+  limit?: number;
+}
+
+export interface OrderStats {
+  totalOrders: number;
+  totalRevenue: number;
+  pendingOrders: number;
+  completedOrders: number;
+  averageOrderValue: number;
+  ordersByPaymentMethod: Array<{
+    method: PaymentMethod;
+    count: number;
+    totalAmount: number;
+  }>;
+  ordersByWarehouse: Array<{
+    warehouseId: string;
+    warehouseName: string;
+    orderCount: number;
+    totalRevenue: number;
+  }>;
+}

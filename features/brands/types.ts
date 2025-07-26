@@ -1,47 +1,58 @@
 export interface Brand {
   _id: string;
   brandId: string;
-  brandName: string;
+  name: string;
   vendorId: string;
   vendor?: {
     _id: string;
     vendorId: string;
-    vendorName: string;
+    name: string;
   };
   createdAt: string;
   updatedAt: string;
 }
 
-export interface ICreateBrandRequest {
+export interface BrandInput {
   brandId: string;
-  brandName: string;
+  name: string;
   vendorId: string;
 }
 
-export interface IUpdateBrandRequest {
+export interface BrandUpdateInput {
   brandId?: string;
-  brandName?: string;
+  name?: string;
   vendorId?: string;
 }
 
-export interface IBrandFilters {
+export interface BrandFilters {
   brandId?: string;
-  brandName?: string;
+  name?: string;
   vendorId?: string;
   search?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
 }
 
-export interface IBrandResponse {
+export interface BrandResponse {
   success: boolean;
   data?: Brand;
   message?: string;
 }
 
-export interface IBrandsResponse {
+export interface BrandsResponse {
   success: boolean;
   data?: Brand[];
   message?: string;
   total?: number;
   page?: number;
   limit?: number;
+}
+
+export interface BrandStats {
+  totalBrands: number;
+  brandsByVendor: Array<{
+    vendorId: string;
+    vendorName: string;
+    brandCount: number;
+  }>;
 } 

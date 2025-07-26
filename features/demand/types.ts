@@ -15,12 +15,28 @@ export interface DemandInput {
   status: "Pending" | "Approved" | "ConvertedToStock";
 }
 
+export interface DemandUpdateInput {
+  demandId?: string;
+  locationId?: string;
+  locationType?: "Warehouse" | "Outlet";
+  products?: {
+    productId: string;
+    quantity: number;
+  }[];
+  status?: "Pending" | "Approved" | "ConvertedToStock";
+}
+
 export interface DemandFilters {
   page?: number;
   limit?: number;
   locationId?: string;
   locationType?: "Warehouse" | "Outlet";
   status?: "Pending" | "Approved" | "ConvertedToStock";
+  startDate?: string;
+  endDate?: string;
+  search?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
 }
 
 export interface DemandConversionRequest {
@@ -37,4 +53,43 @@ export interface DemandResponse {
     limit: number;
     total: number;
   };
+}
+
+export interface DemandApiResponse {
+  success: boolean;
+  data?: Demand | Demand[];
+  message?: string;
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+  };
+}
+
+export interface DemandStats {
+  totalDemands: number;
+  pendingDemands: number;
+  approvedDemands: number;
+  convertedDemands: number;
+  demandsByLocation: Array<{
+    locationId: string;
+    locationType: "Warehouse" | "Outlet";
+    demandCount: number;
+    totalQuantity: number;
+  }>;
+  demandsByStatus: Array<{
+    status: "Pending" | "Approved" | "ConvertedToStock";
+    count: number;
+  }>;
+}
+
+export interface DemandGenerationRequest {
+  locationId: string;
+  locationType: "Warehouse" | "Outlet";
+  products: Array<{
+    productId: string;
+    currentStock: number;
+    minStock: number;
+    suggestedQuantity: number;
+  }>;
 } 

@@ -1,10 +1,14 @@
 export interface Customer {
   _id: string;
   customerId: string;
-  customerName: string;
-  contactInfo: string;
-  purchaseAmount: number;
-  membershipStatus: boolean;
+  name: string;
+  contactInfo: {
+    phone?: string;
+    email?: string;
+    address?: string;
+  };
+  membershipActive: boolean;
+  totalPurchaseLastMonth: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -14,12 +18,12 @@ export interface CustomerInput
 
 export interface CustomerFilters {
   search?: string;
-  membershipStatus?: boolean;
-  customerName?: string;
+  membershipActive?: boolean;
+  name?: string;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
 }
 
 export interface MembershipUpdateInput {
-  membershipStatus: boolean;
+  membershipActive: boolean;
 }

@@ -42,14 +42,28 @@ async function dbConnect() {
     cached.promise = mongoose
       .connect(MONGODB_URI, opts)
       .then((mongooseInstance) => {
+        console.log("Mongoose connected successfully");
         return mongooseInstance;
+      })
+      .catch((error) => {
+        console.error("Mongoose connection error:", error);
+        cached.promise = null;
+        throw error;
       });
   }
 
   try {
     cached.conn = await cached.promise;
+    
+    // Ensure connection is ready
+    if (cached.conn.connection.readyState !== 1) {
+      throw new Error("Mongoose connection not ready");
+    }
+    
+    console.log("Database connection established");
   } catch (e) {
     cached.promise = null;
+    console.error("Database connection failed:", e);
     throw e;
   }
 

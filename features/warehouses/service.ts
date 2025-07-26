@@ -36,6 +36,7 @@ export async function handleGet(request: NextRequest) {
     const query: any = {};
     if (search) {
       query.$or = [
+        { warehouseId: { $regex: search, $options: "i" } },
         { name: { $regex: search, $options: "i" } },
         { location: { $regex: search, $options: "i" } },
       ];
@@ -93,9 +94,16 @@ export async function handlePost(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { name, location } = body;
+    const { warehouseId, name, location } = body;
 
     // Basic validation
+    if (!warehouseId || warehouseId.trim().length === 0) {
+      return NextResponse.json(
+        { success: false, message: "Warehouse ID is required" },
+        { status: 400 },
+      );
+    }
+
     if (!name || name.trim().length === 0) {
       return NextResponse.json(
         { success: false, message: "Warehouse name is required" },
@@ -110,12 +118,24 @@ export async function handlePost(request: NextRequest) {
       );
     }
 
-    // Check if warehouse already exists
-    const existingWarehouse = await Warehouse.findOne({
+    // Check if warehouseId already exists
+    const existingWarehouseId = await Warehouse.findOne({
+      warehouseId: warehouseId.trim().toUpperCase(),
+    });
+
+    if (existingWarehouseId) {
+      return NextResponse.json(
+        { success: false, message: "Warehouse ID already exists" },
+        { status: 409 },
+      );
+    }
+
+    // Check if warehouse name already exists
+    const existingWarehouseName = await Warehouse.findOne({
       name: { $regex: new RegExp(`^${name.trim()}$`, "i") },
     });
 
-    if (existingWarehouse) {
+    if (existingWarehouseName) {
       return NextResponse.json(
         { success: false, message: "Warehouse with this name already exists" },
         { status: 409 },
@@ -124,6 +144,7 @@ export async function handlePost(request: NextRequest) {
 
     // Create warehouse
     const warehouse = await Warehouse.create({
+      warehouseId: warehouseId.trim().toUpperCase(),
       name: name.trim(),
       location: location.trim(),
     });
@@ -216,7 +237,7 @@ export async function handleUpdateById(
     await dbConnect();
 
     const body = await request.json();
-    const { name, location } = body;
+    const { warehouseId, name, location } = body;
 
     // Check if warehouse exists
     const existingWarehouse = await Warehouse.findById(_id);
@@ -228,6 +249,13 @@ export async function handleUpdateById(
     }
 
     // Basic validation
+    if (!warehouseId || warehouseId.trim().length === 0) {
+      return NextResponse.json(
+        { success: false, message: "Warehouse ID is required" },
+        { status: 400 },
+      );
+    }
+
     if (!name || name.trim().length === 0) {
       return NextResponse.json(
         { success: false, message: "Warehouse name is required" },
@@ -239,6 +267,19 @@ export async function handleUpdateById(
       return NextResponse.json(
         { success: false, message: "Warehouse location is required" },
         { status: 400 },
+      );
+    }
+
+    // Check if new warehouseId conflicts with existing warehouse (excluding current one)
+    const warehouseIdConflict = await Warehouse.findOne({
+      _id: { $ne: _id },
+      warehouseId: warehouseId.trim().toUpperCase(),
+    });
+
+    if (warehouseIdConflict) {
+      return NextResponse.json(
+        { success: false, message: "Warehouse ID already exists" },
+        { status: 409 },
       );
     }
 
@@ -259,6 +300,7 @@ export async function handleUpdateById(
     const updatedWarehouse = await Warehouse.findByIdAndUpdate(
       _id,
       {
+        warehouseId: warehouseId.trim().toUpperCase(),
         name: name.trim(),
         location: location.trim(),
       },

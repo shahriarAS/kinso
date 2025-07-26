@@ -72,6 +72,16 @@ export default function WarehouseTable({
   // Define columns using the generic interface
   const columns: TableColumn<Warehouse>[] = [
     {
+      title: <span className="font-medium text-base">Warehouse ID</span>,
+      dataIndex: "warehouseId",
+      key: "warehouseId",
+      render: (text: string) => (
+        <span className="font-mono text-blue-600 bg-blue-50 px-2 py-1 rounded">
+          {text}
+        </span>
+      ),
+    },
+    {
       title: <span className="font-medium text-base">Name</span>,
       dataIndex: "name",
       key: "name",

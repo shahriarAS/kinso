@@ -36,12 +36,17 @@ const menuItems = [
     href: "/dashboard/warehouse",
   },
   {
-    icon: "lineicons:shopping-bag-1",
+    icon: "lineicons:buildings-2",
+    label: "Outlets",
+    href: "/dashboard/outlets",
+  },
+  {
+    icon: "lineicons:caravan-1",
     label: "Vendors",
     href: "/dashboard/vendors",
   },
   {
-    icon: "lineicons:tag-1",
+    icon: "lineicons:tag",
     label: "Brands",
     href: "/dashboard/brands",
   },

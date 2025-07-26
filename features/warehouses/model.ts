@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IWarehouse extends Document {
+  warehouseId: string;
   name: string;
   location: string;
   createdAt: Date;
@@ -9,6 +10,13 @@ export interface IWarehouse extends Document {
 
 const WarehouseSchema: Schema = new Schema(
   {
+    warehouseId: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      uppercase: true,
+    },
     name: {
       type: String,
       required: true,
@@ -25,6 +33,8 @@ const WarehouseSchema: Schema = new Schema(
   },
 );
 
+// Index for warehouseId queries (unique)
+WarehouseSchema.index({ warehouseId: 1 }, { unique: true });
 // Index for name queries
 WarehouseSchema.index({ name: 1 });
 // Index for location queries

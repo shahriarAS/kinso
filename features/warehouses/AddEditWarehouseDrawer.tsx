@@ -37,6 +37,21 @@ export default function AddEditWarehouseDrawer({
   // Define form fields using the generic interface
   const fields: FormField[] = [
     {
+      name: "warehouseId",
+      label: "Warehouse ID",
+      type: "input",
+      placeholder: "e.g., WH001",
+      rules: [
+        { required: true, message: "Please enter warehouse ID" },
+        { min: 2, message: "Warehouse ID must be at least 2 characters" },
+        { max: 20, message: "Warehouse ID must not exceed 20 characters" },
+        {
+          pattern: /^[A-Z0-9]+$/,
+          message: "Warehouse ID must contain only uppercase letters and numbers",
+        },
+      ],
+    },
+    {
       name: "name",
       label: "Warehouse Name",
       type: "input",
@@ -101,6 +116,7 @@ export default function AddEditWarehouseDrawer({
       initialValues={
         warehouse
           ? {
+              warehouseId: warehouse.warehouseId,
               name: warehouse.name,
               location: warehouse.location,
             }

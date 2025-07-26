@@ -12,6 +12,7 @@ import { settingsApi } from "@/features/settings";
 import { vendorApi } from "@/features/vendors";
 import { brandsApi } from "@/features/brands";
 import { outletsApi } from "@/features/outlets";
+import { stockApi } from "@/features/stock";
 
 const store = configureStore({
   reducer: {
@@ -28,6 +29,7 @@ const store = configureStore({
     [vendorApi.reducerPath]: vendorApi.reducer,
     [brandsApi.reducerPath]: brandsApi.reducer,
     [outletsApi.reducerPath]: outletsApi.reducer,
+    [stockApi.reducerPath]: stockApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -47,6 +49,7 @@ const store = configureStore({
       vendorApi.middleware,
       brandsApi.middleware,
       outletsApi.middleware,
+      stockApi.middleware,
     ),
 });
 

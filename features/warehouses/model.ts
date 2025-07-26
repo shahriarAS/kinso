@@ -3,7 +3,6 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface IWarehouse extends Document {
   warehouseId: string;
   name: string;
-  location: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -15,14 +14,8 @@ const WarehouseSchema: Schema = new Schema(
       required: true,
       unique: true,
       trim: true,
-      uppercase: true,
     },
     name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    location: {
       type: String,
       required: true,
       trim: true,
@@ -33,14 +26,13 @@ const WarehouseSchema: Schema = new Schema(
   },
 );
 
-// Index for warehouseId queries (unique)
-WarehouseSchema.index({ warehouseId: 1 }, { unique: true });
+// Index for warehouseId queries
+WarehouseSchema.index({ warehouseId: 1 });
+
 // Index for name queries
 WarehouseSchema.index({ name: 1 });
-// Index for location queries
-WarehouseSchema.index({ location: 1 });
 
-// Add index for createdAt
+// Index for createdAt
 WarehouseSchema.index({ createdAt: -1 });
 
 // Check if model already exists to prevent overwrite error

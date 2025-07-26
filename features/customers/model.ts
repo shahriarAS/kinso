@@ -2,62 +2,33 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface ICustomer extends Document {
   customerId: string;
-  customerName: string;
-  contactInfo: string;
-  purchaseAmount: number;
-  membershipStatus: boolean;
+  name: string;
+  contactInfo: {
+    phone?: string;
+    email?: string;
+    address?: string;
+  };
+  membershipActive: boolean;
+  totalPurchaseLastMonth: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
 const CustomerSchema: Schema = new Schema(
   {
-    customerId: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-    },
-    customerName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    customerId: { type: String, required: true, unique: true, trim: true },
+    name: { type: String, required: true, trim: true },
     contactInfo: {
-      type: String,
-      required: true,
-      trim: true,
+      phone: { type: String, trim: true },
+      email: { type: String, trim: true },
+      address: { type: String, trim: true },
     },
-    purchaseAmount: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
-    membershipStatus: {
-      type: Boolean,
-      default: false,
-    },
+    membershipActive: { type: Boolean, default: false },
+    totalPurchaseLastMonth: { type: Number, default: 0 },
   },
-  {
-    timestamps: true,
-  },
+  { timestamps: true },
 );
-
-// Index for customerId queries
 CustomerSchema.index({ customerId: 1 });
+CustomerSchema.index({ name: 1 });
 
-// Index for customerName queries
-CustomerSchema.index({ customerName: 1 });
-
-// Index for membershipStatus queries
-CustomerSchema.index({ membershipStatus: 1 });
-
-// Index for purchaseAmount queries
-CustomerSchema.index({ purchaseAmount: -1 });
-
-// Add index for createdAt
-CustomerSchema.index({ createdAt: -1 });
-
-// Check if model already exists to prevent overwrite error
-export default mongoose.models.Customer ||
-  mongoose.model<ICustomer>("Customer", CustomerSchema);
+export default mongoose.models.Customer || mongoose.model<ICustomer>("Customer", CustomerSchema);

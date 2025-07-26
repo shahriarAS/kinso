@@ -4,6 +4,7 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
+  outletId?: string;
   role: "admin" | "manager" | "staff";
   avatar?: string;
   createdAt: Date;
@@ -45,6 +46,7 @@ const UserSchema: Schema = new Schema(
       type: Boolean,
       default: true,
     },
+    outletId: { type: String, ref: "Outlet", default: null },
   },
   {
     timestamps: true,

@@ -1,6 +1,16 @@
 import type { Product } from "@/features/products/types";
 
-export type CartItem = Product & { quantity: number; price: number };
+export interface CartItem {
+  _id: string; // Product ID
+  stockId: string; // Stock entry ID for FIFO
+  name: string;
+  barcode: string;
+  quantity: number;
+  price: number;
+  availableStock: number;
+  category?: string;
+  brand?: string;
+}
 
 export interface CustomerOption {
   label: string;

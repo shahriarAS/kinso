@@ -19,6 +19,8 @@ import { OrderInput, Payment } from "@/features/orders/types";
 import { PAYMENT_METHODS } from "@/lib/constraints";
 import { Product } from "@/features/products/types";
 import { UserOutlined } from "@ant-design/icons";
+import { salesApi } from "@/features/sales";
+import { CartManagement, SaleCompletion } from "@/features/sales/components";
 
 interface CartDetailsProps {
   cart: CartItem[];
@@ -38,6 +40,14 @@ interface CartDetailsProps {
   onOrderCompleted?: (orderId: string) => void;
   selectedWarehouse: string;
   products: Product[];
+  onSaleComplete?: (saleData: {
+    outletId: string;
+    customerId?: string;
+    paymentMethod: string;
+    notes?: string;
+  }) => void;
+  outlets?: { _id: string; name: string }[];
+  selectedOutlet?: string;
 }
 
 // Custom SectionHeader component
@@ -78,8 +88,12 @@ export default function CartDetails({
   onOrderCompleted,
   selectedWarehouse,
   products,
+  onSaleComplete,
+  outlets = [],
+  selectedOutlet = "",
 }: CartDetailsProps) {
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
+  const [useSalesSystem, setUseSalesSystem] = useState(true); // Toggle between order and sales system
   const [payments, setPayments] = useState<Payment[]>([
     { method: "CASH", amount: 0 },
   ]);
@@ -218,7 +232,7 @@ export default function CartDetails({
                     >
                       {item.name}
                     </Typography.Text>
-                    <div className="text-xs text-gray-600">SKU: {item.sku}</div>
+                    <div className="text-xs text-gray-600">Barcode: {item.barcode}</div>
                     {/* <div className="text-xs text-gray-500">
                       Stock: {maxQty}
                     </div> */}
@@ -485,83 +499,142 @@ export default function CartDetails({
           </Card>
         </>
       )}
+      {/* System Toggle */}
+      <div className="flex items-center justify-center mb-2">
+        <div className="bg-gray-100 rounded-lg p-1 flex">
+          <button
+            className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+              useSalesSystem
+                ? "bg-white text-primary shadow-sm"
+                : "text-gray-600 hover:text-gray-800"
+            }`}
+            onClick={() => setUseSalesSystem(true)}
+          >
+            Sales System
+          </button>
+          <button
+            className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+              !useSalesSystem
+                ? "bg-white text-primary shadow-sm"
+                : "text-gray-600 hover:text-gray-800"
+            }`}
+            onClick={() => setUseSalesSystem(false)}
+          >
+            Order System
+          </button>
+        </div>
+      </div>
+
       <Button
         size="large"
         type="primary"
         className="w-full mt-2 text-lg font-semibold py-2 rounded-xl transition-all"
-        onClick={handleCheckout}
+        onClick={useSalesSystem ? () => setCheckoutModalOpen(true) : handleCheckout}
         disabled={cart.length === 0}
       >
-        Checkout
+        {useSalesSystem ? "Complete Sale" : "Checkout"}
       </Button>
 
       <Modal
-        title="Confirm Checkout"
+        title={useSalesSystem ? "Complete Sale" : "Confirm Checkout"}
         open={checkoutModalOpen}
         onCancel={() => setCheckoutModalOpen(false)}
-        footer={[
-          <Button key="cancel" onClick={() => setCheckoutModalOpen(false)}>
-            Cancel
-          </Button>,
-          <Button
-            key="confirm"
-            type="primary"
-            loading={isCreatingOrder}
-            onClick={confirmCheckout}
-          >
-            Confirm Order
-          </Button>,
-        ]}
+        footer={null}
+        width={useSalesSystem ? 600 : 500}
       >
-        <div className="space-y-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">
-              ৳{total.toFixed(2)}
+        {useSalesSystem ? (
+          <SaleCompletion
+            cart={cart.map(item => ({
+              stockId: item._id, // This should be stock ID, will be fixed in step 2
+              productName: item.name,
+              quantity: item.quantity,
+              unitPrice: item.price,
+              discountApplied: 0,
+              totalPrice: item.price * item.quantity,
+              availableStock: item.quantity, // This will be updated with actual stock
+            }))}
+            customers={customers.map(c => ({
+              _id: c.value,
+              name: c.label,
+              email: "",
+              phone: "",
+              totalOrders: 0,
+              totalSpent: 0,
+              status: "active" as const,
+            }))}
+            outlets={outlets}
+            selectedOutlet={selectedOutlet || outlets[0]?._id || ""}
+            onSaleComplete={(saleData) => {
+              if (onSaleComplete) {
+                onSaleComplete(saleData);
+              }
+              setCheckoutModalOpen(false);
+            }}
+            loading={false}
+          />
+        ) : (
+          <div className="space-y-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600">
+                ৳{total.toFixed(2)}
+              </div>
+              <div className="text-gray-500">Total Amount</div>
             </div>
-            <div className="text-gray-500">Total Amount</div>
-          </div>
-          <div className="border-t pt-4">
-            <div className="mb-2 font-semibold">Payments:</div>
-            {payments.map((p, idx) => (
-              <div key={idx} className="flex justify-between mb-1">
-                <span>
-                  {PAYMENT_METHODS.find((m) => m.value === p.method)?.label ||
-                    p.method}
-                  :
+            <div className="border-t pt-4">
+              <div className="mb-2 font-semibold">Payments:</div>
+              {payments.map((p, idx) => (
+                <div key={idx} className="flex justify-between mb-1">
+                  <span>
+                    {PAYMENT_METHODS.find((m) => m.value === p.method)?.label ||
+                      p.method}
+                    :
+                  </span>
+                  <span>৳{Number(p.amount).toFixed(2)}</span>
+                </div>
+              ))}
+              <div className="flex justify-between mt-2">
+                <span className="text-green-700 font-semibold">Paid:</span>
+                <span className="text-green-700 font-semibold">
+                  ৳{paid.toFixed(2)}
                 </span>
-                <span>৳{Number(p.amount).toFixed(2)}</span>
               </div>
-            ))}
-            <div className="flex justify-between mt-2">
-              <span className="text-green-700 font-semibold">Paid:</span>
-              <span className="text-green-700 font-semibold">
-                ৳{paid.toFixed(2)}
-              </span>
+              <div className="flex justify-between">
+                <span className="text-red-500 font-semibold">Due:</span>
+                <span className="text-red-500 font-semibold">
+                  ৳{due.toFixed(2)}
+                </span>
+              </div>
             </div>
-            <div className="flex justify-between">
-              <span className="text-red-500 font-semibold">Due:</span>
-              <span className="text-red-500 font-semibold">
-                ৳{due.toFixed(2)}
-              </span>
+            <div className="border-t pt-4">
+              <div className="flex justify-between mb-2">
+                <span>Items:</span>
+                <span>{cart.reduce((sum, item) => sum + item.quantity, 0)}</span>
+              </div>
+              <div className="flex justify-between mb-2">
+                <span>Customer:</span>
+                <span>{customers.find((c) => c.value === customer)?.label}</span>
+              </div>
+              {discount > 0 && (
+                <div className="flex justify-between text-red-500">
+                  <span>Discount:</span>
+                  <span>-৳{discount.toFixed(2)}</span>
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button onClick={() => setCheckoutModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                type="primary"
+                loading={isCreatingOrder}
+                onClick={confirmCheckout}
+              >
+                Confirm Order
+              </Button>
             </div>
           </div>
-          <div className="border-t pt-4">
-            <div className="flex justify-between mb-2">
-              <span>Items:</span>
-              <span>{cart.reduce((sum, item) => sum + item.quantity, 0)}</span>
-            </div>
-            <div className="flex justify-between mb-2">
-              <span>Customer:</span>
-              <span>{customers.find((c) => c.value === customer)?.label}</span>
-            </div>
-            {discount > 0 && (
-              <div className="flex justify-between text-red-500">
-                <span>Discount:</span>
-                <span>-৳{discount.toFixed(2)}</span>
-              </div>
-            )}
-          </div>
-        </div>
+        )}
       </Modal>
     </>
   );

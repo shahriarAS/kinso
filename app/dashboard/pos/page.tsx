@@ -17,6 +17,8 @@ import { mapOrderToInvoiceDataWithSettings } from "@/features/orders/utils";
 import { Skeleton } from "antd";
 import { useGetProductsQuery } from "@/features/products";
 import { useFetchAuthUserQuery } from "@/features/auth";
+import { salesApi } from "@/features/sales";
+import { outletsApi } from "@/features/outlets";
 import toast from "react-hot-toast";
 
 export default function POS() {
@@ -26,10 +28,13 @@ export default function POS() {
   const [discount, setDiscount] = useState(0);
   const [customTotal, setCustomTotal] = useState<string | null>(null);
   const [selectedWarehouse, setSelectedWarehouse] = useState<string>("");
+  const [selectedOutlet, setSelectedOutlet] = useState<string>("");
   const [customerModalOpen, setCustomerModalOpen] = useState(false);
   const { data: userData } = useFetchAuthUserQuery();
   const { data: settingsData } = useGetSettingsQuery(undefined);
   const [getOrder] = useLazyGetOrderQuery();
+  const [createSale] = salesApi.useCreateSaleMutation();
+  const { data: outletsData } = outletsApi.useGetOutletsQuery({ limit: 100 });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const searchInputRef = useRef<any>(null);
   const { success, error } = useNotification();
@@ -87,6 +92,12 @@ export default function POS() {
     warehouse: selectedWarehouse || undefined,
   });
 
+  // Use sales API for product search with stock information
+  const { data: productSearchData } = salesApi.useSearchProductsQuery(
+    { query: search, outletId: selectedOutlet },
+    { skip: !search || search.length < 2 }
+  );
+
   // Prepare warehouse options
   const warehouseOptions: WarehouseOption[] =
     warehousesData?.data.map((warehouse) => ({
@@ -108,22 +119,12 @@ export default function POS() {
   ];
 
   // Get products from inventory
-  // Cast to Product[] for POS context (only required fields used)
-  const products: Product[] =
-    (inventoryData?.data.map((item: Product) => ({
-      _id: item._id,
-      name: item.name,
-      upc: item.upc,
-      sku: item.sku,
-      category: item.category,
-      stock: item.stock,
-    })) as Product[]) || [];
+  const products: Product[] = inventoryData?.data || [];
 
   const filteredProducts = products.filter(
     (p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.upc.includes(search) ||
-      p.sku.includes(search),
+      p.barcode.includes(search),
   );
 
   const subtotal = cart.reduce(
@@ -142,6 +143,7 @@ export default function POS() {
       (s) => s.warehouse._id === selectedWarehouse,
     );
     if (!stockItem || stockItem.unit === 0) return;
+    
     setCart((prev) => {
       const found = prev.find((item) => item._id === product._id);
       if (found) {
@@ -153,21 +155,30 @@ export default function POS() {
             : item,
         );
       }
-      return [
-        ...prev,
-        { ...product, quantity: 1, price: Number(stockItem.mrp) },
-      ];
+      
+      // Create new cart item with stock information
+      const newCartItem: CartItem = {
+        _id: product._id,
+        stockId: `${product._id}_${selectedWarehouse}`, // Use product ID + warehouse ID as stock identifier
+        name: product.name,
+        barcode: product.barcode,
+        quantity: 1,
+        price: Number(stockItem.mrp),
+        availableStock: stockItem.unit,
+        category: (product.categoryId as any)?.categoryName,
+        brand: (product.brandId as any)?.name,
+      };
+      
+      return [...prev, newCartItem];
     });
   };
 
   // In handleQtyChange, cap at warehouse stock
   const handleQtyChange = (_id: string, qty: number) => {
-    const product = products.find((p) => p._id === _id);
-    if (!product) return;
-    const stockItem = product.stock.find(
-      (s) => s.warehouse._id === selectedWarehouse,
-    );
-    const maxQty = stockItem ? stockItem.unit : 0;
+    const cartItem = cart.find((item) => item._id === _id);
+    if (!cartItem) return;
+    
+    const maxQty = cartItem.availableStock;
     setCart((prev) =>
       prev.map((item) =>
         item._id === _id
@@ -230,6 +241,39 @@ export default function POS() {
     }, 100);
   };
 
+  const handleSaleComplete = async (saleData: {
+    outletId: string;
+    customerId?: string;
+    paymentMethod: string;
+    notes?: string;
+  }) => {
+    try {
+      const saleItems = cart.map(item => ({
+        stockId: item.stockId, // Use the actual stock ID
+        quantity: item.quantity,
+        unitPrice: item.price,
+        discountApplied: 0, // Individual item discounts
+      }));
+
+      const totalDiscount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) - (customTotal ? Number(customTotal) : 0);
+
+      await createSale({
+        outletId: saleData.outletId,
+        customerId: saleData.customerId,
+        items: saleItems,
+        paymentMethod: saleData.paymentMethod as any,
+        discountAmount: totalDiscount,
+        notes: saleData.notes,
+      }).unwrap();
+
+      toast.success("Sale completed successfully!");
+      handleCheckoutSuccess();
+    } catch (error) {
+      toast.error("Failed to complete sale");
+      console.error("Sale completion error:", error);
+    }
+  };
+
   // Focus search bar on mount and after order/checkout
   useEffect(() => {
     if (searchInputRef.current) {
@@ -249,6 +293,18 @@ export default function POS() {
     }
   }, [warehousesData]);
 
+  // Initialize outlet selection
+  useEffect(() => {
+    if (outletsData && outletsData.data.length > 0) {
+      if (localStorage.getItem("selectedOutlet")) {
+        setSelectedOutlet(localStorage.getItem("selectedOutlet") || "");
+      } else {
+        setSelectedOutlet(outletsData.data[0]._id);
+        localStorage.setItem("selectedOutlet", outletsData.data[0]._id);
+      }
+    }
+  }, [outletsData]);
+
   return (
     <>
       {/* No modal or PDFDownloadLink needed */}
@@ -258,21 +314,37 @@ export default function POS() {
           <h1 className="text-4xl font-bold text-primary tracking-tight">
             Point of Sale
           </h1>
-          <Select
-            size="large"
-            options={warehouseOptions}
-            value={selectedWarehouse}
-            onChange={(value) => {
-              if (cart.length > 0 && value !== selectedWarehouse) {
-              } else {
-                setSelectedWarehouse(value);
-                localStorage.setItem("selectedWarehouse", value);
-              }
-            }}
-            className="w-52"
-            placeholder="Select Warehouse"
-            loading={warehousesLoading}
-          />
+          <div className="flex gap-4">
+            <Select
+              size="large"
+              options={warehouseOptions}
+              value={selectedWarehouse}
+              onChange={(value) => {
+                if (cart.length > 0 && value !== selectedWarehouse) {
+                } else {
+                  setSelectedWarehouse(value);
+                  localStorage.setItem("selectedWarehouse", value);
+                }
+              }}
+              className="w-52"
+              placeholder="Select Warehouse"
+              loading={warehousesLoading}
+            />
+            <Select
+              size="large"
+              options={outletsData?.data.map(outlet => ({
+                label: outlet.name,
+                value: outlet._id,
+              })) || []}
+              value={selectedOutlet}
+              onChange={(value) => {
+                setSelectedOutlet(value);
+                localStorage.setItem("selectedOutlet", value);
+              }}
+              className="w-52"
+              placeholder="Select Outlet"
+            />
+          </div>
         </div>
         <div className="relative">
           {(warehousesLoading || inventoryLoading) && (
@@ -581,6 +653,9 @@ export default function POS() {
                   onOrderCompleted={handleOrderCompleted}
                   selectedWarehouse={selectedWarehouse}
                   products={products}
+                  onSaleComplete={handleSaleComplete}
+                  outlets={outletsData?.data || []}
+                  selectedOutlet={selectedOutlet}
                 />
               </div>
             </div>

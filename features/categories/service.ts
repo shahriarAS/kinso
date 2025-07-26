@@ -4,7 +4,7 @@ import Category from "./model";
 import { authorizeRequest } from "@/lib/auth";
 import { AuthenticatedRequest } from "@/features/auth";
 
-// GET /api/categories - List all categories with pagination and search
+// GET /api/categories - List all categories with pagination
 export async function handleGet(request: NextRequest) {
   try {
     // Authorize request - all authenticated users can view categories
@@ -27,49 +27,18 @@ export async function handleGet(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
-    const search = searchParams.get("search") || "";
 
     const skip = (page - 1) * limit;
 
-    // Build query
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const query: any = {};
-    if (search) {
-      query.$or = [
-        { categoryId: { $regex: search, $options: "i" } },
-        { categoryName: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-      ];
-    }
-
-    // Add additional filters
-    const categoryId = searchParams.get("categoryId");
-    const categoryName = searchParams.get("categoryName");
-    const vatStatus = searchParams.get("vatStatus");
-
-    if (categoryId) {
-      query.categoryId = { $regex: categoryId, $options: "i" };
-    }
-
-    if (categoryName) {
-      query.categoryName = { $regex: categoryName, $options: "i" };
-    }
-
-    if (vatStatus !== null && vatStatus !== undefined) {
-      query.vatStatus = vatStatus === "true";
-    }
-
     // Execute query
     const [categories, total] = await Promise.all([
-      Category.find(query)
+      Category.find()
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),
-      Category.countDocuments(query),
+      Category.countDocuments(),
     ]);
-
-    const totalPages = Math.ceil(total / limit);
 
     return NextResponse.json({
       success: true,
@@ -78,7 +47,6 @@ export async function handleGet(request: NextRequest) {
         page,
         limit,
         total,
-        totalPages,
       },
     });
   } catch (error) {
@@ -111,7 +79,7 @@ export async function handlePost(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { categoryId, categoryName, vatStatus, description } = body;
+    const { categoryId, name, applyVAT } = body;
 
     // Basic validation
     if (!categoryId || categoryId.trim().length === 0) {
@@ -121,7 +89,7 @@ export async function handlePost(request: NextRequest) {
       );
     }
 
-    if (!categoryName || categoryName.trim().length === 0) {
+    if (!name || name.trim().length === 0) {
       return NextResponse.json(
         { success: false, message: "Category name is required" },
         { status: 400 },
@@ -143,15 +111,13 @@ export async function handlePost(request: NextRequest) {
     // Create category
     const category = await Category.create({
       categoryId: categoryId.trim(),
-      categoryName: categoryName.trim(),
-      vatStatus: vatStatus || false,
-      description: description?.trim() || "",
+      name: name.trim(),
+      applyVAT: applyVAT || false,
     });
 
     return NextResponse.json(
       {
         success: true,
-        message: "Category created successfully",
         data: category,
       },
       { status: 201 },
@@ -165,12 +131,12 @@ export async function handlePost(request: NextRequest) {
   }
 }
 
-// GET /api/categories/[id] - Get a specific category
+// GET /api/categories/:categoryId - Get a specific category
 export async function handleGetById(
   request: NextRequest,
-  { params }: { params: Promise<{ _id: string }> },
+  { params }: { params: Promise<{ categoryId: string }> },
 ) {
-  const { _id } = await params;
+  const { categoryId } = await params;
   try {
     // Authorize request - all authenticated users can view categories
     const authResult = await authorizeRequest(
@@ -189,7 +155,7 @@ export async function handleGetById(
 
     await dbConnect();
 
-    const category = await Category.findById(_id).lean();
+    const category = await Category.findOne({ categoryId }).lean();
 
     if (!category) {
       return NextResponse.json(
@@ -211,12 +177,12 @@ export async function handleGetById(
   }
 }
 
-// PUT /api/categories/[id] - Update a category
+// PUT /api/categories/:categoryId - Update a category
 export async function handleUpdateById(
   request: NextRequest,
-  { params }: { params: Promise<{ _id: string }> },
+  { params }: { params: Promise<{ categoryId: string }> },
 ) {
-  const { _id } = await params;
+  const { categoryId } = await params;
   try {
     // Authorize request - only managers and admins can update categories
     const authResult = await authorizeRequest(
@@ -236,10 +202,10 @@ export async function handleUpdateById(
     await dbConnect();
 
     const body = await request.json();
-    const { categoryId, categoryName, vatStatus, description } = body;
+    const { name, applyVAT } = body;
 
     // Check if category exists
-    const existingCategory = await Category.findById(_id);
+    const existingCategory = await Category.findOne({ categoryId });
     if (!existingCategory) {
       return NextResponse.json(
         { success: false, message: "Category not found" },
@@ -248,48 +214,25 @@ export async function handleUpdateById(
     }
 
     // Basic validation
-    if (!categoryId || categoryId.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Category ID is required" },
-        { status: 400 },
-      );
-    }
-
-    if (!categoryName || categoryName.trim().length === 0) {
+    if (!name || name.trim().length === 0) {
       return NextResponse.json(
         { success: false, message: "Category name is required" },
         { status: 400 },
       );
     }
 
-    // Check if new categoryId conflicts with existing category (excluding current one)
-    const idConflict = await Category.findOne({
-      _id: { $ne: _id },
-      categoryId: { $regex: new RegExp(`^${categoryId.trim()}$`, "i") },
-    });
-
-    if (idConflict) {
-      return NextResponse.json(
-        { success: false, message: "Category with this ID already exists" },
-        { status: 409 },
-      );
-    }
-
     // Update category
-    const updatedCategory = await Category.findByIdAndUpdate(
-      _id,
+    const updatedCategory = await Category.findOneAndUpdate(
+      { categoryId },
       {
-        categoryId: categoryId.trim(),
-        categoryName: categoryName.trim(),
-        vatStatus: vatStatus || false,
-        description: description?.trim() || "",
+        name: name.trim(),
+        applyVAT: applyVAT !== undefined ? applyVAT : existingCategory.applyVAT,
       },
       { new: true, runValidators: true },
     );
 
     return NextResponse.json({
       success: true,
-      message: "Category updated successfully",
       data: updatedCategory,
     });
   } catch (error) {
@@ -301,12 +244,12 @@ export async function handleUpdateById(
   }
 }
 
-// DELETE /api/categories/[id] - Delete a category
+// DELETE /api/categories/:categoryId - Delete a category
 export async function handleDeleteById(
   request: NextRequest,
-  { params }: { params: Promise<{ _id: string }> },
+  { params }: { params: Promise<{ categoryId: string }> },
 ) {
-  const { _id } = await params;
+  const { categoryId } = await params;
   try {
     // Authorize request - only admins can delete categories
     const authResult = await authorizeRequest(
@@ -326,7 +269,7 @@ export async function handleDeleteById(
     await dbConnect();
 
     // Check if category exists
-    const category = await Category.findById(_id);
+    const category = await Category.findOne({ categoryId });
     if (!category) {
       return NextResponse.json(
         { success: false, message: "Category not found" },
@@ -338,11 +281,11 @@ export async function handleDeleteById(
     // This would require checking the Product model for references
     // For now, we'll allow deletion but you should implement this check
 
-    await Category.findByIdAndDelete(_id);
+    await Category.findOneAndDelete({ categoryId });
 
     return NextResponse.json({
       success: true,
-      message: "Category deleted successfully",
+      message: "Category deleted",
     });
   } catch (error) {
     console.error("Error deleting category:", error);

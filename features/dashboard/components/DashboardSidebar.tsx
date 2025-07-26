@@ -31,6 +31,11 @@ const menuItems = [
     href: "/dashboard/stock",
   },
   {
+    icon: "mdi:package-variant",
+    label: "Demand",
+    href: "/dashboard/demand",
+  },
+  {
     icon: "lineicons:folder-1",
     label: "Category",
     href: "/dashboard/category",

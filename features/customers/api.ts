@@ -22,8 +22,8 @@ export const customersApi = createApi({
         page?: number;
         limit?: number;
         search?: string;
-        status?: "active" | "inactive";
-        email?: string;
+        membershipStatus?: boolean;
+        customerName?: string;
         sortBy?: string;
         sortOrder?: "asc" | "desc";
       }
@@ -92,14 +92,44 @@ export const customersApi = createApi({
       invalidatesTags: [{ type: "Customer", id: "LIST" }],
     }),
 
+    // Update membership status
+    updateMembership: builder.mutation<
+      { message: string; customer: Customer },
+      { _id: string; membershipStatus: boolean }
+    >({
+      query: ({ _id, membershipStatus }) => ({
+        url: `/membership/update/${_id}`,
+        method: "PUT",
+        body: { membershipStatus },
+      }),
+      invalidatesTags: (result, error, { _id }) => [
+        { type: "Customer", _id },
+        { type: "Customer", id: "LIST" },
+      ],
+    }),
+
+    // Auto-activate membership based on purchase threshold
+    autoActivateMembership: builder.mutation<
+      { message: string; updatedCount: number },
+      { threshold?: number }
+    >({
+      query: ({ threshold = 1000 }) => ({
+        url: "/membership/auto-activate",
+        method: "POST",
+        body: { threshold },
+      }),
+      invalidatesTags: [{ type: "Customer", id: "LIST" }],
+    }),
+
     // Get customer statistics
     getCustomerStats: builder.query<
       {
         totalCustomers: number;
-        activeCustomers: number;
-        inactiveCustomers: number;
+        members: number;
+        nonMembers: number;
         newCustomersThisMonth: number;
-        averageOrdersPerCustomer: number;
+        averagePurchaseAmount: number;
+        totalPurchaseAmount: number;
       },
       void
     >({
@@ -108,6 +138,19 @@ export const customersApi = createApi({
         method: "GET",
       }),
       providesTags: [{ type: "Customer", id: "STATS" }],
+    }),
+
+    // Get customers by membership status
+    getCustomersByMembership: builder.query<
+      { data: Customer[] },
+      { membershipStatus: boolean; limit?: number }
+    >({
+      query: ({ membershipStatus, limit = 10 }) => ({
+        url: `/membership/by-status/${membershipStatus}`,
+        method: "GET",
+        params: { limit },
+      }),
+      providesTags: [{ type: "Customer", id: "MEMBERSHIP" }],
     }),
   }),
 });
@@ -118,5 +161,8 @@ export const {
   useCreateCustomerMutation,
   useUpdateCustomerMutation,
   useDeleteCustomerMutation,
+  useUpdateMembershipMutation,
+  useAutoActivateMembershipMutation,
   useGetCustomerStatsQuery,
+  useGetCustomersByMembershipQuery,
 } = customersApi;

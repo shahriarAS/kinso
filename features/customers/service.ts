@@ -29,9 +29,9 @@ export async function handleGet(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
     const search = searchParams.get("search") || "";
-    const status = searchParams.get("status") || "";
-    const email = searchParams.get("email") || "";
-    const sortBy = searchParams.get("sortBy") || "name";
+    const membershipStatus = searchParams.get("membershipStatus");
+    const customerName = searchParams.get("customerName") || "";
+    const sortBy = searchParams.get("sortBy") || "customerName";
     const sortOrder = searchParams.get("sortOrder") || "asc";
 
     const skip = (page - 1) * limit;
@@ -41,16 +41,16 @@ export async function handleGet(request: NextRequest) {
     const query: any = {};
     if (search) {
       query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { email: { $regex: search, $options: "i" } },
-        { phone: { $regex: search, $options: "i" } },
+        { customerId: { $regex: search, $options: "i" } },
+        { customerName: { $regex: search, $options: "i" } },
+        { contactInfo: { $regex: search, $options: "i" } },
       ];
     }
-    if (status) {
-      query.status = status;
+    if (membershipStatus !== null && membershipStatus !== undefined) {
+      query.membershipStatus = membershipStatus === "true";
     }
-    if (email) {
-      query.email = { $regex: email, $options: "i" };
+    if (customerName) {
+      query.customerName = { $regex: customerName, $options: "i" };
     }
 
     // Build sort object
@@ -106,60 +106,49 @@ export async function handlePost(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { name, email, phone, status, notes } = body;
+    const { customerId, customerName, contactInfo, purchaseAmount, membershipStatus } = body;
 
     // Basic validation
-    if (!name || name.trim().length === 0) {
+    if (!customerId || customerId.trim().length === 0) {
+      return NextResponse.json(
+        { success: false, message: "Customer ID is required" },
+        { status: 400 },
+      );
+    }
+
+    if (!customerName || customerName.trim().length === 0) {
       return NextResponse.json(
         { success: false, message: "Customer name is required" },
         { status: 400 },
       );
     }
 
-    if (!email || email.trim().length === 0) {
+    if (!contactInfo || contactInfo.trim().length === 0) {
       return NextResponse.json(
-        { success: false, message: "Customer email is required" },
-        { status: 400 },
-      );
-    }
-
-    if (!phone || phone.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Customer phone is required" },
-        { status: 400 },
-      );
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      return NextResponse.json(
-        { success: false, message: "Invalid email format" },
+        { success: false, message: "Contact information is required" },
         { status: 400 },
       );
     }
 
     // Check if customer already exists
     const existingCustomer = await CustomerModel.findOne({
-      email: email.trim().toLowerCase(),
+      customerId: customerId.trim(),
     });
 
     if (existingCustomer) {
       return NextResponse.json(
-        { success: false, message: "Customer with this email already exists" },
+        { success: false, message: "Customer with this ID already exists" },
         { status: 409 },
       );
     }
 
     // Create customer
     const customer = await CustomerModel.create({
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
-      phone: phone.trim(),
-      status: status || "active",
-      notes: notes?.trim() || "",
-      totalOrders: 0,
-      totalSpent: 0,
+      customerId: customerId.trim(),
+      customerName: customerName.trim(),
+      contactInfo: contactInfo.trim(),
+      purchaseAmount: purchaseAmount || 0,
+      membershipStatus: membershipStatus || false,
     });
 
     return NextResponse.json(
@@ -250,7 +239,7 @@ export async function handleUpdateById(
     await dbConnect();
 
     const body = await request.json();
-    const { name, email, phone, status, notes } = body;
+    const { customerId, customerName, contactInfo, purchaseAmount, membershipStatus } = body;
 
     // Check if customer exists
     const existingCustomer = await CustomerModel.findById(_id);
@@ -262,45 +251,36 @@ export async function handleUpdateById(
     }
 
     // Basic validation
-    if (!name || name.trim().length === 0) {
+    if (!customerId || customerId.trim().length === 0) {
+      return NextResponse.json(
+        { success: false, message: "Customer ID is required" },
+        { status: 400 },
+      );
+    }
+
+    if (!customerName || customerName.trim().length === 0) {
       return NextResponse.json(
         { success: false, message: "Customer name is required" },
         { status: 400 },
       );
     }
 
-    if (!email || email.trim().length === 0) {
+    if (!contactInfo || contactInfo.trim().length === 0) {
       return NextResponse.json(
-        { success: false, message: "Customer email is required" },
+        { success: false, message: "Contact information is required" },
         { status: 400 },
       );
     }
 
-    if (!phone || phone.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Customer phone is required" },
-        { status: 400 },
-      );
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      return NextResponse.json(
-        { success: false, message: "Invalid email format" },
-        { status: 400 },
-      );
-    }
-
-    // Check if new email conflicts with existing customer (excluding current one)
-    const emailConflict = await CustomerModel.findOne({
+    // Check if new customerId conflicts with existing customer (excluding current one)
+    const customerIdConflict = await CustomerModel.findOne({
       _id: { $ne: _id },
-      email: email.trim().toLowerCase(),
+      customerId: customerId.trim(),
     });
 
-    if (emailConflict) {
+    if (customerIdConflict) {
       return NextResponse.json(
-        { success: false, message: "Customer with this email already exists" },
+        { success: false, message: "Customer with this ID already exists" },
         { status: 409 },
       );
     }
@@ -309,11 +289,11 @@ export async function handleUpdateById(
     const updatedCustomer = await CustomerModel.findByIdAndUpdate(
       _id,
       {
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
-        phone: phone.trim(),
-        status: status || "active",
-        notes: notes?.trim() || "",
+        customerId: customerId.trim(),
+        customerName: customerName.trim(),
+        contactInfo: contactInfo.trim(),
+        purchaseAmount: purchaseAmount || 0,
+        membershipStatus: membershipStatus || false,
       },
       { new: true, runValidators: true },
     );
@@ -391,6 +371,244 @@ export async function handleDeleteById(
   }
 }
 
+// PUT /api/customers/membership/[id] - Update membership status
+export async function handleUpdateMembership(
+  request: NextRequest,
+  { params }: { params: Promise<{ _id: string }> },
+) {
+  const { _id } = await params;
+  try {
+    // Authorize request - all authenticated users can update membership
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requireAuth: true,
+      },
+    );
+
+    if (!authResult.success) {
+      return NextResponse.json(
+        { success: false, message: authResult.error },
+        { status: authResult.status || 401 },
+      );
+    }
+
+    await dbConnect();
+
+    const body = await request.json();
+    const { membershipStatus } = body;
+
+    // Check if customer exists
+    const existingCustomer = await CustomerModel.findById(_id);
+    if (!existingCustomer) {
+      return NextResponse.json(
+        { success: false, message: "Customer not found" },
+        { status: 404 },
+      );
+    }
+
+    // Update membership status
+    const updatedCustomer = await CustomerModel.findByIdAndUpdate(
+      _id,
+      { membershipStatus: Boolean(membershipStatus) },
+      { new: true, runValidators: true },
+    );
+
+    if (!updatedCustomer) {
+      return NextResponse.json(
+        { success: false, message: "Failed to update membership status" },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Membership status updated successfully",
+      data: updatedCustomer,
+    });
+  } catch (error) {
+    console.error("Error updating membership status:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to update membership status" },
+      { status: 500 },
+    );
+  }
+}
+
+// GET /api/customers/membership/[status] - Get customers by membership status
+export async function handleGetByMembership(
+  request: NextRequest,
+  { params }: { params: Promise<{ membershipStatus: string }> },
+) {
+  const { membershipStatus } = await params;
+  try {
+    // Authorize request - all authenticated users can view customers
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requireAuth: true,
+      },
+    );
+
+    if (!authResult.success) {
+      return NextResponse.json(
+        { success: false, message: authResult.error },
+        { status: authResult.status || 401 },
+      );
+    }
+
+    await dbConnect();
+
+    const { searchParams } = new URL(request.url);
+    const limit = parseInt(searchParams.get("limit") || "10");
+
+    const customers = await CustomerModel.find({
+      membershipStatus: membershipStatus === "true",
+    })
+      .limit(limit)
+      .lean();
+
+    return NextResponse.json({
+      success: true,
+      data: customers,
+    });
+  } catch (error) {
+    console.error("Error fetching customers by membership:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to fetch customers" },
+      { status: 500 },
+    );
+  }
+}
+
+// GET /api/customers/stats - Get customer statistics
+export async function handleGetStats(request: NextRequest) {
+  try {
+    // Authorize request - all authenticated users can view stats
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requireAuth: true,
+      },
+    );
+
+    if (!authResult.success) {
+      return NextResponse.json(
+        { success: false, message: authResult.error },
+        { status: authResult.status || 401 },
+      );
+    }
+
+    await dbConnect();
+
+    const [
+      totalCustomers,
+      members,
+      nonMembers,
+      newCustomersThisMonth,
+      totalPurchaseAmount,
+    ] = await Promise.all([
+      CustomerModel.countDocuments(),
+      CustomerModel.countDocuments({ membershipStatus: true }),
+      CustomerModel.countDocuments({ membershipStatus: false }),
+      CustomerModel.countDocuments({
+        createdAt: {
+          $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+        },
+      }),
+      CustomerModel.aggregate([
+        {
+          $group: {
+            _id: null,
+            total: { $sum: "$purchaseAmount" },
+            average: { $avg: "$purchaseAmount" },
+          },
+        },
+      ]),
+    ]);
+
+    const averagePurchaseAmount = totalPurchaseAmount[0]?.average || 0;
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        totalCustomers,
+        members,
+        nonMembers,
+        newCustomersThisMonth,
+        averagePurchaseAmount,
+        totalPurchaseAmount: totalPurchaseAmount[0]?.total || 0,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching customer stats:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to fetch customer statistics" },
+      { status: 500 },
+    );
+  }
+}
+
+// POST /api/customers/membership/auto-activate - Auto-activate membership based on purchase threshold
+export async function handleAutoActivateMembership(request: NextRequest) {
+  try {
+    // Authorize request - all authenticated users can auto-activate membership
+    const authResult = await authorizeRequest(
+      request as NextRequest & AuthenticatedRequest,
+      {
+        requireAuth: true,
+      },
+    );
+
+    if (!authResult.success) {
+      return NextResponse.json(
+        { success: false, message: authResult.error },
+        { status: authResult.status || 401 },
+      );
+    }
+
+    await dbConnect();
+
+    const body = await request.json();
+    const { threshold = 1000 } = body;
+
+    // Find customers who meet the threshold but don't have membership
+    const eligibleCustomers = await CustomerModel.find({
+      purchaseAmount: { $gte: threshold },
+      membershipStatus: false,
+    });
+
+    if (eligibleCustomers.length === 0) {
+      return NextResponse.json({
+        success: true,
+        message: "No customers eligible for membership activation",
+        data: { updatedCount: 0 },
+      });
+    }
+
+    // Update membership status for eligible customers
+    const updateResult = await CustomerModel.updateMany(
+      {
+        purchaseAmount: { $gte: threshold },
+        membershipStatus: false,
+      },
+      { membershipStatus: true }
+    );
+
+    return NextResponse.json({
+      success: true,
+      message: `Membership activated for ${updateResult.modifiedCount} customers`,
+      data: { updatedCount: updateResult.modifiedCount },
+    });
+  } catch (error) {
+    console.error("Error auto-activating membership:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to auto-activate membership" },
+      { status: 500 },
+    );
+  }
+}
+
 export class CustomerService {
   /**
    * Validate customer input data
@@ -398,33 +616,23 @@ export class CustomerService {
   static validateCustomerInput(data: CustomerInput): string[] {
     const errors: string[] = [];
 
-    if (!data.name || data.name.trim().length === 0) {
-      errors.push("Name is required");
+    if (!data.customerId || data.customerId.trim().length === 0) {
+      errors.push("Customer ID is required");
     }
 
-    if (!data.email || data.email.trim().length === 0) {
-      errors.push("Email is required");
-    } else if (!this.isValidEmail(data.email)) {
-      errors.push("Invalid email format");
+    if (!data.customerName || data.customerName.trim().length === 0) {
+      errors.push("Customer name is required");
     }
 
-    if (!data.phone || data.phone.trim().length === 0) {
-      errors.push("Phone number is required");
+    if (!data.contactInfo || data.contactInfo.trim().length === 0) {
+      errors.push("Contact information is required");
     }
 
-    if (data.status && !["active", "inactive"].includes(data.status)) {
-      errors.push("Status must be either 'active' or 'inactive'");
+    if (data.purchaseAmount < 0) {
+      errors.push("Purchase amount cannot be negative");
     }
 
     return errors;
-  }
-
-  /**
-   * Validate email format
-   */
-  private static isValidEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
   }
 
   /**
@@ -433,10 +641,10 @@ export class CustomerService {
   static formatCustomerForDisplay(customer: Customer) {
     return {
       ...customer,
-      name: customer.name.trim(),
-      email: customer.email.toLowerCase().trim(),
-      phone: customer.phone.trim(),
-      totalSpent: Number(customer.totalSpent.toFixed(2)),
+      customerId: customer.customerId.trim(),
+      customerName: customer.customerName.trim(),
+      contactInfo: customer.contactInfo.trim(),
+      purchaseAmount: Number(customer.purchaseAmount.toFixed(2)),
     };
   }
 
@@ -445,11 +653,11 @@ export class CustomerService {
    */
   static prepareCustomerForSubmission(data: CustomerInput): CustomerInput {
     return {
-      name: data.name.trim(),
-      email: data.email.toLowerCase().trim(),
-      phone: data.phone.trim(),
-      status: data.status || "active",
-      notes: data.notes?.trim() || "",
+      customerId: data.customerId.trim(),
+      customerName: data.customerName.trim(),
+      contactInfo: data.contactInfo.trim(),
+      purchaseAmount: data.purchaseAmount || 0,
+      membershipStatus: data.membershipStatus || false,
     };
   }
 
@@ -465,21 +673,21 @@ export class CustomerService {
       if (filters.search) {
         const searchTerm = filters.search.toLowerCase();
         const matchesSearch =
-          customer.name.toLowerCase().includes(searchTerm) ||
-          customer.email.toLowerCase().includes(searchTerm) ||
-          customer.phone.includes(searchTerm);
+          customer.customerId.toLowerCase().includes(searchTerm) ||
+          customer.customerName.toLowerCase().includes(searchTerm) ||
+          customer.contactInfo.toLowerCase().includes(searchTerm);
         if (!matchesSearch) return false;
       }
 
-      // Status filter
-      if (filters.status) {
-        if (customer.status !== filters.status) return false;
+      // Membership status filter
+      if (filters.membershipStatus !== undefined) {
+        if (customer.membershipStatus !== filters.membershipStatus) return false;
       }
 
-      // Email filter
-      if (filters.email) {
-        const emailTerm = filters.email.toLowerCase();
-        if (!customer.email.toLowerCase().includes(emailTerm)) return false;
+      // Customer name filter
+      if (filters.customerName) {
+        const nameTerm = filters.customerName.toLowerCase();
+        if (!customer.customerName.toLowerCase().includes(nameTerm)) return false;
       }
 
       return true;
@@ -491,7 +699,7 @@ export class CustomerService {
    */
   static sortCustomers(
     customers: Customer[],
-    sortBy: keyof Customer = "name",
+    sortBy: keyof Customer = "customerName",
     sortOrder: "asc" | "desc" = "asc",
   ): Customer[] {
     return [...customers].sort((a, b) => {
@@ -524,19 +732,17 @@ export class CustomerService {
    */
   static getCustomerStats(customers: Customer[]) {
     const totalCustomers = customers.length;
-    const activeCustomers = customers.filter(
-      (c) => c.status === "active",
-    ).length;
-    const inactiveCustomers = totalCustomers - activeCustomers;
-    const totalSpent = customers.reduce((sum, c) => sum + c.totalSpent, 0);
-    const averageSpent = totalCustomers > 0 ? totalSpent / totalCustomers : 0;
+    const members = customers.filter((c) => c.membershipStatus).length;
+    const nonMembers = totalCustomers - members;
+    const totalPurchaseAmount = customers.reduce((sum, c) => sum + c.purchaseAmount, 0);
+    const averagePurchaseAmount = totalCustomers > 0 ? totalPurchaseAmount / totalCustomers : 0;
 
     return {
       totalCustomers,
-      activeCustomers,
-      inactiveCustomers,
-      totalSpent,
-      averageSpent,
+      members,
+      nonMembers,
+      totalPurchaseAmount,
+      averagePurchaseAmount,
     };
   }
 
@@ -544,18 +750,26 @@ export class CustomerService {
    * Generate customer display name
    */
   static getDisplayName(customer: Customer): string {
-    return customer.name || customer.email || "Unknown Customer";
+    return customer.customerName || customer.customerId || "Unknown Customer";
   }
 
   /**
-   * Check if customer has recent activity
+   * Check if customer qualifies for membership based on purchase amount
    */
-  static hasRecentActivity(
+  static checkMembershipEligibility(
     customer: Customer,
-    daysThreshold: number = 30,
+    threshold: number = 1000,
   ): boolean {
-    // This would typically check order history
-    // For now, we'll use totalOrders as a proxy
-    return customer.totalOrders > 0;
+    return customer.purchaseAmount >= threshold;
+  }
+
+  /**
+   * Update membership status based on purchase amount
+   */
+  static updateMembershipStatus(
+    customer: Customer,
+    threshold: number = 1000,
+  ): boolean {
+    return this.checkMembershipEligibility(customer, threshold);
   }
 }

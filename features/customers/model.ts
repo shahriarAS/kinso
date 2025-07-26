@@ -1,53 +1,41 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface ICustomer extends Document {
-  name: string;
-  email: string;
-  phone: string;
-  totalOrders: number;
-  totalSpent: number;
-  status: "active" | "inactive";
-  notes?: string;
+  customerId: string;
+  customerName: string;
+  contactInfo: string;
+  purchaseAmount: number;
+  membershipStatus: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
 const CustomerSchema: Schema = new Schema(
   {
-    name: {
+    customerId: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    customerName: {
       type: String,
       required: true,
       trim: true,
     },
-    email: {
-      type: String,
-      required: true,
-      lowercase: true,
-      trim: true,
-    },
-    phone: {
+    contactInfo: {
       type: String,
       required: true,
       trim: true,
     },
-    totalOrders: {
+    purchaseAmount: {
       type: Number,
       default: 0,
       min: 0,
     },
-    totalSpent: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
-    status: {
-      type: String,
-      enum: ["active", "inactive"],
-      default: "active",
-    },
-    notes: {
-      type: String,
-      trim: true,
+    membershipStatus: {
+      type: Boolean,
+      default: false,
     },
   },
   {
@@ -55,17 +43,17 @@ const CustomerSchema: Schema = new Schema(
   },
 );
 
-// Index for email queries
-CustomerSchema.index({ email: 1 });
+// Index for customerId queries
+CustomerSchema.index({ customerId: 1 });
 
-// Index for phone queries
-CustomerSchema.index({ phone: 1 });
+// Index for customerName queries
+CustomerSchema.index({ customerName: 1 });
 
-// Index for name queries
-CustomerSchema.index({ name: 1 });
+// Index for membershipStatus queries
+CustomerSchema.index({ membershipStatus: 1 });
 
-// Index for status queries
-CustomerSchema.index({ status: 1 });
+// Index for purchaseAmount queries
+CustomerSchema.index({ purchaseAmount: -1 });
 
 // Add index for createdAt
 CustomerSchema.index({ createdAt: -1 });

@@ -13,41 +13,45 @@ export default function CustomerFilters({
   // Define filter fields using the generic interface
   const fields: FilterField[] = [
     {
-      name: "status",
-      label: "Status",
+      name: "membershipStatus",
+      label: "Membership Status",
       type: "select",
-      placeholder: "Select Status",
+      placeholder: "Select Membership Status",
       options: [
         { label: "All", value: "all" },
-        { label: "Active", value: "active" },
-        { label: "Inactive", value: "inactive" },
+        { label: "Members", value: "true" },
+        { label: "Non-Members", value: "false" },
       ],
     },
     {
       name: "search",
       label: "Search",
       type: "input",
-      placeholder: "Search customers...",
+      placeholder: "Search by ID, name, or contact...",
       debounce: 500,
     },
     {
-      name: "email",
-      label: "Email",
+      name: "customerName",
+      label: "Customer Name",
       type: "input",
-      placeholder: "Search by email...",
+      placeholder: "Search by customer name...",
       debounce: 500,
     },
   ];
 
   const handleFiltersChange = useCallback(
     (filters: Record<string, unknown>) => {
-      // Convert "all" status to undefined
+      // Convert "all" membership status to undefined
       const processedFilters = {
         ...filters,
-        status:
-          filters.status === "all"
+        membershipStatus:
+          filters.membershipStatus === "all"
             ? undefined
-            : (filters.status as "active" | "inactive" | undefined),
+            : filters.membershipStatus === "true"
+            ? true
+            : filters.membershipStatus === "false"
+            ? false
+            : undefined,
       };
       onFiltersChange?.(processedFilters as CustomerFiltersType);
     },
@@ -58,7 +62,7 @@ export default function CustomerFilters({
     <GenericFilters
       fields={fields}
       onFiltersChange={handleFiltersChange}
-      gridCols={4}
+      gridCols={3}
       debounceDelay={500}
     />
   );

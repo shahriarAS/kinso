@@ -32,45 +32,54 @@ export default function AddEditCustomerDrawer({
   // Define form fields using the generic interface
   const fields: FormField[] = [
     {
-      name: "name",
-      label: "Full Name",
+      name: "customerId",
+      label: "Customer ID",
       type: "input",
-      placeholder: "Enter Full Name",
-      rules: [{ required: true, message: "Please enter customer name" }],
-    },
-    {
-      name: "email",
-      label: "Email",
-      type: "email",
-      placeholder: "Enter Email",
+      placeholder: "Enter Customer ID",
       rules: [
-        { required: true, message: "Please enter email" },
-        { type: "email", message: "Please enter a valid email" },
+        { required: true, message: "Please enter customer ID" },
+        { min: 3, message: "Customer ID must be at least 3 characters" },
       ],
     },
     {
-      name: "phone",
-      label: "Phone",
+      name: "customerName",
+      label: "Customer Name",
       type: "input",
-      placeholder: "Enter Phone",
-      rules: [{ required: true, message: "Please enter phone number" }],
-    },
-    {
-      name: "status",
-      label: "Status",
-      type: "select",
-      placeholder: "Select Status",
-      rules: [{ required: true, message: "Please select status" }],
-      options: [
-        { label: "Active", value: "active" },
-        { label: "Inactive", value: "inactive" },
+      placeholder: "Enter Customer Name",
+      rules: [
+        { required: true, message: "Please enter customer name" },
+        { min: 2, message: "Customer name must be at least 2 characters" },
       ],
     },
     {
-      name: "notes",
-      label: "Notes",
+      name: "contactInfo",
+      label: "Contact Information",
       type: "textarea",
-      placeholder: "Enter Notes",
+      placeholder: "Enter email, phone, or address",
+      rules: [
+        { required: true, message: "Please enter contact information" },
+        { min: 5, message: "Contact information must be at least 5 characters" },
+      ],
+    },
+    {
+      name: "purchaseAmount",
+      label: "Purchase Amount",
+      type: "number",
+      placeholder: "0.00",
+      rules: [
+        { required: true, message: "Please enter purchase amount" },
+        { type: "number", min: 0, message: "Purchase amount must be positive" },
+      ],
+    },
+    {
+      name: "membershipStatus",
+      label: "Membership Status",
+      type: "select",
+      placeholder: "Select Membership Status",
+      options: [
+        { label: "Non-Member", value: false },
+        { label: "Member", value: true },
+      ],
     },
   ];
 
@@ -113,11 +122,11 @@ export default function AddEditCustomerDrawer({
       initialValues={
         customer
           ? {
-              name: customer.name,
-              email: customer.email,
-              phone: customer.phone,
-              status: customer.status,
-              notes: customer.notes,
+              customerId: customer.customerId,
+              customerName: customer.customerName,
+              contactInfo: customer.contactInfo,
+              purchaseAmount: customer.purchaseAmount,
+              membershipStatus: customer.membershipStatus,
             }
           : undefined
       }

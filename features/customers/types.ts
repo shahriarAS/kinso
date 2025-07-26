@@ -1,19 +1,25 @@
 export interface Customer {
   _id: string;
-  name: string;
-  email: string;
-  phone: string;
-  totalOrders: number;
-  totalSpent: number;
-  status: "active" | "inactive";
-  notes?: string;
+  customerId: string;
+  customerName: string;
+  contactInfo: string;
+  purchaseAmount: number;
+  membershipStatus: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CustomerInput
-  extends Omit<Customer, "_id" | "totalOrders" | "totalSpent"> {}
+  extends Omit<Customer, "_id" | "createdAt" | "updatedAt"> {}
 
 export interface CustomerFilters {
   search?: string;
-  status?: "active" | "inactive";
-  email?: string;
+  membershipStatus?: boolean;
+  customerName?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+}
+
+export interface MembershipUpdateInput {
+  membershipStatus: boolean;
 }

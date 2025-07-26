@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Tag } from "antd";
+import { Tag, Switch } from "antd";
 import type { Customer, CustomerFilters } from "./types";
-import { useGetCustomersQuery, useDeleteCustomerMutation } from "./api";
+import { useGetCustomersQuery, useDeleteCustomerMutation, useUpdateMembershipMutation } from "./api";
 import { useNotification } from "@/hooks/useNotification";
 import {
   GenericTable,
@@ -13,11 +13,6 @@ import {
 import AddEditCustomerDrawer from "./AddEditCustomerDrawer";
 import ViewCustomerOrdersDrawer from "./ViewCustomerOrdersDrawer";
 
-const statusColors: Record<string, string> = {
-  active: "green",
-  inactive: "red",
-};
-
 interface CustomerTableProps {
   filters?: CustomerFilters;
 }
@@ -26,7 +21,7 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sortFilters, setSortFilters] = useState({
-    sortBy: "name",
+    sortBy: "customerName",
     sortOrder: "asc" as "asc" | "desc",
   });
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
@@ -41,6 +36,7 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
 
   const [deleteCustomer, { isLoading: isDeleting }] =
     useDeleteCustomerMutation();
+  const [updateMembership] = useUpdateMembershipMutation();
   const { success, error: showError } = useNotification();
 
   // Update filters when they change
@@ -69,6 +65,16 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
     setViewingCustomer(customer);
   };
 
+  const handleMembershipToggle = async (customer: Customer, checked: boolean) => {
+    try {
+      await updateMembership({ _id: customer._id, membershipStatus: checked }).unwrap();
+      success(`Membership ${checked ? 'activated' : 'deactivated'} successfully`);
+      refetch();
+    } catch (error: any) {
+      showError("Failed to update membership status", error?.data?.message || "An error occurred");
+    }
+  };
+
   const handleEditSuccess = () => {
     setEditingCustomer(null);
     refetch();
@@ -81,52 +87,54 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
   // Define columns using the generic interface
   const columns: TableColumn<Customer>[] = [
     {
+      title: <span className="font-medium text-base">Customer ID</span>,
+      dataIndex: "customerId",
+      key: "customerId",
+      sorter: true,
+      render: (text: string) => (
+        <code className="bg-gray-100 px-2 py-1 rounded text-sm">{text}</code>
+      ),
+    },
+    {
       title: <span className="font-medium text-base">Name</span>,
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "customerName",
+      key: "customerName",
       sorter: true,
       render: (text: string) => (
         <span className="font-medium text-gray-900">{text}</span>
       ),
     },
     {
-      title: <span className="font-medium text-base">Email</span>,
-      dataIndex: "email",
-      key: "email",
-      render: (text: string) => <span className="text-gray-700">{text}</span>,
-    },
-    {
-      title: <span className="font-medium text-base">Phone</span>,
-      dataIndex: "phone",
-      key: "phone",
-      render: (text: string) => <span className="text-gray-700">{text}</span>,
-    },
-    {
-      title: <span className="font-medium text-base">Total Orders</span>,
-      dataIndex: "totalOrders",
-      key: "totalOrders",
-      sorter: true,
-      render: (count: number) => (
-        <span className="font-medium text-gray-900">{count}</span>
+      title: <span className="font-medium text-base">Contact Info</span>,
+      dataIndex: "contactInfo",
+      key: "contactInfo",
+      render: (text: string) => (
+        <span className="text-gray-700 max-w-xs truncate block" title={text}>
+          {text}
+        </span>
       ),
     },
     {
-      title: <span className="font-medium text-base">Total Spent</span>,
-      dataIndex: "totalSpent",
-      key: "totalSpent",
+      title: <span className="font-medium text-base">Purchase Amount</span>,
+      dataIndex: "purchaseAmount",
+      key: "purchaseAmount",
       sorter: true,
       render: (amount: number) => (
-        <span className="font-medium text-gray-900">৳{amount.toFixed(2)}</span>
+        <span className="font-medium text-green-600">${amount.toFixed(2)}</span>
       ),
     },
     {
-      title: <span className="font-medium text-base">Status</span>,
-      dataIndex: "status",
-      key: "status",
-      render: (status: string) => (
-        <Tag color={statusColors[status]} className="capitalize">
-          {status}
-        </Tag>
+      title: <span className="font-medium text-base">Membership</span>,
+      dataIndex: "membershipStatus",
+      key: "membershipStatus",
+      render: (isMember: boolean, record: Customer) => (
+        <Switch
+          checked={isMember}
+          onChange={(checked) => handleMembershipToggle(record, checked)}
+          checkedChildren="Member"
+          unCheckedChildren="Non-Member"
+          size="small"
+        />
       ),
     },
   ];
@@ -183,7 +191,7 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
     if (sorterObj.field) {
       setSortFilters((prev) => ({
         ...prev,
-        sortBy: sorterObj.field || "name",
+        sortBy: sorterObj.field || "customerName",
         sortOrder: sorterObj.order === "descend" ? "desc" : "asc",
       }));
     }

@@ -1,0 +1,191 @@
+import React, { useState } from "react";
+import { Table, Button, Space, Popconfirm, Tag, Input, Select } from "antd";
+import { EditOutlined, DeleteOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { useGetBrandsQuery, useDeleteBrandMutation } from "./api";
+import { useGetAllVendorsQuery } from "@/features/vendors/api";
+import { Brand } from "./types";
+import { useNotification } from "@/hooks/useNotification";
+import { useModal } from "@/hooks/useModal";
+import AddEditBrandDrawer from "./AddEditBrandDrawer";
+
+const { Search } = Input;
+const { Option } = Select;
+
+const BrandTable: React.FC = () => {
+  const [searchText, setSearchText] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [selectedVendorId, setSelectedVendorId] = useState<string>("");
+  const { success, error } = useNotification();
+  const { open, close, isOpen } = useModal("brand-drawer");
+  const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
+
+  const { data: brandsResponse, isLoading, refetch } = useGetBrandsQuery({
+    page: currentPage,
+    limit: pageSize,
+    search: searchText,
+    vendorId: selectedVendorId || undefined,
+  });
+
+  const { data: vendorsResponse } = useGetAllVendorsQuery();
+
+  const [deleteBrand] = useDeleteBrandMutation();
+
+  const handleSearch = (value: string) => {
+    setSearchText(value);
+    setCurrentPage(1);
+  };
+
+  const handleVendorFilter = (value: string) => {
+    setSelectedVendorId(value);
+    setCurrentPage(1);
+  };
+
+  const handleEdit = (brand: Brand) => {
+    setSelectedBrand(brand);
+    open(brand);
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteBrand(id).unwrap();
+      success("Brand deleted successfully");
+      refetch();
+    } catch (err) {
+      error("Failed to delete brand");
+    }
+  };
+
+  const handleAdd = () => {
+    setSelectedBrand(null);
+    open();
+  };
+
+  const handleDrawerClose = () => {
+    close();
+    setSelectedBrand(null);
+    refetch();
+  };
+
+  const columns = [
+    {
+      title: "Brand ID",
+      dataIndex: "brandId",
+      key: "brandId",
+      sorter: true,
+    },
+    {
+      title: "Brand Name",
+      dataIndex: "brandName",
+      key: "brandName",
+      sorter: true,
+    },
+    {
+      title: "Vendor",
+      dataIndex: ["vendor", "vendorName"],
+      key: "vendorName",
+      sorter: true,
+    },
+    {
+      title: "Created At",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (date: string) => new Date(date).toLocaleDateString(),
+      sorter: true,
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_: any, record: Brand) => (
+        <Space size="middle">
+          <Button
+            type="link"
+            icon={<EditOutlined />}
+            onClick={() => handleEdit(record)}
+          >
+            Edit
+          </Button>
+          <Popconfirm
+            title="Are you sure you want to delete this brand?"
+            onConfirm={() => handleDelete(record._id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button type="link" danger icon={<DeleteOutlined />}>
+              Delete
+            </Button>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold text-gray-800">Brands</h2>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={handleAdd}
+          className="bg-blue-600 hover:bg-blue-700"
+        >
+          Add Brand
+        </Button>
+      </div>
+
+      <div className="flex justify-between items-center space-x-4">
+        <Search
+          placeholder="Search brands..."
+          allowClear
+          enterButton={<SearchOutlined />}
+          size="large"
+          onSearch={handleSearch}
+          className="flex-1 max-w-md"
+        />
+        <Select
+          placeholder="Filter by vendor"
+          allowClear
+          style={{ width: 200 }}
+          onChange={handleVendorFilter}
+          value={selectedVendorId || undefined}
+        >
+          {vendorsResponse?.data?.map((vendor) => (
+            <Option key={vendor._id} value={vendor._id}>
+              {vendor.vendorName}
+            </Option>
+          ))}
+        </Select>
+      </div>
+
+      <Table
+        columns={columns}
+        dataSource={brandsResponse?.data || []}
+        loading={isLoading}
+        rowKey="_id"
+        pagination={{
+          current: currentPage,
+          pageSize: pageSize,
+          total: brandsResponse?.pagination?.total || 0,
+          showSizeChanger: true,
+          showQuickJumper: true,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`,
+          onChange: (page, size) => {
+            setCurrentPage(page);
+            setPageSize(size || 10);
+          },
+        }}
+        className="bg-white rounded-lg shadow"
+      />
+
+      <AddEditBrandDrawer
+        open={isOpen}
+        onClose={handleDrawerClose}
+        brand={selectedBrand}
+      />
+    </div>
+  );
+};
+
+export default BrandTable; 

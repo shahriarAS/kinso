@@ -44,7 +44,7 @@ export default function ProductTableRefactored({
     page: currentPage,
     limit: pageSize,
     search: searchTerm,
-    category: categoryFilter || undefined,
+    categoryId: categoryFilter || undefined,
     warehouse: warehouseFilter || undefined,
     sortBy: "name",
     sortOrder: "asc",
@@ -107,28 +107,40 @@ export default function ProductTableRefactored({
       ),
     },
     {
-      title: <span className="font-medium text-base">SKU</span>,
-      dataIndex: "sku",
-      key: "sku",
+      title: <span className="font-medium text-base">Barcode</span>,
+      dataIndex: "barcode",
+      key: "barcode",
       render: (text: string) => (
         <span className="text-gray-700 font-mono">{text}</span>
       ),
     },
     {
-      title: <span className="font-medium text-base">UPC</span>,
-      dataIndex: "upc",
-      key: "upc",
-      render: (text: string) => (
-        <span className="text-gray-700 font-mono">{text}</span>
-      ),
+      title: <span className="font-medium text-base">Vendor</span>,
+      dataIndex: "vendorId",
+      key: "vendorId",
+      render: (vendor: string | { _id: string; vendorName: string }) => {
+        const vendorName =
+          typeof vendor === "string" ? vendor : vendor?.vendorName || "";
+        return <span className="text-gray-700 capitalize">{vendorName}</span>;
+      },
+    },
+    {
+      title: <span className="font-medium text-base">Brand</span>,
+      dataIndex: "brandId",
+      key: "brandId",
+      render: (brand: string | { _id: string; brandName: string }) => {
+        const brandName =
+          typeof brand === "string" ? brand : brand?.brandName || "";
+        return <span className="text-gray-700 capitalize">{brandName}</span>;
+      },
     },
     {
       title: <span className="font-medium text-base">Category</span>,
-      dataIndex: "category",
-      key: "category",
-      render: (category: string | { _id: string; name: string }) => {
+      dataIndex: "categoryId",
+      key: "categoryId",
+      render: (category: string | { _id: string; categoryName: string }) => {
         const categoryName =
-          typeof category === "string" ? category : category?.name || "";
+          typeof category === "string" ? category : category?.categoryName || "";
         return <span className="text-gray-700 capitalize">{categoryName}</span>;
       },
     },

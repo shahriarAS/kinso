@@ -36,9 +36,27 @@ export async function handleGet(request: NextRequest) {
     const query: any = {};
     if (search) {
       query.$or = [
-        { name: { $regex: search, $options: "i" } },
+        { categoryId: { $regex: search, $options: "i" } },
+        { categoryName: { $regex: search, $options: "i" } },
         { description: { $regex: search, $options: "i" } },
       ];
+    }
+
+    // Add additional filters
+    const categoryId = searchParams.get("categoryId");
+    const categoryName = searchParams.get("categoryName");
+    const vatStatus = searchParams.get("vatStatus");
+
+    if (categoryId) {
+      query.categoryId = { $regex: categoryId, $options: "i" };
+    }
+
+    if (categoryName) {
+      query.categoryName = { $regex: categoryName, $options: "i" };
+    }
+
+    if (vatStatus !== null && vatStatus !== undefined) {
+      query.vatStatus = vatStatus === "true";
     }
 
     // Execute query
@@ -93,31 +111,40 @@ export async function handlePost(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { name, description } = body;
+    const { categoryId, categoryName, vatStatus, description } = body;
 
     // Basic validation
-    if (!name || name.trim().length === 0) {
+    if (!categoryId || categoryId.trim().length === 0) {
+      return NextResponse.json(
+        { success: false, message: "Category ID is required" },
+        { status: 400 },
+      );
+    }
+
+    if (!categoryName || categoryName.trim().length === 0) {
       return NextResponse.json(
         { success: false, message: "Category name is required" },
         { status: 400 },
       );
     }
 
-    // Check if category already exists
+    // Check if categoryId already exists
     const existingCategory = await Category.findOne({
-      name: { $regex: new RegExp(`^${name.trim()}$`, "i") },
+      categoryId: { $regex: new RegExp(`^${categoryId.trim()}$`, "i") },
     });
 
     if (existingCategory) {
       return NextResponse.json(
-        { success: false, message: "Category with this name already exists" },
+        { success: false, message: "Category with this ID already exists" },
         { status: 409 },
       );
     }
 
     // Create category
     const category = await Category.create({
-      name: name.trim(),
+      categoryId: categoryId.trim(),
+      categoryName: categoryName.trim(),
+      vatStatus: vatStatus || false,
       description: description?.trim() || "",
     });
 
@@ -209,7 +236,7 @@ export async function handleUpdateById(
     await dbConnect();
 
     const body = await request.json();
-    const { name, description } = body;
+    const { categoryId, categoryName, vatStatus, description } = body;
 
     // Check if category exists
     const existingCategory = await Category.findById(_id);
@@ -221,22 +248,29 @@ export async function handleUpdateById(
     }
 
     // Basic validation
-    if (!name || name.trim().length === 0) {
+    if (!categoryId || categoryId.trim().length === 0) {
+      return NextResponse.json(
+        { success: false, message: "Category ID is required" },
+        { status: 400 },
+      );
+    }
+
+    if (!categoryName || categoryName.trim().length === 0) {
       return NextResponse.json(
         { success: false, message: "Category name is required" },
         { status: 400 },
       );
     }
 
-    // Check if new name conflicts with existing category (excluding current one)
-    const nameConflict = await Category.findOne({
+    // Check if new categoryId conflicts with existing category (excluding current one)
+    const idConflict = await Category.findOne({
       _id: { $ne: _id },
-      name: { $regex: new RegExp(`^${name.trim()}$`, "i") },
+      categoryId: { $regex: new RegExp(`^${categoryId.trim()}$`, "i") },
     });
 
-    if (nameConflict) {
+    if (idConflict) {
       return NextResponse.json(
-        { success: false, message: "Category with this name already exists" },
+        { success: false, message: "Category with this ID already exists" },
         { status: 409 },
       );
     }
@@ -245,7 +279,9 @@ export async function handleUpdateById(
     const updatedCategory = await Category.findByIdAndUpdate(
       _id,
       {
-        name: name.trim(),
+        categoryId: categoryId.trim(),
+        categoryName: categoryName.trim(),
+        vatStatus: vatStatus || false,
         description: description?.trim() || "",
       },
       { new: true, runValidators: true },

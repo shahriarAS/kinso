@@ -22,7 +22,10 @@ export const productsApi = createApi({
         page?: number;
         limit?: number;
         search?: string;
-        category?: string;
+        barcode?: string;
+        vendorId?: string;
+        brandId?: string;
+        categoryId?: string;
         warehouse?: string;
         sortBy?: string;
         sortOrder?: "asc" | "desc";

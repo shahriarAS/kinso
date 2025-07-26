@@ -1,7 +1,9 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface ICategory extends Document {
-  name: string;
+  categoryId: string;
+  categoryName: string;
+  vatStatus: boolean;
   description?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -9,11 +11,20 @@ export interface ICategory extends Document {
 
 const CategorySchema: Schema = new Schema(
   {
-    name: {
+    categoryId: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    categoryName: {
       type: String,
       required: true,
       trim: true,
-      unique: true,
+    },
+    vatStatus: {
+      type: Boolean,
+      default: false,
     },
     description: {
       type: String,
@@ -24,6 +35,15 @@ const CategorySchema: Schema = new Schema(
     timestamps: true,
   },
 );
+
+// Index for categoryId queries
+CategorySchema.index({ categoryId: 1 });
+
+// Index for categoryName queries
+CategorySchema.index({ categoryName: 1 });
+
+// Index for vatStatus queries
+CategorySchema.index({ vatStatus: 1 });
 
 // Add index for createdAt
 CategorySchema.index({ createdAt: -1 });

@@ -1,12 +1,16 @@
 export interface Category {
   _id: string;
-  name: string;
+  categoryId: string;
+  categoryName: string;
+  vatStatus: boolean;
   description?: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CategoryInput {
-  name: string;
+  categoryId: string;
+  categoryName: string;
+  vatStatus: boolean;
   description?: string;
 }

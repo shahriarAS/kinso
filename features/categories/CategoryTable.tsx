@@ -70,11 +70,33 @@ export default function CategoryTable({
   // Define columns using the generic interface
   const columns: TableColumn<Category>[] = [
     {
-      title: <span className="font-medium text-base">Name</span>,
-      dataIndex: "name",
-      key: "name",
+      title: <span className="font-medium text-base">Category ID</span>,
+      dataIndex: "categoryId",
+      key: "categoryId",
       render: (text: string) => (
         <span className="font-medium text-gray-900">{text}</span>
+      ),
+    },
+    {
+      title: <span className="font-medium text-base">Category Name</span>,
+      dataIndex: "categoryName",
+      key: "categoryName",
+      render: (text: string) => (
+        <span className="font-medium text-gray-900">{text}</span>
+      ),
+    },
+    {
+      title: <span className="font-medium text-base">VAT Status</span>,
+      dataIndex: "vatStatus",
+      key: "vatStatus",
+      render: (status: boolean) => (
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+          status 
+            ? "bg-green-100 text-green-800" 
+            : "bg-gray-100 text-gray-800"
+        }`}>
+          {status ? "VAT Enabled" : "VAT Disabled"}
+        </span>
       ),
     },
     {

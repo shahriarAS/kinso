@@ -37,11 +37,28 @@ export default function AddEditCategoryDrawer({
   // Define form fields using the generic interface
   const fields: FormField[] = [
     {
-      name: "name",
+      name: "categoryId",
+      label: "Category ID",
+      type: "input",
+      placeholder: "Enter Category ID",
+      rules: [{ required: true, message: "Please enter category ID" }],
+    },
+    {
+      name: "categoryName",
       label: "Category Name",
       type: "input",
       placeholder: "Enter Category Name",
       rules: [{ required: true, message: "Please enter category name" }],
+    },
+    {
+      name: "vatStatus",
+      label: "VAT Status",
+      type: "select",
+      placeholder: "Select VAT status",
+      options: [
+        { label: "VAT Enabled", value: true },
+        { label: "VAT Disabled", value: false },
+      ],
     },
     {
       name: "description",
@@ -100,7 +117,9 @@ export default function AddEditCategoryDrawer({
       initialValues={
         category
           ? {
-              name: category.name,
+              categoryId: category.categoryId,
+              categoryName: category.categoryName,
+              vatStatus: category.vatStatus,
               description: category.description,
             }
           : undefined

@@ -9,9 +9,10 @@ export interface IStock {
 
 export interface IProduct extends Document {
   name: string;
-  upc: string;
-  sku: string;
-  category: mongoose.Types.ObjectId;
+  barcode: string;
+  vendorId: mongoose.Types.ObjectId;
+  brandId: mongoose.Types.ObjectId;
+  categoryId: mongoose.Types.ObjectId;
   warranty?: {
     value: number;
     unit: string;
@@ -54,19 +55,23 @@ const ProductSchema: Schema = new Schema(
       required: true,
       trim: true,
     },
-    upc: {
+    barcode: {
       type: String,
       required: true,
       unique: true,
       trim: true,
     },
-    sku: {
-      type: String,
+    vendorId: {
+      type: Schema.Types.ObjectId,
+      ref: "Vendor",
       required: true,
-      unique: true,
-      trim: true,
     },
-    category: {
+    brandId: {
+      type: Schema.Types.ObjectId,
+      ref: "Brand",
+      required: true,
+    },
+    categoryId: {
       type: Schema.Types.ObjectId,
       ref: "Category",
       required: true,
@@ -91,8 +96,17 @@ const ProductSchema: Schema = new Schema(
 // Index for name queries
 ProductSchema.index({ name: 1 });
 
-// Index for category queries
-ProductSchema.index({ category: 1 });
+// Index for barcode queries
+ProductSchema.index({ barcode: 1 });
+
+// Index for vendorId queries
+ProductSchema.index({ vendorId: 1 });
+
+// Index for brandId queries
+ProductSchema.index({ brandId: 1 });
+
+// Index for categoryId queries
+ProductSchema.index({ categoryId: 1 });
 
 // Index for stock queries
 ProductSchema.index({ "stock.warehouse": 1 });

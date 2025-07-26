@@ -1,12 +1,15 @@
 import { Warehouse } from "@/features/warehouses";
 import { Category } from "@/features/categories";
+import { Vendor } from "@/features/vendors";
+import { Brand } from "@/features/brands";
 
 export interface Product {
   _id: string;
   name: string;
-  upc: string;
-  sku: string;
-  category: string | Category;
+  barcode: string;
+  vendorId: string | Vendor;
+  brandId: string | Brand;
+  categoryId: string | Category;
   warranty?: {
     value: number;
     unit: string;
@@ -20,12 +23,15 @@ export interface Product {
   createdAt: string;
   updatedAt: string;
 }
+
 export interface ProductInput
   extends Omit<
     Product,
-    "_id" | "createdAt" | "updatedAt" | "stock" | "category"
+    "_id" | "createdAt" | "updatedAt" | "stock" | "vendorId" | "brandId" | "categoryId"
   > {
-  category: string;
+  vendorId: string;
+  brandId: string;
+  categoryId: string;
   stock: {
     warehouse: string;
     unit: number;

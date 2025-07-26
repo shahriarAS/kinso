@@ -3,6 +3,8 @@ import dbConnect from "@/lib/database";
 import Product from "./model";
 import Category from "@/features/categories/model";
 import Warehouse from "@/features/warehouses/model";
+import Vendor from "@/features/vendors/model";
+import Brand from "@/features/brands/model";
 import { authorizeRequest } from "@/lib/auth";
 import { AuthenticatedRequest } from "@/features/auth";
 
@@ -30,7 +32,10 @@ export async function handleGet(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
     const search = searchParams.get("search") || "";
-    const category = searchParams.get("category") || "";
+    const barcode = searchParams.get("barcode") || "";
+    const vendorId = searchParams.get("vendorId") || "";
+    const brandId = searchParams.get("brandId") || "";
+    const categoryId = searchParams.get("categoryId") || "";
     const warehouse = searchParams.get("warehouse") || "";
     const lowStock = searchParams.get("lowStock") === "true";
 
@@ -42,12 +47,20 @@ export async function handleGet(request: NextRequest) {
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: "i" } },
-        { upc: { $regex: search, $options: "i" } },
-        { sku: { $regex: search, $options: "i" } },
+        { barcode: { $regex: search, $options: "i" } },
       ];
     }
-    if (category) {
-      query.category = category;
+    if (barcode) {
+      query.barcode = { $regex: barcode, $options: "i" };
+    }
+    if (vendorId) {
+      query.vendorId = vendorId;
+    }
+    if (brandId) {
+      query.brandId = brandId;
+    }
+    if (categoryId) {
+      query.categoryId = categoryId;
     }
     if (warehouse) {
       query["stock.warehouse"] = warehouse;
@@ -59,7 +72,9 @@ export async function handleGet(request: NextRequest) {
     // Execute query
     const [products, total] = await Promise.all([
       Product.find(query)
-        .populate("category", "name")
+        .populate("vendorId", "vendorId vendorName")
+        .populate("brandId", "brandId brandName")
+        .populate("categoryId", "categoryId categoryName")
         .populate("stock.warehouse", "name location")
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -110,7 +125,7 @@ export async function handlePost(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { name, sku, upc, category, warranty, stock } = body;
+    const { name, barcode, vendorId, brandId, categoryId, warranty, stock } = body;
 
     // Basic validation
     if (!name || name.trim().length === 0) {
@@ -120,21 +135,28 @@ export async function handlePost(request: NextRequest) {
       );
     }
 
-    if (!upc || upc.trim().length === 0) {
+    if (!barcode || barcode.trim().length === 0) {
       return NextResponse.json(
-        { success: false, message: "Product UPC is required" },
+        { success: false, message: "Product barcode is required" },
         { status: 400 },
       );
     }
 
-    if (!sku || sku.trim().length === 0) {
+    if (!vendorId) {
       return NextResponse.json(
-        { success: false, message: "Product SKU is required" },
+        { success: false, message: "Product vendor is required" },
         { status: 400 },
       );
     }
 
-    if (!category) {
+    if (!brandId) {
+      return NextResponse.json(
+        { success: false, message: "Product brand is required" },
+        { status: 400 },
+      );
+    }
+
+    if (!categoryId) {
       return NextResponse.json(
         { success: false, message: "Product category is required" },
         { status: 400 },
@@ -175,26 +197,35 @@ export async function handlePost(request: NextRequest) {
       }
     }
 
-    // Check if product already exists with same SKU
-    const existingProductWithSku = await Product.findOne({ sku: sku.trim() });
-    if (existingProductWithSku) {
+    // Check if product already exists with same barcode
+    const existingProductWithBarcode = await Product.findOne({ barcode: barcode.trim() });
+    if (existingProductWithBarcode) {
       return NextResponse.json(
-        { success: false, message: "Product with this SKU already exists" },
+        { success: false, message: "Product with this barcode already exists" },
         { status: 409 },
       );
     }
 
-    // Check if product already exists with same UPC
-    const existingProductWithUpc = await Product.findOne({ upc: upc.trim() });
-    if (existingProductWithUpc) {
+    // Validate vendor exists
+    const vendorExists = await Vendor.findById(vendorId);
+    if (!vendorExists) {
       return NextResponse.json(
-        { success: false, message: "Product with this UPC already exists" },
-        { status: 409 },
+        { success: false, message: "Vendor not found" },
+        { status: 404 },
+      );
+    }
+
+    // Validate brand exists
+    const brandExists = await Brand.findById(brandId);
+    if (!brandExists) {
+      return NextResponse.json(
+        { success: false, message: "Brand not found" },
+        { status: 404 },
       );
     }
 
     // Validate category exists
-    const categoryExists = await Category.findById(category);
+    const categoryExists = await Category.findById(categoryId);
     if (!categoryExists) {
       return NextResponse.json(
         { success: false, message: "Category not found" },
@@ -216,9 +247,10 @@ export async function handlePost(request: NextRequest) {
     // Create product
     const product = await Product.create({
       name: name.trim(),
-      upc: upc.trim(),
-      sku: sku.trim(),
-      category,
+      barcode: barcode.trim(),
+      vendorId,
+      brandId,
+      categoryId,
       warranty,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       stock: stock.map((s: any) => ({
@@ -231,7 +263,9 @@ export async function handlePost(request: NextRequest) {
 
     // Populate references for response
     const populatedProduct = await Product.findById(product._id)
-      .populate("category", "name")
+      .populate("vendorId", "vendorId vendorName")
+      .populate("brandId", "brandId brandName")
+      .populate("categoryId", "categoryId categoryName")
       .populate("stock.warehouse", "name location")
       .lean();
 
@@ -273,7 +307,9 @@ export async function handleGetById(
     await dbConnect();
     const { _id } = await params;
     const product = await Product.findById(_id)
-      .populate("category", "name")
+      .populate("vendorId", "vendorId vendorName")
+      .populate("brandId", "brandId brandName")
+      .populate("categoryId", "categoryId categoryName")
       .populate("stock.warehouse", "name location")
       .lean();
     if (!product) {
@@ -315,7 +351,7 @@ export async function handleUpdateById(
     }
     await dbConnect();
     const body = await request.json();
-    const { name, sku, upc, category, warranty, stock } = body;
+    const { name, barcode, vendorId, brandId, categoryId, warranty, stock } = body;
     const { _id } = await params;
     const existingProduct = await Product.findById(_id);
     if (!existingProduct) {
@@ -330,19 +366,25 @@ export async function handleUpdateById(
         { status: 400 },
       );
     }
-    if (!sku || sku.trim().length === 0) {
+    if (!barcode || barcode.trim().length === 0) {
       return NextResponse.json(
-        { success: false, message: "Product SKU is required" },
+        { success: false, message: "Product barcode is required" },
         { status: 400 },
       );
     }
-    if (!upc || upc.trim().length === 0) {
+    if (!vendorId) {
       return NextResponse.json(
-        { success: false, message: "Product UPC is required" },
+        { success: false, message: "Product vendor is required" },
         { status: 400 },
       );
     }
-    if (!category) {
+    if (!brandId) {
+      return NextResponse.json(
+        { success: false, message: "Product brand is required" },
+        { status: 400 },
+      );
+    }
+    if (!categoryId) {
       return NextResponse.json(
         { success: false, message: "Product category is required" },
         { status: 400 },
@@ -377,27 +419,31 @@ export async function handleUpdateById(
         );
       }
     }
-    const upcConflict = await Product.findOne({
+    const barcodeConflict = await Product.findOne({
       _id: { $ne: _id },
-      upc: upc.trim(),
+      barcode: barcode.trim(),
     });
-    if (upcConflict) {
+    if (barcodeConflict) {
       return NextResponse.json(
-        { success: false, message: "Product with this UPC already exists" },
+        { success: false, message: "Product with this barcode already exists" },
         { status: 409 },
       );
     }
-    const skuConflict = await Product.findOne({
-      _id: { $ne: _id },
-      sku: sku.trim(),
-    });
-    if (skuConflict) {
+    const vendorExists = await Vendor.findById(vendorId);
+    if (!vendorExists) {
       return NextResponse.json(
-        { success: false, message: "Product with this SKU already exists" },
-        { status: 409 },
+        { success: false, message: "Vendor not found" },
+        { status: 404 },
       );
     }
-    const categoryExists = await Category.findById(category);
+    const brandExists = await Brand.findById(brandId);
+    if (!brandExists) {
+      return NextResponse.json(
+        { success: false, message: "Brand not found" },
+        { status: 404 },
+      );
+    }
+    const categoryExists = await Category.findById(categoryId);
     if (!categoryExists) {
       return NextResponse.json(
         { success: false, message: "Category not found" },
@@ -416,9 +462,10 @@ export async function handleUpdateById(
       _id,
       {
         name: name.trim(),
-        sku: sku.trim(),
-        upc: upc.trim(),
-        category,
+        barcode: barcode.trim(),
+        vendorId,
+        brandId,
+        categoryId,
         warranty,
         stock: stock.map((s: any) => ({
           warehouse: s.warehouse,
@@ -436,7 +483,9 @@ export async function handleUpdateById(
       );
     }
     const populatedProduct = await Product.findById(updatedProduct._id)
-      .populate("category", "name")
+      .populate("vendorId", "vendorId vendorName")
+      .populate("brandId", "brandId brandName")
+      .populate("categoryId", "categoryId categoryName")
       .populate("stock.warehouse", "name location")
       .lean();
     return NextResponse.json({

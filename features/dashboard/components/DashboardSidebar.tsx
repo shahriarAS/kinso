@@ -36,6 +36,16 @@ const menuItems = [
     href: "/dashboard/warehouse",
   },
   {
+    icon: "lineicons:shopping-bag-1",
+    label: "Vendors",
+    href: "/dashboard/vendors",
+  },
+  {
+    icon: "lineicons:tag-1",
+    label: "Brands",
+    href: "/dashboard/brands",
+  },
+  {
     icon: "tabler:currency-taka",
     label: "Orders",
     href: "/dashboard/orders",

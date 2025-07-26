@@ -9,6 +9,8 @@ import { dashboardApi } from "@/features/dashboard";
 import uiReducer from "./slices/uiSlice";
 import { productsApi } from "@/features/products";
 import { settingsApi } from "@/features/settings";
+import { vendorApi } from "@/features/vendors";
+import { brandsApi } from "@/features/brands";
 
 const store = configureStore({
   reducer: {
@@ -22,13 +24,15 @@ const store = configureStore({
     [usersApi.reducerPath]: usersApi.reducer,
     [dashboardApi.reducerPath]: dashboardApi.reducer,
     [settingsApi.reducerPath]: settingsApi.reducer,
+    [vendorApi.reducerPath]: vendorApi.reducer,
+    [brandsApi.reducerPath]: brandsApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: ["persist/PERSIST"],
       },
-    }).concat(
+    }    ).concat(
       authApi.middleware,
       productsApi.middleware,
       customersApi.middleware,
@@ -38,6 +42,8 @@ const store = configureStore({
       usersApi.middleware,
       dashboardApi.middleware,
       settingsApi.middleware,
+      vendorApi.middleware,
+      brandsApi.middleware,
     ),
 });
 

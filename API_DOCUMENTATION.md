@@ -1,4 +1,4 @@
-# API Documentation
+<!-- # API Documentation
 
 This document provides comprehensive documentation for all API routes available in the EZ Enterprise Management System.
 
@@ -340,4 +340,4 @@ List endpoints support pagination with the following parameters:
 
 ## Caching
 
-All API responses are automatically cached using RTK Query. Cache invalidation is handled automatically when mutations are performed.
+All API responses are automatically cached using RTK Query. Cache invalidation is handled automatically when mutations are performed. -->

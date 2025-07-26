@@ -28,11 +28,11 @@ const InvoicePDF: React.FC<{ data: InvoiceData }> = ({ data }) => {
         <View style={styles.header}>
           {/* Logo and Company Info */}
           <View>
-            {data.company.logo && data.company.logo !== "EZ" ? (
+            {data.company.logo && data.company.logo !== "Kinso" ? (
               <Image src={data.company.logo} style={styles.logoBoxImage} />
             ) : (
               <View style={styles.logoBoxText}>
-                <Text style={styles.logoText}>EZ</Text>
+                <Text style={styles.logoText}>Kinso</Text>
               </View>
             )}
             <Text style={styles.companyName}>{data.company.name}</Text>

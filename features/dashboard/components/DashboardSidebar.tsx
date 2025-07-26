@@ -83,7 +83,7 @@ export default function DashboardSidebar() {
           )}
           style={{ transitionProperty: "max-width, opacity" }}
         >
-          Ez Gadgets
+          Kinso
         </span>
         <span
           onClick={() => setCollapsed(!collapsed)}

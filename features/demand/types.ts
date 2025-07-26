@@ -1,56 +1,40 @@
 import { IDemand } from "./model";
 
-export interface Demand extends Omit<IDemand, "_id" | "outletId" | "productId"> {
+export interface Demand extends Omit<IDemand, "_id"> {
   _id: string;
-  outletId?: string;
-  productId: string;
 }
 
 export interface DemandInput {
-  outletId?: string;
-  warehouseId?: string;
-  productId: string;
-  quantity: number;
-  demandDate?: Date;
+  demandId: string;
+  locationId: string;
+  locationType: "Warehouse" | "Outlet";
+  products: {
+    productId: string;
+    quantity: number;
+  }[];
+  status: "Pending" | "Approved" | "ConvertedToStock";
 }
 
 export interface DemandFilters {
   page?: number;
   limit?: number;
-  search?: string;
-  outletId?: string;
-  warehouseId?: string;
-  productId?: string;
-  status?: string;
-  startDate?: string;
-  endDate?: string;
-  sortBy?: string;
-  sortOrder?: "asc" | "desc";
-}
-
-export interface DemandGenerationRequest {
-  outletId?: string;
-  warehouseId?: string;
-  days?: number; // Number of days to look back for sales data
-  minSalesThreshold?: number; // Minimum sales to consider for demand generation
+  locationId?: string;
+  locationType?: "Warehouse" | "Outlet";
+  status?: "Pending" | "Approved" | "ConvertedToStock";
 }
 
 export interface DemandConversionRequest {
-  demandId: string;
-  warehouseId: string;
-  quantity: number;
+  mrp: number;
+  tp: number;
+  expireDate: string;
+  batchNumber: string;
 }
 
 export interface DemandResponse {
   data: Demand[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
-
-export interface DemandGenerationResponse {
-  message: string;
-  generatedCount: number;
-  demands: Demand[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+  };
 } 

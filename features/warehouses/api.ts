@@ -1,6 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
 import { Warehouse, WarehouseInput } from "@/features/warehouses/types";
+import { PaginatedResponse, ApiResponse } from "@/types";
 
 export const warehousesApi = createApi({
   reducerPath: "warehousesApi",
@@ -9,16 +10,7 @@ export const warehousesApi = createApi({
   endpoints: (builder) => ({
     // Get all warehouses with pagination and filters
     getWarehouses: builder.query<
-      {
-        success: boolean;
-        data: Warehouse[];
-        pagination: {
-          page: number;
-          limit: number;
-          total: number;
-          totalPages: number;
-        };
-      },
+      PaginatedResponse<Warehouse>,
       {
         page?: number;
         limit?: number;
@@ -33,7 +25,7 @@ export const warehousesApi = createApi({
         params,
       }),
       providesTags: (result) =>
-        result
+        result?.data
           ? [
               ...result.data.map(({ _id }) => ({
                 type: "Warehouse" as const,
@@ -45,7 +37,7 @@ export const warehousesApi = createApi({
     }),
 
     // Get single warehouse by ID
-    getWarehouse: builder.query<{ success: boolean; data: Warehouse }, string>({
+    getWarehouse: builder.query<ApiResponse<Warehouse>, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "GET",
@@ -55,7 +47,7 @@ export const warehousesApi = createApi({
 
     // Create new warehouse
     createWarehouse: builder.mutation<
-      { success: boolean; message: string; data: Warehouse },
+      ApiResponse<Warehouse>,
       WarehouseInput
     >({
       query: (warehouse) => ({
@@ -68,7 +60,7 @@ export const warehousesApi = createApi({
 
     // Update warehouse
     updateWarehouse: builder.mutation<
-      { success: boolean; message: string; data: Warehouse },
+      ApiResponse<Warehouse>,
       { _id: string; warehouse: Partial<WarehouseInput> }
     >({
       query: ({ _id, warehouse }) => ({
@@ -83,7 +75,7 @@ export const warehousesApi = createApi({
     }),
 
     // Delete warehouse
-    deleteWarehouse: builder.mutation<{ success: boolean; message: string }, string>({
+    deleteWarehouse: builder.mutation<ApiResponse<void>, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",
@@ -93,27 +85,24 @@ export const warehousesApi = createApi({
 
     // Get warehouse inventory
     getWarehouseInventory: builder.query<
-      {
-        success: boolean;
-        data: {
-          warehouse: Warehouse;
-          products: Array<{
-            product: {
-              _id: string;
-              name: string;
-              upc: string;
-              sku: string;
-              category: string;
-            };
-            quantity: number;
-            unit: string;
-            dp?: number;
-            mrp: number;
-          }>;
-          totalProducts: number;
-          totalValue: number;
-        };
-      },
+      ApiResponse<{
+        warehouse: Warehouse;
+        products: Array<{
+          product: {
+            _id: string;
+            name: string;
+            upc: string;
+            sku: string;
+            category: string;
+          };
+          quantity: number;
+          unit: string;
+          dp?: number;
+          mrp: number;
+        }>;
+        totalProducts: number;
+        totalValue: number;
+      }>,
       string
     >({
       query: (warehouseId) => ({
@@ -127,22 +116,19 @@ export const warehousesApi = createApi({
 
     // Get warehouse statistics
     getWarehouseStats: builder.query<
-      {
-        success: boolean;
-        data: {
-          totalWarehouses: number;
-          totalProducts: number;
+      ApiResponse<{
+        totalWarehouses: number;
+        totalProducts: number;
+        totalValue: number;
+        lowStockProducts: number;
+        warehouses: Array<{
+          _id: string;
+          name: string;
+          location: string;
+          productCount: number;
           totalValue: number;
-          lowStockProducts: number;
-          warehouses: Array<{
-            _id: string;
-            name: string;
-            location: string;
-            productCount: number;
-            totalValue: number;
-          }>;
-        };
-      },
+        }>;
+      }>,
       void
     >({
       query: () => ({

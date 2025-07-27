@@ -1,6 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
 import { Order, OrderInput } from "@/features/orders/types";
+import { PaginatedResponse, ApiResponse } from "@/types";
 
 export const ordersApi = createApi({
   reducerPath: "ordersApi",
@@ -9,15 +10,7 @@ export const ordersApi = createApi({
   endpoints: (builder) => ({
     // Get all orders with pagination and filters
     getOrders: builder.query<
-      {
-        data: Order[];
-        pagination: {
-          page: number;
-          limit: number;
-          total: number;
-          totalPages: number;
-        };
-      },
+      PaginatedResponse<Order>,
       {
         page?: number;
         limit?: number;
@@ -33,7 +26,7 @@ export const ordersApi = createApi({
         params,
       }),
       providesTags: (result) =>
-        result
+        result?.data
           ? [
               ...result.data.map(({ _id }) => ({
                 type: "Order" as const,
@@ -45,7 +38,7 @@ export const ordersApi = createApi({
     }),
 
     // Get single order by ID
-    getOrder: builder.query<{ data: Order }, string>({
+    getOrder: builder.query<ApiResponse<Order>, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "GET",
@@ -54,7 +47,7 @@ export const ordersApi = createApi({
     }),
 
     // Create new order
-    createOrder: builder.mutation<{ message: string; data: Order }, OrderInput>(
+    createOrder: builder.mutation<ApiResponse<Order>, OrderInput>(
       {
         query: (order) => ({
           url: "/",
@@ -70,7 +63,7 @@ export const ordersApi = createApi({
 
     // Update order
     updateOrder: builder.mutation<
-      { message: string; data: Order },
+      ApiResponse<Order>,
       { _id: string; order: Partial<OrderInput> }
     >({
       query: ({ _id, order }) => ({
@@ -85,7 +78,7 @@ export const ordersApi = createApi({
     }),
 
     // Delete order
-    deleteOrder: builder.mutation<{ message: string }, string>({
+    deleteOrder: builder.mutation<ApiResponse<void>, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",
@@ -95,7 +88,7 @@ export const ordersApi = createApi({
 
     // Get order statistics
     getOrderStats: builder.query<
-      {
+      ApiResponse<{
         totalOrders: number;
         totalRevenue: number;
         pendingOrders: number;
@@ -105,7 +98,7 @@ export const ordersApi = createApi({
         cancelledOrders: number;
         averageOrderValue: number;
         recentOrders: Order[];
-      },
+      }>,
       {
         startDate?: string;
         endDate?: string;
@@ -120,13 +113,13 @@ export const ordersApi = createApi({
     }),
 
     // Get orders by customer
-    getOrdersByCustomer: builder.query<{ data: Order[] }, string>({
+    getOrdersByCustomer: builder.query<ApiResponse<Order[]>, string>({
       query: (customerId) => ({
         url: `/customer/${customerId}`,
         method: "GET",
       }),
       providesTags: (result) =>
-        result
+        result?.data
           ? result.data.map(({ _id }) => ({ type: "Order" as const, _id }))
           : [],
     }),

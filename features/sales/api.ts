@@ -9,6 +9,7 @@ import type {
   ProductSearchResult,
   SalesStatsResponse,
 } from "./types";
+import { ApiResponse } from "@/types";
 
 export const salesApi = createApi({
   reducerPath: "salesApi",
@@ -16,7 +17,7 @@ export const salesApi = createApi({
   tagTypes: ["Sales", "Products"],
   endpoints: (builder) => ({
     // Create new sale
-    createSale: builder.mutation<{ success: boolean; data: Sale; message: string }, CreateSaleRequest>({
+    createSale: builder.mutation<ApiResponse<Sale>, CreateSaleRequest>({
       query: (saleData) => ({
         url: `/`,
         method: "POST",
@@ -36,7 +37,7 @@ export const salesApi = createApi({
     }),
 
     // Process sale return
-    processSaleReturn: builder.mutation<{ success: boolean; data: Sale; message: string }, SaleReturnRequest>({
+    processSaleReturn: builder.mutation<ApiResponse<Sale>, SaleReturnRequest>({
       query: (returnData) => ({
         url: `/returns`,
         method: "POST",
@@ -46,7 +47,7 @@ export const salesApi = createApi({
     }),
 
     // Get sale by ID
-    getSaleById: builder.query<{ success: boolean; data: Sale }, string>({
+    getSaleById: builder.query<ApiResponse<Sale>, string>({
       query: (saleId) => ({
         url: `/${saleId}`,
         method: "GET",
@@ -56,7 +57,7 @@ export const salesApi = createApi({
 
     // Update sale
     updateSale: builder.mutation<
-      { success: boolean; data: Sale; message: string },
+      ApiResponse<Sale>,
       { saleId: string; saleData: Partial<CreateSaleRequest> }
     >({
       query: ({ saleId, saleData }) => ({
@@ -68,7 +69,7 @@ export const salesApi = createApi({
     }),
 
     // Delete sale
-    deleteSale: builder.mutation<{ success: boolean; message: string }, string>({
+    deleteSale: builder.mutation<ApiResponse<void>, string>({
       query: (saleId) => ({
         url: `/${saleId}`,
         method: "DELETE",
@@ -77,7 +78,7 @@ export const salesApi = createApi({
     }),
 
     // Search products for POS
-    searchProducts: builder.query<{ success: boolean; data: ProductSearchResult[] }, { query: string; outletId?: string }>({
+    searchProducts: builder.query<ApiResponse<ProductSearchResult[]>, { query: string; outletId?: string }>({
       query: (params) => ({
         url: `/search`,
         method: "GET",

@@ -18,6 +18,7 @@ export interface UserInput {
   role?: "admin" | "manager" | "staff";
   outlet?: string;
   avatar?: string;
+  isActive?: boolean;
 }
 
 export interface UserUpdateInput {

@@ -1,6 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
 import { Category, CategoryInput } from "@/features/categories/types";
+import { PaginatedResponse, ApiResponse } from "@/types";
 
 export const categoriesApi = createApi({
   reducerPath: "categoriesApi",
@@ -9,16 +10,7 @@ export const categoriesApi = createApi({
   endpoints: (builder) => ({
     // Get all categories with pagination and search
     getCategories: builder.query<
-      {
-        success: boolean;
-        data: Category[];
-        pagination: {
-          page: number;
-          limit: number;
-          total: number;
-          totalPages: number;
-        };
-      },
+      PaginatedResponse<Category>,
       {
         page?: number;
         limit?: number;
@@ -36,7 +28,7 @@ export const categoriesApi = createApi({
         params,
       }),
       providesTags: (result) =>
-        result
+        result?.data
           ? [
               ...result.data.map(({ _id }) => ({
                 type: "Category" as const,
@@ -48,7 +40,7 @@ export const categoriesApi = createApi({
     }),
 
     // Get single category by ID
-    getCategory: builder.query<{ success: boolean; data: Category }, string>({
+    getCategory: builder.query<ApiResponse<Category>, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "GET",
@@ -58,7 +50,7 @@ export const categoriesApi = createApi({
 
     // Create new category
     createCategory: builder.mutation<
-      { success: boolean; message: string; data: Category },
+      ApiResponse<Category>,
       CategoryInput
     >({
       query: (category) => ({
@@ -71,7 +63,7 @@ export const categoriesApi = createApi({
 
     // Update category
     updateCategory: builder.mutation<
-      { success: boolean; message: string; data: Category },
+      ApiResponse<Category>,
       { _id: string; category: Partial<CategoryInput> }
     >({
       query: ({ _id, category }) => ({
@@ -86,7 +78,7 @@ export const categoriesApi = createApi({
     }),
 
     // Delete category
-    deleteCategory: builder.mutation<{ success: boolean; message: string }, string>({
+    deleteCategory: builder.mutation<ApiResponse<void>, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",
@@ -95,7 +87,7 @@ export const categoriesApi = createApi({
     }),
 
     // Get all categories for dropdown/select
-    getAllCategories: builder.query<{ success: boolean; data: Category[] }, void>({
+    getAllCategories: builder.query<ApiResponse<Category[]>, void>({
       query: () => ({
         url: "/",
         method: "GET",

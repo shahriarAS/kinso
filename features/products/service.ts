@@ -84,6 +84,7 @@ export async function handlePost(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
+        message: "Product created successfully",
         data: product,
       },
       { status: 201 },
@@ -153,6 +154,7 @@ export async function handleGet(request: NextRequest) {
         page,
         limit,
         total,
+        totalPages: Math.ceil(total / limit),
       },
     });
   } catch (error) {
@@ -304,6 +306,7 @@ export async function handleUpdateById(
 
     return NextResponse.json({
       success: true,
+      message: "Product updated successfully",
       data: updatedProduct,
     });
   } catch (error) {
@@ -345,7 +348,7 @@ export async function handleDeleteById(
     await Product.findByIdAndDelete(id);
     return NextResponse.json({
       success: true,
-      message: "Product deleted",
+      message: "Product deleted successfully",
     });
   } catch (error) {
     console.error("Error deleting product:", error);

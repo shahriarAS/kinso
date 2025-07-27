@@ -1,7 +1,5 @@
 import { Product } from "@/features/products/types";
-import { Warehouse } from "../warehouses";
-
-export type PaymentMethod = "CASH" | "BKASH" | "ROCKET" | "NAGAD" | "BANK";
+import { PaymentMethod } from "@/types";
 
 export interface Payment {
   method: PaymentMethod;
@@ -9,7 +7,7 @@ export interface Payment {
 }
 
 export interface OrderItem {
-  product: Product;
+  product: string;
   quantity: number;
   unitPrice: number;
   totalPrice: number;
@@ -27,9 +25,7 @@ export interface Order {
   notes?: string;
   createdAt: string;
   updatedAt: string;
-  warehouse: Warehouse;
-  paid: number; // Computed: sum of payments
-  due: number; // Computed: totalAmount - paid
+  warehouse: string;
 }
 
 export interface OrderInput
@@ -39,29 +35,12 @@ export interface OrderInput
     | "orderNumber"
     | "createdAt"
     | "updatedAt"
-    | "items"
-    | "warehouse"
-    | "paid"
-    | "due"
-  > {
-  items: {
-    product: string;
-    quantity: number;
-    unitPrice: number;
-    totalPrice: number;
-  }[];
-  warehouse: string;
-}
+  > {}
 
 export interface OrderUpdateInput {
   customer?: string;
   customerName?: string;
-  items?: {
-    product: string;
-    quantity: number;
-    unitPrice: number;
-    totalPrice: number;
-  }[];
+  items?: OrderItem[];
   totalAmount?: number;
   payments?: Payment[];
   discount?: number;

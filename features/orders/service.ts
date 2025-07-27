@@ -6,7 +6,6 @@ import Product from "@/features/products/model";
 import Warehouse from "@/features/warehouses/model";
 import { authorizeRequest } from "@/lib/auth";
 import OrderCounter from "@/features/orders/modelOrderCounter";
-import { PaymentMethod } from "./model";
 import { AuthenticatedRequest } from "@/features/auth";
 
 // GET /api/orders - List all orders with pagination and search
@@ -76,8 +75,6 @@ export async function handleGet(request: NextRequest) {
       Order.countDocuments(query),
     ]);
 
-    const totalPages = Math.ceil(total / limit);
-
     return NextResponse.json({
       success: true,
       data: orders,
@@ -85,7 +82,7 @@ export async function handleGet(request: NextRequest) {
         page,
         limit,
         total,
-        totalPages,
+        totalPages: Math.ceil(total / limit),
       },
     });
   } catch (error) {
@@ -119,7 +116,7 @@ export async function handlePost(request: NextRequest) {
 
     const body = await request.json();
     const {
-      customerId,
+      customer,
       customerName,
       items,
       notes,
@@ -129,7 +126,7 @@ export async function handlePost(request: NextRequest) {
     } = body;
 
     // Basic validation
-    if (!customerId) {
+    if (!customer) {
       return NextResponse.json(
         { success: false, message: "Customer ID is required" },
         { status: 400 },
@@ -192,8 +189,8 @@ export async function handlePost(request: NextRequest) {
     }
 
     // Validate customer exists
-    const customer = await Customer.findById(customerId);
-    if (!customer) {
+    const customerDoc = await Customer.findById(customer);
+    if (!customerDoc) {
       return NextResponse.json(
         { success: false, message: "Customer not found" },
         { status: 404 },
@@ -300,7 +297,7 @@ export async function handlePost(request: NextRequest) {
     // Create order
     const order = await Order.create({
       orderNumber,
-      customerId,
+      customerId: customer, // Use customer ID from body
       customerName: customerName.trim(),
       items: validatedItems,
       totalAmount: finalTotal,
@@ -311,7 +308,7 @@ export async function handlePost(request: NextRequest) {
     });
 
     // Update customer statistics
-    await Customer.findByIdAndUpdate(customerId, {
+    await Customer.findByIdAndUpdate(customer, {
       $inc: {
         totalOrders: 1,
         totalSpent: finalTotal,
@@ -418,7 +415,7 @@ export async function handleUpdateById(
 
     const body = await request.json();
     const {
-      customerId,
+      customer,
       customerName,
       items,
       notes,
@@ -436,7 +433,7 @@ export async function handleUpdateById(
     }
 
     // Basic validation
-    if (!customerId) {
+    if (!customer) {
       return NextResponse.json(
         { success: false, message: "Customer ID is required" },
         { status: 400 },
@@ -483,8 +480,8 @@ export async function handleUpdateById(
     }
 
     // Validate customer exists
-    const customer = await Customer.findById(customerId);
-    if (!customer) {
+    const customerDoc = await Customer.findById(customer);
+    if (!customerDoc) {
       return NextResponse.json(
         { success: false, message: "Customer not found" },
         { status: 404 },
@@ -560,7 +557,7 @@ export async function handleUpdateById(
     const updatedOrder = await Order.findByIdAndUpdate(
       id,
       {
-        customerId,
+        customerId: customer, // Use customer ID from body
         customerName: customerName.trim(),
         items: validatedItems,
         totalAmount: finalTotal,

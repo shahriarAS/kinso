@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
-
-export type PaymentMethod = "CASH" | "BKASH" | "ROCKET" | "NAGAD" | "BANK";
+import { PaymentMethod } from "@/types";
 
 export interface IOrderItem {
   product: mongoose.Types.ObjectId;

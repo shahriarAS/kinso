@@ -1,6 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
 import { Outlet, OutletInput, OutletInventory, OutletStats } from "@/features/outlets/types";
+import { PaginatedResponse, ApiResponse } from "@/types";
 
 export const outletsApi = createApi({
   reducerPath: "outletsApi",
@@ -9,16 +10,7 @@ export const outletsApi = createApi({
   endpoints: (builder) => ({
     // Get all outlets with pagination and filters
     getOutlets: builder.query<
-      {
-        success: boolean;
-        data: Outlet[];
-        pagination: {
-          page: number;
-          limit: number;
-          total: number;
-          totalPages: number;
-        };
-      },
+      PaginatedResponse<Outlet>,
       {
         page?: number;
         limit?: number;
@@ -33,7 +25,7 @@ export const outletsApi = createApi({
         params,
       }),
       providesTags: (result) =>
-        result
+        result?.data
           ? [
               ...result.data.map(({ _id }) => ({
                 type: "Outlet" as const,
@@ -45,7 +37,7 @@ export const outletsApi = createApi({
     }),
 
     // Get single outlet by ID
-    getOutlet: builder.query<{ success: boolean; data: Outlet }, string>({
+    getOutlet: builder.query<ApiResponse<Outlet>, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "GET",
@@ -55,7 +47,7 @@ export const outletsApi = createApi({
 
     // Create new outlet
     createOutlet: builder.mutation<
-      { success: boolean; message: string; data: Outlet },
+      ApiResponse<Outlet>,
       OutletInput
     >({
       query: (outlet) => ({
@@ -68,7 +60,7 @@ export const outletsApi = createApi({
 
     // Update outlet
     updateOutlet: builder.mutation<
-      { success: boolean; message: string; data: Outlet },
+      ApiResponse<Outlet>,
       { _id: string; outlet: Partial<OutletInput> }
     >({
       query: ({ _id, outlet }) => ({
@@ -83,7 +75,7 @@ export const outletsApi = createApi({
     }),
 
     // Delete outlet
-    deleteOutlet: builder.mutation<{ success: boolean; message: string }, string>({
+    deleteOutlet: builder.mutation<ApiResponse<void>, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",
@@ -93,10 +85,7 @@ export const outletsApi = createApi({
 
     // Get outlet inventory
     getOutletInventory: builder.query<
-      {
-        success: boolean;
-        data: OutletInventory;
-      },
+      ApiResponse<OutletInventory>,
       string
     >({
       query: (outletId) => ({
@@ -110,10 +99,7 @@ export const outletsApi = createApi({
 
     // Get outlet statistics
     getOutletStats: builder.query<
-      {
-        success: boolean;
-        data: OutletStats;
-      },
+      ApiResponse<OutletStats>,
       void
     >({
       query: () => ({

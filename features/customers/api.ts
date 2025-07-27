@@ -1,6 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
 import { Customer, CustomerInput } from "./types";
+import { PaginatedResponse, ApiResponse } from "@/types";
 
 export const customersApi = createApi({
   reducerPath: "customersApi",
@@ -9,15 +10,7 @@ export const customersApi = createApi({
   endpoints: (builder) => ({
     // Get all customers with pagination and filters
     getCustomers: builder.query<
-      {
-        data: Customer[];
-        pagination: {
-          page: number;
-          limit: number;
-          total: number;
-          totalPages: number;
-        };
-      },
+      PaginatedResponse<Customer>,
       {
         page?: number;
         limit?: number;
@@ -34,7 +27,7 @@ export const customersApi = createApi({
         params,
       }),
       providesTags: (result) =>
-        result
+        result?.data
           ? [
               ...result.data.map(({ _id }) => ({
                 type: "Customer" as const,
@@ -46,7 +39,7 @@ export const customersApi = createApi({
     }),
 
     // Get single customer by ID
-    getCustomer: builder.query<{ data: Customer }, string>({
+    getCustomer: builder.query<ApiResponse<Customer>, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "GET",
@@ -56,7 +49,7 @@ export const customersApi = createApi({
 
     // Create new customer
     createCustomer: builder.mutation<
-      { message: string; data: Customer },
+      ApiResponse<Customer>,
       CustomerInput
     >({
       query: (customer) => ({
@@ -69,7 +62,7 @@ export const customersApi = createApi({
 
     // Update customer
     updateCustomer: builder.mutation<
-      { message: string; data: Customer },
+      ApiResponse<Customer>,
       { _id: string; customer: Partial<CustomerInput> }
     >({
       query: ({ _id, customer }) => ({
@@ -84,7 +77,7 @@ export const customersApi = createApi({
     }),
 
     // Delete customer
-    deleteCustomer: builder.mutation<{ message: string }, string>({
+    deleteCustomer: builder.mutation<ApiResponse<void>, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",
@@ -94,7 +87,7 @@ export const customersApi = createApi({
 
     // Update membership status
     updateMembership: builder.mutation<
-      { message: string; data: Customer },
+      ApiResponse<Customer>,
       { _id: string; membershipStatus: boolean }
     >({
       query: ({ _id, membershipStatus }) => ({
@@ -110,7 +103,7 @@ export const customersApi = createApi({
 
     // Auto-activate membership based on purchase threshold
     autoActivateMembership: builder.mutation<
-      { message: string; updatedCount: number },
+      ApiResponse<{ updatedCount: number }>,
       { threshold?: number }
     >({
       query: ({ threshold = 1000 }) => ({
@@ -123,14 +116,14 @@ export const customersApi = createApi({
 
     // Get customer statistics
     getCustomerStats: builder.query<
-      {
+      ApiResponse<{
         totalCustomers: number;
         members: number;
         nonMembers: number;
         newCustomersThisMonth: number;
         averagePurchaseAmount: number;
         totalPurchaseAmount: number;
-      },
+      }>,
       void
     >({
       query: () => ({
@@ -142,7 +135,7 @@ export const customersApi = createApi({
 
     // Get customers by membership status
     getCustomersByMembership: builder.query<
-      { data: Customer[] },
+      ApiResponse<Customer[]>,
       { membershipStatus: boolean; limit?: number }
     >({
       query: ({ membershipStatus, limit = 10 }) => ({

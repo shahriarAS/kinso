@@ -7,7 +7,7 @@ export interface Stock extends IStock {
 export interface StockInput {
   product: string;
   location: string;
-  locationType: "Warehouse" | "Outlet";
+  locationType: string;
   mrp: number;
   tp: number;
   expireDate: string;
@@ -18,7 +18,7 @@ export interface StockInput {
 export interface StockUpdateInput {
   product?: string;
   location?: string;
-  locationType?: "Warehouse" | "Outlet";
+  locationType?: string;
   mrp?: number;
   tp?: number;
   expireDate?: string;

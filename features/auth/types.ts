@@ -1,6 +1,5 @@
 import { User } from "@/features/users/types";
-
-export type UserRole = "admin" | "manager" | "staff";
+import { UserRole } from "@/types";
 
 export interface AuthenticatedRequest {
   user?: User;

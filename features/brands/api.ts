@@ -1,6 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
 import { Brand, BrandInput, BrandUpdateInput } from "./types";
+import { PaginatedResponse, ApiResponse } from "@/types";
 
 export const brandsApi = createApi({
   reducerPath: "brandsApi",
@@ -8,16 +9,7 @@ export const brandsApi = createApi({
   tagTypes: ["Brand"],
   endpoints: (builder) => ({
     getBrands: builder.query<
-      {
-        success: boolean;
-        data: Brand[];
-        pagination: {
-          page: number;
-          limit: number;
-          total: number;
-          totalPages: number;
-        };
-      },
+      PaginatedResponse<Brand>,
       {
         page?: number;
         limit?: number;
@@ -35,7 +27,7 @@ export const brandsApi = createApi({
         params,
       }),
       providesTags: (result) =>
-        result
+        result?.data
           ? [
               ...result.data.map(({ _id }) => ({
                 type: "Brand" as const,
@@ -46,7 +38,7 @@ export const brandsApi = createApi({
           : [{ type: "Brand", id: "LIST" }],
     }),
 
-    getBrand: builder.query<{ success: boolean; data: Brand }, string>({
+    getBrand: builder.query<ApiResponse<Brand>, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "GET",
@@ -55,7 +47,7 @@ export const brandsApi = createApi({
     }),
 
     createBrand: builder.mutation<
-      { success: boolean; message: string; data: Brand },
+      ApiResponse<Brand>,
       BrandInput
     >({
       query: (brand) => ({
@@ -67,7 +59,7 @@ export const brandsApi = createApi({
     }),
 
     updateBrand: builder.mutation<
-      { success: boolean; message: string; data: Brand },
+      ApiResponse<Brand>,
       { _id: string; brand: Partial<BrandUpdateInput> }
     >({
       query: ({ _id, brand }) => ({
@@ -81,7 +73,7 @@ export const brandsApi = createApi({
       ],
     }),
 
-    deleteBrand: builder.mutation<{ success: boolean; message: string }, string>({
+    deleteBrand: builder.mutation<ApiResponse<void>, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",
@@ -89,7 +81,7 @@ export const brandsApi = createApi({
       invalidatesTags: [{ type: "Brand", id: "LIST" }],
     }),
 
-    getAllBrands: builder.query<{ success: boolean; data: Brand[] }, void>({
+    getAllBrands: builder.query<ApiResponse<Brand[]>, void>({
       query: () => ({
         url: "/",
         method: "GET",
@@ -98,7 +90,7 @@ export const brandsApi = createApi({
       providesTags: ["Brand"],
     }),
 
-    getBrandsByVendor: builder.query<{ success: boolean; data: Brand[] }, string>({
+    getBrandsByVendor: builder.query<ApiResponse<Brand[]>, string>({
       query: (vendorId) => ({
         url: "/",
         method: "GET",

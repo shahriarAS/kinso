@@ -1,6 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
 import { Product, ProductInput } from "@/features/products/types";
+import { PaginatedResponse, ApiResponse } from "@/types";
 
 export const productsApi = createApi({
   reducerPath: "productsApi",
@@ -9,15 +10,7 @@ export const productsApi = createApi({
   endpoints: (builder) => ({
     // Get all products with pagination and filters
     getProducts: builder.query<
-      {
-        data: Product[];
-        pagination: {
-          page: number;
-          limit: number;
-          total: number;
-          totalPages: number;
-        };
-      },
+      PaginatedResponse<Product>,
       {
         page?: number;
         limit?: number;
@@ -37,7 +30,7 @@ export const productsApi = createApi({
         params,
       }),
       providesTags: (result) =>
-        result
+        result?.data
           ? [
               ...result.data.map(({ _id }) => ({
                 type: "Product" as const,
@@ -49,7 +42,7 @@ export const productsApi = createApi({
     }),
 
     // Get single product by ID
-    getProduct: builder.query<{ data: Product }, string>({
+    getProduct: builder.query<ApiResponse<Product>, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "GET",
@@ -59,7 +52,7 @@ export const productsApi = createApi({
 
     // Create new product
     createProduct: builder.mutation<
-      { message: string; data: Product },
+      ApiResponse<Product>,
       ProductInput
     >({
       query: (product) => ({
@@ -72,7 +65,7 @@ export const productsApi = createApi({
 
     // Update product
     updateProduct: builder.mutation<
-      { message: string; data: Product },
+      ApiResponse<Product>,
       { _id: string; product: Partial<ProductInput> }
     >({
       query: ({ _id, product }) => ({
@@ -87,7 +80,7 @@ export const productsApi = createApi({
     }),
 
     // Delete product
-    deleteProduct: builder.mutation<{ message: string }, string>({
+    deleteProduct: builder.mutation<ApiResponse<void>, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",
@@ -97,7 +90,7 @@ export const productsApi = createApi({
 
     // Update product stock
     updateProductStock: builder.mutation<
-      { message: string; data: Product },
+      ApiResponse<Product>,
       {
         productId: string;
         warehouseId: string;
@@ -118,7 +111,7 @@ export const productsApi = createApi({
 
     // Search products
     searchProducts: builder.query<
-      { data: Product[] },
+      ApiResponse<Product[]>,
       { query: string; limit?: number }
     >({
       query: ({ query, limit = 20 }) => ({
@@ -127,7 +120,7 @@ export const productsApi = createApi({
         params: { query, limit },
       }),
       providesTags: (result) =>
-        result
+        result?.data
           ? result.data.map(({ _id }) => ({ type: "Product" as const, _id }))
           : [],
     }),

@@ -7,9 +7,9 @@ export interface Product {
   _id: string;
   name: string;
   barcode: string;
-  vendor: string | Vendor;
-  brand: string | Brand;
-  category: string | Category;
+  vendor: string;
+  brand: string;
+  category: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -17,12 +17,8 @@ export interface Product {
 export interface ProductInput
   extends Omit<
     Product,
-    "_id" | "createdAt" | "updatedAt" | "vendor" | "brand" | "category"
-  > {
-  vendor: string;
-  brand: string;
-  category: string;
-}
+    "_id" | "createdAt" | "updatedAt"
+  > {}
 
 export interface ProductUpdateInput {
   name?: string;

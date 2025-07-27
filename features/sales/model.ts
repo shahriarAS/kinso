@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { PaymentMethod } from "@/types";
 
 export interface ISale extends Document {
   saleId: string;
@@ -12,7 +13,7 @@ export interface ISale extends Document {
     unitPrice: number;
     discountApplied: number;
   }[];
-  paymentMethod: "CASH" | "BKASH" | "ROCKET" | "NAGAD" | "BANK" | "CARD";
+  paymentMethod: PaymentMethod;
   discountAmount: number;
   notes?: string;
   createdBy: mongoose.Types.ObjectId;

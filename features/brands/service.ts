@@ -51,6 +51,7 @@ export async function handlePost(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
+        message: "Brand created successfully",
         data: brand,
       },
       { status: 201 },
@@ -115,6 +116,7 @@ export async function handleGet(request: NextRequest) {
         page,
         limit,
         total,
+        totalPages: Math.ceil(total / limit),
       },
     });
   } catch (error) {
@@ -231,6 +233,7 @@ export async function handleUpdateById(
 
     return NextResponse.json({
       success: true,
+      message: "Brand updated successfully",
       data: updatedBrand,
     });
   } catch (error) {
@@ -272,7 +275,7 @@ export async function handleDeleteById(
     await Brand.findByIdAndDelete(id);
     return NextResponse.json({
       success: true,
-      message: "Brand deleted",
+      message: "Brand deleted successfully",
     });
   } catch (error) {
     console.error("Error deleting brand:", error);

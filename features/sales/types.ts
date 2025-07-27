@@ -2,6 +2,7 @@ import { Customer } from "@/features/customers";
 import { Outlet } from "@/features/outlets";
 import { User } from "@/features/users";
 import { Stock } from "@/features/stock";
+import { PaymentMethod } from "@/types";
 
 export interface SaleItem {
   stock: string;
@@ -13,15 +14,15 @@ export interface SaleItem {
 export interface Sale {
   _id: string;
   saleId: string;
-  outlet: string | Outlet;
-  customer?: string | Customer;
+  outlet: string;
+  customer?: string;
   saleDate: string;
   totalAmount: number;
   items: SaleItem[];
-  paymentMethod: "CASH" | "BKASH" | "ROCKET" | "NAGAD" | "BANK" | "CARD";
+  paymentMethod: PaymentMethod;
   discountAmount: number;
   notes?: string;
-  createdBy: string | User;
+  createdBy: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -30,7 +31,7 @@ export interface CreateSaleRequest {
   outlet: string;
   customer?: string;
   items: SaleItem[];
-  paymentMethod: "CASH" | "BKASH" | "ROCKET" | "NAGAD" | "BANK" | "CARD";
+  paymentMethod: PaymentMethod;
   discountAmount: number;
   notes?: string;
 }
@@ -39,7 +40,7 @@ export interface SaleUpdateRequest {
   saleId: string;
   customer?: string;
   items?: SaleItem[];
-  paymentMethod?: "CASH" | "BKASH" | "ROCKET" | "NAGAD" | "BANK" | "CARD";
+  paymentMethod?: PaymentMethod;
   discountAmount?: number;
   notes?: string;
 }
@@ -59,7 +60,7 @@ export interface SalesHistoryFilters {
   customer?: string;
   startDate?: string;
   endDate?: string;
-  paymentMethod?: "CASH" | "BKASH" | "ROCKET" | "NAGAD" | "BANK" | "CARD";
+  paymentMethod?: PaymentMethod;
   minAmount?: number;
   maxAmount?: number;
   search?: string;

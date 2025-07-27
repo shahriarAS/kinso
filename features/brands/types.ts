@@ -2,10 +2,6 @@ export interface Brand {
   _id: string;
   name: string;
   vendor: string;
-  vendorDetails?: {
-    _id: string;
-    name: string;
-  };
   createdAt: string;
   updatedAt: string;
 }

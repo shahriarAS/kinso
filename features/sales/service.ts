@@ -97,6 +97,7 @@ export async function handlePost(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
+        message: "Sale created successfully",
         data: sale,
       },
       { status: 201 },
@@ -367,6 +368,7 @@ export async function handlePut(
 
     return NextResponse.json({
       success: true,
+      message: "Sale updated successfully",
       data: updatedSale,
     });
   } catch (error) {
@@ -408,7 +410,7 @@ export async function handleDelete(
     await Sale.findOneAndDelete({ saleId: id });
     return NextResponse.json({
       success: true,
-      message: "Sale deleted",
+      message: "Sale deleted successfully",
     });
   } catch (error) {
     console.error("Error deleting sale:", error);

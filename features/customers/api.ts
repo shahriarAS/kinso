@@ -69,7 +69,7 @@ export const customersApi = createApi({
 
     // Update customer
     updateCustomer: builder.mutation<
-      { message: string; customer: Customer },
+      { message: string; data: Customer },
       { _id: string; customer: Partial<CustomerInput> }
     >({
       query: ({ _id, customer }) => ({
@@ -94,7 +94,7 @@ export const customersApi = createApi({
 
     // Update membership status
     updateMembership: builder.mutation<
-      { message: string; customer: Customer },
+      { message: string; data: Customer },
       { _id: string; membershipStatus: boolean }
     >({
       query: ({ _id, membershipStatus }) => ({

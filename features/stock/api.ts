@@ -1,11 +1,11 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
-import { Stock, StockInput, StockMoveInput, StockFilters, StockStats } from "./types";
+import { Stock, StockInput, StockFilters } from "./types";
 
 export const stockApi = createApi({
   reducerPath: "stockApi",
   baseQuery: baseQueryWithErrorHandling("/api/stock"),
-  tagTypes: ["Stock", "StockStats"],
+  tagTypes: ["Stock"],
   endpoints: (builder) => ({
     // Get all stock with pagination and filters
     getStock: builder.query<
@@ -42,15 +42,6 @@ export const stockApi = createApi({
           : [{ type: "Stock", id: "LIST" }],
     }),
 
-    // Get stock statistics
-    getStockStats: builder.query<{ data: StockStats }, void>({
-      query: () => ({
-        url: "/stats",
-        method: "GET",
-      }),
-      providesTags: [{ type: "StockStats", id: "LIST" }],
-    }),
-
     // Add new stock
     addStock: builder.mutation<
       { message: string; data: Stock },
@@ -61,27 +52,10 @@ export const stockApi = createApi({
         method: "POST",
         body: stock,
       }),
-      invalidatesTags: [
-        { type: "Stock", id: "LIST" },
-        { type: "StockStats", id: "LIST" },
-      ],
+      invalidatesTags: [{ type: "Stock", id: "LIST" }],
     }),
 
-    // Move stock between locations
-    moveStock: builder.mutation<
-      { message: string },
-      StockMoveInput
-    >({
-      query: (moveData) => ({
-        url: "/move",
-        method: "POST",
-        body: moveData,
-      }),
-      invalidatesTags: [
-        { type: "Stock", id: "LIST" },
-        { type: "StockStats", id: "LIST" },
-      ],
-    }),
+
 
     // Get stock by product ID
     getStockByProduct: builder.query<
@@ -139,9 +113,7 @@ export const stockApi = createApi({
 
 export const {
   useGetStockQuery,
-  useGetStockStatsQuery,
   useAddStockMutation,
-  useMoveStockMutation,
   useGetStockByProductQuery,
   useGetLowStockQuery,
   useGetExpiringStockQuery,

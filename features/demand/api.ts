@@ -6,13 +6,12 @@ import {
   DemandFilters,
   DemandResponse,
   DemandGenerationRequest,
-  DemandGenerationResponse,
   DemandConversionRequest,
 } from "./types";
 
 export const demandApi = createApi({
   reducerPath: "demandApi",
-  baseQuery: baseQueryWithErrorHandling("/api/demand"),
+  baseQuery: baseQueryWithErrorHandling("/api/demands"),
   tagTypes: ["Demand"],
   endpoints: (builder) => ({
     // Get all demands with pagination and filters
@@ -83,7 +82,7 @@ export const demandApi = createApi({
 
     // Generate demands based on sales data
     generateDemands: builder.mutation<
-      DemandGenerationResponse,
+      { message: string; data: Demand[] },
       DemandGenerationRequest
     >({
       query: (request) => ({
@@ -97,12 +96,12 @@ export const demandApi = createApi({
     // Convert demand to stock
     convertDemandToStock: builder.mutation<
       { message: string; data: Demand },
-      DemandConversionRequest
+      { demandId: string; conversionData: DemandConversionRequest }
     >({
-      query: (request) => ({
-        url: "/convert",
+      query: ({ demandId, conversionData }) => ({
+        url: `/convert/${demandId}`,
         method: "POST",
-        body: request,
+        body: conversionData,
       }),
       invalidatesTags: (result, error, { demandId }) => [
         { type: "Demand", id: demandId },

@@ -88,40 +88,7 @@ export const usersApi = createApi({
       invalidatesTags: [{ type: "User", id: "LIST" }],
     }),
 
-    // Get user statistics
-    getUserStats: builder.query<
-      {
-        totalUsers: number;
-        activeUsers: number;
-        inactiveUsers: number;
-        usersByRole: {
-          admin: number;
-          manager: number;
-          staff: number;
-        };
-        recentUsers: User[];
-      },
-      void
-    >({
-      query: () => ({
-        url: "/stats",
-        method: "GET",
-      }),
-      providesTags: ["User"],
-    }),
 
-    // Search users by name or email
-    searchUsers: builder.query<{ data: User[] }, string>({
-      query: (searchTerm) => ({
-        url: "/search",
-        method: "GET",
-        params: { q: searchTerm },
-      }),
-      providesTags: (result) =>
-        result
-          ? result.data.map(({ _id }) => ({ type: "User" as const, _id }))
-          : [],
-    }),
   }),
 });
 
@@ -131,6 +98,4 @@ export const {
   useCreateUserMutation,
   useUpdateUserMutation,
   useDeleteUserMutation,
-  useGetUserStatsQuery,
-  useSearchUsersQuery,
 } = usersApi;

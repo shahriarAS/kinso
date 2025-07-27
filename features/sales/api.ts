@@ -6,28 +6,17 @@ import type {
   SaleReturnRequest,
   SalesHistoryFilters,
   SalesHistoryResponse,
-  ProductSearchResult,
 } from "./types";
 
 export const salesApi = createApi({
   reducerPath: "salesApi",
-  baseQuery: baseQueryWithErrorHandling("/api"),
-  tagTypes: ["Sales", "Products"],
+  baseQuery: baseQueryWithErrorHandling("/api/sales"),
+  tagTypes: ["Sales"],
   endpoints: (builder) => ({
-    // Product search endpoint
-    searchProducts: builder.query<ProductSearchResult[], { query: string; outletId?: string }>({
-      query: ({ query, outletId }) => ({
-        url: `/products/search`,
-        method: "GET",
-        params: { query, outletId },
-      }),
-      providesTags: ["Products"],
-    }),
-
     // Create new sale
     createSale: builder.mutation<{ data: Sale; message: string }, CreateSaleRequest>({
       query: (saleData) => ({
-        url: `/sales`,
+        url: `/`,
         method: "POST",
         body: saleData,
       }),
@@ -37,7 +26,7 @@ export const salesApi = createApi({
     // Get sales history
     getSalesHistory: builder.query<SalesHistoryResponse, SalesHistoryFilters>({
       query: (filters) => ({
-        url: `/sales/history`,
+        url: `/history`,
         method: "GET",
         params: filters,
       }),
@@ -47,7 +36,7 @@ export const salesApi = createApi({
     // Process sale return
     processSaleReturn: builder.mutation<{ data: Sale; message: string }, SaleReturnRequest>({
       query: (returnData) => ({
-        url: `/sales/returns`,
+        url: `/returns`,
         method: "POST",
         body: returnData,
       }),
@@ -57,7 +46,7 @@ export const salesApi = createApi({
     // Get sale by ID
     getSaleById: builder.query<{ data: Sale }, string>({
       query: (saleId) => ({
-        url: `/sales/${saleId}`,
+        url: `/${saleId}`,
         method: "GET",
       }),
       providesTags: ["Sales"],
@@ -66,7 +55,6 @@ export const salesApi = createApi({
 });
 
 export const {
-  useSearchProductsQuery,
   useCreateSaleMutation,
   useGetSalesHistoryQuery,
   useProcessSaleReturnMutation,

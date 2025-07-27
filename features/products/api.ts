@@ -115,6 +115,22 @@ export const productsApi = createApi({
         { type: "Product", id: "LIST" },
       ],
     }),
+
+    // Search products
+    searchProducts: builder.query<
+      { data: Product[] },
+      { query: string; limit?: number }
+    >({
+      query: ({ query, limit = 20 }) => ({
+        url: "/search",
+        method: "GET",
+        params: { query, limit },
+      }),
+      providesTags: (result) =>
+        result
+          ? result.data.map(({ _id }) => ({ type: "Product" as const, _id }))
+          : [],
+    }),
   }),
 });
 
@@ -125,4 +141,5 @@ export const {
   useUpdateProductMutation,
   useDeleteProductMutation,
   useUpdateProductStockMutation,
+  useSearchProductsQuery,
 } = productsApi;

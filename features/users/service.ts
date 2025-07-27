@@ -152,9 +152,9 @@ export async function handlePost(request: NextRequest) {
 // GET /api/users/[id] - Get a specific user
 export async function handleGetById(
   request: NextRequest,
-  { params }: { params: Promise<{ _id: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { _id } = await params;
+  const { id } = await params;
   try {
     // Authorize request - only admins can view users
     const authResult = await authorizeRequest(
@@ -173,7 +173,7 @@ export async function handleGetById(
 
     await dbConnect();
 
-    const user = await User.findById(_id).select("-password").lean();
+    const user = await User.findById(id).select("-password").lean();
 
     if (!user) {
       return NextResponse.json(
@@ -198,9 +198,9 @@ export async function handleGetById(
 // PUT /api/users/[id] - Update a user
 export async function handleUpdateById(
   request: NextRequest,
-  { params }: { params: Promise<{ _id: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { _id } = await params;
+  const { id } = await params;
   try {
     // Authorize request - only admins can update users
     const authResult = await authorizeRequest(
@@ -223,7 +223,7 @@ export async function handleUpdateById(
     const { name, email, role, isActive, avatar } = body;
 
     // Check if user exists
-    const existingUser = await User.findById(_id);
+    const existingUser = await User.findById(id);
     if (!existingUser) {
       return NextResponse.json(
         { success: false, message: "User not found" },
@@ -257,7 +257,7 @@ export async function handleUpdateById(
 
     // Check if new email conflicts with existing user (excluding current one)
     const emailConflict = await User.findOne({
-      _id: { $ne: _id },
+      _id: { $ne: id },
       email: email.trim().toLowerCase(),
     });
 
@@ -270,7 +270,7 @@ export async function handleUpdateById(
 
     // Update user
     const updatedUser = await User.findByIdAndUpdate(
-      _id,
+      id,
       {
         name: name.trim(),
         email: email.trim().toLowerCase(),
@@ -305,9 +305,9 @@ export async function handleUpdateById(
 // DELETE /api/users/[id] - Delete a user
 export async function handleDeleteById(
   request: NextRequest,
-  { params }: { params: Promise<{ _id: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { _id } = await params;
+  const { id } = await params;
   try {
     // Authorize request - only admins can delete users
     const authResult = await authorizeRequest(
@@ -327,7 +327,7 @@ export async function handleDeleteById(
     await dbConnect();
 
     // Check if user exists
-    const user = await User.findById(_id);
+    const user = await User.findById(id);
     if (!user) {
       return NextResponse.json(
         { success: false, message: "User not found" },
@@ -336,14 +336,14 @@ export async function handleDeleteById(
     }
 
     // Prevent self-deletion
-    if (authResult.user && authResult.user._id === _id) {
+    if (authResult.user && authResult.user._id === id) {
       return NextResponse.json(
         { success: false, message: "Cannot delete your own account" },
         { status: 400 },
       );
     }
 
-    await User.findByIdAndDelete(_id);
+    await User.findByIdAndDelete(id);
 
     return NextResponse.json({
       success: true,

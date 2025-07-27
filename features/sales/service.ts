@@ -217,10 +217,10 @@ export async function handleGet(request: NextRequest) {
   }
 }
 
-// GET /api/sales/[saleId] - Get a specific sale
+// GET /api/sales/[id] - Get a specific sale
 export async function handleGetById(
   request: NextRequest,
-  { params }: { params: Promise<{ saleId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const authResult = await authorizeRequest(
@@ -236,8 +236,8 @@ export async function handleGetById(
       );
     }
     await dbConnect();
-    const { saleId } = await params;
-    const sale = await Sale.findOne({ saleId })
+    const { id } = await params;
+    const sale = await Sale.findOne({ saleId: id })
       .populate("outlet", "name")
       .populate("customer", "name")
       .populate("createdBy", "name")
@@ -262,10 +262,10 @@ export async function handleGetById(
   }
 }
 
-// PUT /api/sales/[saleId] - Update a sale (Error Correction)
+// PUT /api/sales/[id] - Update a sale (Error Correction)
 export async function handlePut(
   request: NextRequest,
-  { params }: { params: Promise<{ saleId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const authResult = await authorizeRequest(
@@ -283,9 +283,9 @@ export async function handlePut(
     await dbConnect();
     const body = await request.json();
     const { outlet, customer, items, totalAmount, paymentMethod, discountAmount, notes } = body;
-    const { saleId } = await params;
+    const { id } = await params;
     
-    const existingSale = await Sale.findOne({ saleId });
+    const existingSale = await Sale.findOne({ saleId: id });
     if (!existingSale) {
       return NextResponse.json(
         { success: false, message: "Sale not found" },
@@ -345,7 +345,7 @@ export async function handlePut(
     }
 
     const updatedSale = await Sale.findOneAndUpdate(
-      { saleId },
+      { saleId: id },
       {
         outlet,
         customer: customer || null,
@@ -378,10 +378,10 @@ export async function handlePut(
   }
 }
 
-// DELETE /api/sales/[saleId] - Delete a sale
+// DELETE /api/sales/[id] - Delete a sale
 export async function handleDelete(
   request: NextRequest,
-  { params }: { params: Promise<{ saleId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const authResult = await authorizeRequest(
@@ -397,15 +397,15 @@ export async function handleDelete(
       );
     }
     await dbConnect();
-    const { saleId } = await params;
-    const sale = await Sale.findOne({ saleId });
+    const { id } = await params;
+    const sale = await Sale.findOne({ saleId: id });
     if (!sale) {
       return NextResponse.json(
         { success: false, message: "Sale not found" },
         { status: 404 },
       );
     }
-    await Sale.findOneAndDelete({ saleId });
+    await Sale.findOneAndDelete({ saleId: id });
     return NextResponse.json({
       success: true,
       message: "Sale deleted",

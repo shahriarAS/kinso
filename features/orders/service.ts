@@ -345,9 +345,9 @@ export async function handlePost(request: NextRequest) {
 // GET /api/orders/[id] - Get a specific order
 export async function handleGetById(
   request: NextRequest,
-  { params }: { params: Promise<{ _id: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { _id } = await params;
+  const { id } = await params;
   try {
     // Authorize request - all authenticated users can view orders
     const authResult = await authorizeRequest(
@@ -366,7 +366,7 @@ export async function handleGetById(
 
     await dbConnect();
 
-    const order = await Order.findById(_id)
+    const order = await Order.findById(id)
       .populate("customerId", "name email phone")
       .populate("items.product", "name upc sku warranty")
       .populate("warehouse", "name location")
@@ -395,9 +395,9 @@ export async function handleGetById(
 // PUT /api/orders/[id] - Update an order
 export async function handleUpdateById(
   request: NextRequest,
-  { params }: { params: Promise<{ _id: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { _id } = await params;
+  const { id } = await params;
   try {
     // Authorize request - only managers and admins can update orders
     const authResult = await authorizeRequest(
@@ -427,7 +427,7 @@ export async function handleUpdateById(
     } = body;
 
     // Check if order exists
-    const existingOrder = await Order.findById(_id);
+    const existingOrder = await Order.findById(id);
     if (!existingOrder) {
       return NextResponse.json(
         { success: false, message: "Order not found" },
@@ -558,7 +558,7 @@ export async function handleUpdateById(
 
     // Update order
     const updatedOrder = await Order.findByIdAndUpdate(
-      _id,
+      id,
       {
         customerId,
         customerName: customerName.trim(),
@@ -602,9 +602,9 @@ export async function handleUpdateById(
 // DELETE /api/orders/[id] - Delete an order
 export async function handleDeleteById(
   request: NextRequest,
-  { params }: { params: Promise<{ _id: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { _id } = await params;
+  const { id } = await params;
   try {
     // Authorize request - only admins can delete orders
     const authResult = await authorizeRequest(
@@ -624,7 +624,7 @@ export async function handleDeleteById(
     await dbConnect();
 
     // Check if order exists
-    const order = await Order.findById(_id);
+    const order = await Order.findById(id);
     if (!order) {
       return NextResponse.json(
         { success: false, message: "Order not found" },
@@ -632,7 +632,7 @@ export async function handleDeleteById(
       );
     }
 
-    await Order.findByIdAndDelete(_id);
+    await Order.findByIdAndDelete(id);
 
     return NextResponse.json({
       success: true,
@@ -650,9 +650,9 @@ export async function handleDeleteById(
 // GET /api/orders/customer/[id] - Get orders by customer
 export async function handleGetByCustomer(
   request: NextRequest,
-  { params }: { params: Promise<{ _id: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { _id } = await params;
+  const { id } = await params;
   try {
     // Authorize request - all authenticated users can view customer orders
     const authResult = await authorizeRequest(
@@ -671,7 +671,7 @@ export async function handleGetByCustomer(
 
     await dbConnect();
 
-    const orders = await Order.find({ customerId: _id })
+    const orders = await Order.find({ customerId: id })
       .populate("customerId", "name email phone")
       .populate("items.product", "name upc sku")
       .populate("warehouse", "name location")

@@ -3,6 +3,16 @@ import dbConnect from "@/lib/database";
 import Outlet from "./model";
 import { authorizeRequest } from "@/lib/auth";
 import { AuthenticatedRequest } from "@/features/auth";
+import { OutletType, OUTLET_TYPES } from "@/types";
+import {
+  createSuccessResponse,
+  createErrorResponse,
+  createPaginatedResponse,
+  createNotFoundResponse,
+  createValidationErrorResponse,
+  createConflictErrorResponse,
+  createUnauthorizedResponse,
+} from "@/lib/apiResponse";
 
 // POST /api/outlets - Create a new outlet
 export async function handlePost(request: NextRequest) {
@@ -16,10 +26,7 @@ export async function handlePost(request: NextRequest) {
     );
 
     if (!authResult.success) {
-      return NextResponse.json(
-        { success: false, message: authResult.error },
-        { status: authResult.status || 401 },
-      );
+      return createUnauthorizedResponse(authResult.error);
     }
 
     await dbConnect();
@@ -29,13 +36,10 @@ export async function handlePost(request: NextRequest) {
 
     // Basic validation
     if (!name || name.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Outlet name is required" },
-        { status: 400 },
-      );
+      return createValidationErrorResponse("Outlet name is required");
     }
 
-    if (!type || !["Micro Outlet", "Super Shop"].includes(type)) {
+    if (!type || !OUTLET_TYPES.includes(type as OutletType)) {
       return NextResponse.json(
         { success: false, message: "Outlet type must be 'Micro Outlet' or 'Super Shop'" },
         { status: 400 },
@@ -45,10 +49,7 @@ export async function handlePost(request: NextRequest) {
     // Check if outlet already exists with same name
     const existingOutlet = await Outlet.findOne({ name: name.trim() });
     if (existingOutlet) {
-      return NextResponse.json(
-        { success: false, message: "Outlet with this name already exists" },
-        { status: 409 },
-      );
+      return createConflictErrorResponse("Outlet with this name already exists");
     }
 
     // Create outlet
@@ -57,19 +58,10 @@ export async function handlePost(request: NextRequest) {
       type,
     });
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: outlet,
-      },
-      { status: 201 },
-    );
+    return createSuccessResponse(outlet, undefined, 201);
   } catch (error) {
     console.error("Error creating outlet:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to create outlet" },
-      { status: 500 },
-    );
+    return createErrorResponse("Failed to create outlet");
   }
 }
 

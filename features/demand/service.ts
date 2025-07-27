@@ -4,6 +4,15 @@ import Demand from "./model";
 import Stock from "../stock/model";
 import { authorizeRequest } from "@/lib/auth";
 import { AuthenticatedRequest } from "@/features/auth";
+import { LocationType, LOCATION_TYPES, DemandStatus, DEMAND_STATUSES } from "@/types";
+import {
+  createSuccessResponse,
+  createErrorResponse,
+  createPaginatedResponse,
+  createNotFoundResponse,
+  createValidationErrorResponse,
+  createUnauthorizedResponse,
+} from "@/lib/apiResponse";
 
 // POST /api/demands - Create a new demand
 export async function handlePost(request: NextRequest) {
@@ -36,7 +45,7 @@ export async function handlePost(request: NextRequest) {
       );
     }
 
-    if (!locationType || !["Warehouse", "Outlet"].includes(locationType)) {
+    if (!locationType || !LOCATION_TYPES.includes(locationType as LocationType)) {
       return NextResponse.json(
         { success: false, message: "Location type must be either 'Warehouse' or 'Outlet'" },
         { status: 400 },
@@ -60,7 +69,7 @@ export async function handlePost(request: NextRequest) {
       }
     }
 
-    if (!status || !["Pending", "Approved", "ConvertedToStock"].includes(status)) {
+    if (!status || !DEMAND_STATUSES.includes(status as DemandStatus)) {
       return NextResponse.json(
         { success: false, message: "Status must be one of: Pending, Approved, ConvertedToStock" },
         { status: 400 },
@@ -75,19 +84,10 @@ export async function handlePost(request: NextRequest) {
       status,
     });
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: demand,
-      },
-      { status: 201 },
-    );
+    return createSuccessResponse(demand, undefined, 201);
   } catch (error) {
     console.error("Error creating demand:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to create demand" },
-      { status: 500 },
-    );
+    return createErrorResponse("Failed to create demand");
   }
 }
 
@@ -125,10 +125,10 @@ export async function handleGet(request: NextRequest) {
     if (location) {
       query.location = location;
     }
-    if (locationType && ["Warehouse", "Outlet"].includes(locationType)) {
+    if (locationType && LOCATION_TYPES.includes(locationType as LocationType)) {
       query.locationType = locationType;
     }
-    if (status && ["Pending", "Approved", "ConvertedToStock"].includes(status)) {
+    if (status && DEMAND_STATUSES.includes(status as DemandStatus)) {
       query.status = status;
     }
 
@@ -143,22 +143,15 @@ export async function handleGet(request: NextRequest) {
       Demand.countDocuments(query),
     ]);
 
-    return NextResponse.json({
-      success: true,
-      data: demands,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+    return createPaginatedResponse(demands, {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
     console.error("Error fetching demands:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to fetch demands" },
-      { status: 500 },
-    );
+    return createErrorResponse("Failed to fetch demands");
   }
 }
 
@@ -186,21 +179,12 @@ export async function handleGetById(
       .populate("products.product", "name barcode")
       .lean();
     if (!demand) {
-      return NextResponse.json(
-        { success: false, message: "Demand not found" },
-        { status: 404 },
-      );
+      return createNotFoundResponse("Demand");
     }
-    return NextResponse.json({
-      success: true,
-      data: demand,
-    });
+    return createSuccessResponse(demand);
   } catch (error) {
     console.error("Error fetching demand:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to fetch demand" },
-      { status: 500 },
-    );
+    return createErrorResponse("Failed to fetch demand");
   }
 }
 
@@ -236,7 +220,7 @@ export async function handleUpdateById(
     }
 
     // Validation
-    if (locationType && !["Warehouse", "Outlet"].includes(locationType)) {
+    if (locationType && !LOCATION_TYPES.includes(locationType as LocationType)) {
       return NextResponse.json(
         { success: false, message: "Location type must be either 'Warehouse' or 'Outlet'" },
         { status: 400 },
@@ -262,7 +246,7 @@ export async function handleUpdateById(
       }
     }
 
-    if (status && !["Pending", "Approved", "ConvertedToStock"].includes(status)) {
+    if (status && !DEMAND_STATUSES.includes(status as DemandStatus)) {
       return NextResponse.json(
         { success: false, message: "Status must be one of: Pending, Approved, ConvertedToStock" },
         { status: 400 },
@@ -283,22 +267,13 @@ export async function handleUpdateById(
     );
 
     if (!updatedDemand) {
-      return NextResponse.json(
-        { success: false, message: "Failed to update demand" },
-        { status: 500 },
-      );
+      return createErrorResponse("Failed to update demand");
     }
 
-    return NextResponse.json({
-      success: true,
-      data: updatedDemand,
-    });
+    return createSuccessResponse(updatedDemand);
   } catch (error) {
     console.error("Error updating demand:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to update demand" },
-      { status: 500 },
-    );
+    return createErrorResponse("Failed to update demand");
   }
 }
 
@@ -330,16 +305,10 @@ export async function handleDeleteById(
       );
     }
     await Demand.findByIdAndDelete(id);
-    return NextResponse.json({
-      success: true,
-      message: "Demand deleted",
-    });
+    return createSuccessResponse(undefined, "Demand deleted");
   } catch (error) {
     console.error("Error deleting demand:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to delete demand" },
-      { status: 500 },
-    );
+    return createErrorResponse("Failed to delete demand");
   }
 }
 
@@ -445,15 +414,9 @@ export async function handleConvertToStock(
     );
 
     // Return the first stock entry as representative
-    return NextResponse.json({
-      success: true,
-      data: stockEntries[0],
-    });
+    return createSuccessResponse(stockEntries[0]);
   } catch (error) {
     console.error("Error converting demand to stock:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to convert demand to stock" },
-      { status: 500 },
-    );
+    return createErrorResponse("Failed to convert demand to stock");
   }
 } 

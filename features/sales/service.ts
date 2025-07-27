@@ -4,6 +4,15 @@ import Sale from "./model";
 import Customer from "@/features/customers/model";
 import { authorizeRequest } from "@/lib/auth";
 import { AuthenticatedRequest } from "@/features/auth";
+import { PaymentMethod, PAYMENT_METHODS } from "@/types";
+import {
+  createSuccessResponse,
+  createErrorResponse,
+  createPaginatedResponse,
+  createNotFoundResponse,
+  createValidationErrorResponse,
+  createUnauthorizedResponse,
+} from "@/lib/apiResponse";
 
 // POST /api/sales - Create a new sale
 export async function handlePost(request: NextRequest) {
@@ -43,7 +52,7 @@ export async function handlePost(request: NextRequest) {
       );
     }
 
-    if (!paymentMethod || !["CASH", "BKASH", "ROCKET", "NAGAD", "BANK", "CARD"].includes(paymentMethod)) {
+    if (!paymentMethod || !PAYMENT_METHODS.includes(paymentMethod as PaymentMethod)) {
       return NextResponse.json(
         { success: false, message: "Valid payment method is required" },
         { status: 400 },
@@ -105,20 +114,10 @@ export async function handlePost(request: NextRequest) {
       });
     }
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Sale created successfully",
-        data: sale,
-      },
-      { status: 201 },
-    );
+    return createSuccessResponse(sale, "Sale created successfully", 201);
   } catch (error) {
     console.error("Error creating sale:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to create sale" },
-      { status: 500 },
-    );
+    return createErrorResponse("Failed to create sale");
   }
 }
 
@@ -212,22 +211,15 @@ export async function handleGet(request: NextRequest) {
       Sale.countDocuments(query),
     ]);
 
-    return NextResponse.json({
-      success: true,
-      data: sales,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+    return createPaginatedResponse(sales, {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
     console.error("Error fetching sales:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to fetch sales" },
-      { status: 500 },
-    );
+    return createErrorResponse("Failed to fetch sales");
   }
 }
 
@@ -258,21 +250,12 @@ export async function handleGetById(
       .populate("items.stock", "product")
       .lean();
     if (!sale) {
-      return NextResponse.json(
-        { success: false, message: "Sale not found" },
-        { status: 404 },
-      );
+      return createNotFoundResponse("Sale");
     }
-    return NextResponse.json({
-      success: true,
-      data: sale,
-    });
+    return createSuccessResponse(sale);
   } catch (error) {
     console.error("Error fetching sale:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to fetch sale" },
-      { status: 500 },
-    );
+    return createErrorResponse("Failed to fetch sale");
   }
 }
 

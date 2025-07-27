@@ -3,6 +3,16 @@ import dbConnect from "@/lib/database";
 import Stock from "./model";
 import { authorizeRequest } from "@/lib/auth";
 import { AuthenticatedRequest } from "@/features/auth";
+import { LocationType, LOCATION_TYPES } from "@/types";
+import {
+  createSuccessResponse,
+  createErrorResponse,
+  createPaginatedResponse,
+  createNotFoundResponse,
+  createValidationErrorResponse,
+  createConflictErrorResponse,
+  createUnauthorizedResponse,
+} from "@/lib/apiResponse";
 
 // GET /api/stocks - List all stocks with pagination and filters
 export async function handleGet(request: NextRequest) {
@@ -58,22 +68,15 @@ export async function handleGet(request: NextRequest) {
       Stock.countDocuments(query),
     ]);
 
-    return NextResponse.json({
-      success: true,
-      data: stocks,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+    return createPaginatedResponse(stocks, {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
     console.error("Error fetching stocks:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to fetch stocks" },
-      { status: 500 },
-    );
+    return createErrorResponse("Failed to fetch stocks");
   }
 }
 
@@ -114,7 +117,7 @@ export async function handlePost(request: NextRequest) {
       );
     }
 
-    if (!locationType || !["Warehouse", "Outlet"].includes(locationType)) {
+    if (!locationType || !LOCATION_TYPES.includes(locationType as LocationType)) {
       return NextResponse.json(
         { success: false, message: "Location type must be either 'Warehouse' or 'Outlet'" },
         { status: 400 },
@@ -179,19 +182,10 @@ export async function handlePost(request: NextRequest) {
 
     const stock = await Stock.create(stockData);
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: stock,
-      },
-      { status: 201 },
-    );
+    return createSuccessResponse(stock, undefined, 201);
   } catch (error) {
     console.error("Error adding stock:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to add stock" },
-      { status: 500 },
-    );
+    return createErrorResponse("Failed to add stock");
   }
 }
 
@@ -221,22 +215,13 @@ export async function handleGetById(request: NextRequest, { params }: { params: 
       .lean();
 
     if (!stock) {
-      return NextResponse.json(
-        { success: false, message: "Stock not found" },
-        { status: 404 },
-      );
+      return createNotFoundResponse("Stock");
     }
 
-    return NextResponse.json({
-      success: true,
-      data: stock,
-    });
+    return createSuccessResponse(stock);
   } catch (error) {
     console.error("Error fetching stock:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to fetch stock" },
-      { status: 500 },
-    );
+    return createErrorResponse("Failed to fetch stock");
   }
 }
 
@@ -287,7 +272,7 @@ export async function handlePut(request: NextRequest, { params }: { params: Prom
       );
     }
 
-    if (!locationType || !["Warehouse", "Outlet"].includes(locationType)) {
+    if (!locationType || !LOCATION_TYPES.includes(locationType as LocationType)) {
       return NextResponse.json(
         { success: false, message: "Location type must be either 'Warehouse' or 'Outlet'" },
         { status: 400 },
@@ -354,16 +339,10 @@ export async function handlePut(request: NextRequest, { params }: { params: Prom
       { new: true }
     ).lean();
 
-    return NextResponse.json({
-      success: true,
-      data: updatedStock,
-    });
+    return createSuccessResponse(updatedStock);
   } catch (error) {
     console.error("Error updating stock:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to update stock" },
-      { status: 500 },
-    );
+    return createErrorResponse("Failed to update stock");
   }
 }
 
@@ -391,21 +370,12 @@ export async function handleDelete(request: NextRequest, { params }: { params: P
     const stock = await Stock.findByIdAndDelete(id);
 
     if (!stock) {
-      return NextResponse.json(
-        { success: false, message: "Stock not found" },
-        { status: 404 },
-      );
+      return createNotFoundResponse("Stock");
     }
 
-    return NextResponse.json({
-      success: true,
-      message: "Stock deleted",
-    });
+    return createSuccessResponse(undefined, "Stock deleted");
   } catch (error) {
     console.error("Error deleting stock:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to delete stock" },
-      { status: 500 },
-    );
+    return createErrorResponse("Failed to delete stock");
   }
 } 

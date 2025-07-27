@@ -168,4 +168,7 @@ export const {
   useGetStockMovementsQuery,
   useGetStockByProductAndLocationQuery,
   useGetStockStatsQuery,
-} = stockApi; 
+} = stockApi;
+
+// Alias for backward compatibility
+export const useAddStockMutation = useCreateStockMutation; 

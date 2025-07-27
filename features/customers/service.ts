@@ -3,6 +3,15 @@ import dbConnect from "@/lib/database";
 import CustomerModel from "./model";
 import { authorizeRequest } from "@/lib/auth";
 import { AuthenticatedRequest } from "@/features/auth";
+import {
+  createSuccessResponse,
+  createErrorResponse,
+  createPaginatedResponse,
+  createNotFoundResponse,
+  createValidationErrorResponse,
+  createConflictErrorResponse,
+  createUnauthorizedResponse,
+} from "@/lib/apiResponse";
 
 // GET /api/customers - List all customers with pagination and filters
 export async function handleGet(request: NextRequest) {
@@ -51,22 +60,15 @@ export async function handleGet(request: NextRequest) {
       CustomerModel.countDocuments(query),
     ]);
 
-    return NextResponse.json({
-      success: true,
-      data: customers,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+    return createPaginatedResponse(customers, {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
     console.error("Error fetching customers:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to fetch customers" },
-      { status: 500 },
-    );
+    return createErrorResponse("Failed to fetch customers");
   }
 }
 
@@ -115,19 +117,10 @@ export async function handlePost(request: NextRequest) {
       totalSpent: totalSpent || 0,
     });
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: customer,
-      },
-      { status: 201 },
-    );
+    return createSuccessResponse(customer, undefined, 201);
   } catch (error) {
     console.error("Error creating customer:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to create customer" },
-      { status: 500 },
-    );
+    return createErrorResponse("Failed to create customer");
   }
 }
 
@@ -158,22 +151,13 @@ export async function handleGetById(
     const customer = await CustomerModel.findById(id).lean();
 
     if (!customer) {
-      return NextResponse.json(
-        { success: false, message: "Customer not found" },
-        { status: 404 },
-      );
+      return createNotFoundResponse("Customer");
     }
 
-    return NextResponse.json({
-      success: true,
-      data: customer,
-    });
+    return createSuccessResponse(customer);
   } catch (error) {
     console.error("Error fetching customer:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to fetch customer" },
-      { status: 500 },
-    );
+    return createErrorResponse("Failed to fetch customer");
   }
 }
 
@@ -207,10 +191,7 @@ export async function handleUpdateById(
     // Check if customer exists
     const existingCustomer = await CustomerModel.findById(id);
     if (!existingCustomer) {
-      return NextResponse.json(
-        { success: false, message: "Customer not found" },
-        { status: 404 },
-      );
+      return createNotFoundResponse("Customer");
     }
 
     // Basic validation
@@ -240,22 +221,13 @@ export async function handleUpdateById(
     );
 
     if (!updatedCustomer) {
-      return NextResponse.json(
-        { success: false, message: "Failed to update customer" },
-        { status: 500 },
-      );
+      return createErrorResponse("Failed to update customer");
     }
 
-    return NextResponse.json({
-      success: true,
-      data: updatedCustomer,
-    });
+    return createSuccessResponse(updatedCustomer);
   } catch (error) {
     console.error("Error updating customer:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to update customer" },
-      { status: 500 },
-    );
+    return createErrorResponse("Failed to update customer");
   }
 }
 
@@ -286,23 +258,14 @@ export async function handleDeleteById(
     // Check if customer exists
     const customer = await CustomerModel.findById(id);
     if (!customer) {
-      return NextResponse.json(
-        { success: false, message: "Customer not found" },
-        { status: 404 },
-      );
+      return createNotFoundResponse("Customer");
     }
 
     await CustomerModel.findByIdAndDelete(id);
 
-    return NextResponse.json({
-      success: true,
-      message: "Customer deleted",
-    });
+    return createSuccessResponse(undefined, "Customer deleted");
   } catch (error) {
     console.error("Error deleting customer:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to delete customer" },
-      { status: 500 },
-    );
+    return createErrorResponse("Failed to delete customer");
   }
 }

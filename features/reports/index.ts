@@ -1,9 +1,3 @@
-export { 
-  handleGetSalesReport, 
-  handleGetInventoryReport, 
-  handleGetCustomerReport 
-} from "./service";
-
 export { reportsApi } from "./api";
 
 export type { 

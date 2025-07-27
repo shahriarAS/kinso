@@ -1,11 +1,23 @@
 // Common enums
 export type PaymentMethod = "CASH" | "BKASH" | "ROCKET" | "NAGAD" | "BANK" | "CARD";
 
+export const PAYMENT_METHODS: PaymentMethod[] = ["CASH", "BKASH", "ROCKET", "NAGAD", "BANK", "CARD"];
+
 export type UserRole = "admin" | "manager" | "staff";
+
+export const USER_ROLES: UserRole[] = ["admin", "manager", "staff"];
 
 export type OutletType = "Micro Outlet" | "Super Shop";
 
+export const OUTLET_TYPES: OutletType[] = ["Micro Outlet", "Super Shop"];
+
 export type LocationType = "Warehouse" | "Outlet";
+
+export const LOCATION_TYPES: LocationType[] = ["Warehouse", "Outlet"];
+
+export type DemandStatus = "Pending" | "Approved" | "ConvertedToStock";
+
+export const DEMAND_STATUSES: DemandStatus[] = ["Pending", "Approved", "ConvertedToStock"];
 
 // Standard response structures
 export interface ApiResponse<T = any> {

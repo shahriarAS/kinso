@@ -3,6 +3,15 @@ import dbConnect from "@/lib/database";
 import Product from "./model";
 import { authorizeRequest } from "@/lib/auth";
 import { AuthenticatedRequest } from "@/features/auth";
+import {
+  createSuccessResponse,
+  createErrorResponse,
+  createPaginatedResponse,
+  createNotFoundResponse,
+  createValidationErrorResponse,
+  createConflictErrorResponse,
+  createUnauthorizedResponse,
+} from "@/lib/apiResponse";
 
 // POST /api/products - Create a new product
 export async function handlePost(request: NextRequest) {
@@ -29,10 +38,7 @@ export async function handlePost(request: NextRequest) {
 
     // Basic validation
     if (!name || name.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Product name is required" },
-        { status: 400 },
-      );
+      return createValidationErrorResponse("Product name is required");
     }
 
     if (!barcode || barcode.trim().length === 0) {
@@ -81,20 +87,10 @@ export async function handlePost(request: NextRequest) {
       category,
     });
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Product created successfully",
-        data: product,
-      },
-      { status: 201 },
-    );
+    return createSuccessResponse(product, "Product created successfully", 201);
   } catch (error) {
     console.error("Error creating product:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to create product" },
-      { status: 500 },
-    );
+    return createErrorResponse("Failed to create product");
   }
 }
 
@@ -147,22 +143,15 @@ export async function handleGet(request: NextRequest) {
       Product.countDocuments(query),
     ]);
 
-    return NextResponse.json({
-      success: true,
-      data: products,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+    return createPaginatedResponse(products, {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
     console.error("Error fetching products:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to fetch products" },
-      { status: 500 },
-    );
+    return createErrorResponse("Failed to fetch products");
   }
 }
 
@@ -192,21 +181,12 @@ export async function handleGetById(
       .populate("category", "name")
       .lean();
     if (!product) {
-      return NextResponse.json(
-        { success: false, message: "Product not found" },
-        { status: 404 },
-      );
+      return createNotFoundResponse("Product");
     }
-    return NextResponse.json({
-      success: true,
-      data: product,
-    });
+    return createSuccessResponse(product);
   } catch (error) {
     console.error("Error fetching product:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to fetch product" },
-      { status: 500 },
-    );
+    return createErrorResponse("Failed to fetch product");
   }
 }
 

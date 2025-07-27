@@ -7,10 +7,10 @@ export interface IUser extends Document {
   outlet?: mongoose.Types.ObjectId;
   role: "admin" | "manager" | "staff";
   avatar?: string;
+  isActive: boolean;
+  lastLoginAt?: Date;
   createdAt: Date;
   updatedAt: Date;
-  lastLoginAt?: Date;
-  isActive: boolean;
 }
 
 const UserSchema: Schema = new Schema(

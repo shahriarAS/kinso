@@ -1,6 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
 import { User, UserInput, UserUpdateInput } from "@/features/users/types";
+import { PaginatedResponse, ApiResponse } from "@/types";
 
 export const usersApi = createApi({
   reducerPath: "usersApi",
@@ -9,16 +10,7 @@ export const usersApi = createApi({
   endpoints: (builder) => ({
     // Get all users with pagination and search
     getUsers: builder.query<
-      {
-        success: boolean;
-        data: User[];
-        pagination: {
-          page: number;
-          limit: number;
-          total: number;
-          totalPages: number;
-        };
-      },
+      PaginatedResponse<User>,
       {
         page?: number;
         limit?: number;
@@ -34,7 +26,7 @@ export const usersApi = createApi({
         params,
       }),
       providesTags: (result) =>
-        result
+        result?.data
           ? [
               ...result.data.map(({ _id }) => ({
                 type: "User" as const,
@@ -46,7 +38,7 @@ export const usersApi = createApi({
     }),
 
     // Get single user by ID
-    getUser: builder.query<{ success: boolean; data: User }, string>({
+    getUser: builder.query<ApiResponse<User>, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "GET",
@@ -55,7 +47,7 @@ export const usersApi = createApi({
     }),
 
     // Create new user
-    createUser: builder.mutation<{ success: boolean; message: string; data: User }, UserInput>({
+    createUser: builder.mutation<ApiResponse<User>, UserInput>({
       query: (user) => ({
         url: "/",
         method: "POST",
@@ -66,7 +58,7 @@ export const usersApi = createApi({
 
     // Update user
     updateUser: builder.mutation<
-      { success: boolean; message: string; data: User },
+      ApiResponse<User>,
       { _id: string; user: UserUpdateInput }
     >({
       query: ({ _id, user }) => ({
@@ -81,7 +73,7 @@ export const usersApi = createApi({
     }),
 
     // Delete user
-    deleteUser: builder.mutation<{ success: boolean; message: string }, string>({
+    deleteUser: builder.mutation<ApiResponse<void>, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",

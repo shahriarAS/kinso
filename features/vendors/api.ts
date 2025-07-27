@@ -1,6 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
 import { Vendor, VendorInput, VendorUpdateInput } from "./types";
+import { PaginatedResponse, ApiResponse } from "@/types";
 
 export const vendorApi = createApi({
   reducerPath: "vendorApi",
@@ -8,16 +9,7 @@ export const vendorApi = createApi({
   tagTypes: ["Vendor"],
   endpoints: (builder) => ({
     getVendors: builder.query<
-      {
-        success: boolean;
-        data: Vendor[];
-        pagination: {
-          page: number;
-          limit: number;
-          total: number;
-          totalPages: number;
-        };
-      },
+      PaginatedResponse<Vendor>,
       {
         page?: number;
         limit?: number;
@@ -34,7 +26,7 @@ export const vendorApi = createApi({
         params,
       }),
       providesTags: (result) =>
-        result
+        result?.data
           ? [
               ...result.data.map(({ _id }) => ({
                 type: "Vendor" as const,
@@ -45,7 +37,7 @@ export const vendorApi = createApi({
           : [{ type: "Vendor", id: "LIST" }],
     }),
 
-    getVendor: builder.query<{ success: boolean; data: Vendor }, string>({
+    getVendor: builder.query<ApiResponse<Vendor>, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "GET",
@@ -54,7 +46,7 @@ export const vendorApi = createApi({
     }),
 
     createVendor: builder.mutation<
-      { success: boolean; message: string; data: Vendor },
+      ApiResponse<Vendor>,
       VendorInput
     >({
       query: (vendor) => ({
@@ -66,7 +58,7 @@ export const vendorApi = createApi({
     }),
 
     updateVendor: builder.mutation<
-      { success: boolean; message: string; data: Vendor },
+      ApiResponse<Vendor>,
       { _id: string; vendor: Partial<VendorUpdateInput> }
     >({
       query: ({ _id, vendor }) => ({
@@ -80,7 +72,7 @@ export const vendorApi = createApi({
       ],
     }),
 
-    deleteVendor: builder.mutation<{ success: boolean; message: string }, string>({
+    deleteVendor: builder.mutation<ApiResponse<void>, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",
@@ -88,7 +80,7 @@ export const vendorApi = createApi({
       invalidatesTags: [{ type: "Vendor", id: "LIST" }],
     }),
 
-    getAllVendors: builder.query<{ success: boolean; data: Vendor[] }, void>({
+    getAllVendors: builder.query<ApiResponse<Vendor[]>, void>({
       query: () => ({
         url: "/",
         method: "GET",

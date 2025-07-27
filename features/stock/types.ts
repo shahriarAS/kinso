@@ -10,7 +10,7 @@ export interface StockInput {
   locationType: string;
   mrp: number;
   tp: number;
-  expireDate: Date;
+  expireDate: string;
   unit: number;
   batchNumber: string;
 }
@@ -21,7 +21,7 @@ export interface StockUpdateInput {
   locationType?: string;
   mrp?: number;
   tp?: number;
-  expireDate?: Date;
+  expireDate?: string;
   unit?: number;
   batchNumber?: string;
 }

@@ -8,6 +8,7 @@ import {
   DemandGenerationRequest,
   DemandConversionRequest,
 } from "./types";
+import { ApiResponse } from "@/types";
 
 export const demandApi = createApi({
   reducerPath: "demandApi",
@@ -22,7 +23,7 @@ export const demandApi = createApi({
         params: filters,
       }),
       providesTags: (result) =>
-        result
+        result?.data
           ? [
               ...result.data.map(({ _id }) => ({
                 type: "Demand" as const,
@@ -34,7 +35,7 @@ export const demandApi = createApi({
     }),
 
     // Get single demand by ID
-    getDemand: builder.query<{ success: boolean; data: Demand }, string>({
+    getDemand: builder.query<ApiResponse<Demand>, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "GET",
@@ -44,7 +45,7 @@ export const demandApi = createApi({
 
     // Create new demand
     createDemand: builder.mutation<
-      { success: boolean; message: string; data: Demand },
+      ApiResponse<Demand>,
       DemandInput
     >({
       query: (demand) => ({
@@ -57,7 +58,7 @@ export const demandApi = createApi({
 
     // Update demand
     updateDemand: builder.mutation<
-      { success: boolean; message: string; data: Demand },
+      ApiResponse<Demand>,
       { _id: string; demand: Partial<DemandInput> }
     >({
       query: ({ _id, demand }) => ({
@@ -72,7 +73,7 @@ export const demandApi = createApi({
     }),
 
     // Delete demand
-    deleteDemand: builder.mutation<{ success: boolean; message: string }, string>({
+    deleteDemand: builder.mutation<ApiResponse<void>, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",
@@ -82,7 +83,7 @@ export const demandApi = createApi({
 
     // Generate demands based on sales data
     generateDemands: builder.mutation<
-      { success: boolean; message: string; data: Demand[] },
+      ApiResponse<Demand[]>,
       DemandGenerationRequest
     >({
       query: (request) => ({
@@ -95,7 +96,7 @@ export const demandApi = createApi({
 
     // Convert demand to stock
     convertDemandToStock: builder.mutation<
-      { success: boolean; message: string; data: Demand },
+      ApiResponse<Demand>,
       { demandId: string; conversionData: DemandConversionRequest }
     >({
       query: ({ demandId, conversionData }) => ({
@@ -111,7 +112,7 @@ export const demandApi = createApi({
 
     // Update demand status
     updateDemandStatus: builder.mutation<
-      { success: boolean; message: string; data: Demand },
+      ApiResponse<Demand>,
       { _id: string; status: "pending" | "approved" | "converted" | "cancelled" }
     >({
       query: ({ _id, status }) => ({

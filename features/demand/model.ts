@@ -2,12 +2,12 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface IDemand extends Document {
   location: mongoose.Types.ObjectId;
-  locationType: string;
+  locationType: "Warehouse" | "Outlet";
   products: {
     product: mongoose.Types.ObjectId;
     quantity: number;
   }[];
-  status: string;
+  status: "Pending" | "Approved" | "ConvertedToStock";
   createdAt: Date;
   updatedAt: Date;
 }

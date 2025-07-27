@@ -4,7 +4,7 @@ export interface User {
   email: string;
   role: "admin" | "manager" | "staff";
   avatar?: string;
-  outletId?: string;
+  outlet?: string;
   createdAt: string;
   updatedAt: string;
   lastLoginAt?: string;
@@ -16,7 +16,7 @@ export interface UserInput {
   email: string;
   password: string;
   role?: "admin" | "manager" | "staff";
-  outletId?: string;
+  outlet?: string;
   avatar?: string;
 }
 
@@ -26,14 +26,14 @@ export interface UserUpdateInput {
   role?: "admin" | "manager" | "staff";
   isActive?: boolean;
   avatar?: string;
-  outletId?: string;
+  outlet?: string;
 }
 
 export interface UserFilters {
   search?: string;
   role?: "admin" | "manager" | "staff";
   isActive?: boolean;
-  outletId?: string;
+  outlet?: string;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
   page?: number;
@@ -64,7 +64,7 @@ export interface UserStats {
     count: number;
   }>;
   usersByOutlet: Array<{
-    outletId: string;
+    outlet: string;
     outletName: string;
     userCount: number;
   }>;
@@ -76,7 +76,7 @@ export interface UserProfile {
   email: string;
   role: "admin" | "manager" | "staff";
   avatar?: string;
-  outletId?: string;
+  outlet?: string;
   isActive: boolean;
   lastLoginAt?: string;
   createdAt: string;

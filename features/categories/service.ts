@@ -79,16 +79,9 @@ export async function handlePost(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { categoryId, name, applyVAT } = body;
+    const { name, applyVAT } = body;
 
     // Basic validation
-    if (!categoryId || categoryId.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Category ID is required" },
-        { status: 400 },
-      );
-    }
-
     if (!name || name.trim().length === 0) {
       return NextResponse.json(
         { success: false, message: "Category name is required" },
@@ -96,21 +89,8 @@ export async function handlePost(request: NextRequest) {
       );
     }
 
-    // Check if categoryId already exists
-    const existingCategory = await Category.findOne({
-      categoryId: { $regex: new RegExp(`^${categoryId.trim()}$`, "i") },
-    });
-
-    if (existingCategory) {
-      return NextResponse.json(
-        { success: false, message: "Category with this ID already exists" },
-        { status: 409 },
-      );
-    }
-
     // Create category
     const category = await Category.create({
-      categoryId: categoryId.trim(),
       name: name.trim(),
       applyVAT: applyVAT || false,
     });
@@ -131,12 +111,12 @@ export async function handlePost(request: NextRequest) {
   }
 }
 
-// GET /api/categories/:categoryId - Get a specific category
+// GET /api/categories/:id - Get a specific category
 export async function handleGetById(
   request: NextRequest,
-  { params }: { params: Promise<{ categoryId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { categoryId } = await params;
+  const { id } = await params;
   try {
     // Authorize request - all authenticated users can view categories
     const authResult = await authorizeRequest(
@@ -155,7 +135,7 @@ export async function handleGetById(
 
     await dbConnect();
 
-    const category = await Category.findOne({ categoryId }).lean();
+    const category = await Category.findById(id).lean();
 
     if (!category) {
       return NextResponse.json(
@@ -177,12 +157,12 @@ export async function handleGetById(
   }
 }
 
-// PUT /api/categories/:categoryId - Update a category
+// PUT /api/categories/:id - Update a category
 export async function handleUpdateById(
   request: NextRequest,
-  { params }: { params: Promise<{ categoryId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { categoryId } = await params;
+  const { id } = await params;
   try {
     // Authorize request - only managers and admins can update categories
     const authResult = await authorizeRequest(
@@ -205,7 +185,7 @@ export async function handleUpdateById(
     const { name, applyVAT } = body;
 
     // Check if category exists
-    const existingCategory = await Category.findOne({ categoryId });
+    const existingCategory = await Category.findById(id);
     if (!existingCategory) {
       return NextResponse.json(
         { success: false, message: "Category not found" },
@@ -222,8 +202,8 @@ export async function handleUpdateById(
     }
 
     // Update category
-    const updatedCategory = await Category.findOneAndUpdate(
-      { categoryId },
+    const updatedCategory = await Category.findByIdAndUpdate(
+      id,
       {
         name: name.trim(),
         applyVAT: applyVAT !== undefined ? applyVAT : existingCategory.applyVAT,
@@ -244,12 +224,12 @@ export async function handleUpdateById(
   }
 }
 
-// DELETE /api/categories/:categoryId - Delete a category
+// DELETE /api/categories/:id - Delete a category
 export async function handleDeleteById(
   request: NextRequest,
-  { params }: { params: Promise<{ categoryId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { categoryId } = await params;
+  const { id } = await params;
   try {
     // Authorize request - only admins can delete categories
     const authResult = await authorizeRequest(
@@ -269,7 +249,7 @@ export async function handleDeleteById(
     await dbConnect();
 
     // Check if category exists
-    const category = await Category.findOne({ categoryId });
+    const category = await Category.findById(id);
     if (!category) {
       return NextResponse.json(
         { success: false, message: "Category not found" },
@@ -281,7 +261,7 @@ export async function handleDeleteById(
     // This would require checking the Product model for references
     // For now, we'll allow deletion but you should implement this check
 
-    await Category.findOneAndDelete({ categoryId });
+    await Category.findByIdAndDelete(id);
 
     return NextResponse.json({
       success: true,

@@ -1,6 +1,5 @@
 export interface Customer {
   _id: string;
-  customerId: string;
   name: string;
   contactInfo: {
     phone?: string;
@@ -17,7 +16,6 @@ export interface CustomerInput
   extends Omit<Customer, "_id" | "createdAt" | "updatedAt"> {}
 
 export interface CustomerUpdateInput {
-  customerId?: string;
   name?: string;
   contactInfo?: {
     phone?: string;
@@ -65,7 +63,7 @@ export interface CustomerStats {
   inactiveMembers: number;
   newCustomersThisMonth: number;
   topCustomers: Array<{
-    customerId: string;
+    _id: string;
     name: string;
     totalPurchase: number;
     membershipActive: boolean;
@@ -73,7 +71,7 @@ export interface CustomerStats {
 }
 
 export interface CustomerOrderHistory {
-  customerId: string;
+  _id: string;
   customerName: string;
   orders: Array<{
     orderId: string;

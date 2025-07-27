@@ -26,30 +26,31 @@ export async function handleGet(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
-    const locationId = searchParams.get("locationId") || "";
+    const location = searchParams.get("location") || "";
     const locationType = searchParams.get("locationType") || "";
-    const productId = searchParams.get("productId") || "";
+    const product = searchParams.get("product") || "";
 
     const skip = (page - 1) * limit;
 
     // Build query
     const query: any = {};
     
-    if (locationId) {
-      query.locationId = locationId;
+    if (location) {
+      query.location = location;
     }
     
     if (locationType) {
       query.locationType = locationType;
     }
     
-    if (productId) {
-      query.productId = productId;
+    if (product) {
+      query.product = product;
     }
 
     // Execute query
     const [stocks, total] = await Promise.all([
       Stock.find(query)
+        .populate("product", "name barcode")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -95,26 +96,19 @@ export async function handlePost(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { stockId, productId, locationId, locationType, mrp, tp, expireDate, quantity, batchNumber } = body;
+    const { product, location, locationType, mrp, tp, expireDate, quantity, batchNumber } = body;
 
     // Validation
-    if (!stockId) {
+    if (!product) {
       return NextResponse.json(
-        { success: false, message: "Stock ID is required" },
+        { success: false, message: "Product is required" },
         { status: 400 },
       );
     }
 
-    if (!productId) {
+    if (!location) {
       return NextResponse.json(
-        { success: false, message: "Product ID is required" },
-        { status: 400 },
-      );
-    }
-
-    if (!locationId) {
-      return NextResponse.json(
-        { success: false, message: "Location ID is required" },
+        { success: false, message: "Location is required" },
         { status: 400 },
       );
     }
@@ -161,15 +155,6 @@ export async function handlePost(request: NextRequest) {
       );
     }
 
-    // Check if stockId already exists
-    const existingStock = await Stock.findOne({ stockId });
-    if (existingStock) {
-      return NextResponse.json(
-        { success: false, message: "Stock ID already exists" },
-        { status: 400 },
-      );
-    }
-
     // Check if batchNumber already exists
     const existingBatch = await Stock.findOne({ batchNumber });
     if (existingBatch) {
@@ -181,9 +166,8 @@ export async function handlePost(request: NextRequest) {
 
     // Create stock entry
     const stockData = {
-      stockId,
-      productId,
-      locationId,
+      product,
+      location,
       locationType,
       mrp,
       tp,
@@ -210,8 +194,8 @@ export async function handlePost(request: NextRequest) {
   }
 }
 
-// GET /api/stocks/:stockId - Get specific stock
-export async function handleGetById(request: NextRequest, { params }: { params: { stockId: string } }) {
+// GET /api/stocks/:id - Get specific stock
+export async function handleGetById(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const authResult = await authorizeRequest(
       request as NextRequest & AuthenticatedRequest,
@@ -229,9 +213,11 @@ export async function handleGetById(request: NextRequest, { params }: { params: 
 
     await dbConnect();
 
-    const { stockId } = params;
+    const { id } = await params;
 
-    const stock = await Stock.findOne({ stockId }).lean();
+    const stock = await Stock.findById(id)
+      .populate("product", "name barcode")
+      .lean();
 
     if (!stock) {
       return NextResponse.json(
@@ -253,8 +239,8 @@ export async function handleGetById(request: NextRequest, { params }: { params: 
   }
 }
 
-// PUT /api/stocks/:stockId - Update stock
-export async function handlePut(request: NextRequest, { params }: { params: { stockId: string } }) {
+// PUT /api/stocks/:id - Update stock
+export async function handlePut(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const authResult = await authorizeRequest(
       request as NextRequest & AuthenticatedRequest,
@@ -272,12 +258,12 @@ export async function handlePut(request: NextRequest, { params }: { params: { st
 
     await dbConnect();
 
-    const { stockId } = params;
+    const { id } = await params;
     const body = await request.json();
-    const { productId, locationId, locationType, mrp, tp, expireDate, quantity, batchNumber } = body;
+    const { product, location, locationType, mrp, tp, expireDate, quantity, batchNumber } = body;
 
     // Find existing stock
-    const existingStock = await Stock.findOne({ stockId });
+    const existingStock = await Stock.findById(id);
     if (!existingStock) {
       return NextResponse.json(
         { success: false, message: "Stock not found" },
@@ -286,16 +272,16 @@ export async function handlePut(request: NextRequest, { params }: { params: { st
     }
 
     // Validation
-    if (!productId) {
+    if (!product) {
       return NextResponse.json(
-        { success: false, message: "Product ID is required" },
+        { success: false, message: "Product is required" },
         { status: 400 },
       );
     }
 
-    if (!locationId) {
+    if (!location) {
       return NextResponse.json(
-        { success: false, message: "Location ID is required" },
+        { success: false, message: "Location is required" },
         { status: 400 },
       );
     }
@@ -343,7 +329,7 @@ export async function handlePut(request: NextRequest, { params }: { params: { st
     }
 
     // Check if batchNumber already exists for different stock
-    const existingBatch = await Stock.findOne({ batchNumber, stockId: { $ne: stockId } });
+    const existingBatch = await Stock.findOne({ batchNumber, _id: { $ne: id } });
     if (existingBatch) {
       return NextResponse.json(
         { success: false, message: "Batch number already exists" },
@@ -352,11 +338,11 @@ export async function handlePut(request: NextRequest, { params }: { params: { st
     }
 
     // Update stock
-    const updatedStock = await Stock.findOneAndUpdate(
-      { stockId },
+    const updatedStock = await Stock.findByIdAndUpdate(
+      id,
       {
-        productId,
-        locationId,
+        product,
+        location,
         locationType,
         mrp,
         tp,
@@ -380,8 +366,8 @@ export async function handlePut(request: NextRequest, { params }: { params: { st
   }
 }
 
-// DELETE /api/stocks/:stockId - Delete stock
-export async function handleDelete(request: NextRequest, { params }: { params: { stockId: string } }) {
+// DELETE /api/stocks/:id - Delete stock
+export async function handleDelete(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const authResult = await authorizeRequest(
       request as NextRequest & AuthenticatedRequest,
@@ -399,9 +385,9 @@ export async function handleDelete(request: NextRequest, { params }: { params: {
 
     await dbConnect();
 
-    const { stockId } = params;
+    const { id } = await params;
 
-    const stock = await Stock.findOneAndDelete({ stockId });
+    const stock = await Stock.findByIdAndDelete(id);
 
     if (!stock) {
       return NextResponse.json(

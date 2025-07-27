@@ -25,16 +25,9 @@ export async function handlePost(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { brandId, name, vendorId } = body;
+    const { name, vendor } = body;
 
     // Basic validation
-    if (!brandId || brandId.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Brand ID is required" },
-        { status: 400 },
-      );
-    }
-
     if (!name || name.trim().length === 0) {
       return NextResponse.json(
         { success: false, message: "Brand name is required" },
@@ -42,27 +35,17 @@ export async function handlePost(request: NextRequest) {
       );
     }
 
-    if (!vendorId) {
+    if (!vendor) {
       return NextResponse.json(
-        { success: false, message: "Vendor ID is required" },
+        { success: false, message: "Vendor is required" },
         { status: 400 },
-      );
-    }
-
-    // Check if brand already exists with same brandId
-    const existingBrand = await Brand.findOne({ brandId: brandId.trim() });
-    if (existingBrand) {
-      return NextResponse.json(
-        { success: false, message: "Brand with this ID already exists" },
-        { status: 409 },
       );
     }
 
     // Create brand
     const brand = await Brand.create({
-      brandId: brandId.trim(),
       name: name.trim(),
-      vendorId,
+      vendor,
     });
 
     return NextResponse.json(
@@ -104,19 +87,20 @@ export async function handleGet(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
-    const vendorId = searchParams.get("vendorId") || "";
+    const vendor = searchParams.get("vendor") || "";
 
     const skip = (page - 1) * limit;
 
     // Build query
     const query: any = {};
-    if (vendorId) {
-      query.vendorId = vendorId;
+    if (vendor) {
+      query.vendor = vendor;
     }
 
     // Execute query
     const [brands, total] = await Promise.all([
       Brand.find(query)
+        .populate("vendor", "name")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -142,10 +126,10 @@ export async function handleGet(request: NextRequest) {
   }
 }
 
-// GET /api/brands/[brandId] - Get a specific brand
+// GET /api/brands/[id] - Get a specific brand
 export async function handleGetById(
   request: NextRequest,
-  { params }: { params: Promise<{ brandId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const authResult = await authorizeRequest(
@@ -161,8 +145,10 @@ export async function handleGetById(
       );
     }
     await dbConnect();
-    const { brandId } = await params;
-    const brand = await Brand.findOne({ brandId }).lean();
+    const { id } = await params;
+    const brand = await Brand.findById(id)
+      .populate("vendor", "name")
+      .lean();
     if (!brand) {
       return NextResponse.json(
         { success: false, message: "Brand not found" },
@@ -182,10 +168,10 @@ export async function handleGetById(
   }
 }
 
-// PUT /api/brands/[brandId] - Update a brand
+// PUT /api/brands/[id] - Update a brand
 export async function handleUpdateById(
   request: NextRequest,
-  { params }: { params: Promise<{ brandId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const authResult = await authorizeRequest(
@@ -202,10 +188,10 @@ export async function handleUpdateById(
     }
     await dbConnect();
     const body = await request.json();
-    const { name, vendorId } = body;
-    const { brandId } = await params;
+    const { name, vendor } = body;
+    const { id } = await params;
     
-    const existingBrand = await Brand.findOne({ brandId });
+    const existingBrand = await Brand.findById(id);
     if (!existingBrand) {
       return NextResponse.json(
         { success: false, message: "Brand not found" },
@@ -220,18 +206,18 @@ export async function handleUpdateById(
         { status: 400 },
       );
     }
-    if (!vendorId) {
+    if (!vendor) {
       return NextResponse.json(
-        { success: false, message: "Vendor ID is required" },
+        { success: false, message: "Vendor is required" },
         { status: 400 },
       );
     }
 
-    const updatedBrand = await Brand.findOneAndUpdate(
-      { brandId },
+    const updatedBrand = await Brand.findByIdAndUpdate(
+      id,
       {
         name: name.trim(),
-        vendorId,
+        vendor,
       },
       { new: true, runValidators: true },
     );
@@ -256,10 +242,10 @@ export async function handleUpdateById(
   }
 }
 
-// DELETE /api/brands/[brandId] - Delete a brand
+// DELETE /api/brands/[id] - Delete a brand
 export async function handleDeleteById(
   request: NextRequest,
-  { params }: { params: Promise<{ brandId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const authResult = await authorizeRequest(
@@ -275,15 +261,15 @@ export async function handleDeleteById(
       );
     }
     await dbConnect();
-    const { brandId } = await params;
-    const brand = await Brand.findOne({ brandId });
+    const { id } = await params;
+    const brand = await Brand.findById(id);
     if (!brand) {
       return NextResponse.json(
         { success: false, message: "Brand not found" },
         { status: 404 },
       );
     }
-    await Brand.findOneAndDelete({ brandId });
+    await Brand.findByIdAndDelete(id);
     return NextResponse.json({
       success: true,
       message: "Brand deleted",

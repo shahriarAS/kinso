@@ -4,7 +4,7 @@ import { User } from "@/features/users";
 import { Stock } from "@/features/stock";
 
 export interface SaleItem {
-  stockId: string;
+  stock: string;
   quantity: number;
   unitPrice: number;
   discountApplied: number;
@@ -13,8 +13,8 @@ export interface SaleItem {
 export interface Sale {
   _id: string;
   saleId: string;
-  outletId: string | Outlet;
-  customerId?: string | Customer;
+  outlet: string | Outlet;
+  customer?: string | Customer;
   saleDate: string;
   totalAmount: number;
   items: SaleItem[];
@@ -27,8 +27,8 @@ export interface Sale {
 }
 
 export interface CreateSaleRequest {
-  outletId: string;
-  customerId?: string;
+  outlet: string;
+  customer?: string;
   items: SaleItem[];
   paymentMethod: "CASH" | "BKASH" | "ROCKET" | "NAGAD" | "BANK" | "CARD";
   discountAmount: number;
@@ -37,7 +37,7 @@ export interface CreateSaleRequest {
 
 export interface SaleUpdateRequest {
   saleId: string;
-  customerId?: string;
+  customer?: string;
   items?: SaleItem[];
   paymentMethod?: "CASH" | "BKASH" | "ROCKET" | "NAGAD" | "BANK" | "CARD";
   discountAmount?: number;
@@ -47,7 +47,7 @@ export interface SaleUpdateRequest {
 export interface SaleReturnRequest {
   saleId: string;
   items: {
-    stockId: string;
+    stock: string;
     quantity: number;
     reason: string;
   }[];
@@ -55,8 +55,8 @@ export interface SaleReturnRequest {
 }
 
 export interface SalesHistoryFilters {
-  outletId?: string;
-  customerId?: string;
+  outlet?: string;
+  customer?: string;
   startDate?: string;
   endDate?: string;
   paymentMethod?: "CASH" | "BKASH" | "ROCKET" | "NAGAD" | "BANK" | "CARD";
@@ -78,7 +78,7 @@ export interface SalesHistoryResponse {
 }
 
 export interface CartItem {
-  stockId: string;
+  stock: string;
   productName: string;
   quantity: number;
   unitPrice: number;
@@ -121,7 +121,7 @@ export interface SaleStats {
   totalRevenue: number;
   averageSaleValue: number;
   salesByOutlet: Array<{
-    outletId: string;
+    outlet: string;
     outletName: string;
     saleCount: number;
     totalRevenue: number;
@@ -142,7 +142,7 @@ export interface SaleReturn {
   _id: string;
   saleId: string;
   items: Array<{
-    stockId: string;
+    stock: string;
     quantity: number;
     reason: string;
   }>;

@@ -25,12 +25,12 @@ export async function handlePost(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { outletId, customerId, items, paymentMethod, discountAmount, notes } = body;
+    const { outlet, customer, items, paymentMethod, discountAmount, notes } = body;
 
     // Basic validation
-    if (!outletId || outletId.trim().length === 0) {
+    if (!outlet) {
       return NextResponse.json(
-        { success: false, message: "Outlet ID is required" },
+        { success: false, message: "Outlet is required" },
         { status: 400 },
       );
     }
@@ -51,9 +51,9 @@ export async function handlePost(request: NextRequest) {
 
     // Validate items array
     for (const item of items) {
-      if (!item.stockId || !item.quantity || !item.unitPrice) {
+      if (!item.stock || !item.quantity || !item.unitPrice) {
         return NextResponse.json(
-          { success: false, message: "Each item must have stockId, quantity, and unitPrice" },
+          { success: false, message: "Each item must have stock, quantity, and unitPrice" },
           { status: 400 },
         );
       }
@@ -83,8 +83,8 @@ export async function handlePost(request: NextRequest) {
     // Create sale
     const sale = await Sale.create({
       saleId,
-      outletId: outletId.trim(),
-      customerId: customerId || null,
+      outlet,
+      customer: customer || null,
       saleDate: new Date().toISOString().split('T')[0],
       items,
       totalAmount,
@@ -133,8 +133,8 @@ export async function handleGet(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
-    const outletId = searchParams.get("outletId");
-    const customerId = searchParams.get("customerId");
+    const outlet = searchParams.get("outlet");
+    const customer = searchParams.get("customer");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
     const paymentMethod = searchParams.get("paymentMethod");
@@ -148,11 +148,11 @@ export async function handleGet(request: NextRequest) {
 
     // Build query
     const query: any = {};
-    if (outletId) {
-      query.outletId = outletId;
+    if (outlet) {
+      query.outlet = outlet;
     }
-    if (customerId) {
-      query.customerId = customerId;
+    if (customer) {
+      query.customer = customer;
     }
     if (paymentMethod) {
       query.paymentMethod = paymentMethod;
@@ -189,9 +189,10 @@ export async function handleGet(request: NextRequest) {
     // Execute query with population
     const [sales, total] = await Promise.all([
       Sale.find(query)
-        .populate("outletId", "name")
-        .populate("customerId", "name phone email")
+        .populate("outlet", "name")
+        .populate("customer", "name")
         .populate("createdBy", "name")
+        .populate("items.stock", "product")
         .sort(sort)
         .skip(skip)
         .limit(limit)
@@ -236,7 +237,12 @@ export async function handleGetById(
     }
     await dbConnect();
     const { saleId } = await params;
-    const sale = await Sale.findOne({ saleId }).lean();
+    const sale = await Sale.findOne({ saleId })
+      .populate("outlet", "name")
+      .populate("customer", "name")
+      .populate("createdBy", "name")
+      .populate("items.stock", "product")
+      .lean();
     if (!sale) {
       return NextResponse.json(
         { success: false, message: "Sale not found" },
@@ -276,7 +282,7 @@ export async function handlePut(
     }
     await dbConnect();
     const body = await request.json();
-    const { outletId, customerId, products, totalAmount, paymentMethod } = body;
+    const { outlet, customer, items, totalAmount, paymentMethod, discountAmount, notes } = body;
     const { saleId } = await params;
     
     const existingSale = await Sale.findOne({ saleId });
@@ -288,16 +294,16 @@ export async function handlePut(
     }
 
     // Validation
-    if (!outletId || outletId.trim().length === 0) {
+    if (!outlet) {
       return NextResponse.json(
-        { success: false, message: "Outlet ID is required" },
+        { success: false, message: "Outlet is required" },
         { status: 400 },
       );
     }
 
-    if (!products || !Array.isArray(products) || products.length === 0) {
+    if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
-        { success: false, message: "Products array is required and cannot be empty" },
+        { success: false, message: "Items array is required and cannot be empty" },
         { status: 400 },
       );
     }
@@ -309,30 +315,30 @@ export async function handlePut(
       );
     }
 
-    if (!paymentMethod || paymentMethod.trim().length === 0) {
+    if (!paymentMethod) {
       return NextResponse.json(
         { success: false, message: "Payment method is required" },
         { status: 400 },
       );
     }
 
-    // Validate products array
-    for (const product of products) {
-      if (!product.productId || !product.quantity || !product.price) {
+    // Validate items array
+    for (const item of items) {
+      if (!item.stock || !item.quantity || !item.unitPrice) {
         return NextResponse.json(
-          { success: false, message: "Each product must have productId, quantity, and price" },
+          { success: false, message: "Each item must have stock, quantity, and unitPrice" },
           { status: 400 },
         );
       }
-      if (product.quantity <= 0) {
+      if (item.quantity <= 0) {
         return NextResponse.json(
-          { success: false, message: "Product quantity must be greater than 0" },
+          { success: false, message: "Item quantity must be greater than 0" },
           { status: 400 },
         );
       }
-      if (product.price <= 0) {
+      if (item.unitPrice <= 0) {
         return NextResponse.json(
-          { success: false, message: "Product price must be greater than 0" },
+          { success: false, message: "Item unit price must be greater than 0" },
           { status: 400 },
         );
       }
@@ -341,11 +347,13 @@ export async function handlePut(
     const updatedSale = await Sale.findOneAndUpdate(
       { saleId },
       {
-        outletId: outletId.trim(),
-        customerId: customerId || null,
-        products,
+        outlet,
+        customer: customer || null,
+        items,
         totalAmount,
-        paymentMethod: paymentMethod.trim(),
+        paymentMethod,
+        discountAmount: discountAmount || 0,
+        notes: notes || "",
       },
       { new: true, runValidators: true },
     );

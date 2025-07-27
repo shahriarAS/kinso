@@ -28,6 +28,7 @@ export async function handleGet(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
     const membershipActive = searchParams.get("membershipActive");
+    const search = searchParams.get("search") || "";
 
     const skip = (page - 1) * limit;
 
@@ -35,6 +36,13 @@ export async function handleGet(request: NextRequest) {
     const query: any = {};
     if (membershipActive !== null && membershipActive !== undefined) {
       query.membershipActive = membershipActive === "true";
+    }
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { "contactInfo.phone": { $regex: search, $options: "i" } },
+        { "contactInfo.email": { $regex: search, $options: "i" } },
+      ];
     }
 
     // Execute query
@@ -82,16 +90,9 @@ export async function handlePost(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { customerId, name, contactInfo, membershipActive, totalPurchaseLastMonth } = body;
+    const { name, contactInfo, membershipActive, totalPurchaseLastMonth } = body;
 
     // Basic validation
-    if (!customerId || customerId.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Customer ID is required" },
-        { status: 400 },
-      );
-    }
-
     if (!name || name.trim().length === 0) {
       return NextResponse.json(
         { success: false, message: "Name is required" },
@@ -99,21 +100,8 @@ export async function handlePost(request: NextRequest) {
       );
     }
 
-    // Check if customer already exists
-    const existingCustomer = await CustomerModel.findOne({
-      customerId: customerId.trim(),
-    });
-
-    if (existingCustomer) {
-      return NextResponse.json(
-        { success: false, message: "Customer with this ID already exists" },
-        { status: 409 },
-      );
-    }
-
     // Create customer
     const customer = await CustomerModel.create({
-      customerId: customerId.trim(),
       name: name.trim(),
       contactInfo: {
         phone: contactInfo?.phone?.trim() || "",
@@ -140,12 +128,12 @@ export async function handlePost(request: NextRequest) {
   }
 }
 
-// GET /api/customers/:customerId - Get a specific customer
+// GET /api/customers/:id - Get a specific customer
 export async function handleGetById(
   request: NextRequest,
-  { params }: { params: Promise<{ customerId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { customerId } = await params;
+  const { id } = await params;
   try {
     // Authorize request - all authenticated users can view customers
     const authResult = await authorizeRequest(
@@ -164,7 +152,7 @@ export async function handleGetById(
 
     await dbConnect();
 
-    const customer = await CustomerModel.findOne({ customerId }).lean();
+    const customer = await CustomerModel.findById(id).lean();
 
     if (!customer) {
       return NextResponse.json(
@@ -186,12 +174,12 @@ export async function handleGetById(
   }
 }
 
-// PUT /api/customers/:customerId - Update a customer
+// PUT /api/customers/:id - Update a customer
 export async function handleUpdateById(
   request: NextRequest,
-  { params }: { params: Promise<{ customerId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { customerId } = await params;
+  const { id } = await params;
   try {
     // Authorize request - all authenticated users can update customers
     const authResult = await authorizeRequest(
@@ -214,7 +202,7 @@ export async function handleUpdateById(
     const { name, contactInfo, membershipActive, totalPurchaseLastMonth } = body;
 
     // Check if customer exists
-    const existingCustomer = await CustomerModel.findOne({ customerId });
+    const existingCustomer = await CustomerModel.findById(id);
     if (!existingCustomer) {
       return NextResponse.json(
         { success: false, message: "Customer not found" },
@@ -231,8 +219,8 @@ export async function handleUpdateById(
     }
 
     // Update customer
-    const updatedCustomer = await CustomerModel.findOneAndUpdate(
-      { customerId },
+    const updatedCustomer = await CustomerModel.findByIdAndUpdate(
+      id,
       {
         name: name.trim(),
         contactInfo: {
@@ -266,12 +254,12 @@ export async function handleUpdateById(
   }
 }
 
-// DELETE /api/customers/:customerId - Delete a customer
+// DELETE /api/customers/:id - Delete a customer
 export async function handleDeleteById(
   request: NextRequest,
-  { params }: { params: Promise<{ customerId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { customerId } = await params;
+  const { id } = await params;
   try {
     // Authorize request - all authenticated users can delete customers
     const authResult = await authorizeRequest(
@@ -291,7 +279,7 @@ export async function handleDeleteById(
     await dbConnect();
 
     // Check if customer exists
-    const customer = await CustomerModel.findOne({ customerId });
+    const customer = await CustomerModel.findById(id);
     if (!customer) {
       return NextResponse.json(
         { success: false, message: "Customer not found" },
@@ -299,7 +287,7 @@ export async function handleDeleteById(
       );
     }
 
-    await CustomerModel.findOneAndDelete({ customerId });
+    await CustomerModel.findByIdAndDelete(id);
 
     return NextResponse.json({
       success: true,

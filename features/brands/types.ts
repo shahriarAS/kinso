@@ -1,11 +1,9 @@
 export interface Brand {
   _id: string;
-  brandId: string;
   name: string;
-  vendorId: string;
-  vendor?: {
+  vendor: string;
+  vendorDetails?: {
     _id: string;
-    vendorId: string;
     name: string;
   };
   createdAt: string;
@@ -13,21 +11,18 @@ export interface Brand {
 }
 
 export interface BrandInput {
-  brandId: string;
   name: string;
-  vendorId: string;
+  vendor: string;
 }
 
 export interface BrandUpdateInput {
-  brandId?: string;
   name?: string;
-  vendorId?: string;
+  vendor?: string;
 }
 
 export interface BrandFilters {
-  brandId?: string;
   name?: string;
-  vendorId?: string;
+  vendor?: string;
   search?: string;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
@@ -51,7 +46,7 @@ export interface BrandsResponse {
 export interface BrandStats {
   totalBrands: number;
   brandsByVendor: Array<{
-    vendorId: string;
+    vendor: string;
     vendorName: string;
     brandCount: number;
   }>;

@@ -5,9 +5,8 @@ export interface Stock extends IStock {
 }
 
 export interface StockInput {
-  stockId: string;
-  productId: string;
-  locationId: string;
+  product: string;
+  location: string;
   locationType: "Warehouse" | "Outlet";
   mrp: number;
   tp: number;
@@ -17,8 +16,8 @@ export interface StockInput {
 }
 
 export interface StockUpdateInput {
-  productId?: string;
-  locationId?: string;
+  product?: string;
+  location?: string;
   locationType?: "Warehouse" | "Outlet";
   mrp?: number;
   tp?: number;
@@ -30,9 +29,9 @@ export interface StockUpdateInput {
 export interface StockFilters {
   page?: number;
   limit?: number;
-  locationId?: string;
+  location?: string;
   locationType?: "Warehouse" | "Outlet";
-  productId?: string;
+  product?: string;
   batchNumber?: string;
   minQuantity?: number;
   maxQuantity?: number;
@@ -76,13 +75,13 @@ export interface StockStats {
   outOfStockItems: number;
   expiringItems: number;
   stockByLocation: Array<{
-    locationId: string;
+    location: string;
     locationType: "Warehouse" | "Outlet";
     itemCount: number;
     totalValue: number;
   }>;
   stockByProduct: Array<{
-    productId: string;
+    product: string;
     productName: string;
     totalQuantity: number;
     totalValue: number;
@@ -91,7 +90,7 @@ export interface StockStats {
 
 export interface StockMovement {
   _id: string;
-  stockId: string;
+  stock: string;
   fromLocation?: string;
   toLocation: string;
   quantity: number;
@@ -102,7 +101,7 @@ export interface StockMovement {
 }
 
 export interface StockMovementInput {
-  stockId: string;
+  stock: string;
   fromLocation?: string;
   toLocation: string;
   quantity: number;

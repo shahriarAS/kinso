@@ -5,22 +5,20 @@ export interface Demand extends Omit<IDemand, "_id"> {
 }
 
 export interface DemandInput {
-  demandId: string;
-  locationId: string;
+  location: string;
   locationType: "Warehouse" | "Outlet";
   products: {
-    productId: string;
+    product: string;
     quantity: number;
   }[];
   status: "Pending" | "Approved" | "ConvertedToStock";
 }
 
 export interface DemandUpdateInput {
-  demandId?: string;
-  locationId?: string;
+  location?: string;
   locationType?: "Warehouse" | "Outlet";
   products?: {
-    productId: string;
+    product: string;
     quantity: number;
   }[];
   status?: "Pending" | "Approved" | "ConvertedToStock";
@@ -29,7 +27,7 @@ export interface DemandUpdateInput {
 export interface DemandFilters {
   page?: number;
   limit?: number;
-  locationId?: string;
+  location?: string;
   locationType?: "Warehouse" | "Outlet";
   status?: "Pending" | "Approved" | "ConvertedToStock";
   startDate?: string;
@@ -72,7 +70,7 @@ export interface DemandStats {
   approvedDemands: number;
   convertedDemands: number;
   demandsByLocation: Array<{
-    locationId: string;
+    location: string;
     locationType: "Warehouse" | "Outlet";
     demandCount: number;
     totalQuantity: number;
@@ -84,10 +82,10 @@ export interface DemandStats {
 }
 
 export interface DemandGenerationRequest {
-  locationId: string;
+  location: string;
   locationType: "Warehouse" | "Outlet";
   products: Array<{
-    productId: string;
+    product: string;
     currentStock: number;
     minStock: number;
     suggestedQuantity: number;

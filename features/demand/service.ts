@@ -26,19 +26,12 @@ export async function handlePost(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { demandId, locationId, locationType, products, status } = body;
+    const { location, locationType, products, status } = body;
 
     // Basic validation
-    if (!demandId || demandId.trim().length === 0) {
+    if (!location) {
       return NextResponse.json(
-        { success: false, message: "Demand ID is required" },
-        { status: 400 },
-      );
-    }
-
-    if (!locationId || locationId.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Location ID is required" },
+        { success: false, message: "Location is required" },
         { status: 400 },
       );
     }
@@ -59,9 +52,9 @@ export async function handlePost(request: NextRequest) {
 
     // Validate each product in the array
     for (const product of products) {
-      if (!product.productId || !product.quantity || product.quantity <= 0) {
+      if (!product.product || !product.quantity || product.quantity <= 0) {
         return NextResponse.json(
-          { success: false, message: "Each product must have a valid productId and quantity > 0" },
+          { success: false, message: "Each product must have a valid product and quantity > 0" },
           { status: 400 },
         );
       }
@@ -74,19 +67,9 @@ export async function handlePost(request: NextRequest) {
       );
     }
 
-    // Check if demand already exists with same demandId
-    const existingDemand = await Demand.findOne({ demandId: demandId.trim() });
-    if (existingDemand) {
-      return NextResponse.json(
-        { success: false, message: "Demand with this ID already exists" },
-        { status: 409 },
-      );
-    }
-
     // Create demand
     const demand = await Demand.create({
-      demandId: demandId.trim(),
-      locationId: locationId.trim(),
+      location,
       locationType,
       products,
       status,
@@ -131,7 +114,7 @@ export async function handleGet(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
-    const locationId = searchParams.get("locationId");
+    const location = searchParams.get("location");
     const locationType = searchParams.get("locationType");
     const status = searchParams.get("status");
 
@@ -139,8 +122,8 @@ export async function handleGet(request: NextRequest) {
 
     // Build query
     const query: any = {};
-    if (locationId) {
-      query.locationId = locationId;
+    if (location) {
+      query.location = location;
     }
     if (locationType && ["Warehouse", "Outlet"].includes(locationType)) {
       query.locationType = locationType;
@@ -152,6 +135,7 @@ export async function handleGet(request: NextRequest) {
     // Execute query
     const [demands, total] = await Promise.all([
       Demand.find(query)
+        .populate("products.product", "name barcode")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -177,10 +161,10 @@ export async function handleGet(request: NextRequest) {
   }
 }
 
-// GET /api/demands/[demandId] - Get a specific demand
+// GET /api/demands/[id] - Get a specific demand
 export async function handleGetById(
   request: NextRequest,
-  { params }: { params: Promise<{ demandId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const authResult = await authorizeRequest(
@@ -196,8 +180,10 @@ export async function handleGetById(
       );
     }
     await dbConnect();
-    const { demandId } = await params;
-    const demand = await Demand.findOne({ demandId }).lean();
+    const { id } = await params;
+    const demand = await Demand.findById(id)
+      .populate("products.product", "name barcode")
+      .lean();
     if (!demand) {
       return NextResponse.json(
         { success: false, message: "Demand not found" },
@@ -217,10 +203,10 @@ export async function handleGetById(
   }
 }
 
-// PUT /api/demands/[demandId] - Update a demand
+// PUT /api/demands/[id] - Update a demand
 export async function handleUpdateById(
   request: NextRequest,
-  { params }: { params: Promise<{ demandId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const authResult = await authorizeRequest(
@@ -237,10 +223,10 @@ export async function handleUpdateById(
     }
     await dbConnect();
     const body = await request.json();
-    const { locationId, locationType, products, status } = body;
-    const { demandId } = await params;
+    const { location, locationType, products, status } = body;
+    const { id } = await params;
     
-    const existingDemand = await Demand.findOne({ demandId });
+    const existingDemand = await Demand.findById(id);
     if (!existingDemand) {
       return NextResponse.json(
         { success: false, message: "Demand not found" },
@@ -249,13 +235,6 @@ export async function handleUpdateById(
     }
 
     // Validation
-    if (locationId && locationId.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Location ID cannot be empty" },
-        { status: 400 },
-      );
-    }
-
     if (locationType && !["Warehouse", "Outlet"].includes(locationType)) {
       return NextResponse.json(
         { success: false, message: "Location type must be either 'Warehouse' or 'Outlet'" },
@@ -273,9 +252,9 @@ export async function handleUpdateById(
 
       // Validate each product in the array
       for (const product of products) {
-        if (!product.productId || !product.quantity || product.quantity <= 0) {
+        if (!product.product || !product.quantity || product.quantity <= 0) {
           return NextResponse.json(
-            { success: false, message: "Each product must have a valid productId and quantity > 0" },
+            { success: false, message: "Each product must have a valid product and quantity > 0" },
             { status: 400 },
           );
         }
@@ -291,13 +270,13 @@ export async function handleUpdateById(
 
     // Build update object
     const updateData: any = {};
-    if (locationId) updateData.locationId = locationId.trim();
+    if (location) updateData.location = location;
     if (locationType) updateData.locationType = locationType;
     if (products) updateData.products = products;
     if (status) updateData.status = status;
 
-    const updatedDemand = await Demand.findOneAndUpdate(
-      { demandId },
+    const updatedDemand = await Demand.findByIdAndUpdate(
+      id,
       updateData,
       { new: true, runValidators: true },
     );
@@ -322,10 +301,10 @@ export async function handleUpdateById(
   }
 }
 
-// DELETE /api/demands/[demandId] - Delete a demand
+// DELETE /api/demands/[id] - Delete a demand
 export async function handleDeleteById(
   request: NextRequest,
-  { params }: { params: Promise<{ demandId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const authResult = await authorizeRequest(
@@ -341,15 +320,15 @@ export async function handleDeleteById(
       );
     }
     await dbConnect();
-    const { demandId } = await params;
-    const demand = await Demand.findOne({ demandId });
+    const { id } = await params;
+    const demand = await Demand.findById(id);
     if (!demand) {
       return NextResponse.json(
         { success: false, message: "Demand not found" },
         { status: 404 },
       );
     }
-    await Demand.findOneAndDelete({ demandId });
+    await Demand.findByIdAndDelete(id);
     return NextResponse.json({
       success: true,
       message: "Demand deleted",
@@ -363,10 +342,10 @@ export async function handleDeleteById(
   }
 }
 
-// POST /api/demands/[demandId]/convert - Convert demand to stock
+// POST /api/demands/[id]/convert - Convert demand to stock
 export async function handleConvertToStock(
   request: NextRequest,
-  { params }: { params: Promise<{ demandId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const authResult = await authorizeRequest(
@@ -384,10 +363,10 @@ export async function handleConvertToStock(
     await dbConnect();
     const body = await request.json();
     const { mrp, tp, expireDate, batchNumber } = body;
-    const { demandId } = await params;
+    const { id } = await params;
 
     // Validate demand exists
-    const demand = await Demand.findOne({ demandId });
+    const demand = await Demand.findById(id);
     if (!demand) {
       return NextResponse.json(
         { success: false, message: "Demand not found" },
@@ -441,16 +420,12 @@ export async function handleConvertToStock(
       );
     }
 
-    // Generate stock ID
-    const stockId = `STK-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
     // Create stock entries for each product in the demand
     const stockEntries = [];
     for (const product of demand.products) {
       const stockEntry = await Stock.create({
-        stockId: `${stockId}-${product.productId}`,
-        productId: product.productId,
-        locationId: demand.locationId,
+        product: product.product,
+        location: demand.location,
         locationType: demand.locationType,
         mrp,
         tp,
@@ -462,8 +437,8 @@ export async function handleConvertToStock(
     }
 
     // Update demand status to ConvertedToStock
-    await Demand.findOneAndUpdate(
-      { demandId },
+    await Demand.findByIdAndUpdate(
+      id,
       { status: "ConvertedToStock" },
       { new: true, runValidators: true },
     );

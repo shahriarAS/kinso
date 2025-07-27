@@ -25,16 +25,9 @@ export async function handlePost(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { productId, name, barcode, vendorId, brandId, categoryId } = body;
+    const { name, barcode, vendor, brand, category } = body;
 
     // Basic validation
-    if (!productId || productId.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Product ID is required" },
-        { status: 400 },
-      );
-    }
-
     if (!name || name.trim().length === 0) {
       return NextResponse.json(
         { success: false, message: "Product name is required" },
@@ -49,33 +42,24 @@ export async function handlePost(request: NextRequest) {
       );
     }
 
-    if (!vendorId) {
+    if (!vendor) {
       return NextResponse.json(
         { success: false, message: "Product vendor is required" },
         { status: 400 },
       );
     }
 
-    if (!brandId) {
+    if (!brand) {
       return NextResponse.json(
         { success: false, message: "Product brand is required" },
         { status: 400 },
       );
     }
 
-    if (!categoryId) {
+    if (!category) {
       return NextResponse.json(
         { success: false, message: "Product category is required" },
         { status: 400 },
-      );
-    }
-
-    // Check if product already exists with same productId
-    const existingProductWithId = await Product.findOne({ productId: productId.trim() });
-    if (existingProductWithId) {
-      return NextResponse.json(
-        { success: false, message: "Product with this ID already exists" },
-        { status: 409 },
       );
     }
 
@@ -90,12 +74,11 @@ export async function handlePost(request: NextRequest) {
 
     // Create product
     const product = await Product.create({
-      productId: productId.trim(),
       name: name.trim(),
       barcode: barcode.trim(),
-      vendorId,
-      brandId,
-      categoryId,
+      vendor,
+      brand,
+      category,
     });
 
     return NextResponse.json(
@@ -153,6 +136,9 @@ export async function handleGet(request: NextRequest) {
     // Execute query
     const [products, total] = await Promise.all([
       Product.find(query)
+        .populate("vendor", "name")
+        .populate("brand", "name")
+        .populate("category", "name")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -178,10 +164,10 @@ export async function handleGet(request: NextRequest) {
   }
 }
 
-// GET /api/products/[productId] - Get a specific product
+// GET /api/products/[id] - Get a specific product
 export async function handleGetById(
   request: NextRequest,
-  { params }: { params: Promise<{ productId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const authResult = await authorizeRequest(
@@ -197,8 +183,12 @@ export async function handleGetById(
       );
     }
     await dbConnect();
-    const { productId } = await params;
-    const product = await Product.findOne({ productId }).lean();
+    const { id } = await params;
+    const product = await Product.findById(id)
+      .populate("vendor", "name")
+      .populate("brand", "name")
+      .populate("category", "name")
+      .lean();
     if (!product) {
       return NextResponse.json(
         { success: false, message: "Product not found" },
@@ -218,10 +208,10 @@ export async function handleGetById(
   }
 }
 
-// PUT /api/products/[productId] - Update a product
+// PUT /api/products/[id] - Update a product
 export async function handleUpdateById(
   request: NextRequest,
-  { params }: { params: Promise<{ productId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const authResult = await authorizeRequest(
@@ -238,10 +228,10 @@ export async function handleUpdateById(
     }
     await dbConnect();
     const body = await request.json();
-    const { name, barcode, vendorId, brandId, categoryId } = body;
-    const { productId } = await params;
+    const { name, barcode, vendor, brand, category } = body;
+    const { id } = await params;
     
-    const existingProduct = await Product.findOne({ productId });
+    const existingProduct = await Product.findById(id);
     if (!existingProduct) {
       return NextResponse.json(
         { success: false, message: "Product not found" },
@@ -262,19 +252,19 @@ export async function handleUpdateById(
         { status: 400 },
       );
     }
-    if (!vendorId) {
+    if (!vendor) {
       return NextResponse.json(
         { success: false, message: "Product vendor is required" },
         { status: 400 },
       );
     }
-    if (!brandId) {
+    if (!brand) {
       return NextResponse.json(
         { success: false, message: "Product brand is required" },
         { status: 400 },
       );
     }
-    if (!categoryId) {
+    if (!category) {
       return NextResponse.json(
         { success: false, message: "Product category is required" },
         { status: 400 },
@@ -283,7 +273,7 @@ export async function handleUpdateById(
 
     // Check for barcode conflict with other products
     const barcodeConflict = await Product.findOne({
-      productId: { $ne: productId },
+      _id: { $ne: id },
       barcode: barcode.trim(),
     });
     if (barcodeConflict) {
@@ -293,14 +283,14 @@ export async function handleUpdateById(
       );
     }
 
-    const updatedProduct = await Product.findOneAndUpdate(
-      { productId },
+    const updatedProduct = await Product.findByIdAndUpdate(
+      id,
       {
         name: name.trim(),
         barcode: barcode.trim(),
-        vendorId,
-        brandId,
-        categoryId,
+        vendor,
+        brand,
+        category,
       },
       { new: true, runValidators: true },
     );
@@ -325,10 +315,10 @@ export async function handleUpdateById(
   }
 }
 
-// DELETE /api/products/[productId] - Delete a product
+// DELETE /api/products/[id] - Delete a product
 export async function handleDeleteById(
   request: NextRequest,
-  { params }: { params: Promise<{ productId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const authResult = await authorizeRequest(
@@ -344,15 +334,15 @@ export async function handleDeleteById(
       );
     }
     await dbConnect();
-    const { productId } = await params;
-    const product = await Product.findOne({ productId });
+    const { id } = await params;
+    const product = await Product.findById(id);
     if (!product) {
       return NextResponse.json(
         { success: false, message: "Product not found" },
         { status: 404 },
       );
     }
-    await Product.findOneAndDelete({ productId });
+    await Product.findByIdAndDelete(id);
     return NextResponse.json({
       success: true,
       message: "Product deleted",

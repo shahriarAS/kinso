@@ -5,12 +5,11 @@ import { Brand } from "@/features/brands";
 
 export interface Product {
   _id: string;
-  productId: string;
   name: string;
   barcode: string;
-  vendorId: string | Vendor;
-  brandId: string | Brand;
-  categoryId: string | Category;
+  vendor: string | Vendor;
+  brand: string | Brand;
+  category: string | Category;
   warranty?: {
     value: number;
     unit: string;
@@ -28,11 +27,11 @@ export interface Product {
 export interface ProductInput
   extends Omit<
     Product,
-    "_id" | "createdAt" | "updatedAt" | "stock" | "vendorId" | "brandId" | "categoryId"
+    "_id" | "createdAt" | "updatedAt" | "stock" | "vendor" | "brand" | "category"
   > {
-  vendorId: string;
-  brandId: string;
-  categoryId: string;
+  vendor: string;
+  brand: string;
+  category: string;
   stock: {
     warehouse: string;
     unit: number;
@@ -42,12 +41,11 @@ export interface ProductInput
 }
 
 export interface ProductUpdateInput {
-  productId?: string;
   name?: string;
   barcode?: string;
-  vendorId?: string;
-  brandId?: string;
-  categoryId?: string;
+  vendor?: string;
+  brand?: string;
+  category?: string;
   warranty?: {
     value: number;
     unit: string;
@@ -55,12 +53,11 @@ export interface ProductUpdateInput {
 }
 
 export interface ProductFilters {
-  productId?: string;
   name?: string;
   barcode?: string;
-  vendorId?: string;
-  brandId?: string;
-  categoryId?: string;
+  vendor?: string;
+  brand?: string;
+  category?: string;
   search?: string;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
@@ -85,12 +82,11 @@ export interface ProductsResponse {
 
 export interface ProductSearchResult {
   _id: string;
-  productId: string;
   name: string;
   barcode: string;
-  vendorId: string;
-  brandId: string;
-  categoryId: string;
+  vendor: string;
+  brand: string;
+  category: string;
   stock: {
     _id: string;
     warehouse: string;
@@ -107,12 +103,12 @@ export interface ProductStats {
   lowStockProducts: number;
   outOfStockProducts: number;
   productsByCategory: Array<{
-    categoryId: string;
+    category: string;
     categoryName: string;
     productCount: number;
   }>;
   productsByVendor: Array<{
-    vendorId: string;
+    vendor: string;
     vendorName: string;
     productCount: number;
   }>;

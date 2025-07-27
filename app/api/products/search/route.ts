@@ -16,12 +16,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Search products by name, barcode, or productId
+    // Search products by name or barcode
     const products = await Product.find({
       $or: [
         { name: { $regex: query, $options: "i" } },
         { barcode: { $regex: query, $options: "i" } },
-        { productId: { $regex: query, $options: "i" } },
       ],
     })
       .limit(20)

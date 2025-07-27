@@ -95,7 +95,7 @@ export async function handlePost(request: NextRequest) {
       saleId,
       outlet,
       customer: customer || null,
-      saleDate: new Date().toISOString().split('T')[0],
+      saleDate: new Date(),
       items,
       totalAmount,
       paymentMethod,

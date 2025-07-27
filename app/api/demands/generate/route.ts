@@ -28,8 +28,8 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const { 
-      outletId, 
-      warehouseId, 
+      outlet, 
+      warehouse, 
       days = 30, 
       minSalesThreshold = 1,
       demandDays = 7,
@@ -47,13 +47,13 @@ export async function POST(request: NextRequest) {
       createdAt: { $gte: startDate, $lte: endDate },
     };
 
-    if (outletId) {
-      salesQuery.outletId = outletId;
+    if (outlet) {
+      salesQuery.outlet = outlet;
     }
 
     // Get sales data
     const sales = await Sale.find(salesQuery)
-      .populate("items.stockId", "productId")
+      .populate("items.stock", "product")
       .lean();
 
     // Analyze sales patterns
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     // Group sales by product
     for (const sale of sales) {
       for (const item of sale.items) {
-        const productId = (item.stockId as any)?.productId;
+        const productId = (item.stock as any)?.product;
         if (!productId) continue;
 
         if (!productSales[productId]) {
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
       const saleDate = new Date(sale.createdAt).toISOString().split('T')[0];
       
       for (const item of sale.items) {
-        const productId = (item.stockId as any)?.productId;
+        const productId = (item.stock as any)?.product;
         if (!productId) continue;
 
         if (!dailySales[productId]) {
@@ -134,14 +134,14 @@ export async function POST(request: NextRequest) {
 
     // Get current stock levels
     const stockQuery: any = {
-      quantity: { $gt: 0 },
+      unit: { $gt: 0 },
     };
 
-    if (warehouseId) {
-      stockQuery.locationId = warehouseId;
+    if (warehouse) {
+      stockQuery.location = warehouse;
       stockQuery.locationType = "Warehouse";
-    } else if (outletId) {
-      stockQuery.locationId = outletId;
+    } else if (outlet) {
+      stockQuery.location = outlet;
       stockQuery.locationType = "Outlet";
     }
 
@@ -149,8 +149,8 @@ export async function POST(request: NextRequest) {
     const stockByProduct: Record<string, number> = {};
     
     for (const stock of currentStock) {
-      const productId = stock.productId.toString();
-      stockByProduct[productId] = (stockByProduct[productId] || 0) + stock.quantity;
+      const productId = stock.product.toString();
+      stockByProduct[productId] = (stockByProduct[productId] || 0) + stock.unit;
     }
 
     // Generate demands
@@ -187,25 +187,14 @@ export async function POST(request: NextRequest) {
       const netDemand = Math.max(0, Math.ceil(baseDemand - currentStockLevel));
       
       if (netDemand > 0) {
-        // Generate demand ID
-        const demandId = `DEM-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        
         const demand = {
-          demandId,
-          locationId: outletId || warehouseId,
-          locationType: outletId ? "Outlet" : "Warehouse",
+          location: outlet || warehouse,
+          locationType: outlet ? "Outlet" : "Warehouse",
           products: [{
-            productId,
+            product: productId,
             quantity: netDemand,
           }],
           status: "Pending",
-          generatedFrom: {
-            analysisPeriod: days,
-            averageDailySales: salesData.averageDailySales,
-            salesFrequency: salesData.salesFrequency,
-            currentStock: currentStockLevel,
-            algorithm: "Enhanced",
-          },
         };
 
         demands.push(demand);

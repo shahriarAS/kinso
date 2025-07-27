@@ -16,7 +16,7 @@ export interface Sale {
   saleId: string;
   outlet: string;
   customer?: string;
-  saleDate: string;
+  saleDate: Date;
   totalAmount: number;
   items: SaleItem[];
   paymentMethod: PaymentMethod;

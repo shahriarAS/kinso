@@ -40,26 +40,25 @@ export async function GET(request: NextRequest) {
       $or: [
         { name: { $regex: query.trim(), $options: "i" } },
         { barcode: { $regex: query.trim(), $options: "i" } },
-        { sku: { $regex: query.trim(), $options: "i" } },
       ],
     };
 
     // Get products with stock information
     const products = await Product.find(searchQuery)
-      .populate("categoryId", "categoryName")
-      .populate("brandId", "name")
+      .populate("category", "name")
+      .populate("brand", "name")
       .lean();
 
     // Filter products by outlet stock if outletId is provided
     let filteredProducts = products;
     if (outletId) {
       const stockItems = await Stock.find({
-        locationId: outletId,
+        location: outletId,
         locationType: "Outlet",
-        quantity: { $gt: 0 },
+        unit: { $gt: 0 },
       }).lean();
 
-      const availableProductIds = stockItems.map(item => item.productId.toString());
+      const availableProductIds = stockItems.map(item => item.product.toString());
       filteredProducts = products.filter(product => 
         availableProductIds.includes((product as any)._id.toString())
       );
@@ -70,9 +69,8 @@ export async function GET(request: NextRequest) {
       _id: product._id,
       name: product.name,
       barcode: product.barcode,
-      sku: product.sku,
-      category: product.categoryId?.categoryName,
-      brand: product.brandId?.name,
+      category: product.category?.name,
+      brand: product.brand?.name,
       stock: [], // Will be populated by the frontend from inventory data
     }));
 

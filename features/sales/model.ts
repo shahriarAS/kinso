@@ -5,7 +5,7 @@ export interface ISale extends Document {
   saleId: string;
   outlet: mongoose.Types.ObjectId;
   customer?: mongoose.Types.ObjectId;
-  saleDate: string;
+  saleDate: Date;
   totalAmount: number;
   items: {
     stock: mongoose.Types.ObjectId;
@@ -26,7 +26,7 @@ const SaleSchema: Schema = new Schema(
     saleId: { type: String, required: true, unique: true, trim: true },
     outlet: { type: Schema.Types.ObjectId, required: true, ref: "Outlet" },
     customer: { type: Schema.Types.ObjectId, ref: "Customer", default: null },
-    saleDate: { type: String, required: true },
+    saleDate: { type: Date, required: true, default: Date.now },
     totalAmount: { type: Number, required: true, min: 0 },
     items: [
       {

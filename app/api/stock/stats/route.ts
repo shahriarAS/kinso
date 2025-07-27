@@ -24,13 +24,13 @@ export async function GET(request: NextRequest) {
     await dbConnect();
 
     const { searchParams } = new URL(request.url);
-    const locationId = searchParams.get("locationId") || "";
+    const location = searchParams.get("location") || "";
     const locationType = searchParams.get("locationType") || "";
 
     // Build query
     const query: any = {};
-    if (locationId) {
-      query.locationId = locationId;
+    if (location) {
+      query.location = location;
     }
     if (locationType) {
       query.locationType = locationType;
@@ -45,22 +45,22 @@ export async function GET(request: NextRequest) {
       {
         $group: {
           _id: null,
-          totalValue: { $sum: { $multiply: ["$quantity", "$mrp"] } },
+          totalValue: { $sum: { $multiply: ["$unit", "$mrp"] } },
         },
       },
     ]);
     const totalValue = stockValueResult[0]?.totalValue || 0;
 
-    // Get low stock items (quantity < 10)
+    // Get low stock items (unit < 10)
     const lowStockItems = await Stock.countDocuments({
       ...query,
-      quantity: { $lt: 10 },
+      unit: { $lt: 10 },
     });
 
     // Get out of stock items
     const outOfStockItems = await Stock.countDocuments({
       ...query,
-      quantity: 0,
+      unit: 0,
     });
 
     // Get expiring items (within 30 days)
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
     const expiringItems = await Stock.countDocuments({
       ...query,
       expireDate: { $lte: thirtyDaysFromNow },
-      quantity: { $gt: 0 },
+      unit: { $gt: 0 },
     });
 
     // Get stock by location
@@ -79,16 +79,16 @@ export async function GET(request: NextRequest) {
       {
         $group: {
           _id: {
-            locationId: "$locationId",
+            location: "$location",
             locationType: "$locationType",
           },
           itemCount: { $sum: 1 },
-          totalValue: { $sum: { $multiply: ["$quantity", "$mrp"] } },
+          totalValue: { $sum: { $multiply: ["$unit", "$mrp"] } },
         },
       },
       {
         $project: {
-          locationId: "$_id.locationId",
+          location: "$_id.location",
           locationType: "$_id.locationType",
           itemCount: 1,
           totalValue: 1,
@@ -102,9 +102,9 @@ export async function GET(request: NextRequest) {
       { $match: query },
       {
         $group: {
-          _id: "$productId",
-          totalQuantity: { $sum: "$quantity" },
-          totalValue: { $sum: { $multiply: ["$quantity", "$mrp"] } },
+          _id: "$product",
+          totalQuantity: { $sum: "$unit" },
+          totalValue: { $sum: { $multiply: ["$unit", "$mrp"] } },
         },
       },
       {
@@ -120,7 +120,7 @@ export async function GET(request: NextRequest) {
       },
       {
         $project: {
-          productId: "$_id",
+          product: "$_id",
           productName: "$product.name",
           totalQuantity: 1,
           totalValue: 1,

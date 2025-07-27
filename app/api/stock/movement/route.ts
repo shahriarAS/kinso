@@ -25,24 +25,24 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const { 
-      productId, 
-      fromLocationId, 
-      toLocationId, 
+      product, 
+      fromLocation, 
+      toLocation, 
       fromLocationType, 
       toLocationType, 
-      quantity,
+      unit,
       reason = "Stock Transfer"
     } = body;
 
     // Validation
-    if (!productId) {
+    if (!product) {
       return NextResponse.json(
-        { success: false, message: "Product ID is required" },
+        { success: false, message: "Product is required" },
         { status: 400 },
       );
     }
 
-    if (!fromLocationId || !toLocationId) {
+    if (!fromLocation || !toLocation) {
       return NextResponse.json(
         { success: false, message: "Source and destination locations are required" },
         { status: 400 },
@@ -56,19 +56,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!quantity || quantity <= 0) {
+    if (!unit || unit <= 0) {
       return NextResponse.json(
-        { success: false, message: "Valid quantity is required" },
+        { success: false, message: "Valid unit is required" },
         { status: 400 },
       );
     }
 
     // Get available stock from source location (FIFO order)
     const availableStock = await Stock.find({
-      productId,
-      locationId: fromLocationId,
+      product,
+      location: fromLocation,
       locationType: fromLocationType,
-      quantity: { $gt: 0 }
+      unit: { $gt: 0 }
     })
     .sort({ createdAt: 1 }) // FIFO: oldest first
     .lean();
@@ -81,33 +81,33 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate total available quantity
-    const totalAvailable = availableStock.reduce((sum, stock) => sum + stock.quantity, 0);
+    const totalAvailable = availableStock.reduce((sum, stock) => sum + stock.unit, 0);
     
-    if (totalAvailable < quantity) {
+    if (totalAvailable < unit) {
       return NextResponse.json(
-        { success: false, message: `Insufficient stock. Available: ${totalAvailable}, Requested: ${quantity}` },
+        { success: false, message: `Insufficient stock. Available: ${totalAvailable}, Requested: ${unit}` },
         { status: 400 },
       );
     }
 
     // Transfer stock using FIFO logic
-    let remainingQuantity = quantity;
+    let remainingQuantity = unit;
     const transferResults = [];
 
     for (const stock of availableStock) {
       if (remainingQuantity <= 0) break;
 
-      const transferAmount = Math.min(stock.quantity, remainingQuantity);
+      const transferAmount = Math.min(stock.unit, remainingQuantity);
       
       // Reduce stock from source
       await Stock.findByIdAndUpdate(stock._id, {
-        $inc: { quantity: -transferAmount }
+        $inc: { unit: -transferAmount }
       });
 
       // Add stock to destination (create new entry or update existing)
       const existingDestinationStock = await Stock.findOne({
-        productId,
-        locationId: toLocationId,
+        product,
+        location: toLocation,
         locationType: toLocationType,
         batchNumber: stock.batchNumber
       });
@@ -115,29 +115,28 @@ export async function POST(request: NextRequest) {
       if (existingDestinationStock) {
         // Update existing stock entry
         await Stock.findByIdAndUpdate(existingDestinationStock._id, {
-          $inc: { quantity: transferAmount }
+          $inc: { unit: transferAmount }
         });
       } else {
         // Create new stock entry at destination
         await Stock.create({
-          stockId: `STK-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          productId,
-          locationId: toLocationId,
+          product,
+          location: toLocation,
           locationType: toLocationType,
           mrp: stock.mrp,
           tp: stock.tp,
           expireDate: stock.expireDate,
-          quantity: transferAmount,
+          unit: transferAmount,
           batchNumber: stock.batchNumber
         });
       }
 
       transferResults.push({
-        stockId: stock.stockId,
+        stockId: stock._id,
         batchNumber: stock.batchNumber,
         transferredQuantity: transferAmount,
-        fromLocation: fromLocationId,
-        toLocation: toLocationId
+        fromLocation: fromLocation,
+        toLocation: toLocation
       });
 
       remainingQuantity -= transferAmount;
@@ -145,9 +144,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Successfully transferred ${quantity} units`,
+      message: `Successfully transferred ${unit} units`,
       data: {
-        totalTransferred: quantity,
+        totalTransferred: unit,
         transfers: transferResults
       }
     });
@@ -183,8 +182,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
-    const productId = searchParams.get("productId") || "";
-    const locationId = searchParams.get("locationId") || "";
+    const product = searchParams.get("product") || "";
+    const location = searchParams.get("location") || "";
     const movementType = searchParams.get("movementType") || "";
 
     const skip = (page - 1) * limit;

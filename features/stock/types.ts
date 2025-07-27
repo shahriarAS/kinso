@@ -10,7 +10,7 @@ export interface StockInput {
   locationType: string;
   mrp: number;
   tp: number;
-  expireDate: string;
+  expireDate: Date;
   unit: number;
   batchNumber: string;
 }
@@ -21,7 +21,7 @@ export interface StockUpdateInput {
   locationType?: string;
   mrp?: number;
   tp?: number;
-  expireDate?: string;
+  expireDate?: Date;
   unit?: number;
   batchNumber?: string;
 }
@@ -35,8 +35,8 @@ export interface StockFilters {
   batchNumber?: string;
   minUnit?: number;
   maxUnit?: number;
-  minExpireDate?: string;
-  maxExpireDate?: string;
+  minExpireDate?: Date;
+  maxExpireDate?: Date;
   search?: string;
   sortBy?: string;
   sortOrder?: "asc" | "desc";

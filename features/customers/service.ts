@@ -107,9 +107,9 @@ export async function handlePost(request: NextRequest) {
     const customer = await CustomerModel.create({
       name: name.trim(),
       contactInfo: {
-        phone: contactInfo?.phone?.trim() || "",
-        email: contactInfo?.email?.trim() || "",
-        address: contactInfo?.address?.trim() || "",
+        phone: contactInfo?.phone?.trim() || undefined,
+        email: contactInfo?.email?.trim() || undefined,
+        address: contactInfo?.address?.trim() || undefined,
       },
       membershipActive: membershipActive || false,
       totalPurchaseLastMonth: totalPurchaseLastMonth || 0,
@@ -208,9 +208,9 @@ export async function handleUpdateById(
       {
         name: name.trim(),
         contactInfo: {
-          phone: contactInfo?.phone?.trim() || "",
-          email: contactInfo?.email?.trim() || "",
-          address: contactInfo?.address?.trim() || "",
+          phone: contactInfo?.phone?.trim() || undefined,
+          email: contactInfo?.email?.trim() || undefined,
+          address: contactInfo?.address?.trim() || undefined,
         },
         membershipActive: membershipActive !== undefined ? membershipActive : existingCustomer.membershipActive,
         totalPurchaseLastMonth: totalPurchaseLastMonth !== undefined ? totalPurchaseLastMonth : existingCustomer.totalPurchaseLastMonth,

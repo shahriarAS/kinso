@@ -44,9 +44,9 @@ export async function POST(request: NextRequest) {
 
     // Validate items array
     for (const item of items) {
-      if (!item.stockId || !item.quantity || !item.reason) {
+      if (!item.stock || !item.quantity || !item.reason) {
         return NextResponse.json(
-          { success: false, message: "Each item must have stockId, quantity, and reason" },
+          { success: false, message: "Each item must have stock, quantity, and reason" },
           { status: 400 },
         );
       }
@@ -71,10 +71,10 @@ export async function POST(request: NextRequest) {
     const returnItems = [];
     for (const returnItem of items) {
       // Find the original sale item
-      const originalItem = originalSale.items.find((item: any) => item.stockId === returnItem.stockId);
+      const originalItem = originalSale.items.find((item: any) => item.stock.toString() === returnItem.stock);
       if (!originalItem) {
         return NextResponse.json(
-          { success: false, message: `Item with stockId ${returnItem.stockId} not found in original sale` },
+          { success: false, message: `Item with stock ${returnItem.stock} not found in original sale` },
           { status: 400 },
         );
       }
@@ -82,26 +82,26 @@ export async function POST(request: NextRequest) {
       // Check if return quantity is valid
       if (returnItem.quantity > originalItem.quantity) {
         return NextResponse.json(
-          { success: false, message: `Return quantity cannot exceed original quantity for item ${returnItem.stockId}` },
+          { success: false, message: `Return quantity cannot exceed original quantity for item ${returnItem.stock}` },
           { status: 400 },
         );
       }
 
       // Update stock (FIFO - add back to stock)
-      const stockItem = await Stock.findById(returnItem.stockId);
+      const stockItem = await Stock.findById(returnItem.stock);
       if (!stockItem) {
         return NextResponse.json(
-          { success: false, message: `Stock item ${returnItem.stockId} not found` },
+          { success: false, message: `Stock item ${returnItem.stock} not found` },
           { status: 404 },
         );
       }
 
       // Add quantity back to stock
-      stockItem.quantity += returnItem.quantity;
+      stockItem.unit += returnItem.quantity;
       await stockItem.save();
 
       returnItems.push({
-        stockId: returnItem.stockId,
+        stock: returnItem.stock,
         quantity: returnItem.quantity,
         reason: returnItem.reason,
         originalQuantity: originalItem.quantity,

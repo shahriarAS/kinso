@@ -9,7 +9,7 @@ export const dashboardApi = createApi({
   endpoints: (builder) => ({
     // Get dashboard overview statistics
     getDashboardStats: builder.query<
-      DashboardStats,
+      { success: boolean; data: DashboardStats },
       {
         startDate?: string;
         endDate?: string;
@@ -25,7 +25,7 @@ export const dashboardApi = createApi({
 
     // Get sales analytics
     getSalesAnalytics: builder.query<
-      SalesAnalytics,
+      { success: boolean; data: SalesAnalytics },
       {
         period: "daily" | "weekly" | "monthly";
         startDate?: string;
@@ -41,7 +41,7 @@ export const dashboardApi = createApi({
     }),
 
     // Get inventory alerts
-    getInventoryAlerts: builder.query<InventoryAlerts, void>({
+    getInventoryAlerts: builder.query<{ success: boolean; data: InventoryAlerts }, void>({
       query: () => ({
         url: "/inventory-alerts",
         method: "GET",

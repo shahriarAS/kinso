@@ -88,6 +88,12 @@ export interface StockStats {
   }>;
 }
 
+export interface StockStatsResponse {
+  success: boolean;
+  data: StockStats;
+  message?: string;
+}
+
 export interface StockMovement {
   _id: string;
   stock: string;

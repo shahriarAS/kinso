@@ -10,6 +10,7 @@ export const outletsApi = createApi({
     // Get all outlets with pagination and filters
     getOutlets: builder.query<
       {
+        success: boolean;
         data: Outlet[];
         pagination: {
           page: number;
@@ -44,7 +45,7 @@ export const outletsApi = createApi({
     }),
 
     // Get single outlet by ID
-    getOutlet: builder.query<{ data: Outlet }, string>({
+    getOutlet: builder.query<{ success: boolean; data: Outlet }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "GET",
@@ -54,7 +55,7 @@ export const outletsApi = createApi({
 
     // Create new outlet
     createOutlet: builder.mutation<
-      { message: string; data: Outlet },
+      { success: boolean; message: string; data: Outlet },
       OutletInput
     >({
       query: (outlet) => ({
@@ -67,7 +68,7 @@ export const outletsApi = createApi({
 
     // Update outlet
     updateOutlet: builder.mutation<
-      { message: string; data: Outlet },
+      { success: boolean; message: string; data: Outlet },
       { _id: string; outlet: Partial<OutletInput> }
     >({
       query: ({ _id, outlet }) => ({
@@ -82,7 +83,7 @@ export const outletsApi = createApi({
     }),
 
     // Delete outlet
-    deleteOutlet: builder.mutation<{ message: string }, string>({
+    deleteOutlet: builder.mutation<{ success: boolean; message: string }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",
@@ -93,6 +94,7 @@ export const outletsApi = createApi({
     // Get outlet inventory
     getOutletInventory: builder.query<
       {
+        success: boolean;
         data: OutletInventory;
       },
       string
@@ -109,6 +111,7 @@ export const outletsApi = createApi({
     // Get outlet statistics
     getOutletStats: builder.query<
       {
+        success: boolean;
         data: OutletStats;
       },
       void

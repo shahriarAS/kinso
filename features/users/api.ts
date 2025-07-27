@@ -10,6 +10,7 @@ export const usersApi = createApi({
     // Get all users with pagination and search
     getUsers: builder.query<
       {
+        success: boolean;
         data: User[];
         pagination: {
           page: number;
@@ -45,7 +46,7 @@ export const usersApi = createApi({
     }),
 
     // Get single user by ID
-    getUser: builder.query<{ data: User }, string>({
+    getUser: builder.query<{ success: boolean; data: User }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "GET",
@@ -54,7 +55,7 @@ export const usersApi = createApi({
     }),
 
     // Create new user
-    createUser: builder.mutation<{ message: string; data: User }, UserInput>({
+    createUser: builder.mutation<{ success: boolean; message: string; data: User }, UserInput>({
       query: (user) => ({
         url: "/",
         method: "POST",
@@ -65,7 +66,7 @@ export const usersApi = createApi({
 
     // Update user
     updateUser: builder.mutation<
-      { message: string; data: User },
+      { success: boolean; message: string; data: User },
       { _id: string; user: UserUpdateInput }
     >({
       query: ({ _id, user }) => ({
@@ -80,15 +81,13 @@ export const usersApi = createApi({
     }),
 
     // Delete user
-    deleteUser: builder.mutation<{ message: string }, string>({
+    deleteUser: builder.mutation<{ success: boolean; message: string }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",
       }),
       invalidatesTags: [{ type: "User", id: "LIST" }],
     }),
-
-
   }),
 });
 

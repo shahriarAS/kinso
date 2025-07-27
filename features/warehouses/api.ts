@@ -10,6 +10,7 @@ export const warehousesApi = createApi({
     // Get all warehouses with pagination and filters
     getWarehouses: builder.query<
       {
+        success: boolean;
         data: Warehouse[];
         pagination: {
           page: number;
@@ -44,7 +45,7 @@ export const warehousesApi = createApi({
     }),
 
     // Get single warehouse by ID
-    getWarehouse: builder.query<{ data: Warehouse }, string>({
+    getWarehouse: builder.query<{ success: boolean; data: Warehouse }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "GET",
@@ -54,7 +55,7 @@ export const warehousesApi = createApi({
 
     // Create new warehouse
     createWarehouse: builder.mutation<
-      { message: string; data: Warehouse },
+      { success: boolean; message: string; data: Warehouse },
       WarehouseInput
     >({
       query: (warehouse) => ({
@@ -67,7 +68,7 @@ export const warehousesApi = createApi({
 
     // Update warehouse
     updateWarehouse: builder.mutation<
-      { message: string; data: Warehouse },
+      { success: boolean; message: string; data: Warehouse },
       { _id: string; warehouse: Partial<WarehouseInput> }
     >({
       query: ({ _id, warehouse }) => ({
@@ -82,7 +83,7 @@ export const warehousesApi = createApi({
     }),
 
     // Delete warehouse
-    deleteWarehouse: builder.mutation<{ message: string }, string>({
+    deleteWarehouse: builder.mutation<{ success: boolean; message: string }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",
@@ -93,6 +94,7 @@ export const warehousesApi = createApi({
     // Get warehouse inventory
     getWarehouseInventory: builder.query<
       {
+        success: boolean;
         data: {
           warehouse: Warehouse;
           products: Array<{
@@ -126,17 +128,20 @@ export const warehousesApi = createApi({
     // Get warehouse statistics
     getWarehouseStats: builder.query<
       {
-        totalWarehouses: number;
-        totalProducts: number;
-        totalValue: number;
-        lowStockProducts: number;
-        warehouses: Array<{
-          _id: string;
-          name: string;
-          location: string;
-          productCount: number;
+        success: boolean;
+        data: {
+          totalWarehouses: number;
+          totalProducts: number;
           totalValue: number;
-        }>;
+          lowStockProducts: number;
+          warehouses: Array<{
+            _id: string;
+            name: string;
+            location: string;
+            productCount: number;
+            totalValue: number;
+          }>;
+        };
       },
       void
     >({

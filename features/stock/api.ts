@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
-import { Stock, StockInput, StockMovementInput } from "./types";
+import { Stock, StockInput, StockMovementInput, StockStatsResponse } from "./types";
 
 export const stockApi = createApi({
   reducerPath: "stockApi",
@@ -10,6 +10,7 @@ export const stockApi = createApi({
     // Get all stocks with pagination and filters
     getStocks: builder.query<
       {
+        success: boolean;
         data: Stock[];
         pagination: {
           page: number;
@@ -46,7 +47,7 @@ export const stockApi = createApi({
     }),
 
     // Get single stock by ID
-    getStock: builder.query<{ data: Stock }, string>({
+    getStock: builder.query<{ success: boolean; data: Stock }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "GET",
@@ -56,7 +57,7 @@ export const stockApi = createApi({
 
     // Create new stock
     createStock: builder.mutation<
-      { message: string; data: Stock },
+      { success: boolean; message: string; data: Stock },
       StockInput
     >({
       query: (stock) => ({
@@ -69,7 +70,7 @@ export const stockApi = createApi({
 
     // Update stock
     updateStock: builder.mutation<
-      { message: string; data: Stock },
+      { success: boolean; message: string; data: Stock },
       { _id: string; stock: Partial<StockInput> }
     >({
       query: ({ _id, stock }) => ({
@@ -84,7 +85,7 @@ export const stockApi = createApi({
     }),
 
     // Delete stock
-    deleteStock: builder.mutation<{ message: string }, string>({
+    deleteStock: builder.mutation<{ success: boolean; message: string }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",
@@ -94,7 +95,7 @@ export const stockApi = createApi({
 
     // Transfer stock between locations
     transferStock: builder.mutation<
-      { message: string; data: any },
+      { success: boolean; message: string; data: any },
       {
         productId: string;
         fromLocationId: string;
@@ -116,6 +117,7 @@ export const stockApi = createApi({
     // Get stock movement history
     getStockMovements: builder.query<
       {
+        success: boolean;
         data: any[];
         pagination: {
           page: number;
@@ -141,7 +143,7 @@ export const stockApi = createApi({
 
     // Get stock by product and location (for FIFO)
     getStockByProductAndLocation: builder.query<
-      { data: Stock[] },
+      { success: boolean; data: Stock[] },
       {
         productId: string;
         locationId: string;
@@ -157,13 +159,10 @@ export const stockApi = createApi({
     }),
 
     // Get stock statistics
-    getStockStats: builder.query<
-      { data: any },
-      {
-        locationId?: string;
-        locationType?: "Warehouse" | "Outlet";
-      }
-    >({
+    getStockStats: builder.query<StockStatsResponse, {
+      locationId?: string;
+      locationType?: "Warehouse" | "Outlet";
+    }>({
       query: (params) => ({
         url: "/stats",
         method: "GET",

@@ -3,7 +3,7 @@ import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
 import {
   Demand,
   DemandInput,
-  DemandFilters,
+  DemandFiltersTypes,
   DemandResponse,
   DemandGenerationRequest,
   DemandConversionRequest,
@@ -15,7 +15,7 @@ export const demandApi = createApi({
   tagTypes: ["Demand"],
   endpoints: (builder) => ({
     // Get all demands with pagination and filters
-    getDemands: builder.query<DemandResponse, DemandFilters>({
+    getDemands: builder.query<DemandResponse, DemandFiltersTypes>({
       query: (filters) => ({
         url: "/",
         method: "GET",
@@ -34,7 +34,7 @@ export const demandApi = createApi({
     }),
 
     // Get single demand by ID
-    getDemand: builder.query<{ data: Demand }, string>({
+    getDemand: builder.query<{ success: boolean; data: Demand }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "GET",
@@ -44,7 +44,7 @@ export const demandApi = createApi({
 
     // Create new demand
     createDemand: builder.mutation<
-      { message: string; data: Demand },
+      { success: boolean; message: string; data: Demand },
       DemandInput
     >({
       query: (demand) => ({
@@ -57,7 +57,7 @@ export const demandApi = createApi({
 
     // Update demand
     updateDemand: builder.mutation<
-      { message: string; data: Demand },
+      { success: boolean; message: string; data: Demand },
       { _id: string; demand: Partial<DemandInput> }
     >({
       query: ({ _id, demand }) => ({
@@ -72,7 +72,7 @@ export const demandApi = createApi({
     }),
 
     // Delete demand
-    deleteDemand: builder.mutation<{ message: string }, string>({
+    deleteDemand: builder.mutation<{ success: boolean; message: string }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",
@@ -82,7 +82,7 @@ export const demandApi = createApi({
 
     // Generate demands based on sales data
     generateDemands: builder.mutation<
-      { message: string; data: Demand[] },
+      { success: boolean; message: string; data: Demand[] },
       DemandGenerationRequest
     >({
       query: (request) => ({
@@ -95,7 +95,7 @@ export const demandApi = createApi({
 
     // Convert demand to stock
     convertDemandToStock: builder.mutation<
-      { message: string; data: Demand },
+      { success: boolean; message: string; data: Demand },
       { demandId: string; conversionData: DemandConversionRequest }
     >({
       query: ({ demandId, conversionData }) => ({
@@ -111,7 +111,7 @@ export const demandApi = createApi({
 
     // Update demand status
     updateDemandStatus: builder.mutation<
-      { message: string; data: Demand },
+      { success: boolean; message: string; data: Demand },
       { _id: string; status: "pending" | "approved" | "converted" | "cancelled" }
     >({
       query: ({ _id, status }) => ({

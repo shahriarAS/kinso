@@ -10,6 +10,7 @@ export const categoriesApi = createApi({
     // Get all categories with pagination and search
     getCategories: builder.query<
       {
+        success: boolean;
         data: Category[];
         pagination: {
           page: number;
@@ -47,7 +48,7 @@ export const categoriesApi = createApi({
     }),
 
     // Get single category by ID
-    getCategory: builder.query<{ data: Category }, string>({
+    getCategory: builder.query<{ success: boolean; data: Category }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "GET",
@@ -57,7 +58,7 @@ export const categoriesApi = createApi({
 
     // Create new category
     createCategory: builder.mutation<
-      { message: string; data: Category },
+      { success: boolean; message: string; data: Category },
       CategoryInput
     >({
       query: (category) => ({
@@ -70,7 +71,7 @@ export const categoriesApi = createApi({
 
     // Update category
     updateCategory: builder.mutation<
-      { message: string; data: Category },
+      { success: boolean; message: string; data: Category },
       { _id: string; category: Partial<CategoryInput> }
     >({
       query: ({ _id, category }) => ({
@@ -85,7 +86,7 @@ export const categoriesApi = createApi({
     }),
 
     // Delete category
-    deleteCategory: builder.mutation<{ message: string }, string>({
+    deleteCategory: builder.mutation<{ success: boolean; message: string }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",
@@ -94,7 +95,7 @@ export const categoriesApi = createApi({
     }),
 
     // Get all categories for dropdown/select
-    getAllCategories: builder.query<{ data: Category[] }, void>({
+    getAllCategories: builder.query<{ success: boolean; data: Category[] }, void>({
       query: () => ({
         url: "/",
         method: "GET",

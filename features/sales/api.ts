@@ -7,6 +7,7 @@ import type {
   SalesHistoryFilters,
   SalesHistoryResponse,
   ProductSearchResult,
+  SalesStatsResponse,
 } from "./types";
 
 export const salesApi = createApi({
@@ -15,7 +16,7 @@ export const salesApi = createApi({
   tagTypes: ["Sales", "Products"],
   endpoints: (builder) => ({
     // Create new sale
-    createSale: builder.mutation<{ data: Sale; message: string }, CreateSaleRequest>({
+    createSale: builder.mutation<{ success: boolean; data: Sale; message: string }, CreateSaleRequest>({
       query: (saleData) => ({
         url: `/`,
         method: "POST",
@@ -35,7 +36,7 @@ export const salesApi = createApi({
     }),
 
     // Process sale return
-    processSaleReturn: builder.mutation<{ data: Sale; message: string }, SaleReturnRequest>({
+    processSaleReturn: builder.mutation<{ success: boolean; data: Sale; message: string }, SaleReturnRequest>({
       query: (returnData) => ({
         url: `/returns`,
         method: "POST",
@@ -45,7 +46,7 @@ export const salesApi = createApi({
     }),
 
     // Get sale by ID
-    getSaleById: builder.query<{ data: Sale }, string>({
+    getSaleById: builder.query<{ success: boolean; data: Sale }, string>({
       query: (saleId) => ({
         url: `/${saleId}`,
         method: "GET",
@@ -53,8 +54,30 @@ export const salesApi = createApi({
       providesTags: ["Sales"],
     }),
 
+    // Update sale
+    updateSale: builder.mutation<
+      { success: boolean; data: Sale; message: string },
+      { saleId: string; saleData: Partial<CreateSaleRequest> }
+    >({
+      query: ({ saleId, saleData }) => ({
+        url: `/${saleId}`,
+        method: "PUT",
+        body: saleData,
+      }),
+      invalidatesTags: ["Sales"],
+    }),
+
+    // Delete sale
+    deleteSale: builder.mutation<{ success: boolean; message: string }, string>({
+      query: (saleId) => ({
+        url: `/${saleId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Sales"],
+    }),
+
     // Search products for POS
-    searchProducts: builder.query<{ data: ProductSearchResult[] }, { query: string; outletId?: string }>({
+    searchProducts: builder.query<{ success: boolean; data: ProductSearchResult[] }, { query: string; outletId?: string }>({
       query: (params) => ({
         url: `/search`,
         method: "GET",
@@ -64,7 +87,7 @@ export const salesApi = createApi({
     }),
 
     // Get sales statistics
-    getSalesStats: builder.query<{ data: any }, { startDate?: string; endDate?: string; outletId?: string }>({
+    getSalesStats: builder.query<SalesStatsResponse, { startDate?: string; endDate?: string; outletId?: string }>({
       query: (params) => ({
         url: `/stats`,
         method: "GET",
@@ -80,6 +103,8 @@ export const {
   useGetSalesHistoryQuery,
   useProcessSaleReturnMutation,
   useGetSaleByIdQuery,
+  useUpdateSaleMutation,
+  useDeleteSaleMutation,
   useSearchProductsQuery,
   useGetSalesStatsQuery,
 } = salesApi; 

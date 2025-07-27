@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
-import { Brand, ICreateBrandRequest, IUpdateBrandRequest } from "./types";
+import { Brand, BrandInput, BrandUpdateInput } from "./types";
 
 export const brandsApi = createApi({
   reducerPath: "brandsApi",
@@ -9,6 +9,7 @@ export const brandsApi = createApi({
   endpoints: (builder) => ({
     getBrands: builder.query<
       {
+        success: boolean;
         data: Brand[];
         pagination: {
           page: number;
@@ -45,7 +46,7 @@ export const brandsApi = createApi({
           : [{ type: "Brand", id: "LIST" }],
     }),
 
-    getBrand: builder.query<{ data: Brand }, string>({
+    getBrand: builder.query<{ success: boolean; data: Brand }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "GET",
@@ -54,8 +55,8 @@ export const brandsApi = createApi({
     }),
 
     createBrand: builder.mutation<
-      { message: string; data: Brand },
-      ICreateBrandRequest
+      { success: boolean; message: string; data: Brand },
+      BrandInput
     >({
       query: (brand) => ({
         url: "/",
@@ -66,8 +67,8 @@ export const brandsApi = createApi({
     }),
 
     updateBrand: builder.mutation<
-      { message: string; data: Brand },
-      { _id: string; brand: Partial<IUpdateBrandRequest> }
+      { success: boolean; message: string; data: Brand },
+      { _id: string; brand: Partial<BrandUpdateInput> }
     >({
       query: ({ _id, brand }) => ({
         url: `/${_id}`,
@@ -80,7 +81,7 @@ export const brandsApi = createApi({
       ],
     }),
 
-    deleteBrand: builder.mutation<{ message: string }, string>({
+    deleteBrand: builder.mutation<{ success: boolean; message: string }, string>({
       query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",
@@ -88,7 +89,7 @@ export const brandsApi = createApi({
       invalidatesTags: [{ type: "Brand", id: "LIST" }],
     }),
 
-    getAllBrands: builder.query<{ data: Brand[] }, void>({
+    getAllBrands: builder.query<{ success: boolean; data: Brand[] }, void>({
       query: () => ({
         url: "/",
         method: "GET",
@@ -97,7 +98,7 @@ export const brandsApi = createApi({
       providesTags: ["Brand"],
     }),
 
-    getBrandsByVendor: builder.query<{ data: Brand[] }, string>({
+    getBrandsByVendor: builder.query<{ success: boolean; data: Brand[] }, string>({
       query: (vendorId) => ({
         url: "/",
         method: "GET",

@@ -24,7 +24,7 @@ export interface DemandUpdateInput {
   status?: "Pending" | "Approved" | "ConvertedToStock";
 }
 
-export interface DemandFilters {
+export interface DemandFiltersTypes {
   page?: number;
   limit?: number;
   location?: string;

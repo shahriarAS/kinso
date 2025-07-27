@@ -138,6 +138,12 @@ export interface SaleStats {
   }>;
 }
 
+export interface SalesStatsResponse {
+  success: boolean;
+  data: SaleStats;
+  message?: string;
+}
+
 export interface SaleReturn {
   _id: string;
   saleId: string;

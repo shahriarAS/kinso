@@ -7,14 +7,14 @@ export const settingsApi = createApi({
   baseQuery: baseQueryWithErrorHandling("/api/settings"),
   tagTypes: ["Settings"],
   endpoints: (builder) => ({
-    getSettings: builder.query<{ data: Settings }, void>({
+    getSettings: builder.query<{ success: boolean; data: Settings }, void>({
       query: () => ({
         url: "/",
         method: "GET",
       }),
       providesTags: ["Settings"],
     }),
-    updateSettings: builder.mutation<{ data: Settings }, Partial<Settings>>({
+    updateSettings: builder.mutation<{ success: boolean; message: string; data: Settings }, Partial<Settings>>({
       query: (body) => ({
         url: "/",
         method: "POST",

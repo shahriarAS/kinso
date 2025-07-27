@@ -1,21 +1,16 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
 import { LoginInput, RegisterInput, AuthResponse } from "./types";
 
 export const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: "/api/auth",
-    prepareHeaders(headers) {
-      return headers;
-    },
-    credentials: "include",
-  }),
+  baseQuery: baseQueryWithErrorHandling("/api/auth"),
   tagTypes: ["Auth"],
   endpoints: (builder) => ({
     loginUser: builder.mutation<AuthResponse, LoginInput>({
       query: ({ email, password }) => ({
         url: "/login",
-        method: "post",
+        method: "POST",
         body: {
           email,
           password,
@@ -23,10 +18,11 @@ export const authApi = createApi({
       }),
       invalidatesTags: ["Auth"],
     }),
-    logoutUser: builder.mutation<{ message: string }, void>({
+    
+    logoutUser: builder.mutation<{ success: boolean; message: string }, void>({
       query: () => ({
         url: "/logout",
-        method: "post",
+        method: "POST",
       }),
       invalidatesTags: ["Auth"],
       onQueryStarted: async (arg, { dispatch, queryFulfilled }) => {
@@ -42,14 +38,15 @@ export const authApi = createApi({
           // Navigate after cache is cleared
           window.location.href = "/login";
         } catch (err) {
-          // Handle error
+          // Handle error silently
         }
       },
     }),
-    registerUser: builder.mutation<{ message: string }, RegisterInput>({
+    
+    registerUser: builder.mutation<{ success: boolean; message: string }, RegisterInput>({
       query: ({ name, email, password, password2 }) => ({
         url: "/register",
-        method: "post",
+        method: "POST",
         body: {
           name,
           email,
@@ -59,10 +56,11 @@ export const authApi = createApi({
       }),
       invalidatesTags: ["Auth"],
     }),
+    
     fetchAuthUser: builder.query<AuthResponse, void>({
       query: () => ({
         url: "/profile",
-        method: "get",
+        method: "GET",
       }),
       providesTags: ["Auth"],
     }),

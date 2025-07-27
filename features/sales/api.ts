@@ -6,12 +6,13 @@ import type {
   SaleReturnRequest,
   SalesHistoryFilters,
   SalesHistoryResponse,
+  ProductSearchResult,
 } from "./types";
 
 export const salesApi = createApi({
   reducerPath: "salesApi",
   baseQuery: baseQueryWithErrorHandling("/api/sales"),
-  tagTypes: ["Sales"],
+  tagTypes: ["Sales", "Products"],
   endpoints: (builder) => ({
     // Create new sale
     createSale: builder.mutation<{ data: Sale; message: string }, CreateSaleRequest>({
@@ -51,6 +52,26 @@ export const salesApi = createApi({
       }),
       providesTags: ["Sales"],
     }),
+
+    // Search products for POS
+    searchProducts: builder.query<{ data: ProductSearchResult[] }, { query: string; outletId?: string }>({
+      query: (params) => ({
+        url: `/search`,
+        method: "GET",
+        params,
+      }),
+      providesTags: ["Products"],
+    }),
+
+    // Get sales statistics
+    getSalesStats: builder.query<{ data: any }, { startDate?: string; endDate?: string; outletId?: string }>({
+      query: (params) => ({
+        url: `/stats`,
+        method: "GET",
+        params,
+      }),
+      providesTags: ["Sales"],
+    }),
   }),
 });
 
@@ -59,4 +80,6 @@ export const {
   useGetSalesHistoryQuery,
   useProcessSaleReturnMutation,
   useGetSaleByIdQuery,
+  useSearchProductsQuery,
+  useGetSalesStatsQuery,
 } = salesApi; 

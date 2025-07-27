@@ -25,16 +25,9 @@ export async function handlePost(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { saleId, outletId, customerId, products, totalAmount, paymentMethod } = body;
+    const { outletId, customerId, items, paymentMethod, discountAmount, notes } = body;
 
     // Basic validation
-    if (!saleId || saleId.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Sale ID is required" },
-        { status: 400 },
-      );
-    }
-
     if (!outletId || outletId.trim().length === 0) {
       return NextResponse.json(
         { success: false, message: "Outlet ID is required" },
@@ -42,66 +35,63 @@ export async function handlePost(request: NextRequest) {
       );
     }
 
-    if (!products || !Array.isArray(products) || products.length === 0) {
+    if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
-        { success: false, message: "Products array is required and cannot be empty" },
+        { success: false, message: "Items array is required and cannot be empty" },
         { status: 400 },
       );
     }
 
-    if (!totalAmount || totalAmount <= 0) {
+    if (!paymentMethod || !["CASH", "BKASH", "ROCKET", "NAGAD", "BANK", "CARD"].includes(paymentMethod)) {
       return NextResponse.json(
-        { success: false, message: "Total amount is required and must be greater than 0" },
+        { success: false, message: "Valid payment method is required" },
         { status: 400 },
       );
     }
 
-    if (!paymentMethod || paymentMethod.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Payment method is required" },
-        { status: 400 },
-      );
-    }
-
-    // Validate products array
-    for (const product of products) {
-      if (!product.productId || !product.quantity || !product.price) {
+    // Validate items array
+    for (const item of items) {
+      if (!item.stockId || !item.quantity || !item.unitPrice) {
         return NextResponse.json(
-          { success: false, message: "Each product must have productId, quantity, and price" },
+          { success: false, message: "Each item must have stockId, quantity, and unitPrice" },
           { status: 400 },
         );
       }
-      if (product.quantity <= 0) {
+      if (item.quantity <= 0) {
         return NextResponse.json(
-          { success: false, message: "Product quantity must be greater than 0" },
+          { success: false, message: "Item quantity must be greater than 0" },
           { status: 400 },
         );
       }
-      if (product.price <= 0) {
+      if (item.unitPrice <= 0) {
         return NextResponse.json(
-          { success: false, message: "Product price must be greater than 0" },
+          { success: false, message: "Item unit price must be greater than 0" },
           { status: 400 },
         );
       }
     }
 
-    // Check if sale already exists with same saleId
-    const existingSale = await Sale.findOne({ saleId: saleId.trim() });
-    if (existingSale) {
-      return NextResponse.json(
-        { success: false, message: "Sale with this ID already exists" },
-        { status: 409 },
-      );
-    }
+    // Calculate total amount
+    const totalAmount = items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0) - (discountAmount || 0);
+
+    // Generate sale ID
+    const saleId = `SALE-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+    // Get user from auth
+    const userId = authResult.user?._id;
 
     // Create sale
     const sale = await Sale.create({
-      saleId: saleId.trim(),
+      saleId,
       outletId: outletId.trim(),
       customerId: customerId || null,
-      products,
+      saleDate: new Date().toISOString().split('T')[0],
+      items,
       totalAmount,
-      paymentMethod: paymentMethod.trim(),
+      paymentMethod,
+      discountAmount: discountAmount || 0,
+      notes: notes || "",
+      createdBy: userId,
     });
 
     return NextResponse.json(
@@ -147,6 +137,12 @@ export async function handleGet(request: NextRequest) {
     const customerId = searchParams.get("customerId");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
+    const paymentMethod = searchParams.get("paymentMethod");
+    const minAmount = searchParams.get("minAmount");
+    const maxAmount = searchParams.get("maxAmount");
+    const search = searchParams.get("search");
+    const sortBy = searchParams.get("sortBy") || "createdAt";
+    const sortOrder = searchParams.get("sortOrder") || "desc";
 
     const skip = (page - 1) * limit;
 
@@ -158,6 +154,18 @@ export async function handleGet(request: NextRequest) {
     if (customerId) {
       query.customerId = customerId;
     }
+    if (paymentMethod) {
+      query.paymentMethod = paymentMethod;
+    }
+    if (minAmount || maxAmount) {
+      query.totalAmount = {};
+      if (minAmount) {
+        query.totalAmount.$gte = parseFloat(minAmount);
+      }
+      if (maxAmount) {
+        query.totalAmount.$lte = parseFloat(maxAmount);
+      }
+    }
     if (startDate || endDate) {
       query.createdAt = {};
       if (startDate) {
@@ -167,11 +175,24 @@ export async function handleGet(request: NextRequest) {
         query.createdAt.$lte = new Date(endDate);
       }
     }
+    if (search) {
+      query.$or = [
+        { saleId: { $regex: search, $options: "i" } },
+        { notes: { $regex: search, $options: "i" } },
+      ];
+    }
 
-    // Execute query
+    // Build sort object
+    const sort: any = {};
+    sort[sortBy] = sortOrder === "asc" ? 1 : -1;
+
+    // Execute query with population
     const [sales, total] = await Promise.all([
       Sale.find(query)
-        .sort({ createdAt: -1 })
+        .populate("outletId", "name")
+        .populate("customerId", "name phone email")
+        .populate("createdBy", "name")
+        .sort(sort)
         .skip(skip)
         .limit(limit)
         .lean(),
@@ -181,11 +202,10 @@ export async function handleGet(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: sales,
-      pagination: {
-        page,
-        limit,
-        total,
-      },
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
     console.error("Error fetching sales:", error);

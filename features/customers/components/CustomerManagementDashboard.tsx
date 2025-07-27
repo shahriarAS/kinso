@@ -1,274 +1,381 @@
+"use client";
 import React, { useState } from "react";
-import { Card, Row, Col, Statistic, Button, Space, Table, Tag, Switch, Modal } from "antd";
-import {
-  UserOutlined,
-  CrownOutlined,
-  DollarOutlined,
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  EyeOutlined,
-} from "@ant-design/icons";
-import { Customer } from "../types";
-import { useGetCustomersQuery, useGetCustomerStatsQuery, useUpdateMembershipMutation, useDeleteCustomerMutation } from "../api";
-import CustomerRegistrationForm from "./CustomerRegistrationForm";
-import toast from "react-hot-toast";
+import { Card, Row, Col, Statistic, Progress, Table, Tag, Button, Modal, Typography } from "antd";
+import { UserOutlined, ShoppingCartOutlined, DollarOutlined, TrophyOutlined } from "@ant-design/icons";
+import { useGetCustomersQuery } from "@/features/customers";
+import { salesApi } from "@/features/sales";
+import type { Customer } from "@/features/customers/types";
 
-const CustomerManagementDashboard: React.FC = () => {
-  const [isRegistrationModalVisible, setIsRegistrationModalVisible] = useState(false);
+const { Title, Text } = Typography;
+
+interface CustomerStats {
+  totalCustomers: number;
+  activeCustomers: number;
+  totalRevenue: number;
+  averageOrderValue: number;
+  topCustomers: Array<{
+    customer: Customer;
+    totalSpent: number;
+    orderCount: number;
+    lastOrderDate: string;
+  }>;
+  customerSegments: {
+    new: number;
+    regular: number;
+    premium: number;
+    inactive: number;
+  };
+}
+
+export default function CustomerManagementDashboard() {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [customerDetailsVisible, setCustomerDetailsVisible] = useState(false);
 
-  const { data: customersData, isLoading: customersLoading, refetch } = useGetCustomersQuery({
-    page: 1,
-    limit: 10,
+  // Fetch customers
+  const { data: customersData, isLoading: customersLoading } = useGetCustomersQuery({
+    limit: 1000,
   });
 
-  const { data: statsData, isLoading: statsLoading } = useGetCustomerStatsQuery();
-  const [updateMembership] = useUpdateMembershipMutation();
-  const [deleteCustomer] = useDeleteCustomerMutation();
+  // Fetch sales data for customer analysis
+  const { data: salesData } = salesApi.useGetSalesHistoryQuery({
+    limit: 1000,
+  });
 
-  const handleMembershipToggle = async (customer: Customer, checked: boolean) => {
-    try {
-      await updateMembership({ _id: customer._id, membershipStatus: checked }).unwrap();
-      toast.success(`Membership ${checked ? 'activated' : 'deactivated'} successfully`);
-      refetch();
-    } catch (error: any) {
-      toast.error(error?.data?.message || "Failed to update membership status");
+  // Calculate customer statistics
+  const calculateCustomerStats = (): CustomerStats => {
+    if (!customersData?.data || !salesData?.data) {
+      return {
+        totalCustomers: 0,
+        activeCustomers: 0,
+        totalRevenue: 0,
+        averageOrderValue: 0,
+        topCustomers: [],
+        customerSegments: { new: 0, regular: 0, premium: 0, inactive: 0 },
+      };
     }
-  };
 
-  const handleDeleteCustomer = async (customer: Customer) => {
-    Modal.confirm({
-      title: "Delete Customer",
-      content: `Are you sure you want to delete ${customer.customerName}?`,
-      okText: "Delete",
-      okType: "danger",
-      cancelText: "Cancel",
-      onOk: async () => {
-        try {
-          await deleteCustomer(customer._id).unwrap();
-          toast.success("Customer deleted successfully");
-          refetch();
-        } catch (error: any) {
-          toast.error(error?.data?.message || "Failed to delete customer");
+    const customers = customersData.data;
+    const sales = salesData.data;
+
+    // Group sales by customer
+    const customerSales: Record<string, {
+      totalSpent: number;
+      orderCount: number;
+      lastOrderDate: string;
+      orders: any[];
+    }> = {};
+
+    sales.forEach(sale => {
+      if (sale.customerId) {
+        const customerId = typeof sale.customerId === 'string' ? sale.customerId : sale.customerId._id;
+        if (!customerSales[customerId]) {
+          customerSales[customerId] = {
+            totalSpent: 0,
+            orderCount: 0,
+            lastOrderDate: '',
+            orders: [],
+          };
         }
-      },
+        customerSales[customerId].totalSpent += sale.totalAmount;
+        customerSales[customerId].orderCount += 1;
+        customerSales[customerId].orders.push(sale);
+        
+        if (sale.createdAt > customerSales[customerId].lastOrderDate) {
+          customerSales[customerId].lastOrderDate = sale.createdAt;
+        }
+      }
     });
+
+    // Calculate total revenue
+    const totalRevenue = sales.reduce((sum, sale) => sum + sale.totalAmount, 0);
+
+    // Find top customers
+    const topCustomers = Object.entries(customerSales)
+      .map(([customerId, salesData]) => {
+        const customer = customers.find(c => c._id === customerId);
+        return {
+          customer,
+          totalSpent: salesData.totalSpent,
+          orderCount: salesData.orderCount,
+          lastOrderDate: salesData.lastOrderDate,
+        };
+      })
+      .filter((item): item is { customer: Customer; totalSpent: number; orderCount: number; lastOrderDate: string } => 
+        item.customer !== undefined
+      )
+      .sort((a, b) => b.totalSpent - a.totalSpent)
+      .slice(0, 10);
+
+    // Calculate customer segments
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const customerSegments = {
+      new: 0,
+      regular: 0,
+      premium: 0,
+      inactive: 0,
+    };
+
+    customers.forEach(customer => {
+      const salesData = customerSales[customer._id];
+      if (!salesData) {
+        customerSegments.new++;
+        return;
+      }
+
+      const lastOrderDate = new Date(salesData.lastOrderDate);
+      const isActive = lastOrderDate > thirtyDaysAgo;
+      const isPremium = salesData.totalSpent > 10000; // Premium threshold
+      const isRegular = salesData.orderCount > 5; // Regular customer threshold
+
+      if (!isActive) {
+        customerSegments.inactive++;
+      } else if (isPremium) {
+        customerSegments.premium++;
+      } else if (isRegular) {
+        customerSegments.regular++;
+      } else {
+        customerSegments.new++;
+      }
+    });
+
+    const activeCustomers = customers.filter(customer => {
+      const salesData = customerSales[customer._id];
+      if (!salesData) return false;
+      const lastOrderDate = new Date(salesData.lastOrderDate);
+      return lastOrderDate > thirtyDaysAgo;
+    }).length;
+
+    return {
+      totalCustomers: customers.length,
+      activeCustomers,
+      totalRevenue,
+      averageOrderValue: totalRevenue / sales.length || 0,
+      topCustomers,
+      customerSegments,
+    };
   };
 
-  const columns = [
+  const stats = calculateCustomerStats();
+
+  const topCustomersColumns = [
     {
-      title: "Customer ID",
-      dataIndex: "customerId",
-      key: "customerId",
-      render: (text: string) => <code className="bg-gray-100 px-2 py-1 rounded">{text}</code>,
+      title: "Customer",
+      dataIndex: "customer",
+      key: "customer",
+             render: (customer: Customer) => (
+         <div>
+           <div className="font-medium">{customer.name}</div>
+           <div className="text-sm text-gray-500">{customer.contactInfo.phone}</div>
+         </div>
+       ),
     },
     {
-      title: "Name",
-      dataIndex: "customerName",
-      key: "customerName",
-      render: (text: string) => <strong>{text}</strong>,
-    },
-    {
-      title: "Contact Info",
-      dataIndex: "contactInfo",
-      key: "contactInfo",
-      ellipsis: true,
-    },
-    {
-      title: "Purchase Amount",
-      dataIndex: "purchaseAmount",
-      key: "purchaseAmount",
+      title: "Total Spent",
+      dataIndex: "totalSpent",
+      key: "totalSpent",
       render: (amount: number) => (
-        <span className="font-mono text-green-600">
-          ${amount.toFixed(2)}
+        <span className="font-semibold text-green-600">
+          ৳{amount.toLocaleString()}
         </span>
       ),
     },
     {
-      title: "Membership",
-      dataIndex: "membershipStatus",
-      key: "membershipStatus",
-      render: (isMember: boolean, record: Customer) => (
-        <Switch
-          checked={isMember}
-          onChange={(checked) => handleMembershipToggle(record, checked)}
-          checkedChildren="Member"
-          unCheckedChildren="Non-Member"
-        />
-      ),
+      title: "Orders",
+      dataIndex: "orderCount",
+      key: "orderCount",
+      render: (count: number) => <Tag color="blue">{count}</Tag>,
+    },
+    {
+      title: "Last Order",
+      dataIndex: "lastOrderDate",
+      key: "lastOrderDate",
+      render: (date: string) => new Date(date).toLocaleDateString(),
     },
     {
       title: "Actions",
       key: "actions",
-      render: (_: any, record: Customer) => (
-        <Space>
-          <Button
-            type="text"
-            icon={<EyeOutlined />}
-            onClick={() => setSelectedCustomer(record)}
-            size="small"
-          />
-          <Button
-            type="text"
-            icon={<EditOutlined />}
-            onClick={() => {
-              setSelectedCustomer(record);
-              setIsEditModalVisible(true);
-            }}
-            size="small"
-          />
-          <Button
-            type="text"
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => handleDeleteCustomer(record)}
-            size="small"
-          />
-        </Space>
+      render: (_: any, record: any) => (
+        <Button
+          size="small"
+          onClick={() => {
+            setSelectedCustomer(record.customer);
+            setCustomerDetailsVisible(true);
+          }}
+        >
+          View Details
+        </Button>
       ),
     },
   ];
 
+  const customerSegmentsData = [
+    { type: "New Customers", count: stats.customerSegments.new, color: "#1890ff" },
+    { type: "Regular Customers", count: stats.customerSegments.regular, color: "#52c41a" },
+    { type: "Premium Customers", count: stats.customerSegments.premium, color: "#faad14" },
+    { type: "Inactive Customers", count: stats.customerSegments.inactive, color: "#ff4d4f" },
+  ];
+
   return (
     <div className="space-y-6">
+      <Title level={2}>Customer Management Dashboard</Title>
+
       {/* Statistics Cards */}
-      <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} lg={6}>
+      <Row gutter={16}>
+        <Col span={6}>
           <Card>
             <Statistic
               title="Total Customers"
-              value={statsData?.totalCustomers || 0}
+              value={stats.totalCustomers}
               prefix={<UserOutlined />}
-              loading={statsLoading}
+              loading={customersLoading}
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
+        <Col span={6}>
           <Card>
             <Statistic
-              title="Members"
-              value={statsData?.members || 0}
-              prefix={<CrownOutlined />}
-              valueStyle={{ color: "#3f8600" }}
-              loading={statsLoading}
+              title="Active Customers"
+              value={stats.activeCustomers}
+              prefix={<ShoppingCartOutlined />}
+              loading={customersLoading}
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
+        <Col span={6}>
           <Card>
             <Statistic
-              title="Total Purchase Amount"
-              value={statsData?.totalPurchaseAmount || 0}
+              title="Total Revenue"
+              value={stats.totalRevenue}
               prefix={<DollarOutlined />}
               precision={2}
-              valueStyle={{ color: "#1890ff" }}
-              loading={statsLoading}
+              loading={customersLoading}
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
+        <Col span={6}>
           <Card>
             <Statistic
-              title="New This Month"
-              value={statsData?.newCustomersThisMonth || 0}
-              prefix={<UserOutlined />}
-              valueStyle={{ color: "#722ed1" }}
-              loading={statsLoading}
+              title="Average Order Value"
+              value={stats.averageOrderValue}
+              prefix={<TrophyOutlined />}
+              precision={2}
+              loading={customersLoading}
             />
           </Card>
         </Col>
       </Row>
 
-      {/* Actions */}
-      <Card>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Customer Management</h2>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setIsRegistrationModalVisible(true)}
-          >
-            Add New Customer
-          </Button>
-        </div>
+      {/* Customer Segments */}
+      <Row gutter={16}>
+        <Col span={12}>
+          <Card title="Customer Segments" className="h-full">
+            <div className="space-y-4">
+              {customerSegmentsData.map((segment) => (
+                <div key={segment.type} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: segment.color }}
+                    />
+                    <Text>{segment.type}</Text>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Text strong>{segment.count}</Text>
+                    <Progress
+                      percent={Math.round((segment.count / stats.totalCustomers) * 100)}
+                      showInfo={false}
+                      strokeColor={segment.color}
+                      size="small"
+                      style={{ width: 100 }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </Col>
+        <Col span={12}>
+          <Card title="Customer Activity" className="h-full">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-blue-600">
+                {Math.round((stats.activeCustomers / stats.totalCustomers) * 100)}%
+              </div>
+              <Text type="secondary">Active Customer Rate</Text>
+              <div className="mt-4">
+                <Progress
+                  type="circle"
+                  percent={Math.round((stats.activeCustomers / stats.totalCustomers) * 100)}
+                  format={(percent) => `${percent}%`}
+                />
+              </div>
+            </div>
+          </Card>
+        </Col>
+      </Row>
 
+      {/* Top Customers Table */}
+      <Card title="Top Customers by Revenue">
         <Table
-          columns={columns}
-          dataSource={customersData?.data || []}
+          columns={topCustomersColumns}
+          dataSource={stats.topCustomers}
+          rowKey={(record) => record.customer._id}
+          pagination={false}
           loading={customersLoading}
-          rowKey="_id"
-          pagination={{
-            total: customersData?.pagination?.total || 0,
-            pageSize: customersData?.pagination?.limit || 10,
-            current: customersData?.pagination?.page || 1,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) =>
-              `${range[0]}-${range[1]} of ${total} customers`,
-          }}
         />
       </Card>
-
-      {/* Registration Modal */}
-      <Modal
-        title="Register New Customer"
-        open={isRegistrationModalVisible}
-        onCancel={() => setIsRegistrationModalVisible(false)}
-        footer={null}
-        width={800}
-        destroyOnClose
-      >
-        <CustomerRegistrationForm
-          onSuccess={() => {
-            setIsRegistrationModalVisible(false);
-            refetch();
-          }}
-          onCancel={() => setIsRegistrationModalVisible(false)}
-        />
-      </Modal>
 
       {/* Customer Details Modal */}
       <Modal
         title="Customer Details"
-        open={!!selectedCustomer && !isEditModalVisible}
-        onCancel={() => setSelectedCustomer(null)}
-        footer={[
-          <Button key="close" onClick={() => setSelectedCustomer(null)}>
-            Close
-          </Button>,
-        ]}
-        width={600}
+        open={customerDetailsVisible}
+        onCancel={() => setCustomerDetailsVisible(false)}
+        footer={null}
+        width={800}
       >
         {selectedCustomer && (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="font-semibold">Customer ID:</label>
-                <p className="bg-gray-100 px-2 py-1 rounded">{selectedCustomer.customerId}</p>
-              </div>
-              <div>
-                <label className="font-semibold">Name:</label>
-                <p>{selectedCustomer.customerName}</p>
-              </div>
-            </div>
+                         <div className="grid grid-cols-2 gap-4">
+               <div>
+                 <Text strong>Name:</Text>
+                 <div>{selectedCustomer.name}</div>
+               </div>
+               <div>
+                 <Text strong>Phone:</Text>
+                 <div>{selectedCustomer.contactInfo.phone}</div>
+               </div>
+               <div>
+                 <Text strong>Email:</Text>
+                 <div>{selectedCustomer.contactInfo.email}</div>
+               </div>
+               <div>
+                 <Text strong>Address:</Text>
+                 <div>{selectedCustomer.contactInfo.address}</div>
+               </div>
+             </div>
+            
+            {/* Purchase History */}
             <div>
-              <label className="font-semibold">Contact Information:</label>
-              <p>{selectedCustomer.contactInfo}</p>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="font-semibold">Purchase Amount:</label>
-                <p className="text-green-600 font-mono">${selectedCustomer.purchaseAmount.toFixed(2)}</p>
-              </div>
-              <div>
-                <label className="font-semibold">Membership Status:</label>
-                <p>
-                  <Tag color={selectedCustomer.membershipStatus ? "green" : "default"}>
-                    {selectedCustomer.membershipStatus ? "Member" : "Non-Member"}
-                  </Tag>
-                </p>
+              <Text strong>Purchase History</Text>
+              <div className="mt-2">
+                {salesData?.data
+                  .filter(sale => 
+                    typeof sale.customerId === 'string' 
+                      ? sale.customerId === selectedCustomer._id
+                      : sale.customerId?._id === selectedCustomer._id
+                  )
+                  .map(sale => (
+                    <div key={sale._id} className="border-b py-2">
+                      <div className="flex justify-between">
+                        <span>{sale.saleId}</span>
+                        <span className="font-semibold">৳{sale.totalAmount}</span>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {new Date(sale.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                  ))}
               </div>
             </div>
           </div>
@@ -276,6 +383,4 @@ const CustomerManagementDashboard: React.FC = () => {
       </Modal>
     </div>
   );
-};
-
-export default CustomerManagementDashboard; 
+} 

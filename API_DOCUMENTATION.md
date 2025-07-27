@@ -7,8 +7,10 @@ This document provides comprehensive documentation for all API routes available 
 - [Authentication](#authentication)
 - [Categories](#categories)
 - [Customers](#customers)
+- [Demands](#demands)
 - [Orders](#orders)
 - [Products](#products)
+- [Sales](#sales)
 - [Users](#users)
 - [Warehouses](#warehouses)
 - [Dashboard](#dashboard)
@@ -97,6 +99,48 @@ This document provides comprehensive documentation for all API routes available 
 - **DELETE** `/api/customers/[id]`
 - **Response**: `{ message: string }`
 
+## Demands
+
+### Get All Demands
+
+- **GET** `/api/demands`
+- **Query Parameters**: `page`, `limit`, `locationId`, `locationType`, `status`, `sortBy`, `sortOrder`
+- **Response**: `{ data: Demand[], pagination: { page, limit, total, totalPages } }`
+
+### Get Demand by ID
+
+- **GET** `/api/demands/[id]`
+- **Response**: `{ data: Demand }`
+
+### Create Demand
+
+- **POST** `/api/demands`
+- **Body**: `{ demandId: string, locationId: string, locationType: "Warehouse" | "Outlet", products: Array<{ productId: string, quantity: number }>, status: "Pending" | "Approved" | "ConvertedToStock" }`
+- **Response**: `{ message: string, data: Demand }`
+
+### Update Demand
+
+- **PUT** `/api/demands/[id]`
+- **Body**: `{ locationId?: string, locationType?: "Warehouse" | "Outlet", products?: Array<{ productId: string, quantity: number }>, status?: "Pending" | "Approved" | "ConvertedToStock" }`
+- **Response**: `{ message: string, data: Demand }`
+
+### Delete Demand
+
+- **DELETE** `/api/demands/[id]`
+- **Response**: `{ message: string }`
+
+### Generate Demands
+
+- **POST** `/api/demands/generate`
+- **Body**: `{ outletId?: string, warehouseId?: string, days?: number, minSalesThreshold?: number, demandDays?: number, safetyStockFactor?: number, seasonalAdjustment?: number }`
+- **Response**: `{ message: string, data: { generatedCount: number, demands: Demand[], analysis: object } }`
+
+### Convert Demand to Stock
+
+- **POST** `/api/demands/[id]/convert`
+- **Body**: `{ mrp: number, tp: number, expireDate: string, batchNumber: string }`
+- **Response**: `{ message: string, data: Stock }`
+
 ## Orders
 
 ### Get All Orders
@@ -156,6 +200,55 @@ This document provides comprehensive documentation for all API routes available 
 
 - **DELETE** `/api/products/[id]`
 - **Response**: `{ message: string }`
+
+### Search Products
+
+- **GET** `/api/products/search`
+- **Query Parameters**: `query`, `outletId`
+- **Response**: `{ data: ProductSearchResult[] }`
+
+## Sales
+
+### Get All Sales
+
+- **GET** `/api/sales`
+- **Query Parameters**: `page`, `limit`, `outletId`, `customerId`, `startDate`, `endDate`, `paymentMethod`, `minAmount`, `maxAmount`, `search`, `sortBy`, `sortOrder`
+- **Response**: `{ data: Sale[], total, page, limit, totalPages }`
+
+### Get Sales History
+
+- **GET** `/api/sales/history`
+- **Query Parameters**: `page`, `limit`, `outletId`, `customerId`, `startDate`, `endDate`, `paymentMethod`, `minAmount`, `maxAmount`, `search`, `sortBy`, `sortOrder`
+- **Response**: `{ data: Sale[], total, page, limit, totalPages }`
+
+### Get Sale by ID
+
+- **GET** `/api/sales/[id]`
+- **Response**: `{ data: Sale }`
+
+### Create Sale
+
+- **POST** `/api/sales`
+- **Body**: `{ outletId: string, customerId?: string, items: Array<{ stockId: string, quantity: number, unitPrice: number, discountApplied: number }>, paymentMethod: "CASH" | "BKASH" | "ROCKET" | "NAGAD" | "BANK" | "CARD", discountAmount: number, notes?: string }`
+- **Response**: `{ message: string, data: Sale }`
+
+### Process Sale Return
+
+- **POST** `/api/sales/returns`
+- **Body**: `{ saleId: string, items: Array<{ stockId: string, quantity: number, reason: string }>, notes?: string }`
+- **Response**: `{ message: string, data: SaleReturn }`
+
+### Get Sales Statistics
+
+- **GET** `/api/sales/stats`
+- **Query Parameters**: `startDate`, `endDate`, `outletId`
+- **Response**: `{ data: { totalSales, totalRevenue, averageSaleValue, salesByPaymentMethod, salesByDate } }`
+
+### Search Products for POS
+
+- **GET** `/api/sales/search`
+- **Query Parameters**: `query`, `outletId`
+- **Response**: `{ data: ProductSearchResult[] }`
 
 ## Users
 

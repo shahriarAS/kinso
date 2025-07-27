@@ -8,8 +8,8 @@ import {
   useUpdateProductMutation,
 } from "@/features/products";
 import { useGetAllCategoriesQuery } from "@/features/categories/api";
-import { useGetWarehousesQuery } from "@/features/warehouses";
-import StockEntries from "./StockEntries";
+import { useGetAllVendorsQuery } from "@/features/vendors";
+import { useGetAllBrandsQuery } from "@/features/brands";
 import { useNotification } from "@/hooks/useNotification";
 import WarrantyInput from "./WarrantyInput";
 import type { FormInstance } from "antd";
@@ -27,7 +27,7 @@ interface Props {
   onClose?: () => void;
 }
 
-export default function AddEditProductDrawerRefactored({
+export default function AddEditProductDrawer({
   open,
   setOpen,
   product,
@@ -40,7 +40,8 @@ export default function AddEditProductDrawerRefactored({
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
   const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
   const { data: categoriesData } = useGetAllCategoriesQuery();
-  const { data: warehousesData } = useGetWarehousesQuery({});
+  const { data: vendorsData } = useGetAllVendorsQuery();
+  const { data: brandsData } = useGetAllBrandsQuery();
 
   const isEditing = !!product;
   const isLoading = isCreating || isUpdating;
@@ -51,37 +52,72 @@ export default function AddEditProductDrawerRefactored({
       value: cat._id,
     })) || [];
 
-  const warehouseOptions =
-    warehousesData?.data?.map((warehouse) => ({
-      label: warehouse.name,
-      value: warehouse._id,
+  const vendorOptions =
+    vendorsData?.data?.map((vendor: { name: string; _id: string }) => ({
+      label: vendor.name,
+      value: vendor._id,
+    })) || [];
+
+  const brandOptions =
+    brandsData?.data?.map((brand: { name: string; _id: string }) => ({
+      label: brand.name,
+      value: brand._id,
     })) || [];
 
   // Define form fields using the generic interface
   const fields: CustomFormField[] = [
     {
+      name: "productId",
+      label: "Product ID",
+      type: "input",
+      placeholder: "Enter Product ID",
+      rules: [
+        { required: true, message: "Please enter product ID" },
+        { min: 3, message: "Product ID must be at least 3 characters" },
+      ],
+    },
+    {
       name: "name",
       label: "Product Name",
       type: "input",
       placeholder: "Enter Product Name",
-      rules: [{ required: true, message: "Please enter product name" }],
+      rules: [
+        { required: true, message: "Please enter product name" },
+        { min: 2, message: "Product name must be at least 2 characters" },
+      ],
     },
     {
-      name: "sku",
-      label: "SKU",
+      name: "barcode",
+      label: "Barcode",
       type: "input",
-      placeholder: "Enter SKU",
-      rules: [{ required: true, message: "Please enter SKU" }],
+      placeholder: "Enter Barcode",
+      rules: [
+        { required: true, message: "Please enter barcode" },
+        { min: 8, message: "Barcode must be at least 8 characters" },
+        {
+          pattern: /^[0-9]+$/,
+          message: "Barcode must contain only numbers",
+        },
+      ],
     },
     {
-      name: "upc",
-      label: "UPC",
-      type: "input",
-      placeholder: "Enter UPC",
-      rules: [{ required: true, message: "Please enter UPC" }],
+      name: "vendorId",
+      label: "Vendor",
+      type: "select",
+      placeholder: "Select Vendor",
+      options: vendorOptions,
+      rules: [{ required: true, message: "Please select a vendor" }],
     },
     {
-      name: "category",
+      name: "brandId",
+      label: "Brand",
+      type: "select",
+      placeholder: "Select Brand",
+      options: brandOptions,
+      rules: [{ required: true, message: "Please select a brand" }],
+    },
+    {
+      name: "categoryId",
       label: "Category",
       type: "select",
       placeholder: "Select Category",
@@ -92,98 +128,46 @@ export default function AddEditProductDrawerRefactored({
       name: "warranty",
       label: "Warranty",
       type: "custom",
-      render: (form: FormInstance) => <WarrantyInput form={form} />, // Use the custom component
-      rules: [], // No required rule, so it's optional
+      render: (form: FormInstance) => <WarrantyInput form={form} />,
+      rules: [],
     },
   ];
 
   const handleSubmit = async (values: ProductInput) => {
     try {
-      // If warranty is empty or has no value, remove it from payload
-      const submitValues = { ...values };
-      if (
-        !submitValues.warranty ||
-        submitValues.warranty.value === undefined ||
-        submitValues.warranty.value === null
-      ) {
-        delete submitValues.warranty;
-      }
       if (isEditing && product) {
         await updateProduct({
           _id: product._id,
-          product: submitValues,
+          product: values,
         }).unwrap();
         success("Product updated successfully");
       } else {
-        await createProduct(submitValues).unwrap();
+        await createProduct(values).unwrap();
         success("Product created successfully");
       }
-    } catch (error: unknown) {
-      if (
-        error &&
-        typeof error === "object" &&
-        "data" in error &&
-        error.data &&
-        typeof error.data === "object" &&
-        "message" in error.data
-      ) {
-        showError(
-          "Failed to save product",
-          (error.data as { message: string }).message,
-        );
-      } else if (error && typeof error === "object" && "errorFields" in error) {
-        // Form validation error
-        return;
-      } else {
-        showError("Failed to save product");
-      }
+      handleClose();
+    } catch (error: any) {
+      showError(error?.data?.message || "Failed to save product");
     }
   };
 
   const handleClose = () => {
+    form.resetFields();
     setOpen(false);
-    if (onClose) {
-      onClose();
-    }
+    onClose?.();
   };
 
-  // Transform product data for form initialization
   const getInitialValues = (): Partial<ProductInput> | undefined => {
-    if (!product || !open) return undefined;
-
-    const transformedStock =
-      product.stock?.map((stockItem) => ({
-        ...stockItem,
-        warehouse:
-          typeof stockItem.warehouse === "string"
-            ? stockItem.warehouse
-            : stockItem.warehouse?._id,
-      })) || [];
-
-    let initialWarranty: { value: number; unit: string } | undefined =
-      undefined;
-    if (
-      product.warranty &&
-      typeof product.warranty === "object" &&
-      product.warranty.value !== undefined &&
-      product.warranty.value !== null
-    ) {
-      initialWarranty = {
-        value: product.warranty.value,
-        unit: product.warranty.unit,
-      };
-    }
+    if (!product) return undefined;
 
     return {
+      productId: product.productId,
       name: product.name,
-      sku: product.sku,
-      upc: product.upc,
-      category:
-        typeof product.category === "string"
-          ? product.category
-          : product.category?._id,
-      warranty: initialWarranty,
-      stock: transformedStock,
+      barcode: product.barcode,
+      vendorId: typeof product.vendorId === "string" ? product.vendorId : product.vendorId._id,
+      brandId: typeof product.brandId === "string" ? product.brandId : product.brandId._id,
+      categoryId: typeof product.categoryId === "string" ? product.categoryId : product.categoryId._id,
+      warranty: product.warranty,
     };
   };
 
@@ -192,19 +176,13 @@ export default function AddEditProductDrawerRefactored({
       open={open}
       onClose={handleClose}
       title={isEditing ? "Edit Product" : "Add New Product"}
-      width={800}
       form={form}
       fields={fields}
       initialValues={getInitialValues()}
       onSubmit={handleSubmit}
-      submitText={isEditing ? "Update" : "Save"}
+      submitText={isEditing ? "Update Product" : "Create Product"}
       loading={isLoading}
-      gridCols={3}
-    >
-      {/* Custom Stock Entries Section */}
-      <div className="mt-6">
-        <StockEntries form={form} warehouseOptions={warehouseOptions} />
-      </div>
-    </GenericDrawer>
+      width={600}
+    />
   );
 }

@@ -1,26 +1,29 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
-import { Stock, StockInput, StockFilters } from "./types";
+import { Stock, StockInput, StockMovementInput } from "./types";
 
 export const stockApi = createApi({
   reducerPath: "stockApi",
   baseQuery: baseQueryWithErrorHandling("/api/stock"),
   tagTypes: ["Stock"],
   endpoints: (builder) => ({
-    // Get all stock with pagination and filters
-    getStock: builder.query<
+    // Get all stocks with pagination and filters
+    getStocks: builder.query<
       {
         data: Stock[];
         pagination: {
           page: number;
           limit: number;
           total: number;
-          totalPages: number;
         };
       },
-      StockFilters & {
+      {
         page?: number;
         limit?: number;
+        locationId?: string;
+        locationType?: "Warehouse" | "Outlet";
+        productId?: string;
+        search?: string;
         sortBy?: string;
         sortOrder?: "asc" | "desc";
       }
@@ -42,8 +45,17 @@ export const stockApi = createApi({
           : [{ type: "Stock", id: "LIST" }],
     }),
 
-    // Add new stock
-    addStock: builder.mutation<
+    // Get single stock by ID
+    getStock: builder.query<{ data: Stock }, string>({
+      query: (_id) => ({
+        url: `/${_id}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, id) => [{ type: "Stock", id }],
+    }),
+
+    // Create new stock
+    createStock: builder.mutation<
       { message: string; data: Stock },
       StockInput
     >({
@@ -55,66 +67,121 @@ export const stockApi = createApi({
       invalidatesTags: [{ type: "Stock", id: "LIST" }],
     }),
 
-
-
-    // Get stock by product ID
-    getStockByProduct: builder.query<
-      { data: Stock[] },
-      { productId: string; locationType?: "warehouse" | "outlet" }
+    // Update stock
+    updateStock: builder.mutation<
+      { message: string; data: Stock },
+      { _id: string; stock: Partial<StockInput> }
     >({
-      query: ({ productId, locationType }) => ({
-        url: "/",
-        method: "GET",
-        params: {
-          productId,
-          ...(locationType === "warehouse" && { warehouseId: { $exists: true } }),
-          ...(locationType === "outlet" && { outletId: { $exists: true } }),
-        },
+      query: ({ _id, stock }) => ({
+        url: `/${_id}`,
+        method: "PUT",
+        body: stock,
       }),
-      providesTags: (result, error, { productId }) => [
-        { type: "Stock", productId },
+      invalidatesTags: (result, error, { _id }) => [
+        { type: "Stock", _id },
         { type: "Stock", id: "LIST" },
       ],
     }),
 
-    // Get low stock items
-    getLowStock: builder.query<
-      { data: Stock[] },
-      { limit?: number }
-    >({
-      query: (params) => ({
-        url: "/",
-        method: "GET",
-        params: {
-          ...params,
-          lowStock: true,
-        },
+    // Delete stock
+    deleteStock: builder.mutation<{ message: string }, string>({
+      query: (_id) => ({
+        url: `/${_id}`,
+        method: "DELETE",
       }),
-      providesTags: [{ type: "Stock", id: "LOW_STOCK" }],
+      invalidatesTags: [{ type: "Stock", id: "LIST" }],
     }),
 
-    // Get expiring stock items
-    getExpiringStock: builder.query<
-      { data: Stock[] },
-      { limit?: number }
+    // Transfer stock between locations
+    transferStock: builder.mutation<
+      { message: string; data: any },
+      {
+        productId: string;
+        fromLocationId: string;
+        toLocationId: string;
+        fromLocationType: "Warehouse" | "Outlet";
+        toLocationType: "Warehouse" | "Outlet";
+        quantity: number;
+        reason?: string;
+      }
+    >({
+      query: (transferData) => ({
+        url: "/movement",
+        method: "POST",
+        body: transferData,
+      }),
+      invalidatesTags: [{ type: "Stock", id: "LIST" }],
+    }),
+
+    // Get stock movement history
+    getStockMovements: builder.query<
+      {
+        data: any[];
+        pagination: {
+          page: number;
+          limit: number;
+          total: number;
+        };
+      },
+      {
+        page?: number;
+        limit?: number;
+        productId?: string;
+        locationId?: string;
+        movementType?: string;
+      }
     >({
       query: (params) => ({
+        url: "/movement",
+        method: "GET",
+        params,
+      }),
+      providesTags: ["Stock"],
+    }),
+
+    // Get stock by product and location (for FIFO)
+    getStockByProductAndLocation: builder.query<
+      { data: Stock[] },
+      {
+        productId: string;
+        locationId: string;
+        locationType: "Warehouse" | "Outlet";
+      }
+    >({
+      query: ({ productId, locationId, locationType }) => ({
         url: "/",
         method: "GET",
-        params: {
-          ...params,
-          expiringSoon: true,
-        },
+        params: { productId, locationId, locationType, limit: 1000 },
       }),
-      providesTags: [{ type: "Stock", id: "EXPIRING" }],
+      providesTags: ["Stock"],
+    }),
+
+    // Get stock statistics
+    getStockStats: builder.query<
+      { data: any },
+      {
+        locationId?: string;
+        locationType?: "Warehouse" | "Outlet";
+      }
+    >({
+      query: (params) => ({
+        url: "/stats",
+        method: "GET",
+        params,
+      }),
+      providesTags: ["Stock"],
     }),
   }),
 });
 
 export const {
+  useGetStocksQuery,
   useGetStockQuery,
-  useAddStockMutation,
-  useGetStockByProductQuery,
-  useGetLowStockQuery,
-  useGetExpiringStockQuery,
+  useCreateStockMutation,
+  useUpdateStockMutation,
+  useDeleteStockMutation,
+  useTransferStockMutation,
+  useGetStockMovementsQuery,
+  useGetStockByProductAndLocationQuery,
+  useGetStockStatsQuery,
 } = stockApi; 

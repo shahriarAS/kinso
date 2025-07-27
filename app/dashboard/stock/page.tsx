@@ -2,29 +2,33 @@
 
 import React, { useState, useCallback } from "react";
 import { Button, message, Modal } from "antd";
-import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
+import { PlusOutlined, ReloadOutlined, SwapOutlined } from "@ant-design/icons";
 import { toast } from "react-hot-toast";
 import {
-  useGetStockQuery,
+  useGetStocksQuery,
   useGetStockStatsQuery,
   AddStockDrawer,
   StockTable,
   StockFilters,
   StockStats,
 } from "@/features/stock";
+import MoveStockDrawer from "@/features/stock/components/MoveStockDrawer";
 import { StockFilters as StockFiltersType } from "@/features/stock/types";
+import type { Stock } from "@/features/stock/types";
 
 export default function StockPage() {
   const [filters, setFilters] = useState<StockFiltersType>({});
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [addDrawerOpen, setAddDrawerOpen] = useState(false);
+  const [moveDrawerOpen, setMoveDrawerOpen] = useState(false);
+  const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
 
   const {
     data: stockData,
     isLoading: stockLoading,
     refetch: refetchStock,
-  } = useGetStockQuery({
+  } = useGetStocksQuery({
     ...filters,
     page,
     limit,
@@ -34,7 +38,7 @@ export default function StockPage() {
     data: statsData,
     isLoading: statsLoading,
     refetch: refetchStats,
-  } = useGetStockStatsQuery();
+  } = useGetStockStatsQuery({});
 
   const handleFiltersChange = useCallback((newFilters: StockFiltersType) => {
     setFilters(newFilters);
@@ -63,14 +67,25 @@ export default function StockPage() {
     toast.success("Stock added successfully");
   }, [refetchStock, refetchStats]);
 
-  const handleEdit = useCallback((stock: any) => {
+  const handleMoveStock = useCallback((stock: Stock) => {
+    setSelectedStock(stock);
+    setMoveDrawerOpen(true);
+  }, []);
+
+  const handleMoveSuccess = useCallback(() => {
+    refetchStock();
+    refetchStats();
+    toast.success("Stock transferred successfully");
+  }, [refetchStock, refetchStats]);
+
+  const handleEdit = useCallback((stock: Stock) => {
     message.info("Edit functionality coming soon");
   }, []);
 
-  const handleDelete = useCallback((stock: any) => {
+  const handleDelete = useCallback((stock: Stock) => {
     Modal.confirm({
       title: "Delete Stock",
-      content: `Are you sure you want to delete this stock entry for ${stock.product?.name}?`,
+      content: `Are you sure you want to delete this stock entry for ${stock.productId}?`,
       okText: "Yes",
       okType: "danger",
       cancelText: "No",
@@ -78,6 +93,11 @@ export default function StockPage() {
         message.info("Delete functionality coming soon");
       },
     });
+  }, []);
+
+  const handleCloseMoveDrawer = useCallback(() => {
+    setMoveDrawerOpen(false);
+    setSelectedStock(null);
   }, []);
 
   return (
@@ -99,6 +119,13 @@ export default function StockPage() {
                 loading={stockLoading || statsLoading}
               >
                 Refresh
+              </Button>
+              <Button
+                icon={<SwapOutlined />}
+                onClick={() => setMoveDrawerOpen(true)}
+                size="large"
+              >
+                Transfer Stock
               </Button>
               <Button
                 type="primary"
@@ -148,7 +175,7 @@ export default function StockPage() {
                   Showing {((page - 1) * limit) + 1} to {Math.min(page * limit, stockData.pagination.total)} of {stockData.pagination.total} entries
                 </div>
                 <div className="text-sm text-gray-600">
-                  Page {page} of {stockData.pagination.totalPages}
+                  Page {page} of {Math.ceil(stockData.pagination.total / limit)}
                 </div>
               </div>
             </div>
@@ -160,6 +187,13 @@ export default function StockPage() {
       <AddStockDrawer
         open={addDrawerOpen}
         onClose={() => setAddDrawerOpen(false)}
+      />
+
+      {/* Move Stock Drawer */}
+      <MoveStockDrawer
+        open={moveDrawerOpen}
+        onClose={handleCloseMoveDrawer}
+        selectedStock={selectedStock}
       />
     </div>
   );

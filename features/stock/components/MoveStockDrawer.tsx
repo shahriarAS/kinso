@@ -1,167 +1,229 @@
-import React, { useState } from "react";
-import { Drawer, Form, Input, Select, Button, message } from "antd";
-import { useMoveStockMutation } from "../api";
-import { useGetOutletsQuery } from "@/features/outlets/api";
-import { useGetWarehousesQuery } from "@/features/warehouses/api";
-import { StockMoveInput, Stock } from "../types";
+"use client";
+import { Form, Select, InputNumber, Button, message } from "antd";
+import React, { useEffect, useState } from "react";
+import { GenericDrawer, type FormField } from "@/components/common";
+import { useTransferStockMutation } from "@/features/stock/api";
+import { useGetProductsQuery } from "@/features/products/api";
+import { useGetWarehousesQuery } from "@/features/warehouses";
+import { outletsApi } from "@/features/outlets";
+import { useNotification } from "@/hooks/useNotification";
+import type { Stock } from "@/features/stock/types";
+import type { FormInstance } from "antd";
 
 interface MoveStockDrawerProps {
   open: boolean;
   onClose: () => void;
-  stock: Stock | null;
+  selectedStock?: Stock | null;
 }
 
-const MoveStockDrawer: React.FC<MoveStockDrawerProps> = ({ open, onClose, stock }) => {
-  const [form] = Form.useForm();
-  const [locationType, setLocationType] = useState<"warehouse" | "outlet">("outlet");
-  const [moveStock, { isLoading }] = useMoveStockMutation();
+interface TransferFormData {
+  productId: string;
+  fromLocationId: string;
+  toLocationId: string;
+  fromLocationType: "Warehouse" | "Outlet";
+  toLocationType: "Warehouse" | "Outlet";
+  quantity: number;
+  reason: string;
+}
 
-  const { data: outletsData } = useGetOutletsQuery({ limit: 1000 });
+export default function MoveStockDrawer({
+  open,
+  onClose,
+  selectedStock,
+}: MoveStockDrawerProps) {
+  const [form] = Form.useForm<TransferFormData>();
+  const { success, error: showError } = useNotification();
+  const [maxQuantity, setMaxQuantity] = useState(0);
+
+  // API hooks
+  const [transferStock, { isLoading }] = useTransferStockMutation();
+  const { data: productsData } = useGetProductsQuery({ limit: 1000 });
   const { data: warehousesData } = useGetWarehousesQuery({ limit: 1000 });
+  const { data: outletsData } = outletsApi.useGetOutletsQuery({ limit: 1000 });
 
-  const handleSubmit = async (values: any) => {
-    if (!stock) return;
+  const productOptions =
+    productsData?.data?.map((product: any) => ({
+      label: `${product.name} (${product.barcode})`,
+      value: product._id,
+    })) || [];
 
+  const warehouseOptions =
+    warehousesData?.data?.map((warehouse: any) => ({
+      label: warehouse.name,
+      value: warehouse._id,
+    })) || [];
+
+  const outletOptions =
+    outletsData?.data?.map((outlet: any) => ({
+      label: `${outlet.name} (${outlet.type})`,
+      value: outlet._id,
+    })) || [];
+
+  const locationTypeOptions = [
+    { label: "Warehouse", value: "Warehouse" },
+    { label: "Outlet", value: "Outlet" },
+  ];
+
+  // Define form fields
+  const fields: FormField[] = [
+    {
+      name: "productId",
+      label: "Product",
+      type: "select",
+      placeholder: "Select Product",
+      options: productOptions,
+      rules: [{ required: true, message: "Please select a product" }],
+    },
+    {
+      name: "fromLocationType",
+      label: "From Location Type",
+      type: "select",
+      placeholder: "Select Location Type",
+      options: locationTypeOptions,
+      rules: [{ required: true, message: "Please select source location type" }],
+    },
+    {
+      name: "fromLocationId",
+      label: "From Location",
+      type: "select",
+      placeholder: "Select Source Location",
+      options: [],
+      rules: [{ required: true, message: "Please select source location" }],
+    },
+    {
+      name: "toLocationType",
+      label: "To Location Type",
+      type: "select",
+      placeholder: "Select Location Type",
+      options: locationTypeOptions,
+      rules: [{ required: true, message: "Please select destination location type" }],
+    },
+    {
+      name: "toLocationId",
+      label: "To Location",
+      type: "select",
+      placeholder: "Select Destination Location",
+      options: [],
+      rules: [{ required: true, message: "Please select destination location" }],
+    },
+    {
+      name: "quantity",
+      label: "Quantity",
+      type: "number",
+      placeholder: "Enter quantity to transfer",
+      rules: [
+        { required: true, message: "Please enter quantity" },
+        { type: "number", min: 1, message: "Quantity must be at least 1" },
+        {
+          validator: (_: any, value: any) => {
+            if (value > maxQuantity) {
+              return Promise.reject(new Error(`Maximum available quantity is ${maxQuantity}`));
+            }
+            return Promise.resolve();
+          },
+        },
+      ],
+    },
+    {
+      name: "reason",
+      label: "Reason",
+      type: "input",
+      placeholder: "Enter transfer reason (optional)",
+      rules: [],
+    },
+  ];
+
+  // Update location options based on selected type
+  useEffect(() => {
+    const fromLocationType = form.getFieldValue("fromLocationType");
+    const toLocationType = form.getFieldValue("toLocationType");
+
+    if (fromLocationType === "Warehouse") {
+      form.setFieldsValue({ fromLocationId: undefined });
+      // Update from location options to show warehouses
+      const fromLocationField = fields.find(f => f.name === "fromLocationId");
+      if (fromLocationField) {
+        fromLocationField.options = warehouseOptions;
+      }
+    } else if (fromLocationType === "Outlet") {
+      form.setFieldsValue({ fromLocationId: undefined });
+      // Update from location options to show outlets
+      const fromLocationField = fields.find(f => f.name === "fromLocationId");
+      if (fromLocationField) {
+        fromLocationField.options = outletOptions;
+      }
+    }
+
+    if (toLocationType === "Warehouse") {
+      form.setFieldsValue({ toLocationId: undefined });
+      // Update to location options to show warehouses
+      const toLocationField = fields.find(f => f.name === "toLocationId");
+      if (toLocationField) {
+        toLocationField.options = warehouseOptions;
+      }
+    } else if (toLocationType === "Outlet") {
+      form.setFieldsValue({ toLocationId: undefined });
+      // Update to location options to show outlets
+      const toLocationField = fields.find(f => f.name === "toLocationId");
+      if (toLocationField) {
+        toLocationField.options = outletOptions;
+      }
+    }
+  }, [form, warehouseOptions, outletOptions]);
+
+  // Calculate max quantity when product and source location are selected
+  useEffect(() => {
+    const productId = form.getFieldValue("productId");
+    const fromLocationId = form.getFieldValue("fromLocationId");
+    const fromLocationType = form.getFieldValue("fromLocationType");
+
+    if (productId && fromLocationId && fromLocationType) {
+      // In a real implementation, you would fetch the available stock
+      // For now, we'll set a default value
+      setMaxQuantity(selectedStock?.quantity || 100);
+    }
+  }, [form, selectedStock]);
+
+  const handleSubmit = async (values: TransferFormData) => {
     try {
-      const moveData: StockMoveInput = {
-        stockId: stock._id,
-        units: parseInt(values.units),
-        ...(locationType === "outlet" && { targetOutletId: values.targetLocationId }),
-        ...(locationType === "warehouse" && { targetWarehouseId: values.targetLocationId }),
-      };
-
-      await moveStock(moveData).unwrap();
-      message.success("Stock moved successfully");
-      form.resetFields();
-      onClose();
+      await transferStock(values).unwrap();
+      success("Stock transferred successfully");
+      handleClose();
     } catch (error: any) {
-      message.error(error?.data?.message || "Failed to move stock");
+      showError(error?.data?.message || "Failed to transfer stock");
     }
   };
 
-  const handleLocationTypeChange = (value: "warehouse" | "outlet") => {
-    setLocationType(value);
-    form.setFieldsValue({ targetLocationId: undefined });
+  const handleClose = () => {
+    form.resetFields();
+    setMaxQuantity(0);
+    onClose();
   };
 
-  const maxUnits = stock?.units || 0;
+  // Set initial values if stock is selected
+  useEffect(() => {
+    if (open && selectedStock) {
+      form.setFieldsValue({
+        productId: selectedStock.productId,
+        fromLocationId: selectedStock.locationId,
+        fromLocationType: selectedStock.locationType as "Warehouse" | "Outlet",
+        quantity: selectedStock.quantity,
+      });
+      setMaxQuantity(selectedStock.quantity);
+    }
+  }, [open, selectedStock, form]);
 
   return (
-    <Drawer
-      title="Move Stock"
-      width={600}
+    <GenericDrawer
       open={open}
-      onClose={onClose}
-      footer={
-        <div className="flex justify-end space-x-2">
-          <Button onClick={onClose}>Cancel</Button>
-          <Button
-            type="primary"
-            loading={isLoading}
-            onClick={() => form.submit()}
-          >
-            Move Stock
-          </Button>
-        </div>
-      }
-    >
-      {stock && (
-        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-          <h4 className="font-medium mb-2">Stock Details</h4>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="text-gray-600">Product:</span>
-              <p className="font-medium">{stock.product?.name}</p>
-            </div>
-            <div>
-              <span className="text-gray-600">Current Location:</span>
-              <p className="font-medium">
-                {stock.outlet?.name || stock.warehouse?.name}
-              </p>
-            </div>
-            <div>
-              <span className="text-gray-600">Available Units:</span>
-              <p className="font-medium">{stock.units}</p>
-            </div>
-            <div>
-              <span className="text-gray-600">Expire Date:</span>
-              <p className="font-medium">
-                {new Date(stock.expireDate).toLocaleDateString()}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={handleSubmit}
-        initialValues={{
-          locationType: "outlet",
-        }}
-      >
-        <Form.Item
-          name="locationType"
-          label="Target Location Type"
-          rules={[{ required: true, message: "Please select target location type" }]}
-        >
-          <Select onChange={handleLocationTypeChange}>
-            <Select.Option value="outlet">Outlet</Select.Option>
-            <Select.Option value="warehouse">Warehouse</Select.Option>
-          </Select>
-        </Form.Item>
-
-        <Form.Item
-          name="targetLocationId"
-          label={`Target ${locationType === "warehouse" ? "Warehouse" : "Outlet"}`}
-          rules={[{ required: true, message: `Please select target ${locationType}` }]}
-        >
-          <Select
-            placeholder={`Select target ${locationType}`}
-            showSearch
-            optionFilterProp="children"
-            loading={locationType === "outlet" ? !outletsData : !warehousesData}
-          >
-            {locationType === "outlet"
-              ? outletsData?.data?.map((outlet) => (
-                  <Select.Option key={outlet._id} value={outlet._id}>
-                    {outlet.name} ({outlet.outletId})
-                  </Select.Option>
-                ))
-              : warehousesData?.data?.map((warehouse) => (
-                  <Select.Option key={warehouse._id} value={warehouse.warehouseId}>
-                    {warehouse.name} ({warehouse.warehouseId})
-                  </Select.Option>
-                ))}
-          </Select>
-        </Form.Item>
-
-        <Form.Item
-          name="units"
-          label="Units to Move"
-          rules={[
-            { required: true, message: "Please enter units to move" },
-            { type: "number", min: 1, message: "Units must be at least 1" },
-            {
-              validator: (_, value) => {
-                if (value > maxUnits) {
-                  return Promise.reject(new Error(`Cannot move more than ${maxUnits} units`));
-                }
-                return Promise.resolve();
-              },
-            },
-          ]}
-        >
-          <Input
-            type="number"
-            placeholder={`Enter units (max: ${maxUnits})`}
-            max={maxUnits}
-          />
-        </Form.Item>
-      </Form>
-    </Drawer>
+      onClose={handleClose}
+      title="Transfer Stock"
+      form={form}
+      fields={fields}
+      onSubmit={handleSubmit}
+      submitText="Transfer Stock"
+      loading={isLoading}
+      width={600}
+    />
   );
-};
-
-export default MoveStockDrawer; 
+} 

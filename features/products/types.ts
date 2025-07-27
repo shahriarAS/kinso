@@ -10,16 +10,6 @@ export interface Product {
   vendor: string | Vendor;
   brand: string | Brand;
   category: string | Category;
-  warranty?: {
-    value: number;
-    unit: string;
-  };
-  stock: {
-    warehouse: Warehouse;
-    unit: number;
-    dp?: number;
-    mrp: number;
-  }[];
   createdAt: string;
   updatedAt: string;
 }
@@ -27,17 +17,11 @@ export interface Product {
 export interface ProductInput
   extends Omit<
     Product,
-    "_id" | "createdAt" | "updatedAt" | "stock" | "vendor" | "brand" | "category"
+    "_id" | "createdAt" | "updatedAt" | "vendor" | "brand" | "category"
   > {
   vendor: string;
   brand: string;
   category: string;
-  stock: {
-    warehouse: string;
-    unit: number;
-    dp?: number;
-    mrp: number;
-  }[];
 }
 
 export interface ProductUpdateInput {
@@ -46,10 +30,6 @@ export interface ProductUpdateInput {
   vendor?: string;
   brand?: string;
   category?: string;
-  warranty?: {
-    value: number;
-    unit: string;
-  };
 }
 
 export interface ProductFilters {

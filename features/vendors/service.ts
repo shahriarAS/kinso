@@ -25,16 +25,9 @@ export async function handlePost(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { vendorId, name } = body;
+    const { name } = body;
 
     // Basic validation
-    if (!vendorId || vendorId.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Vendor ID is required" },
-        { status: 400 },
-      );
-    }
-
     if (!name || name.trim().length === 0) {
       return NextResponse.json(
         { success: false, message: "Vendor name is required" },
@@ -42,18 +35,17 @@ export async function handlePost(request: NextRequest) {
       );
     }
 
-    // Check if vendor already exists with same vendorId
-    const existingVendor = await Vendor.findOne({ vendorId: vendorId.trim() });
+    // Check if vendor already exists with same name
+    const existingVendor = await Vendor.findOne({ name: name.trim() });
     if (existingVendor) {
       return NextResponse.json(
-        { success: false, message: "Vendor with this ID already exists" },
+        { success: false, message: "Vendor with this name already exists" },
         { status: 409 },
       );
     }
 
     // Create vendor
     const vendor = await Vendor.create({
-      vendorId: vendorId.trim(),
       name: name.trim(),
     });
 
@@ -127,10 +119,10 @@ export async function handleGet(request: NextRequest) {
   }
 }
 
-// GET /api/vendors/[vendorId] - Get a specific vendor
+// GET /api/vendors/[id] - Get a specific vendor
 export async function handleGetById(
   request: NextRequest,
-  { params }: { params: Promise<{ vendorId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const authResult = await authorizeRequest(
@@ -146,8 +138,8 @@ export async function handleGetById(
       );
     }
     await dbConnect();
-    const { vendorId } = await params;
-    const vendor = await Vendor.findOne({ vendorId }).lean();
+    const { id } = await params;
+    const vendor = await Vendor.findById(id).lean();
     if (!vendor) {
       return NextResponse.json(
         { success: false, message: "Vendor not found" },
@@ -167,10 +159,10 @@ export async function handleGetById(
   }
 }
 
-// PUT /api/vendors/[vendorId] - Update a vendor
+// PUT /api/vendors/[id] - Update a vendor
 export async function handleUpdateById(
   request: NextRequest,
-  { params }: { params: Promise<{ vendorId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const authResult = await authorizeRequest(
@@ -188,9 +180,9 @@ export async function handleUpdateById(
     await dbConnect();
     const body = await request.json();
     const { name } = body;
-    const { vendorId } = await params;
+    const { id } = await params;
     
-    const existingVendor = await Vendor.findOne({ vendorId });
+    const existingVendor = await Vendor.findById(id);
     if (!existingVendor) {
       return NextResponse.json(
         { success: false, message: "Vendor not found" },
@@ -206,8 +198,8 @@ export async function handleUpdateById(
       );
     }
 
-    const updatedVendor = await Vendor.findOneAndUpdate(
-      { vendorId },
+    const updatedVendor = await Vendor.findByIdAndUpdate(
+      id,
       {
         name: name.trim(),
       },
@@ -234,10 +226,10 @@ export async function handleUpdateById(
   }
 }
 
-// DELETE /api/vendors/[vendorId] - Delete a vendor
+// DELETE /api/vendors/[id] - Delete a vendor
 export async function handleDeleteById(
   request: NextRequest,
-  { params }: { params: Promise<{ vendorId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const authResult = await authorizeRequest(
@@ -253,15 +245,15 @@ export async function handleDeleteById(
       );
     }
     await dbConnect();
-    const { vendorId } = await params;
-    const vendor = await Vendor.findOne({ vendorId });
+    const { id } = await params;
+    const vendor = await Vendor.findById(id);
     if (!vendor) {
       return NextResponse.json(
         { success: false, message: "Vendor not found" },
         { status: 404 },
       );
     }
-    await Vendor.findOneAndDelete({ vendorId });
+    await Vendor.findByIdAndDelete(id);
     return NextResponse.json({
       success: true,
       message: "Vendor deleted",

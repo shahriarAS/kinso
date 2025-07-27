@@ -25,16 +25,9 @@ export async function handlePost(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { outletId, name, type } = body;
+    const { name, type } = body;
 
     // Basic validation
-    if (!outletId || outletId.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Outlet ID is required" },
-        { status: 400 },
-      );
-    }
-
     if (!name || name.trim().length === 0) {
       return NextResponse.json(
         { success: false, message: "Outlet name is required" },
@@ -49,18 +42,17 @@ export async function handlePost(request: NextRequest) {
       );
     }
 
-    // Check if outlet already exists with same outletId
-    const existingOutlet = await Outlet.findOne({ outletId: outletId.trim() });
+    // Check if outlet already exists with same name
+    const existingOutlet = await Outlet.findOne({ name: name.trim() });
     if (existingOutlet) {
       return NextResponse.json(
-        { success: false, message: "Outlet with this ID already exists" },
+        { success: false, message: "Outlet with this name already exists" },
         { status: 409 },
       );
     }
 
     // Create outlet
     const outlet = await Outlet.create({
-      outletId: outletId.trim(),
       name: name.trim(),
       type,
     });
@@ -142,10 +134,10 @@ export async function handleGet(request: NextRequest) {
   }
 }
 
-// GET /api/outlets/[outletId] - Get a specific outlet
+// GET /api/outlets/[id] - Get a specific outlet
 export async function handleGetById(
   request: NextRequest,
-  { params }: { params: Promise<{ outletId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const authResult = await authorizeRequest(
@@ -161,8 +153,8 @@ export async function handleGetById(
       );
     }
     await dbConnect();
-    const { outletId } = await params;
-    const outlet = await Outlet.findOne({ outletId }).lean();
+    const { id } = await params;
+    const outlet = await Outlet.findById(id).lean();
     if (!outlet) {
       return NextResponse.json(
         { success: false, message: "Outlet not found" },
@@ -182,10 +174,10 @@ export async function handleGetById(
   }
 }
 
-// PUT /api/outlets/[outletId] - Update an outlet
+// PUT /api/outlets/[id] - Update an outlet
 export async function handleUpdateById(
   request: NextRequest,
-  { params }: { params: Promise<{ outletId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const authResult = await authorizeRequest(
@@ -203,9 +195,9 @@ export async function handleUpdateById(
     await dbConnect();
     const body = await request.json();
     const { name, type } = body;
-    const { outletId } = await params;
+    const { id } = await params;
     
-    const existingOutlet = await Outlet.findOne({ outletId });
+    const existingOutlet = await Outlet.findById(id);
     if (!existingOutlet) {
       return NextResponse.json(
         { success: false, message: "Outlet not found" },
@@ -227,8 +219,8 @@ export async function handleUpdateById(
       );
     }
 
-    const updatedOutlet = await Outlet.findOneAndUpdate(
-      { outletId },
+    const updatedOutlet = await Outlet.findByIdAndUpdate(
+      id,
       {
         name: name.trim(),
         type,
@@ -256,10 +248,10 @@ export async function handleUpdateById(
   }
 }
 
-// DELETE /api/outlets/[outletId] - Delete an outlet
+// DELETE /api/outlets/[id] - Delete an outlet
 export async function handleDeleteById(
   request: NextRequest,
-  { params }: { params: Promise<{ outletId: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const authResult = await authorizeRequest(
@@ -275,15 +267,15 @@ export async function handleDeleteById(
       );
     }
     await dbConnect();
-    const { outletId } = await params;
-    const outlet = await Outlet.findOne({ outletId });
+    const { id } = await params;
+    const outlet = await Outlet.findById(id);
     if (!outlet) {
       return NextResponse.json(
         { success: false, message: "Outlet not found" },
         { status: 404 },
       );
     }
-    await Outlet.findOneAndDelete({ outletId });
+    await Outlet.findByIdAndDelete(id);
     return NextResponse.json({
       success: true,
       message: "Outlet deleted",

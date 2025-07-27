@@ -1,23 +1,19 @@
 export interface Warehouse {
   _id: string;
-  warehouseId: string;
   name: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface WarehouseInput {
-  warehouseId: string;
   name: string;
 }
 
 export interface WarehouseUpdateInput {
-  warehouseId?: string;
   name?: string;
 }
 
 export interface WarehouseFilters {
-  warehouseId?: string;
   name?: string;
   search?: string;
   sortBy?: string;
@@ -64,7 +60,6 @@ export interface WarehouseStats {
   lowStockProducts: number;
   warehouses: Array<{
     _id: string;
-    warehouseId: string;
     name: string;
     productCount: number;
     totalValue: number;

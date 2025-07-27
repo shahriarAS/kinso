@@ -35,11 +35,7 @@ export async function handleGet(request: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: any = {};
     if (search) {
-      query.$or = [
-        { warehouseId: { $regex: search, $options: "i" } },
-        { name: { $regex: search, $options: "i" } },
-        { location: { $regex: search, $options: "i" } },
-      ];
+      query.name = { $regex: search, $options: "i" };
     }
 
     // Execute query
@@ -94,16 +90,9 @@ export async function handlePost(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { warehouseId, name, location } = body;
+    const { name } = body;
 
     // Basic validation
-    if (!warehouseId || warehouseId.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Warehouse ID is required" },
-        { status: 400 },
-      );
-    }
-
     if (!name || name.trim().length === 0) {
       return NextResponse.json(
         { success: false, message: "Warehouse name is required" },
@@ -111,31 +100,12 @@ export async function handlePost(request: NextRequest) {
       );
     }
 
-    if (!location || location.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Warehouse location is required" },
-        { status: 400 },
-      );
-    }
-
-    // Check if warehouseId already exists
-    const existingWarehouseId = await Warehouse.findOne({
-      warehouseId: warehouseId.trim().toUpperCase(),
-    });
-
-    if (existingWarehouseId) {
-      return NextResponse.json(
-        { success: false, message: "Warehouse ID already exists" },
-        { status: 409 },
-      );
-    }
-
     // Check if warehouse name already exists
-    const existingWarehouseName = await Warehouse.findOne({
+    const existingWarehouse = await Warehouse.findOne({
       name: { $regex: new RegExp(`^${name.trim()}$`, "i") },
     });
 
-    if (existingWarehouseName) {
+    if (existingWarehouse) {
       return NextResponse.json(
         { success: false, message: "Warehouse with this name already exists" },
         { status: 409 },
@@ -144,9 +114,7 @@ export async function handlePost(request: NextRequest) {
 
     // Create warehouse
     const warehouse = await Warehouse.create({
-      warehouseId: warehouseId.trim().toUpperCase(),
       name: name.trim(),
-      location: location.trim(),
     });
 
     return NextResponse.json(
@@ -169,9 +137,9 @@ export async function handlePost(request: NextRequest) {
 // GET /api/warehouses/[id] - Get a specific warehouse
 export async function handleGetById(
   request: NextRequest,
-  { params }: { params: Promise<{ _id: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { _id } = await params;
+  const { id } = await params;
   try {
     // Authorize request - all authenticated users can view warehouses
     const authResult = await authorizeRequest(
@@ -190,7 +158,7 @@ export async function handleGetById(
 
     await dbConnect();
 
-    const warehouse = await Warehouse.findById(_id).lean();
+    const warehouse = await Warehouse.findById(id).lean();
 
     if (!warehouse) {
       return NextResponse.json(
@@ -215,9 +183,9 @@ export async function handleGetById(
 // PUT /api/warehouses/[id] - Update a warehouse
 export async function handleUpdateById(
   request: NextRequest,
-  { params }: { params: Promise<{ _id: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { _id } = await params;
+  const { id } = await params;
   try {
     // Authorize request - only managers and admins can update warehouses
     const authResult = await authorizeRequest(
@@ -237,10 +205,10 @@ export async function handleUpdateById(
     await dbConnect();
 
     const body = await request.json();
-    const { warehouseId, name, location } = body;
+    const { name } = body;
 
     // Check if warehouse exists
-    const existingWarehouse = await Warehouse.findById(_id);
+    const existingWarehouse = await Warehouse.findById(id);
     if (!existingWarehouse) {
       return NextResponse.json(
         { success: false, message: "Warehouse not found" },
@@ -249,13 +217,6 @@ export async function handleUpdateById(
     }
 
     // Basic validation
-    if (!warehouseId || warehouseId.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Warehouse ID is required" },
-        { status: 400 },
-      );
-    }
-
     if (!name || name.trim().length === 0) {
       return NextResponse.json(
         { success: false, message: "Warehouse name is required" },
@@ -263,29 +224,9 @@ export async function handleUpdateById(
       );
     }
 
-    if (!location || location.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Warehouse location is required" },
-        { status: 400 },
-      );
-    }
-
-    // Check if new warehouseId conflicts with existing warehouse (excluding current one)
-    const warehouseIdConflict = await Warehouse.findOne({
-      _id: { $ne: _id },
-      warehouseId: warehouseId.trim().toUpperCase(),
-    });
-
-    if (warehouseIdConflict) {
-      return NextResponse.json(
-        { success: false, message: "Warehouse ID already exists" },
-        { status: 409 },
-      );
-    }
-
     // Check if new name conflicts with existing warehouse (excluding current one)
     const nameConflict = await Warehouse.findOne({
-      _id: { $ne: _id },
+      _id: { $ne: id },
       name: { $regex: new RegExp(`^${name.trim()}$`, "i") },
     });
 
@@ -298,11 +239,9 @@ export async function handleUpdateById(
 
     // Update warehouse
     const updatedWarehouse = await Warehouse.findByIdAndUpdate(
-      _id,
+      id,
       {
-        warehouseId: warehouseId.trim().toUpperCase(),
         name: name.trim(),
-        location: location.trim(),
       },
       { new: true, runValidators: true },
     );
@@ -324,9 +263,9 @@ export async function handleUpdateById(
 // DELETE /api/warehouses/[id] - Delete a warehouse
 export async function handleDeleteById(
   request: NextRequest,
-  { params }: { params: Promise<{ _id: string }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { _id } = await params;
+  const { id } = await params;
   try {
     // Authorize request - only admins can delete warehouses
     const authResult = await authorizeRequest(
@@ -346,7 +285,7 @@ export async function handleDeleteById(
     await dbConnect();
 
     // Check if warehouse exists
-    const warehouse = await Warehouse.findById(_id);
+    const warehouse = await Warehouse.findById(id);
     if (!warehouse) {
       return NextResponse.json(
         { success: false, message: "Warehouse not found" },
@@ -358,7 +297,7 @@ export async function handleDeleteById(
     // This would require checking the Product model for references in stock array
     // For now, we'll allow deletion but you should implement this check
 
-    await Warehouse.findByIdAndDelete(_id);
+    await Warehouse.findByIdAndDelete(id);
 
     return NextResponse.json({
       success: true,

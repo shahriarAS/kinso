@@ -1,6 +1,5 @@
 export interface Category {
   _id: string;
-  categoryId: string;
   name: string;
   applyVAT: boolean;
   createdAt: string;
@@ -8,19 +7,16 @@ export interface Category {
 }
 
 export interface CategoryInput {
-  categoryId: string;
   name: string;
   applyVAT: boolean;
 }
 
 export interface CategoryUpdateInput {
-  categoryId?: string;
   name?: string;
   applyVAT?: boolean;
 }
 
 export interface CategoryFilters {
-  categoryId?: string;
   name?: string;
   applyVAT?: boolean;
   search?: string;

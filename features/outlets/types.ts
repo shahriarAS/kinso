@@ -1,6 +1,5 @@
 export interface Outlet {
   _id: string;
-  outletId: string;
   name: string;
   type: "Micro Outlet" | "Super Shop";
   createdAt: string;
@@ -8,19 +7,16 @@ export interface Outlet {
 }
 
 export interface OutletInput {
-  outletId: string;
   name: string;
   type: "Micro Outlet" | "Super Shop";
 }
 
 export interface OutletUpdateInput {
-  outletId?: string;
   name?: string;
   type?: "Micro Outlet" | "Super Shop";
 }
 
 export interface OutletFilters {
-  outletId?: string;
   name?: string;
   type?: "Micro Outlet" | "Super Shop";
   search?: string;
@@ -68,7 +64,6 @@ export interface OutletStats {
   lowStockProducts: number;
   outlets: Array<{
     _id: string;
-    outletId: string;
     name: string;
     type: "Micro Outlet" | "Super Shop";
     productCount: number;

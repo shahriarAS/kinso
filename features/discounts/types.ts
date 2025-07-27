@@ -1,7 +1,6 @@
 export interface Discount {
   _id: string;
-  discountId: string;
-  productId: string;
+  product: string;
   type: "General" | "Membership";
   amount: number;
   startDate: string;
@@ -11,8 +10,7 @@ export interface Discount {
 }
 
 export interface DiscountInput {
-  discountId: string;
-  productId: string;
+  product: string;
   type: "General" | "Membership";
   amount: number;
   startDate: string;
@@ -20,8 +18,7 @@ export interface DiscountInput {
 }
 
 export interface DiscountUpdateInput {
-  discountId?: string;
-  productId?: string;
+  product?: string;
   type?: "General" | "Membership";
   amount?: number;
   startDate?: string;
@@ -29,7 +26,7 @@ export interface DiscountUpdateInput {
 }
 
 export interface DiscountFilters {
-  productId?: string;
+  product?: string;
   type?: "General" | "Membership";
   startDate?: string;
   endDate?: string;
@@ -53,7 +50,7 @@ export interface DiscountsResponse {
 }
 
 export interface ActiveDiscount {
-  discountId: string;
+  _id: string;
   type: "General" | "Membership";
   amount: number;
   isActive: boolean;

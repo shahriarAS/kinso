@@ -1,23 +1,19 @@
 export interface Vendor {
   _id: string;
-  vendorId: string;
   name: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface VendorInput {
-  vendorId: string;
   name: string;
 }
 
 export interface VendorUpdateInput {
-  vendorId?: string;
   name?: string;
 }
 
 export interface VendorFilters {
-  vendorId?: string;
   name?: string;
   search?: string;
   sortBy?: string;
@@ -43,7 +39,7 @@ export interface VendorStats {
   totalVendors: number;
   vendorsWithBrands: number;
   topVendors: Array<{
-    vendorId: string;
+    _id: string;
     name: string;
     brandCount: number;
   }>;

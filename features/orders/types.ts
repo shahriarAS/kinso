@@ -18,7 +18,7 @@ export interface OrderItem {
 export interface Order {
   _id: string;
   orderNumber: string;
-  customerId: string;
+  customer: string;
   customerName: string;
   items: OrderItem[];
   totalAmount: number;
@@ -54,7 +54,7 @@ export interface OrderInput
 }
 
 export interface OrderUpdateInput {
-  customerId?: string;
+  customer?: string;
   customerName?: string;
   items?: {
     product: string;
@@ -71,7 +71,7 @@ export interface OrderUpdateInput {
 
 export interface OrderFilters {
   orderNumber?: string;
-  customerId?: string;
+  customer?: string;
   customerName?: string;
   warehouse?: string;
   startDate?: string;

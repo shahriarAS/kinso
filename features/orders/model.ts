@@ -16,7 +16,7 @@ export interface IPayment {
 
 export interface IOrder extends Document {
   orderNumber: string;
-  customerId: mongoose.Types.ObjectId;
+  customer: mongoose.Types.ObjectId;
   customerName: string;
   items: IOrderItem[];
   totalAmount: number;
@@ -78,7 +78,7 @@ const OrderSchema: Schema = new Schema(
       unique: true,
       trim: true,
     },
-    customerId: {
+    customer: {
       type: Schema.Types.ObjectId,
       ref: "Customer",
       required: true,
@@ -121,16 +121,16 @@ const OrderSchema: Schema = new Schema(
 );
 
 // Index for customer queries
-OrderSchema.index({ customerId: 1 });
+OrderSchema.index({ customer: 1 });
 
-// Add index for createdAt
+// Index for order number queries
+OrderSchema.index({ orderNumber: 1 });
+
+// Index for warehouse queries
+OrderSchema.index({ warehouse: 1 });
+
+// Index for date range queries
 OrderSchema.index({ createdAt: -1 });
-
-// Add index for items.product
-OrderSchema.index({ "items.product": 1 });
-
-// Add index for payments.method
-OrderSchema.index({ "payments.method": 1 });
 
 // Check if model already exists to prevent overwrite error
 export default mongoose.models.Order ||

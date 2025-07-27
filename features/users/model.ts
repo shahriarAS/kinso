@@ -4,7 +4,7 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
-  outletId?: string;
+  outlet?: mongoose.Types.ObjectId;
   role: "admin" | "manager" | "staff";
   avatar?: string;
   createdAt: Date;
@@ -46,14 +46,17 @@ const UserSchema: Schema = new Schema(
       type: Boolean,
       default: true,
     },
-    outletId: { type: String, ref: "Outlet", default: null },
+    outlet: { type: Schema.Types.ObjectId, ref: "Outlet", default: null },
   },
   {
     timestamps: true,
   },
 );
 
-// Index for role-based queries
+// Index for email queries
+UserSchema.index({ email: 1 });
+
+// Index for role queries
 UserSchema.index({ role: 1 });
 
 // Index for active users
@@ -63,5 +66,4 @@ UserSchema.index({ isActive: 1 });
 UserSchema.index({ createdAt: -1 });
 
 // Check if model already exists to prevent overwrite error
-export default mongoose.models.User ||
-  mongoose.model<IUser>("User", UserSchema);
+export default mongoose.models.User || mongoose.model<IUser>("User", UserSchema);

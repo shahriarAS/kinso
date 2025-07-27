@@ -1,11 +1,10 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IDemand extends Document {
-  demandId: string;
-  locationId: string;
+  location: mongoose.Types.ObjectId;
   locationType: string;
   products: {
-    productId: string;
+    product: mongoose.Types.ObjectId;
     quantity: number;
   }[];
   status: string;
@@ -15,12 +14,11 @@ export interface IDemand extends Document {
 
 const DemandSchema: Schema = new Schema(
   {
-    demandId: { type: String, required: true, unique: true, trim: true },
-    locationId: { type: String, required: true },
+    location: { type: Schema.Types.ObjectId, required: true },
     locationType: { type: String, required: true, enum: ["Warehouse", "Outlet"] },
     products: [
       {
-        productId: { type: String, required: true, ref: "Product" },
+        product: { type: Schema.Types.ObjectId, required: true, ref: "Product" },
         quantity: { type: Number, required: true, min: 1 },
       },
     ],
@@ -28,7 +26,6 @@ const DemandSchema: Schema = new Schema(
   },
   { timestamps: true },
 );
-DemandSchema.index({ demandId: 1 });
-DemandSchema.index({ locationId: 1, status: 1 });
+DemandSchema.index({ location: 1, status: 1 });
 
 export default mongoose.models.Demand || mongoose.model<IDemand>("Demand", DemandSchema);

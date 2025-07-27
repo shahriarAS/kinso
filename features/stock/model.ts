@@ -1,9 +1,8 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IStock extends Document {
-  stockId: string;
-  productId: string;
-  locationId: string;
+  product: mongoose.Types.ObjectId;
+  location: mongoose.Types.ObjectId;
   locationType: string;
   mrp: number;
   tp: number;
@@ -16,9 +15,8 @@ export interface IStock extends Document {
 
 const StockSchema: Schema = new Schema(
   {
-    stockId: { type: String, required: true, unique: true, trim: true },
-    productId: { type: String, required: true, ref: "Product" },
-    locationId: { type: String, required: true },
+    product: { type: Schema.Types.ObjectId, required: true, ref: "Product" },
+    location: { type: Schema.Types.ObjectId, required: true },
     locationType: { type: String, required: true, enum: ["Warehouse", "Outlet"] },
     mrp: { type: Number, required: true },
     tp: { type: Number, required: true },
@@ -28,7 +26,6 @@ const StockSchema: Schema = new Schema(
   },
   { timestamps: true },
 );
-StockSchema.index({ stockId: 1 });
-StockSchema.index({ productId: 1, locationId: 1, batchNumber: 1 });
+StockSchema.index({ product: 1, location: 1, batchNumber: 1 });
 
 export default mongoose.models.Stock || mongoose.model<IStock>("Stock", StockSchema);

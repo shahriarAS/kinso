@@ -7,7 +7,7 @@ export interface IStock extends Document {
   mrp: number;
   tp: number;
   expireDate: Date;
-  quantity: number;
+  unit: number;
   batchNumber: string;
   createdAt: Date;
   updatedAt: Date;
@@ -21,7 +21,7 @@ const StockSchema: Schema = new Schema(
     mrp: { type: Number, required: true },
     tp: { type: Number, required: true },
     expireDate: { type: Date, required: true },
-    quantity: { type: Number, required: true, min: 0 },
+    unit: { type: Number, required: true, min: 0 },
     batchNumber: { type: String, required: true, unique: true },
   },
   { timestamps: true },

@@ -8,6 +8,8 @@ export interface Customer {
   };
   membershipActive: boolean;
   totalPurchaseLastMonth: number;
+  totalOrders: number;
+  totalSpent: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -24,6 +26,8 @@ export interface CustomerUpdateInput {
   };
   membershipActive?: boolean;
   totalPurchaseLastMonth?: number;
+  totalOrders?: number;
+  totalSpent?: number;
 }
 
 export interface CustomerFilters {

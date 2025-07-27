@@ -67,7 +67,7 @@ export interface ProductSearchResult {
     _id: string;
     warehouse: string;
     unit: number;
-    dp?: number;
+    tp: number;
     mrp: number;
     expireDate: string;
   }[];

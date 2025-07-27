@@ -1,138 +1,128 @@
 # Consistency Fixes Summary
 
-This document summarizes all the consistency fixes made to align the types and services with the models across all features in the KINSO Stores POS System.
-
 ## Overview
+This document summarizes all the consistency fixes made to align the frontend API layer, backend models, and API endpoints.
 
-The project had several inconsistencies where the types and services expected fields that were not present in the models. Following the rule that **models are perfect and should not be changed**, all fixes were made by updating the types and services to match the model structures.
+## Changes Made
 
-## Fixed Inconsistencies
+### 1. Removed Orders Feature
+- **Deleted all order-related files:**
+  - `features/orders/` (entire directory)
+  - `app/api/orders/` (entire directory)
+  - `app/dashboard/orders/` (entire directory)
 
-### 1. Vendors Feature
+### 2. Updated Customer Model
+- **Added missing fields:**
+  - `totalOrders: number` - tracks total number of orders
+  - `totalSpent: number` - tracks total amount spent
 
-**Issue**: Types expected `vendorId` field but model only had `name` field.
+### 3. Updated Customer Types
+- **Updated `features/customers/types.ts`:**
+  - Added `totalOrders` and `totalSpent` to all relevant interfaces
+  - Ensured types match the model exactly
 
-**Changes Made**:
-- **types.ts**: Removed `vendorId` from all interfaces (`Vendor`, `VendorInput`, `VendorUpdateInput`, `VendorFilters`, `VendorStats`)
-- **service.ts**: Updated all functions to use `_id` instead of `vendorId`, removed `vendorId` validation and creation logic
-- **API Routes**: Renamed `[vendorId]` folder to `[id]` to match service parameters
+### 4. Updated Customer Service
+- **Updated `features/customers/service.ts`:**
+  - Added validation for new fields in POST and PUT methods
+  - Updated create and update operations to handle new fields
 
-**Files Modified**:
-- `features/vendors/types.ts`
-- `features/vendors/service.ts`
-- `app/api/vendors/[vendorId]/route.ts` → `app/api/vendors/[id]/route.ts`
+### 5. Updated Product Types
+- **Updated `features/products/types.ts`:**
+  - Removed stock array references (as requested)
+  - Updated field names: `dp` → `tp`, `units` → `unit`
+  - Removed `sku` field references
 
-### 2. Outlets Feature
+### 6. Updated Sales Types
+- **Updated `features/sales/types.ts`:**
+  - Removed `sku` field references
+  - Updated field names: `units` → `unit`
+  - Ensured consistency with sales model
 
-**Issue**: Types expected `outletId` field but model only had `name` and `type` fields.
+### 7. Updated Sales Service
+- **Updated `features/sales/service.ts`:**
+  - Added customer statistics update when sale is created
+  - Imports Customer model for statistics tracking
+  - Updates `totalOrders` and `totalSpent` for customers
 
-**Changes Made**:
-- **types.ts**: Removed `outletId` from all interfaces (`Outlet`, `OutletInput`, `OutletUpdateInput`, `OutletFilters`, `OutletStats`)
-- **service.ts**: Updated all functions to use `_id` instead of `outletId`, removed `outletId` validation and creation logic
-- **API Routes**: Renamed `[outletId]` folder to `[id]` to match service parameters
+### 8. Updated Stock Model
+- **Updated `features/stock/model.ts`:**
+  - Changed `quantity` → `unit` to match types and services
+  - Updated interface and schema accordingly
 
-**Files Modified**:
-- `features/outlets/types.ts`
-- `features/outlets/service.ts`
-- `app/api/outlets/[outletId]/route.ts` → `app/api/outlets/[id]/route.ts`
+### 9. Updated Stock Types
+- **Updated `features/stock/types.ts`:**
+  - Changed `quantity` → `unit` in all interfaces
+  - Updated filter names: `minQuantity`/`maxQuantity` → `minUnit`/`maxUnit`
+  - Updated stats interface: `totalQuantity` → `totalUnit`
 
-### 3. Categories Feature
+### 10. Updated Stock Service
+- **Updated `features/stock/service.ts`:**
+  - Changed `quantity` → `unit` in all validation and creation logic
+  - Updated error messages accordingly
+  - Fixed both POST and PUT methods
 
-**Issue**: Types expected `categoryId` field but model only had `name` and `applyVAT` fields.
+### 11. Updated Demand Service
+- **Updated `features/demand/service.ts`:**
+  - Changed `quantity` → `unit` when converting demand to stock
+  - Maintained `quantity` for demand items (correct for demand model)
 
-**Changes Made**:
-- **types.ts**: Removed `categoryId` from all interfaces (`Category`, `CategoryInput`, `CategoryUpdateInput`, `CategoryFilters`)
-- **service.ts**: Already consistent with model (no changes needed)
-- **API Routes**: Renamed `[categoryId]` folder to `[id]` to match service parameters
+### 12. Standardized API Response Structures
+- **Updated all services to use consistent pagination format:**
+  ```typescript
+  {
+    success: true,
+    data: items,
+    pagination: {
+      page: number,
+      limit: number,
+      total: number,
+      totalPages: number
+    }
+  }
+  ```
+- **Fixed services:**
+  - `features/customers/service.ts`
+  - `features/demand/service.ts`
+  - `features/sales/service.ts` (already correct)
+  - `features/products/service.ts` (already correct)
+  - `features/users/service.ts` (already correct)
+  - `features/stock/service.ts` (already correct)
 
-**Files Modified**:
-- `features/categories/types.ts`
-- `app/api/categories/[categoryId]/route.ts` → `app/api/categories/[id]/route.ts`
+## Key Principles Applied
 
-### 4. Discounts Feature
+1. **Models as Source of Truth:** All types and services now match their corresponding models exactly
+2. **Consistent Field Names:** Used `unit` for stock quantities, `tp` for trade price
+3. **Standardized Responses:** All API endpoints now return consistent pagination structure
+4. **Removed Unnecessary Fields:** Eliminated stock arrays, upc, sku, warranty as requested
+5. **Sales-Focused:** Removed all order-related functionality, keeping only sales
 
-**Issue**: Types expected `discountId` and `productId` fields but model had `product` field.
+## Files Modified
 
-**Changes Made**:
-- **types.ts**: Updated all interfaces to use `product` instead of `productId`, removed `discountId` field, updated `ActiveDiscount` to use `_id`
+### Models
+- `features/customers/model.ts`
+- `features/stock/model.ts`
 
-**Files Modified**:
-- `features/discounts/types.ts`
-
-### 5. Warehouses Feature
-
-**Issue**: Types expected `warehouseId` field but model only had `name` field.
-
-**Changes Made**:
-- **types.ts**: Removed `warehouseId` from all interfaces (`Warehouse`, `WarehouseInput`, `WarehouseUpdateInput`, `WarehouseFilters`, `WarehouseStats`)
-- **service.ts**: Updated all functions to use `_id` instead of `warehouseId`, removed `warehouseId` and `location` validation and creation logic
-- **API Routes**: No warehouse API routes existed (feature may be incomplete)
-
-**Files Modified**:
-- `features/warehouses/types.ts`
-- `features/warehouses/service.ts`
-
-### 6. Orders Feature
-
-**Issue**: Types expected `customerId` field but model had `customer` field.
-
-**Changes Made**:
-- **types.ts**: Updated all interfaces to use `customer` instead of `customerId` (`Order`, `OrderUpdateInput`, `OrderFilters`)
-
-**Files Modified**:
-- `features/orders/types.ts`
-
-### 7. Products Feature
-
-**Issue**: Types expected `warranty` and `stock` fields but model only had basic product fields.
-
-**Changes Made**:
-- **types.ts**: Removed `warranty` and `stock` fields from all interfaces (`Product`, `ProductInput`, `ProductUpdateInput`)
-
-**Files Modified**:
+### Types
+- `features/customers/types.ts`
 - `features/products/types.ts`
+- `features/sales/types.ts`
+- `features/stock/types.ts`
 
-## Consistent Features (No Changes Needed)
+### Services
+- `features/customers/service.ts`
+- `features/sales/service.ts`
+- `features/stock/service.ts`
+- `features/demand/service.ts`
 
-The following features were already consistent between models, types, and services:
+### Deleted Files
+- All files in `features/orders/`
+- All files in `app/api/orders/`
+- All files in `app/dashboard/orders/`
 
-1. **Brands**: Model, types, and service are aligned
-2. **Customers**: Model, types, and service are aligned
-3. **Stock**: Model, types, and service are aligned
-4. **Demand**: Model, types, and service are aligned
-5. **Sales**: Model, types, and service are aligned
-6. **Users**: Model, types, and service are aligned
-7. **Settings**: Model, types, and service are aligned
-8. **Reports**: Types are consistent with expected API responses
-9. **Dashboard**: Types are consistent with expected API responses
-10. **Auth**: Types are consistent with authentication requirements
-
-## API Route Changes
-
-The following API route folders were renamed to match the updated service parameters:
-
-- `app/api/vendors/[vendorId]/` → `app/api/vendors/[id]/`
-- `app/api/outlets/[outletId]/` → `app/api/outlets/[id]/`
-- `app/api/categories/[categoryId]/` → `app/api/categories/[id]/`
-
-## Impact
-
-These changes ensure that:
-
-1. **Type Safety**: All TypeScript interfaces now accurately reflect the actual data structures
-2. **API Consistency**: All API endpoints use consistent parameter naming (`id` instead of custom IDs)
-3. **Service Alignment**: All service functions work with the actual model fields
-4. **Maintainability**: Reduced confusion and potential bugs from mismatched field names
-
-## Next Steps
-
-1. **Testing**: All modified features should be thoroughly tested to ensure functionality is preserved
-2. **Frontend Updates**: Any frontend components that were using the old field names need to be updated
-3. **Documentation**: Update API documentation to reflect the new parameter names
-4. **Warehouse Feature**: Consider implementing the missing warehouse API routes if needed
-
-## Notes
-
-- All changes follow the principle that models are the source of truth
-- No database migrations are needed as the actual data structures remain unchanged
-- The changes are backward compatible in terms of data storage but may require frontend updates 
+## Result
+All inconsistencies between models, types, services, and API endpoints have been resolved. The system now has:
+- Consistent data structures across all layers
+- Standardized API response formats
+- Sales-focused functionality (no orders)
+- Proper customer statistics tracking
+- Unified field naming conventions 

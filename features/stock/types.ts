@@ -11,7 +11,7 @@ export interface StockInput {
   mrp: number;
   tp: number;
   expireDate: string;
-  quantity: number;
+  unit: number;
   batchNumber: string;
 }
 
@@ -22,7 +22,7 @@ export interface StockUpdateInput {
   mrp?: number;
   tp?: number;
   expireDate?: string;
-  quantity?: number;
+  unit?: number;
   batchNumber?: string;
 }
 
@@ -33,8 +33,8 @@ export interface StockFilters {
   locationType?: "Warehouse" | "Outlet";
   product?: string;
   batchNumber?: string;
-  minQuantity?: number;
-  maxQuantity?: number;
+  minUnit?: number;
+  maxUnit?: number;
   minExpireDate?: string;
   maxExpireDate?: string;
   search?: string;
@@ -83,7 +83,7 @@ export interface StockStats {
   stockByProduct: Array<{
     product: string;
     productName: string;
-    totalQuantity: number;
+    totalUnit: number;
     totalValue: number;
   }>;
 }
@@ -99,7 +99,7 @@ export interface StockMovement {
   stock: string;
   fromLocation?: string;
   toLocation: string;
-  quantity: number;
+  unit: number;
   movementType: "IN" | "OUT" | "TRANSFER";
   reason: string;
   createdBy: string;
@@ -110,7 +110,7 @@ export interface StockMovementInput {
   stock: string;
   fromLocation?: string;
   toLocation: string;
-  quantity: number;
+  unit: number;
   movementType: "IN" | "OUT" | "TRANSFER";
   reason: string;
 } 

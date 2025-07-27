@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/database";
 import Sale from "./model";
+import Customer from "@/features/customers/model";
 import { authorizeRequest } from "@/lib/auth";
 import { AuthenticatedRequest } from "@/features/auth";
 
@@ -93,6 +94,16 @@ export async function handlePost(request: NextRequest) {
       notes: notes || "",
       createdBy: userId,
     });
+
+    // Update customer statistics if customer exists
+    if (customer) {
+      await Customer.findByIdAndUpdate(customer, {
+        $inc: {
+          totalOrders: 1,
+          totalSpent: totalAmount,
+        },
+      });
+    }
 
     return NextResponse.json(
       {
@@ -204,10 +215,12 @@ export async function handleGet(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: sales,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     console.error("Error fetching sales:", error);

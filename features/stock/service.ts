@@ -65,6 +65,7 @@ export async function handleGet(request: NextRequest) {
         page,
         limit,
         total,
+        totalPages: Math.ceil(total / limit),
       },
     });
   } catch (error) {
@@ -96,7 +97,7 @@ export async function handlePost(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { product, location, locationType, mrp, tp, expireDate, quantity, batchNumber } = body;
+    const { product, location, locationType, mrp, tp, expireDate, unit, batchNumber } = body;
 
     // Validation
     if (!product) {
@@ -141,9 +142,9 @@ export async function handlePost(request: NextRequest) {
       );
     }
 
-    if (!quantity || quantity <= 0) {
+    if (!unit || unit <= 0) {
       return NextResponse.json(
-        { success: false, message: "Valid quantity is required" },
+        { success: false, message: "Valid unit is required" },
         { status: 400 },
       );
     }
@@ -172,7 +173,7 @@ export async function handlePost(request: NextRequest) {
       mrp,
       tp,
       expireDate: new Date(expireDate),
-      quantity,
+      unit,
       batchNumber,
     };
 
@@ -260,7 +261,7 @@ export async function handlePut(request: NextRequest, { params }: { params: Prom
 
     const { id } = await params;
     const body = await request.json();
-    const { product, location, locationType, mrp, tp, expireDate, quantity, batchNumber } = body;
+    const { product, location, locationType, mrp, tp, expireDate, unit, batchNumber } = body;
 
     // Find existing stock
     const existingStock = await Stock.findById(id);
@@ -314,9 +315,9 @@ export async function handlePut(request: NextRequest, { params }: { params: Prom
       );
     }
 
-    if (!quantity || quantity <= 0) {
+    if (!unit || unit <= 0) {
       return NextResponse.json(
-        { success: false, message: "Valid quantity is required" },
+        { success: false, message: "Valid unit is required" },
         { status: 400 },
       );
     }
@@ -347,7 +348,7 @@ export async function handlePut(request: NextRequest, { params }: { params: Prom
         mrp,
         tp,
         expireDate: new Date(expireDate),
-        quantity,
+        unit,
         batchNumber,
       },
       { new: true }

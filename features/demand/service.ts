@@ -150,6 +150,7 @@ export async function handleGet(request: NextRequest) {
         page,
         limit,
         total,
+        totalPages: Math.ceil(total / limit),
       },
     });
   } catch (error) {
@@ -430,7 +431,7 @@ export async function handleConvertToStock(
         mrp,
         tp,
         expireDate: new Date(expireDate),
-        quantity: product.quantity,
+        unit: product.quantity,
         batchNumber: batchNumber.trim(),
       });
       stockEntries.push(stockEntry);

@@ -9,6 +9,8 @@ export interface ICustomer extends Document {
   };
   membershipActive: boolean;
   totalPurchaseLastMonth: number;
+  totalOrders: number;
+  totalSpent: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -23,6 +25,8 @@ const CustomerSchema: Schema = new Schema(
     },
     membershipActive: { type: Boolean, default: false },
     totalPurchaseLastMonth: { type: Number, default: 0 },
+    totalOrders: { type: Number, default: 0 },
+    totalSpent: { type: Number, default: 0 },
   },
   { timestamps: true },
 );

@@ -92,10 +92,9 @@ export interface ProductSearchResult {
   _id: string;
   name: string;
   barcode: string;
-  sku: string;
   stock: {
     _id: string;
-    units: number;
+    unit: number;
     mrp: number;
     tp: number;
     expireDate: string;

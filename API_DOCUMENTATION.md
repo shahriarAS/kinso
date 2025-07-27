@@ -2,6 +2,51 @@
 
 This document provides comprehensive documentation for all API routes available in the EZ Enterprise Management System.
 
+## Recent Critical Fixes (Latest Update)
+
+### 🔴 **Critical Inconsistencies Fixed**
+
+#### 1. **Payment Method Enum Mismatch - RESOLVED**
+- **Issue**: Order model enum was missing "CARD" payment method
+- **Fix**: Updated Order model enum to include "CARD": `["CASH", "BKASH", "ROCKET", "NAGAD", "BANK", "CARD"]`
+- **Impact**: Orders API now accepts "CARD" payments consistently with Sales API
+
+#### 2. **Order Model Field Inconsistencies - RESOLVED**
+- **Issue**: Model defined `customer` field but service used `customerId`
+- **Fix**: Standardized to use `customerId` throughout Order model, types, and service
+- **Impact**: Consistent field naming across all Order-related operations
+
+#### 3. **Product Stock Structure Mismatch - RESOLVED**
+- **Issue**: Product types expected `stock` array but model didn't have it
+- **Fix**: Added `stock` field to Product model with warehouse-based structure
+- **Impact**: Stock management now works correctly with product inventory
+
+#### 4. **Response Structure Inconsistencies - RESOLVED**
+- **Issue**: Some APIs missing `totalPages` in pagination response
+- **Fix**: Standardized all pagination responses to include `totalPages`
+- **Impact**: Consistent pagination structure across all APIs
+
+### 🟡 **Moderate Inconsistencies Fixed**
+
+#### 5. **Stock API Response Structure - RESOLVED**
+- **Issue**: Stock service missing `totalPages` in pagination
+- **Fix**: Added `totalPages: Math.ceil(total / limit)` to stock pagination
+- **Impact**: Consistent pagination response format
+
+#### 6. **Type Definition Updates - RESOLVED**
+- **Issue**: Order types using `customer` instead of `customerId`
+- **Fix**: Updated all Order type definitions to use `customerId`
+- **Impact**: Type safety and consistency across frontend and backend
+
+### ✅ **All Critical and Moderate Issues Resolved**
+
+The system now has:
+- ✅ Consistent payment method enums across all features
+- ✅ Standardized field naming (`customerId` vs `customer`)
+- ✅ Complete product stock management structure
+- ✅ Uniform pagination response format
+- ✅ Type-safe interfaces throughout the application
+
 ## Table of Contents
 
 - [Authentication](#authentication)
@@ -322,115 +367,4 @@ This document provides comprehensive documentation for all API routes available 
 
 - **GET** `/api/dashboard/sales-analytics`
 - **Query Parameters**: `period`, `startDate`, `endDate`
-- **Response**: `{ dailySales, monthlySales, topCategories }`
-
-### Get Inventory Alerts
-
-- **GET** `/api/dashboard/inventory-alerts`
-- **Response**: `{ lowStockProducts, outOfStockProducts, expiringProducts }`
-
-## Usage Examples
-
-### Using API Hooks in Components
-
-```tsx
-import {
-  useGetCustomersQuery,
-  useCreateCustomerMutation,
-} from "@/hooks/useApi";
-
-function CustomerList() {
-  const { data, isLoading, error } = useGetCustomersQuery({
-    page: 1,
-    limit: 10,
-    search: "",
-  });
-  const [createCustomer, { isLoading: isCreating }] =
-    useCreateCustomerMutation();
-
-  const handleCreate = async (customerData) => {
-    try {
-      await createCustomer(customerData).unwrap();
-      // Handle success
-    } catch (error) {
-      // Handle error
-    }
-  };
-
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-
-  return (
-    <div>
-      {data?.data.map((customer) => (
-        <div key={customer.id}>{customer.name}</div>
-      ))}
-    </div>
-  );
-}
-```
-
-### Using API Types
-
-```tsx
-import type { Customer, CustomerInput } from "@/types/api";
-
-const customer: Customer = {
-  id: "1",
-  name: "John Doe",
-  email: "john@example.com",
-  phone: "+1234567890",
-  status: "active",
-  totalOrders: 5,
-  totalSpent: 1500,
-  createdAt: "2024-01-01T00:00:00Z",
-  updatedAt: "2024-01-01T00:00:00Z",
-};
-
-const newCustomer: CustomerInput = {
-  name: "Jane Doe",
-  email: "jane@example.com",
-  phone: "+1234567891",
-  status: "active",
-};
-```
-
-## Error Handling
-
-All API endpoints return consistent error responses:
-
-```json
-{
-  "success": false,
-  "message": "Error description"
-}
-```
-
-Common HTTP status codes:
-
-- `200` - Success
-- `201` - Created
-- `400` - Bad Request
-- `401` - Unauthorized
-- `403` - Forbidden
-- `404` - Not Found
-- `409` - Conflict
-- `500` - Internal Server Error
-
-## Authentication
-
-Most endpoints require authentication. Include the session cookie in requests. The auth middleware will handle token validation and user authorization based on roles.
-
-## Pagination
-
-List endpoints support pagination with the following parameters:
-
-- `page` - Page number (default: 1)
-- `limit` - Items per page (default: 10)
-- `search` - Search term
-- `sortBy` - Field to sort by
-- `sortOrder` - Sort direction ('asc' or 'desc')
-
-## Caching
-
-All API responses are automatically cached using RTK Query. Cache invalidation is handled automatically when mutations are performed. -->
+- **Response**: `

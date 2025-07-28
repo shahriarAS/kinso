@@ -1,6 +1,7 @@
 "use client";
 import React, { useCallback } from "react";
-import { GenericFilters, type FilterField } from "@/components/common";
+import { Input, Button } from "antd";
+import { SearchOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons";
 
 interface WarehouseFilters {
   search?: string;
@@ -18,52 +19,65 @@ export default function WarehouseFilters({
   onSearchChange,
   onPageChange,
 }: Props) {
-  // Define filter fields using the generic interface
-  const fields: FilterField[] = [
-    {
-      name: "search",
-      label: "Search",
-      type: "input",
-      placeholder: "Search warehouses...",
-      debounce: 500,
-    },
-    {
-      name: "location",
-      label: "Location",
-      type: "input",
-      placeholder: "Location",
-      debounce: 500,
-    },
-  ];
-
-  const handleFiltersChange = useCallback(
-    (filters: WarehouseFilters) => {
-      // Reset to first page when filters change
-      const searchChanged =
-        filters.search !== undefined && filters.search !== searchTerm;
+  const handleSearch = useCallback(
+    (value: string) => {
+      const searchChanged = value !== searchTerm;
       if (searchChanged) {
         onPageChange(1);
       }
-
-      // Update search value
-      if (filters.search !== undefined) {
-        onSearchChange(filters.search);
-      }
+      onSearchChange(value);
     },
-    [onPageChange, onSearchChange],
+    [onPageChange, onSearchChange, searchTerm],
   );
 
-  const initialValues = {
-    search: searchTerm,
-  };
+  const handleReset = useCallback(() => {
+    onSearchChange("");
+    onPageChange(1);
+  }, [onSearchChange, onPageChange]);
 
   return (
-    <GenericFilters
-      fields={fields}
-      initialValues={initialValues}
-      onFiltersChange={handleFiltersChange}
-      gridCols={4}
-      debounceDelay={500}
-    />
+    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+          <FilterOutlined className="mr-2" />
+          Warehouse Filters
+        </h3>
+        <Button
+          icon={<ReloadOutlined />}
+          onClick={handleReset}
+          className="flex items-center"
+        >
+          Reset
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Search
+          </label>
+          <Input
+            placeholder="Search warehouses..."
+            prefix={<SearchOutlined />}
+            size="large"
+            allowClear
+            value={searchTerm}
+            onChange={(e) => handleSearch(e.target.value)}
+            onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Location
+          </label>
+          <Input
+            placeholder="Location"
+            size="large"
+            allowClear
+          />
+        </div>
+      </div>
+    </div>
   );
 }

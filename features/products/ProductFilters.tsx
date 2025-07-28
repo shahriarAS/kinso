@@ -1,6 +1,6 @@
-"use client";;
-import { Input, Select } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+"use client";
+import { Input, Select, Button } from "antd";
+import { SearchOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useGetAllCategoriesQuery } from "@/features/categories/api";
 import { useGetAllBrandsQuery } from "../brands";
 import { useGetAllVendorsQuery } from "../vendors";
@@ -22,6 +22,7 @@ interface Props {
   onMinPriceChange: (value: string) => void;
   onMaxPriceChange: (value: string) => void;
   onPageChange: (page: number) => void;
+  onReset?: () => void;
 }
 
 export default function ProductFilters({
@@ -34,6 +35,7 @@ export default function ProductFilters({
   onBrandChange,
   onVendorChange,
   onPageChange,
+  onReset,
 }: Props) {
   // API hooks
   const { data: categoriesData } = useGetAllCategoriesQuery();
@@ -59,61 +61,107 @@ export default function ProductFilters({
     onVendorChange(value);
     onPageChange(1);
   };
+
+  const handleReset = () => {
+    onSearchChange("");
+    onCategoryChange("");
+    onBrandChange("");
+    onVendorChange("");
+    onPageChange(1);
+    if (onReset) onReset();
+  };
+
   return (
-    <div className="flex justify-between items-center space-x-4">
-      <Search
-        placeholder="Search products..."
-        allowClear
-        enterButton={<SearchOutlined />}
-        size="large"
-        onSearch={handleSearch}
-        onChange={(e) => handleSearch(e.target.value)}
-        value={searchTerm}
-        className="flex-1 max-w-md"
-      />
-      <div className="flex space-x-4">
-        <Select
-          placeholder="Filter by category"
-          allowClear
-          size="large"
-          style={{ width: 200 }}
-          onChange={handleCategoryFilter}
-          value={categoryFilter || undefined}
+    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+          <FilterOutlined className="mr-2" />
+          Product Filters
+        </h3>
+        <Button
+          icon={<ReloadOutlined />}
+          onClick={handleReset}
+          className="flex items-center"
         >
-          {categoriesData?.data?.map((category) => (
-            <Option key={category._id} value={category._id}>
-              {category.name}
-            </Option>
-          ))}
-        </Select>
-        <Select
-          placeholder="Filter by brand"
-          allowClear
-          size="large"
-          style={{ width: 200 }}
-          onChange={handleBrandFilter}
-          value={brandFilter || undefined}
-        >
-          {brandsData?.data?.map((brand) => (
-            <Option key={brand._id} value={brand._id}>
-              {brand.name}
-            </Option>
-          ))}
-        </Select>
-        <Select
-          placeholder="Filter by vendor"
-          allowClear
-          size="large"
-          style={{ width: 200 }}
-          onChange={handleVendorFilter}
-          value={vendorFilter || undefined}
-        >
-          {vendorsData?.data?.map((vendor) => (
-            <Option key={vendor._id} value={vendor._id}>
-              {vendor.name}
-            </Option>
-          ))}
-        </Select>
+          Reset
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Search
+          </label>
+          <Input
+            placeholder="Search products..."
+            prefix={<SearchOutlined />}
+            size="large"
+            allowClear
+            value={searchTerm}
+            onChange={(e) => handleSearch(e.target.value)}
+            onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Category
+          </label>
+          <Select
+            placeholder="Filter by category"
+            allowClear
+            size="large"
+            style={{ width: "100%" }}
+            onChange={handleCategoryFilter}
+            value={categoryFilter || undefined}
+          >
+            {categoriesData?.data?.map((category) => (
+              <Option key={category._id} value={category._id}>
+                {category.name}
+              </Option>
+            ))}
+          </Select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Brand
+          </label>
+          <Select
+            placeholder="Filter by brand"
+            allowClear
+            size="large"
+            style={{ width: "100%" }}
+            onChange={handleBrandFilter}
+            value={brandFilter || undefined}
+          >
+            {brandsData?.data?.map((brand) => (
+              <Option key={brand._id} value={brand._id}>
+                {brand.name}
+              </Option>
+            ))}
+          </Select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Vendor
+          </label>
+          <Select
+            placeholder="Filter by vendor"
+            allowClear
+            size="large"
+            style={{ width: "100%" }}
+            onChange={handleVendorFilter}
+            value={vendorFilter || undefined}
+          >
+            {vendorsData?.data?.map((vendor) => (
+              <Option key={vendor._id} value={vendor._id}>
+                {vendor.name}
+              </Option>
+            ))}
+          </Select>
+        </div>
       </div>
     </div>
   );

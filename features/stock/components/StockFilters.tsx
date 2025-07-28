@@ -80,6 +80,7 @@ const StockFilters: React.FC<StockFiltersProps> = ({
           <Input
             placeholder="Search products..."
             prefix={<SearchOutlined />}
+            size="large"
             allowClear
           />
         </Form.Item>
@@ -89,6 +90,7 @@ const StockFilters: React.FC<StockFiltersProps> = ({
             placeholder="Select product"
             allowClear
             showSearch
+            size="large"
             optionFilterProp="children"
             loading={!productsData}
           >
@@ -105,6 +107,7 @@ const StockFilters: React.FC<StockFiltersProps> = ({
             placeholder="Select location"
             allowClear
             showSearch
+            size="large"
             optionFilterProp="children"
           >
             <Select.OptGroup label="Outlets">
@@ -128,13 +131,13 @@ const StockFilters: React.FC<StockFiltersProps> = ({
         </Form.Item>
 
         <Form.Item name="locationType" label="Location Type">
-          <Select placeholder="Select location type" allowClear>
+          <Select placeholder="Select location type" allowClear size="large">
             <Select.Option value="Warehouse">Warehouse</Select.Option>
             <Select.Option value="Outlet">Outlet</Select.Option>
           </Select>
         </Form.Item>
 
-        <div className="flex items-end space-x-4">
+        {/* <div className="flex items-end space-x-4">
           <Form.Item name="lowStock" valuePropName="checked" className="mb-0">
             <Checkbox>Low Stock Only</Checkbox>
           </Form.Item>
@@ -146,7 +149,7 @@ const StockFilters: React.FC<StockFiltersProps> = ({
           >
             <Checkbox>Expiring Soon</Checkbox>
           </Form.Item>
-        </div>
+        </div> */}
       </Form>
     </div>
   );

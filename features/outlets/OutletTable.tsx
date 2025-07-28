@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button, Input, Select } from "antd";
-import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { PlusOutlined, SearchOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useGetOutletsQuery, useDeleteOutletMutation } from "./api";
 import { Outlet } from "./types";
 import { useNotification } from "@/hooks/useNotification";
@@ -48,6 +48,12 @@ const OutletTable: React.FC = () => {
 
   const handleTypeFilter = (value: string) => {
     setSelectedTypeId(value);
+    setCurrentPage(1);
+  };
+
+  const handleReset = () => {
+    setSearchText("");
+    setSelectedTypeId("");
     setCurrentPage(1);
   };
 
@@ -136,30 +142,57 @@ const OutletTable: React.FC = () => {
         </Button>
       </div>
 
-      <div className="flex justify-between items-center space-x-4">
-        <Search
-          placeholder="Search outlets..."
-          allowClear
-          enterButton={<SearchOutlined />}
-          size="large"
-          onSearch={handleSearch}
-          onChange={e => handleSearch(e.target.value)}
-          value={searchText}
-          className="flex-1 max-w-md"
-        />
-        <Select
-          placeholder="Filter by type"
-          allowClear
-          style={{ width: 200 }}
-          onChange={handleTypeFilter}
-          value={selectedTypeId || undefined}
-        >
-          {OUTLET_TYPES.map((type) => (
-            <Option key={type} value={type}>
-              {type}
-            </Option>
-          ))}
-        </Select>
+      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+            <FilterOutlined className="mr-2" />
+            Outlet Filters
+          </h3>
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={handleReset}
+            className="flex items-center"
+          >
+            Reset
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Search
+            </label>
+            <Input
+              placeholder="Search outlets..."
+              prefix={<SearchOutlined />}
+              size="large"
+              allowClear
+              value={searchText}
+              onChange={e => handleSearch(e.target.value)}
+              onPressEnter={e => handleSearch((e.target as HTMLInputElement).value)}
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Type
+            </label>
+            <Select
+              placeholder="Filter by type"
+              allowClear
+              size="large"
+              style={{ width: "100%" }}
+              onChange={handleTypeFilter}
+              value={selectedTypeId || undefined}
+            >
+              {OUTLET_TYPES.map((type) => (
+                <Option key={type} value={type}>
+                  {type}
+                </Option>
+              ))}
+            </Select>
+          </div>
+        </div>
       </div>
 
       <GenericTable<Outlet>

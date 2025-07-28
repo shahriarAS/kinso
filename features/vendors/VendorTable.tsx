@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button, Input } from "antd";
-import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { PlusOutlined, SearchOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useGetVendorsQuery, useDeleteVendorMutation } from "./api";
 import { Vendor } from "./types";
 import { useNotification } from "@/hooks/useNotification";
@@ -39,6 +39,11 @@ const VendorTable: React.FC = () => {
 
   const handleSearch = (value: string) => {
     setSearchText(value);
+    setCurrentPage(1);
+  };
+
+  const handleReset = () => {
+    setSearchText("");
     setCurrentPage(1);
   };
 
@@ -121,17 +126,37 @@ const VendorTable: React.FC = () => {
         </Button>
       </div>
 
-      <div className="flex justify-between items-center">
-        <Search
-          placeholder="Search vendors..."
-          allowClear
-          enterButton={<SearchOutlined />}
-          size="large"
-          onSearch={handleSearch}
-          onChange={e => handleSearch(e.target.value)}
-          value={searchText}
-          className="max-w-md"
-        />
+      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+            <FilterOutlined className="mr-2" />
+            Vendor Filters
+          </h3>
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={handleReset}
+            className="flex items-center"
+          >
+            Reset
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Search
+            </label>
+            <Input
+              placeholder="Search vendors..."
+              prefix={<SearchOutlined />}
+              size="large"
+              allowClear
+              value={searchText}
+              onChange={e => handleSearch(e.target.value)}
+              onPressEnter={e => handleSearch((e.target as HTMLInputElement).value)}
+            />
+          </div>
+        </div>
       </div>
 
       <GenericTable<Vendor>

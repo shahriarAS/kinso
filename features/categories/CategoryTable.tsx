@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button, Input, Select } from "antd";
-import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { PlusOutlined, SearchOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useGetCategoriesQuery, useDeleteCategoryMutation } from "./api";
 import { Category } from "./types";
 import { useNotification } from "@/hooks/useNotification";
@@ -47,6 +47,12 @@ const CategoryTable: React.FC = () => {
 
   const handleApplyVATFilter = (value: boolean) => {
     setSelectedApplyVAT(value);
+    setCurrentPage(1);
+  };
+
+  const handleReset = () => {
+    setSearchText("");
+    setSelectedApplyVAT(undefined);
     setCurrentPage(1);
   };
 
@@ -136,30 +142,54 @@ const CategoryTable: React.FC = () => {
         </Button>
       </div>
 
-      <div className="flex justify-between items-center space-x-4">
-        <Search
-          placeholder="Search categories..."
-          allowClear
-          enterButton={<SearchOutlined />}
-          size="large"
-          onSearch={handleSearch}
-          onChange={e => handleSearch(e.target.value)}
-          value={searchText}
-          className="flex-1 max-w-md"
-        />
-        <Select
-          placeholder="Filter by apply VAT"
-          allowClear
-          style={{ width: 200 }}
-          onChange={handleApplyVATFilter}
-          value={selectedApplyVAT || undefined}
-        >
-          {["Yes", "No"].map((applyVAT) => (
-            <Option key={applyVAT} value={applyVAT === "Yes"}>
-              {applyVAT === "Yes" ? "Yes" : "No"}
-            </Option>
-          ))}
-        </Select>
+      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+            <FilterOutlined className="mr-2" />
+            Category Filters
+          </h3>
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={handleReset}
+            className="flex items-center"
+          >
+            Reset
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Search
+            </label>
+            <Input
+              placeholder="Search categories..."
+              prefix={<SearchOutlined />}
+              size="large"
+              allowClear
+              value={searchText}
+              onChange={e => handleSearch(e.target.value)}
+              onPressEnter={e => handleSearch((e.target as HTMLInputElement).value)}
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Apply VAT
+            </label>
+            <Select
+              placeholder="Filter by apply VAT"
+              allowClear
+              size="large"
+              style={{ width: "100%" }}
+              onChange={handleApplyVATFilter}
+              value={selectedApplyVAT}
+            >
+              <Option value={true}>Yes</Option>
+              <Option value={false}>No</Option>
+            </Select>
+          </div>
+        </div>
       </div>
 
       <GenericTable<Category>

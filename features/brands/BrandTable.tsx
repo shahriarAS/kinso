@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button, Input, Select } from "antd";
-import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { PlusOutlined, SearchOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useGetBrandsQuery, useDeleteBrandMutation } from "./api";
 import { useGetAllVendorsQuery } from "@/features/vendors/api";
 import { Brand } from "./types";
@@ -50,6 +50,12 @@ const BrandTable: React.FC = () => {
 
   const handleVendorFilter = (value: string) => {
     setSelectedVendorId(value);
+    setCurrentPage(1);
+  };
+
+  const handleReset = () => {
+    setSearchText("");
+    setSelectedVendorId("");
     setCurrentPage(1);
   };
 
@@ -138,30 +144,57 @@ const BrandTable: React.FC = () => {
         </Button>
       </div>
 
-      <div className="flex justify-between items-center space-x-4">
-        <Search
-          placeholder="Search brands..."
-          allowClear
-          enterButton={<SearchOutlined />}
-          size="large"
-          onSearch={handleSearch}
-          onChange={e => handleSearch(e.target.value)}
-          value={searchText}
-          className="flex-1 max-w-md"
-        />
-        <Select
-          placeholder="Filter by vendor"
-          allowClear
-          style={{ width: 200 }}
-          onChange={handleVendorFilter}
-          value={selectedVendorId || undefined}
-        >
-          {vendorsResponse?.data?.map((vendor) => (
-            <Option key={vendor._id} value={vendor._id}>
-              {vendor.name}
-            </Option>
-          ))}
-        </Select>
+      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+            <FilterOutlined className="mr-2" />
+            Brand Filters
+          </h3>
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={handleReset}
+            className="flex items-center"
+          >
+            Reset
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Search
+            </label>
+            <Input
+              placeholder="Search brands..."
+              prefix={<SearchOutlined />}
+              size="large"
+              allowClear
+              value={searchText}
+              onChange={e => handleSearch(e.target.value)}
+              onPressEnter={e => handleSearch((e.target as HTMLInputElement).value)}
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Vendor
+            </label>
+            <Select
+              placeholder="Filter by vendor"
+              allowClear
+              size="large"
+              style={{ width: "100%" }}
+              onChange={handleVendorFilter}
+              value={selectedVendorId || undefined}
+            >
+              {vendorsResponse?.data?.map((vendor) => (
+                <Option key={vendor._id} value={vendor._id}>
+                  {vendor.name}
+                </Option>
+              ))}
+            </Select>
+          </div>
+        </div>
       </div>
 
       <GenericTable<Brand>

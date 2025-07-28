@@ -1,12 +1,12 @@
-import React, { useEffect } from "react";
-import { Drawer, Form, Input, Button, Select } from "antd";
+import React, { useMemo } from "react";
 import { useCreateBrandMutation, useUpdateBrandMutation } from "./api";
 import { useGetAllVendorsQuery } from "@/features/vendors/api";
 import { Brand, BrandInput } from "./types";
 import { useNotification } from "@/hooks/useNotification";
-import { Vendor } from "../vendors";
+import { Form } from "antd";
+import { GenericDrawer, FormField } from "@/components/common";
 
-const { Option } = Select;
+import { Vendor } from "../vendors/types";
 
 interface AddEditBrandDrawerProps {
   open: boolean;
@@ -19,7 +19,7 @@ const AddEditBrandDrawer: React.FC<AddEditBrandDrawerProps> = ({
   onClose,
   brand,
 }) => {
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<BrandInput>();
   const { success, error } = useNotification();
   const [createBrand, { isLoading: isCreating }] = useCreateBrandMutation();
   const [updateBrand, { isLoading: isUpdating }] = useUpdateBrandMutation();
@@ -27,99 +27,68 @@ const AddEditBrandDrawer: React.FC<AddEditBrandDrawerProps> = ({
 
   const isEditing = !!brand;
 
-  useEffect(() => {
-    if (open) {
-      if (brand) {
-        form.setFieldsValue({
-          name: brand.name,
-          vendor: brand.vendor._id,
-        });
-      } else {
-        form.resetFields();
-      }
-    }
-  }, [open, brand, form]);
+  // Define form fields for GenericDrawer
+  const fields: FormField[] = useMemo(
+    () => [
+      {
+        name: "name",
+        label: "Brand Name",
+        type: "input",
+        placeholder: "Enter brand name",
+        rules: [
+          { required: true, message: "Please enter brand name" },
+          { min: 2, message: "Brand name must be at least 2 characters" },
+        ],
+      },
+      {
+        name: "vendor",
+        label: "Vendor",
+        type: "select",
+        placeholder: "Select vendor",
+        options: vendorsResponse?.data?.map((vendor: Vendor) => ({
+          label: vendor.name,
+          value: vendor._id,
+        })) || [],
+        rules: [
+          { required: true, message: "Please select a vendor" },
+        ],
+      },
+    ],
+    [vendorsResponse?.data]
+  );
+
+  // Set initial values for edit mode
+  const initialValues = brand ? {
+    name: brand.name,
+    vendor: brand.vendor._id,
+  } : undefined;
 
   const handleSubmit = async (values: BrandInput) => {
-    try {
-      if (isEditing && brand) {
-        await updateBrand({
-          _id: brand._id,
-          brand: values,
-        }).unwrap();
-        success("Brand updated successfully");
-      } else {
-        await createBrand(values).unwrap();
-        success("Brand created successfully");
-      }
-      onClose();
-      form.resetFields();
-    } catch (err) {
-      error("Failed to save brand");
+    if (isEditing && brand) {
+      await updateBrand({
+        _id: brand._id,
+        brand: values,
+      }).unwrap();
+      success("Brand updated successfully");
+    } else {
+      await createBrand(values).unwrap();
+      success("Brand created successfully");
     }
-  };
-
-  const handleClose = () => {
-    form.resetFields();
-    onClose();
   };
 
   return (
-    <Drawer
-      title={isEditing ? "Edit Brand" : "Add Brand"}
-      width={500}
+    <GenericDrawer<BrandInput>
       open={open}
-      onClose={handleClose}
-      footer={
-        <div className="flex justify-end space-x-2">
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button
-            type="primary"
-            loading={isCreating || isUpdating}
-            onClick={() => form.submit()}
-          >
-            {isEditing ? "Update" : "Create"}
-          </Button>
-        </div>
-      }
-    >
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={handleSubmit}
-        autoComplete="off"
-      >
-        <Form.Item
-          name="name"
-          label="Brand Name"
-          rules={[
-            { required: true, message: "Please enter brand name" },
-            { min: 2, message: "Brand name must be at least 2 characters" },
-          ]}
-        >
-          <Input placeholder="Enter brand name" />
-        </Form.Item>
-
-        <Form.Item
-          name="vendor"
-          label="Vendor"
-          rules={[
-            { required: true, message: "Please select a vendor" },
-          ]}
-        >
-          <Select
-            placeholder="Select vendor"
-            showSearch
-          >
-            {vendorsResponse?.data?.map((vendor: Vendor) => (
-              <Option key={vendor._id} value={vendor._id}>
-                {vendor.name}
-              </Option>
-            ))}
-          </Select>
-        </Form.Item>
-      </Form>
-    </Drawer>
+      onClose={onClose}
+      title={isEditing ? "Edit Brand" : "Add Brand"}
+      form={form}
+      fields={fields}
+      initialValues={initialValues}
+      onSubmit={handleSubmit}
+      submitText={isEditing ? "Update" : "Create"}
+      loading={isCreating || isUpdating}
+      width={500}
+    />
   );
 };
 

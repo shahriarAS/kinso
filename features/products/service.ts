@@ -9,8 +9,6 @@ import {
   createPaginatedResponse,
   createNotFoundResponse,
   createValidationErrorResponse,
-  createConflictErrorResponse,
-  createUnauthorizedResponse,
 } from "@/lib/apiResponse";
 
 // POST /api/products - Create a new product
@@ -37,46 +35,26 @@ export async function handlePost(request: NextRequest) {
     const { name, barcode, vendor, brand, category } = body;
 
     // Basic validation
-    if (!name || name.trim().length === 0) {
-      return createValidationErrorResponse("Product name is required");
-    }
+    if (!name?.trim()) return createValidationErrorResponse("Product name is required");
+    if (!barcode?.trim()) return createValidationErrorResponse("Product barcode is required");
+    if (!vendor) return createValidationErrorResponse("Product vendor is required");
+    if (!brand) return createValidationErrorResponse("Product brand is required");
+    if (!category) return createValidationErrorResponse("Product category is required");
 
-    if (!barcode || barcode.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Product barcode is required" },
-        { status: 400 },
-      );
-    }
+    // Barcode uniqueness
+    if (await Product.findOne({ barcode: barcode.trim() }))
+      return createErrorResponse("Product with this barcode already exists", 409);
 
-    if (!vendor) {
-      return NextResponse.json(
-        { success: false, message: "Product vendor is required" },
-        { status: 400 },
-      );
-    }
-
-    if (!brand) {
-      return NextResponse.json(
-        { success: false, message: "Product brand is required" },
-        { status: 400 },
-      );
-    }
-
-    if (!category) {
-      return NextResponse.json(
-        { success: false, message: "Product category is required" },
-        { status: 400 },
-      );
-    }
-
-    // Check if product already exists with same barcode
-    const existingProductWithBarcode = await Product.findOne({ barcode: barcode.trim() });
-    if (existingProductWithBarcode) {
-      return NextResponse.json(
-        { success: false, message: "Product with this barcode already exists" },
-        { status: 409 },
-      );
-    }
+    // Check existence of vendor, brand, category (assuming respective models)
+    const [vendorExists, brandExists, categoryExists] = await Promise.all([
+      // Replace with actual Vendor, Brand, Category models
+      Product.db.model("Vendor").findById(vendor),
+      Product.db.model("Brand").findById(brand),
+      Product.db.model("Category").findById(category),
+    ]);
+    if (!vendorExists) return createNotFoundResponse("Vendor");
+    if (!brandExists) return createNotFoundResponse("Brand");
+    if (!categoryExists) return createNotFoundResponse("Category");
 
     // Create product
     const product = await Product.create({
@@ -117,6 +95,9 @@ export async function handleGet(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
+    const categoryFilter = searchParams.get("category") || "";
+    const brandFilter = searchParams.get("brand") || "";
+    const vendorFilter = searchParams.get("vendor") || "";
     const search = searchParams.get("search") || "";
 
     const skip = (page - 1) * limit;
@@ -128,6 +109,16 @@ export async function handleGet(request: NextRequest) {
         { name: { $regex: search, $options: "i" } },
         { barcode: { $regex: search, $options: "i" } },
       ];
+    }
+
+    if (categoryFilter) {
+      query.category = categoryFilter;
+    }
+    if (brandFilter) {
+      query.brand = brandFilter;
+    }
+    if (vendorFilter) {
+      query.vendor = vendorFilter;
     }
 
     // Execute query
@@ -212,7 +203,7 @@ export async function handleUpdateById(
     const body = await request.json();
     const { name, barcode, vendor, brand, category } = body;
     const { id } = await params;
-    
+
     const existingProduct = await Product.findById(id);
     if (!existingProduct) {
       return NextResponse.json(
@@ -222,48 +213,25 @@ export async function handleUpdateById(
     }
 
     // Validation
-    if (!name || name.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Product name is required" },
-        { status: 400 },
-      );
-    }
-    if (!barcode || barcode.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Product barcode is required" },
-        { status: 400 },
-      );
-    }
-    if (!vendor) {
-      return NextResponse.json(
-        { success: false, message: "Product vendor is required" },
-        { status: 400 },
-      );
-    }
-    if (!brand) {
-      return NextResponse.json(
-        { success: false, message: "Product brand is required" },
-        { status: 400 },
-      );
-    }
-    if (!category) {
-      return NextResponse.json(
-        { success: false, message: "Product category is required" },
-        { status: 400 },
-      );
-    }
+    if (!name?.trim()) return createValidationErrorResponse("Product name is required");
+    if (!barcode?.trim()) return createValidationErrorResponse("Product barcode is required");
+    if (!vendor) return createValidationErrorResponse("Product vendor is required");
+    if (!brand) return createValidationErrorResponse("Product brand is required");
+    if (!category) return createValidationErrorResponse("Product category is required");
 
-    // Check for barcode conflict with other products
-    const barcodeConflict = await Product.findOne({
-      _id: { $ne: id },
-      barcode: barcode.trim(),
-    });
-    if (barcodeConflict) {
-      return NextResponse.json(
-        { success: false, message: "Product with this barcode already exists" },
-        { status: 409 },
-      );
-    }
+    // Barcode uniqueness (exclude current product)
+    if (await Product.findOne({ _id: { $ne: id }, barcode: barcode.trim() }))
+      return createErrorResponse("Product with this barcode already exists", 409);
+
+    // Check existence of vendor, brand, category
+    const [vendorExists, brandExists, categoryExists] = await Promise.all([
+      Product.db.model("Vendor").findById(vendor),
+      Product.db.model("Brand").findById(brand),
+      Product.db.model("Category").findById(category),
+    ]);
+    if (!vendorExists) return createNotFoundResponse("Vendor");
+    if (!brandExists) return createNotFoundResponse("Brand");
+    if (!categoryExists) return createNotFoundResponse("Category");
 
     const updatedProduct = await Product.findByIdAndUpdate(
       id,

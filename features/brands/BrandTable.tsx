@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Table, Button, Space, Popconfirm, Tag, Input, Select } from "antd";
-import { EditOutlined, DeleteOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { Button, Input, Select } from "antd";
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import { useGetBrandsQuery, useDeleteBrandMutation } from "./api";
 import { useGetAllVendorsQuery } from "@/features/vendors/api";
 import { Brand } from "./types";
@@ -8,6 +8,11 @@ import { useNotification } from "@/hooks/useNotification";
 import { useModal } from "@/hooks/useModal";
 import AddEditBrandDrawer from "./AddEditBrandDrawer";
 import { useDebounce } from "@/hooks/useDebounce";
+import {
+  GenericTable,
+  type TableColumn,
+  type TableAction,
+} from "@/components/common";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -18,11 +23,16 @@ const BrandTable: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [selectedVendorId, setSelectedVendorId] = useState<string>("");
-  const { success, error } = useNotification();
+  const { success, error: notifyError } = useNotification();
   const { open, close, isOpen } = useModal("brand-drawer");
   const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
 
-  const { data: brandsResponse, isLoading, refetch } = useGetBrandsQuery({
+  const {
+    data: brandsResponse,
+    isLoading,
+    error,
+    refetch,
+  } = useGetBrandsQuery({
     page: currentPage,
     limit: pageSize,
     search: debouncedSearchText,
@@ -31,7 +41,7 @@ const BrandTable: React.FC = () => {
 
   const { data: vendorsResponse } = useGetAllVendorsQuery();
 
-  const [deleteBrand] = useDeleteBrandMutation();
+  const [deleteBrand, { isLoading: isDeleting }] = useDeleteBrandMutation();
 
   const handleSearch = (value: string) => {
     setSearchText(value);
@@ -48,13 +58,13 @@ const BrandTable: React.FC = () => {
     open(brand);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (brand: Brand) => {
     try {
-      await deleteBrand(id).unwrap();
+      await deleteBrand(brand._id).unwrap();
       success("Brand deleted successfully");
       refetch();
     } catch (err) {
-      error("Failed to delete brand");
+      notifyError("Failed to delete brand");
     }
   };
 
@@ -69,7 +79,7 @@ const BrandTable: React.FC = () => {
     refetch();
   };
 
-  const columns = [
+  const columns: TableColumn<Brand>[] = [
     {
       title: "Brand Name",
       dataIndex: "name",
@@ -78,8 +88,8 @@ const BrandTable: React.FC = () => {
     },
     {
       title: "Vendor",
-      dataIndex: ["vendor", "name"],
       key: "vendorName",
+      render: (_, record: Brand) => record.vendor?.name || "N/A",
       // sorter: true,
     },
     {
@@ -89,30 +99,29 @@ const BrandTable: React.FC = () => {
       render: (date: string) => new Date(date).toLocaleDateString(),
       // sorter: true,
     },
+  ];
+
+  const actions: TableAction<Brand>[] = [
     {
-      title: "Actions",
-      key: "actions",
-      render: (_: any, record: Brand) => (
-        <Space size="middle">
-          <Button
-            type="link"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          >
-            Edit
-          </Button>
-          <Popconfirm
-            title="Are you sure you want to delete this brand?"
-            onConfirm={() => handleDelete(record._id)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button type="link" danger icon={<DeleteOutlined />}>
-              Delete
-            </Button>
-          </Popconfirm>
-        </Space>
-      ),
+      key: "edit",
+      label: "Edit",
+      icon: "ant-design:edit-outlined",
+      type: "edit",
+      color: "blue",
+      onClick: handleEdit,
+    },
+    {
+      key: "delete",
+      label: "Delete",
+      icon: "ant-design:delete-outlined",
+      type: "delete",
+      color: "red",
+      onClick: handleDelete,
+      confirm: {
+        title: "Are you sure you want to delete this brand?",
+        description: "This action cannot be undone.",
+      },
+      loading: isDeleting,
     },
   ];
 
@@ -155,10 +164,13 @@ const BrandTable: React.FC = () => {
         </Select>
       </div>
 
-      <Table
-        columns={columns}
-        dataSource={brandsResponse?.data || []}
+      <GenericTable<Brand>
+        data={brandsResponse?.data || []}
         loading={isLoading}
+        error={error}
+        onRetry={refetch}
+        columns={columns}
+        actions={actions}
         rowKey="_id"
         pagination={{
           current: currentPage,
@@ -166,8 +178,7 @@ const BrandTable: React.FC = () => {
           total: brandsResponse?.pagination?.total || 0,
           showSizeChanger: true,
           showQuickJumper: true,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} items`,
+          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
           onChange: (page, size) => {
             setCurrentPage(page);
             setPageSize(size || 10);

@@ -20,11 +20,11 @@ const menuItems = [
   //   label: "Point of Sale",
   //   href: "/dashboard/pos",
   // },
-  // {
-  //   icon: "lsicon:management-stockout-outline",
-  //   label: "Inventory",
-  //   href: "/dashboard/inventory",
-  // },
+  {
+    icon: "lsicon:management-stockout-outline",
+    label: "Products",
+    href: "/dashboard/products",
+  },
   // {
   //   icon: "mdi:package-variant",
   //   label: "Stock Management",

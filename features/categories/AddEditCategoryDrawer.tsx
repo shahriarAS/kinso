@@ -56,23 +56,17 @@ const AddEditCategoryDrawer: React.FC<AddEditCategoryDrawerProps> = ({
       : undefined;
 
   const handleSubmit = async (values: CategoryInput) => {
-    try {
-      if (isEditing && category) {
-        await updateCategory({ _id: category._id, category: values }).unwrap();
-        success("Category updated successfully");
-      } else {
-        await createCategory(values).unwrap();
-        success("Category created successfully");
-      }
-      onClose();
-      form.resetFields();
-    } catch (err) {
-      error("Failed to save category");
+    if (isEditing && category) {
+      await updateCategory({ _id: category._id, category: values }).unwrap();
+      success("Category updated successfully");
+    } else {
+      await createCategory(values).unwrap();
+      success("Category created successfully");
     }
   };
 
   return (
-    <GenericDrawer
+    <GenericDrawer<CategoryInput>
       open={open}
       onClose={onClose}
       title={isEditing ? "Edit Category" : "Add Category"}

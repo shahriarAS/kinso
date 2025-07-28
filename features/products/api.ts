@@ -16,10 +16,9 @@ export const productsApi = createApi({
         limit?: number;
         search?: string;
         barcode?: string;
-        vendorId?: string;
-        brandId?: string;
-        categoryId?: string;
-        warehouse?: string;
+        vendor?: string;
+        brand?: string;
+        category?: string;
         sortBy?: string;
         sortOrder?: "asc" | "desc";
       }
@@ -32,12 +31,12 @@ export const productsApi = createApi({
       providesTags: (result) =>
         result?.data
           ? [
-              ...result.data.map(({ _id }) => ({
-                type: "Product" as const,
-                _id,
-              })),
-              { type: "Product", id: "LIST" },
-            ]
+            ...result.data.map(({ _id }) => ({
+              type: "Product" as const,
+              _id,
+            })),
+            { type: "Product", id: "LIST" },
+          ]
           : [{ type: "Product", id: "LIST" }],
     }),
 
@@ -87,43 +86,6 @@ export const productsApi = createApi({
       }),
       invalidatesTags: [{ type: "Product", id: "LIST" }],
     }),
-
-    // Update product stock
-    updateProductStock: builder.mutation<
-      ApiResponse<Product>,
-      {
-        productId: string;
-        warehouseId: string;
-        quantity: number;
-        operation: "add" | "subtract" | "set";
-      }
-    >({
-      query: ({ productId, warehouseId, quantity, operation }) => ({
-        url: `/${productId}/stock`,
-        method: "PATCH",
-        body: { warehouseId, quantity, operation },
-      }),
-      invalidatesTags: (result, error, { productId }) => [
-        { type: "Product", id: productId },
-        { type: "Product", id: "LIST" },
-      ],
-    }),
-
-    // Search products
-    searchProducts: builder.query<
-      ApiResponse<Product[]>,
-      { query: string; limit?: number }
-    >({
-      query: ({ query, limit = 20 }) => ({
-        url: "/search",
-        method: "GET",
-        params: { query, limit },
-      }),
-      providesTags: (result) =>
-        result?.data
-          ? result.data.map(({ _id }) => ({ type: "Product" as const, _id }))
-          : [],
-    }),
   }),
 });
 
@@ -132,7 +94,5 @@ export const {
   useGetProductQuery,
   useCreateProductMutation,
   useUpdateProductMutation,
-  useDeleteProductMutation,
-  useUpdateProductStockMutation,
-  useSearchProductsQuery,
+  useDeleteProductMutation
 } = productsApi;

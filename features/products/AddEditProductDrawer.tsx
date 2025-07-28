@@ -11,14 +11,6 @@ import { useGetAllCategoriesQuery } from "@/features/categories/api";
 import { useGetAllVendorsQuery } from "@/features/vendors";
 import { useGetAllBrandsQuery } from "@/features/brands";
 import { useNotification } from "@/hooks/useNotification";
-import WarrantyInput from "./WarrantyInput";
-import type { FormInstance } from "antd";
-
-// Extend FormField type to allow custom render
-export type CustomFormField = FormField & {
-  type?: string;
-  render?: (form: FormInstance) => React.ReactNode;
-};
 
 interface Props {
   open: boolean;
@@ -65,17 +57,7 @@ export default function AddEditProductDrawer({
     })) || [];
 
   // Define form fields using the generic interface
-  const fields: CustomFormField[] = [
-    {
-      name: "productId",
-      label: "Product ID",
-      type: "input",
-      placeholder: "Enter Product ID",
-      rules: [
-        { required: true, message: "Please enter product ID" },
-        { min: 3, message: "Product ID must be at least 3 characters" },
-      ],
-    },
+  const fields: FormField[] = [
     {
       name: "name",
       label: "Product Name",
@@ -94,14 +76,10 @@ export default function AddEditProductDrawer({
       rules: [
         { required: true, message: "Please enter barcode" },
         { min: 8, message: "Barcode must be at least 8 characters" },
-        {
-          pattern: /^[0-9]+$/,
-          message: "Barcode must contain only numbers",
-        },
       ],
     },
     {
-      name: "vendorId",
+      name: "vendor",
       label: "Vendor",
       type: "select",
       placeholder: "Select Vendor",
@@ -109,7 +87,7 @@ export default function AddEditProductDrawer({
       rules: [{ required: true, message: "Please select a vendor" }],
     },
     {
-      name: "brandId",
+      name: "brand",
       label: "Brand",
       type: "select",
       placeholder: "Select Brand",
@@ -117,19 +95,12 @@ export default function AddEditProductDrawer({
       rules: [{ required: true, message: "Please select a brand" }],
     },
     {
-      name: "categoryId",
+      name: "category",
       label: "Category",
       type: "select",
       placeholder: "Select Category",
       options: categoryOptions,
       rules: [{ required: true, message: "Please select a category" }],
-    },
-    {
-      name: "warranty",
-      label: "Warranty",
-      type: "custom",
-      render: (form: FormInstance) => <WarrantyInput form={form} />,
-      rules: [],
     },
   ];
 
@@ -161,13 +132,11 @@ export default function AddEditProductDrawer({
     if (!product) return undefined;
 
     return {
-      productId: product.productId,
       name: product.name,
       barcode: product.barcode,
-      vendorId: typeof product.vendorId === "string" ? product.vendorId : product.vendorId._id,
-      brandId: typeof product.brandId === "string" ? product.brandId : product.brandId._id,
-      categoryId: typeof product.categoryId === "string" ? product.categoryId : product.categoryId._id,
-      warranty: product.warranty,
+      vendor: typeof product.vendor === "string" ? product.vendor : product.vendor._id,
+      brand: typeof product.brand === "string" ? product.brand : product.brand._id,
+      category: typeof product.category === "string" ? product.category : product.category._id,
     };
   };
 

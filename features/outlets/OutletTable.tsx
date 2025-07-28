@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Table, Button, Space, Popconfirm, Input, Select } from "antd";
-import { EditOutlined, DeleteOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { Button, Input, Select } from "antd";
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import { useGetOutletsQuery, useDeleteOutletMutation } from "./api";
 import { Outlet } from "./types";
 import { useNotification } from "@/hooks/useNotification";
@@ -8,6 +8,11 @@ import { useModal } from "@/hooks/useModal";
 import AddEditOutletDrawer from "./AddEditOutletDrawer";
 import { useDebounce } from "@/hooks/useDebounce";
 import { OUTLET_TYPES } from "@/types";
+import {
+  GenericTable,
+  type TableColumn,
+  type TableAction,
+} from "@/components/common";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -18,18 +23,23 @@ const OutletTable: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [selectedTypeId, setSelectedTypeId] = useState<string>("");
-  const { success, error } = useNotification();
+  const { success, error: notifyError } = useNotification();
   const { open, close, isOpen } = useModal("outlet-drawer");
   const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(null);
 
-  const { data: outletsResponse, isLoading, refetch } = useGetOutletsQuery({
+  const {
+    data: outletsResponse,
+    isLoading,
+    error,
+    refetch,
+  } = useGetOutletsQuery({
     page: currentPage,
     limit: pageSize,
     search: debouncedSearchText,
     type: selectedTypeId,
   });
 
-  const [deleteOutlet] = useDeleteOutletMutation();
+  const [deleteOutlet, { isLoading: isDeleting }] = useDeleteOutletMutation();
 
   const handleSearch = (value: string) => {
     setSearchText(value);
@@ -46,13 +56,13 @@ const OutletTable: React.FC = () => {
     open(outlet);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (outlet: Outlet) => {
     try {
-      await deleteOutlet(id).unwrap();
+      await deleteOutlet(outlet._id).unwrap();
       success("Outlet deleted successfully");
       refetch();
     } catch (err) {
-      error("Failed to delete outlet");
+      notifyError("Failed to delete outlet");
     }
   };
 
@@ -67,7 +77,7 @@ const OutletTable: React.FC = () => {
     refetch();
   };
 
-  const columns = [
+  const columns: TableColumn<Outlet>[] = [
     {
       title: "Outlet Name",
       dataIndex: "name",
@@ -87,30 +97,29 @@ const OutletTable: React.FC = () => {
       render: (date: string) => new Date(date).toLocaleDateString(),
       // sorter: true,
     },
+  ];
+
+  const actions: TableAction<Outlet>[] = [
     {
-      title: "Actions",
-      key: "actions",
-      render: (_: any, record: Outlet) => (
-        <Space size="middle">
-          <Button
-            type="link"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          >
-            Edit
-          </Button>
-          <Popconfirm
-            title="Are you sure you want to delete this outlet?"
-            onConfirm={() => handleDelete(record._id)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button type="link" danger icon={<DeleteOutlined />}>
-              Delete
-            </Button>
-          </Popconfirm>
-        </Space>
-      ),
+      key: "edit",
+      label: "Edit",
+      icon: "ant-design:edit-outlined",
+      type: "edit",
+      color: "blue",
+      onClick: handleEdit,
+    },
+    {
+      key: "delete",
+      label: "Delete",
+      icon: "ant-design:delete-outlined",
+      type: "delete",
+      color: "red",
+      onClick: handleDelete,
+      confirm: {
+        title: "Are you sure you want to delete this outlet?",
+        description: "This action cannot be undone.",
+      },
+      loading: isDeleting,
     },
   ];
 
@@ -153,10 +162,13 @@ const OutletTable: React.FC = () => {
         </Select>
       </div>
 
-      <Table
-        columns={columns}
-        dataSource={outletsResponse?.data || []}
+      <GenericTable<Outlet>
+        data={outletsResponse?.data || []}
         loading={isLoading}
+        error={error}
+        onRetry={refetch}
+        columns={columns}
+        actions={actions}
         rowKey="_id"
         pagination={{
           current: currentPage,
@@ -164,8 +176,7 @@ const OutletTable: React.FC = () => {
           total: outletsResponse?.pagination?.total || 0,
           showSizeChanger: true,
           showQuickJumper: true,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} items`,
+          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
           onChange: (page, size) => {
             setCurrentPage(page);
             setPageSize(size || 10);

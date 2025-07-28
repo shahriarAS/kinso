@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import { Tag } from "antd";
 import {
   GenericTable,
   type TableColumn,
@@ -18,8 +17,8 @@ import { useNotification } from "@/hooks/useNotification";
 interface Props {
   searchTerm: string;
   categoryFilter: string;
-  warehouseFilter: string;
-  statusFilter: string;
+  brandFilter: string;
+  vendorFilter: string;
   minPrice: string;
   maxPrice: string;
   currentPage: number;
@@ -27,10 +26,13 @@ interface Props {
   onPageChange: (page: number) => void;
 }
 
-export default function ProductTableRefactored({
+export default function ProductTable({
   searchTerm,
   categoryFilter,
-  warehouseFilter,
+  brandFilter,
+  vendorFilter,
+  minPrice,
+  maxPrice,
   currentPage,
   pageSize,
   onPageChange,
@@ -44,8 +46,9 @@ export default function ProductTableRefactored({
     page: currentPage,
     limit: pageSize,
     search: searchTerm,
-    categoryId: categoryFilter || undefined,
-    warehouse: warehouseFilter || undefined,
+    category: categoryFilter || undefined,
+    brand: brandFilter || undefined,
+    vendor: vendorFilter || undefined,
     sortBy: "name",
     sortOrder: "asc",
   });
@@ -83,19 +86,6 @@ export default function ProductTableRefactored({
     }
   };
 
-  const getStockStatus = (stock: Product["stock"]) => {
-    const totalStock = stock.reduce((sum, item) => sum + item.unit, 0);
-    if (totalStock === 0)
-      return { status: "out_of_stock", color: "red", text: "Out of Stock" };
-    if (totalStock <= 10)
-      return { status: "low_stock", color: "orange", text: "Low Stock" };
-    return { status: "in_stock", color: "green", text: "In Stock" };
-  };
-
-  const getTotalStock = (stock: Product["stock"]) => {
-    return stock.reduce((sum, item) => sum + item.unit, 0);
-  };
-
   // Define columns using the generic interface
   const columns: TableColumn<Product>[] = [
     {
@@ -116,60 +106,52 @@ export default function ProductTableRefactored({
     },
     {
       title: <span className="font-medium text-base">Vendor</span>,
-      dataIndex: "vendorId",
-      key: "vendorId",
-      render: (vendor: string | { _id: string; vendorName: string }) => {
-        const vendorName =
-          typeof vendor === "string" ? vendor : vendor?.vendorName || "";
+      dataIndex: "vendor",
+      key: "vendor",
+      render: (vendor: { _id: string; name: string }) => {
+        const vendorName = vendor?.name || "";
         return <span className="text-gray-700 capitalize">{vendorName}</span>;
       },
     },
     {
       title: <span className="font-medium text-base">Brand</span>,
-      dataIndex: "brandId",
-      key: "brandId",
-      render: (brand: string | { _id: string; brandName: string }) => {
-        const brandName =
-          typeof brand === "string" ? brand : brand?.brandName || "";
+      dataIndex: "brand",
+      key: "brand",
+      render: (brand: { _id: string; name: string }) => {
+        const brandName = brand?.name || "";
         return <span className="text-gray-700 capitalize">{brandName}</span>;
       },
     },
     {
       title: <span className="font-medium text-base">Category</span>,
-      dataIndex: "categoryId",
-      key: "categoryId",
-      render: (category: string | { _id: string; categoryName: string }) => {
-        const categoryName =
-          typeof category === "string" ? category : category?.categoryName || "";
+      dataIndex: "category",
+      key: "category",
+      render: (category: { _id: string; name: string }) => {
+        const categoryName = category?.name || "";
         return <span className="text-gray-700 capitalize">{categoryName}</span>;
       },
     },
     {
-      title: <span className="font-medium text-base">Stock</span>,
-      key: "stock",
-      render: (_: unknown, record: Product) => {
-        const totalStock = getTotalStock(record.stock);
-        const stockStatus = getStockStatus(record.stock);
-        return (
-          <div className="flex items-center gap-2">
-            <span className="font-medium">{totalStock}</span>
-            <Tag color={stockStatus.color}>{stockStatus.text}</Tag>
-          </div>
-        );
+      title: <span className="font-medium text-base">Created</span>,
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (date: string) => {
+        const formattedDate = new Date(date).toLocaleDateString();
+        return <span className="text-gray-600">{formattedDate}</span>;
       },
     },
   ];
 
   // Define actions using the generic interface
   const actions: TableAction<Product>[] = [
-    {
-      key: "view",
-      label: "View Product",
-      icon: "lineicons:eye",
-      type: "view",
-      color: "green",
-      onClick: handleView,
-    },
+    // {
+    //   key: "view",
+    //   label: "View Product",
+    //   icon: "lineicons:eye",
+    //   type: "view",
+    //   color: "green",
+    //   onClick: handleView,
+    // },
     {
       key: "edit",
       label: "Edit",

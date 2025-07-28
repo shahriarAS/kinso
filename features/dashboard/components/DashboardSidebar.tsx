@@ -25,11 +25,11 @@ const menuItems = [
     label: "Products",
     href: "/dashboard/products",
   },
-  // {
-  //   icon: "mdi:package-variant",
-  //   label: "Stock Management",
-  //   href: "/dashboard/stock",
-  // },
+  {
+    icon: "mdi:package-variant",
+    label: "Stock Management",
+    href: "/dashboard/stock",
+  },
   // {
   //   icon: "mdi:package-variant",
   //   label: "Demand",

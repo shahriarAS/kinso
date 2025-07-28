@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
-import { Stock, StockInput, StockMovementInput, StockStatsResponse } from "./types";
+import { Stock, StockInput } from "./types";
 import { PaginatedResponse, ApiResponse } from "@/types";
 
 export const stockApi = createApi({
@@ -14,9 +14,9 @@ export const stockApi = createApi({
       {
         page?: number;
         limit?: number;
-        locationId?: string;
+        location?: string;
         locationType?: string;
-        productId?: string;
+        product?: string;
         search?: string;
         sortBy?: string;
         sortOrder?: "asc" | "desc";
@@ -90,12 +90,12 @@ export const stockApi = createApi({
     transferStock: builder.mutation<
       ApiResponse<any>,
       {
-        productId: string;
-        fromLocationId: string;
-        toLocationId: string;
+        product: string;
+        fromLocation: string;
+        toLocation: string;
         fromLocationType: string;
         toLocationType: string;
-        quantity: number;
+        unit: number;
         reason?: string;
       }
     >({
@@ -105,56 +105,7 @@ export const stockApi = createApi({
         body: transferData,
       }),
       invalidatesTags: [{ type: "Stock", id: "LIST" }],
-    }),
-
-    // Get stock movement history
-    getStockMovements: builder.query<
-      PaginatedResponse<any>,
-      {
-        page?: number;
-        limit?: number;
-        productId?: string;
-        locationId?: string;
-        movementType?: string;
-      }
-    >({
-      query: (params) => ({
-        url: "/movement",
-        method: "GET",
-        params,
-      }),
-      providesTags: ["Stock"],
-    }),
-
-    // Get stock by product and location (for FIFO)
-    getStockByProductAndLocation: builder.query<
-      ApiResponse<Stock[]>,
-      {
-        productId: string;
-        locationId: string;
-        locationType: string;
-      }
-    >({
-      query: ({ productId, locationId, locationType }) => ({
-        url: "/",
-        method: "GET",
-        params: { productId, locationId, locationType, limit: 1000 },
-      }),
-      providesTags: ["Stock"],
-    }),
-
-    // Get stock statistics
-    getStockStats: builder.query<StockStatsResponse, {
-      locationId?: string;
-      locationType?: string;
-    }>({
-      query: (params) => ({
-        url: "/stats",
-        method: "GET",
-        params,
-      }),
-      providesTags: ["Stock"],
-    }),
+    })
   }),
 });
 
@@ -165,9 +116,6 @@ export const {
   useUpdateStockMutation,
   useDeleteStockMutation,
   useTransferStockMutation,
-  useGetStockMovementsQuery,
-  useGetStockByProductAndLocationQuery,
-  useGetStockStatsQuery,
 } = stockApi;
 
 // Alias for backward compatibility

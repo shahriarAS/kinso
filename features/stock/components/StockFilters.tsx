@@ -1,10 +1,24 @@
 import React from "react";
 import { Form, Input, Select, DatePicker, Checkbox, Button } from "antd";
-import { SearchOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+  SearchOutlined,
+  FilterOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import { useGetProductsQuery } from "@/features/products/api";
 import { useGetOutletsQuery } from "@/features/outlets/api";
 import { useGetWarehousesQuery } from "@/features/warehouses/api";
-import { StockFilters as StockFiltersType } from "../types";
+
+interface StockFiltersType {
+  page?: number;
+  limit?: number;
+  location?: string;
+  locationType?: string;
+  product?: string;
+  search?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+}
 
 interface StockFiltersProps {
   filters: StockFiltersType;
@@ -60,7 +74,7 @@ const StockFilters: React.FC<StockFiltersProps> = ({
         layout="vertical"
         onValuesChange={handleValuesChange}
         initialValues={filters}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+        className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4"
       >
         <Form.Item name="search" label="Search">
           <Input
@@ -70,7 +84,7 @@ const StockFilters: React.FC<StockFiltersProps> = ({
           />
         </Form.Item>
 
-        <Form.Item name="productId" label="Product">
+        <Form.Item name="product" label="Product">
           <Select
             placeholder="Select product"
             allowClear
@@ -86,64 +100,38 @@ const StockFilters: React.FC<StockFiltersProps> = ({
           </Select>
         </Form.Item>
 
-        <Form.Item name="outletId" label="Outlet">
+        <Form.Item name="location" label="Location">
           <Select
-            placeholder="Select outlet"
+            placeholder="Select location"
             allowClear
             showSearch
             optionFilterProp="children"
-            loading={!outletsData}
           >
-            {outletsData?.data?.map((outlet) => (
-              <Select.Option key={outlet._id} value={outlet._id}>
-                {outlet.name}
-              </Select.Option>
-            ))}
+            <Select.OptGroup label="Outlets">
+              {outletsData?.data?.map((outlet) => (
+                <Select.Option key={`outlet-${outlet._id}`} value={outlet._id}>
+                  {outlet.name}
+                </Select.Option>
+              ))}
+            </Select.OptGroup>
+            <Select.OptGroup label="Warehouses">
+              {warehousesData?.data?.map((warehouse) => (
+                <Select.Option
+                  key={`warehouse-${warehouse._id}`}
+                  value={warehouse._id}
+                >
+                  {warehouse.name}
+                </Select.Option>
+              ))}
+            </Select.OptGroup>
           </Select>
         </Form.Item>
 
-        <Form.Item name="warehouseId" label="Warehouse">
-          <Select
-            placeholder="Select warehouse"
-            allowClear
-            showSearch
-            optionFilterProp="children"
-            loading={!warehousesData}
-          >
-            {warehousesData?.data?.map((warehouse) => (
-              <Select.Option key={warehouse._id} value={warehouse.warehouseId}>
-                {warehouse.name}
-              </Select.Option>
-            ))}
+        <Form.Item name="locationType" label="Location Type">
+          <Select placeholder="Select location type" allowClear>
+            <Select.Option value="Warehouse">Warehouse</Select.Option>
+            <Select.Option value="Outlet">Outlet</Select.Option>
           </Select>
-        </Form.Item>
-
-        <Form.Item name="expireDateFrom" label="Expire Date From">
-          <DatePicker
-            style={{ width: "100%" }}
-            placeholder="Start date"
-          />
-        </Form.Item>
-
-        <Form.Item name="expireDateTo" label="Expire Date To">
-          <DatePicker
-            style={{ width: "100%" }}
-            placeholder="End date"
-          />
-        </Form.Item>
-
-        <Form.Item name="entryDateFrom" label="Entry Date From">
-          <DatePicker
-            style={{ width: "100%" }}
-            placeholder="Start date"
-          />
-        </Form.Item>
-
-        <Form.Item name="entryDateTo" label="Entry Date To">
-          <DatePicker
-            style={{ width: "100%" }}
-            placeholder="End date"
-          />
         </Form.Item>
 
         <div className="flex items-end space-x-4">
@@ -151,7 +139,11 @@ const StockFilters: React.FC<StockFiltersProps> = ({
             <Checkbox>Low Stock Only</Checkbox>
           </Form.Item>
 
-          <Form.Item name="expiringSoon" valuePropName="checked" className="mb-0">
+          <Form.Item
+            name="expiringSoon"
+            valuePropName="checked"
+            className="mb-0"
+          >
             <Checkbox>Expiring Soon</Checkbox>
           </Form.Item>
         </div>
@@ -160,4 +152,4 @@ const StockFilters: React.FC<StockFiltersProps> = ({
   );
 };
 
-export default StockFilters; 
+export default StockFilters;

@@ -7,8 +7,6 @@ import { OutletType, OUTLET_TYPES } from "@/types";
 import {
   createSuccessResponse,
   createErrorResponse,
-  createPaginatedResponse,
-  createNotFoundResponse,
   createValidationErrorResponse,
   createConflictErrorResponse,
   createUnauthorizedResponse,
@@ -88,6 +86,7 @@ export async function handleGet(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
+    const search = searchParams.get("search") || "";
     const type = searchParams.get("type") || "";
 
     const skip = (page - 1) * limit;
@@ -96,6 +95,11 @@ export async function handleGet(request: NextRequest) {
     const query: any = {};
     if (type) {
       query.type = type;
+    }
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+      ];
     }
 
     // Execute query

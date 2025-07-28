@@ -116,7 +116,6 @@ const VendorTable: React.FC = () => {
           type="primary"
           icon={<PlusOutlined />} // still use AntD icon for button
           onClick={handleAdd}
-          className="bg-blue-600 hover:bg-blue-700"
         >
           Add Vendor
         </Button>

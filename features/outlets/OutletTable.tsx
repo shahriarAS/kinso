@@ -1,143 +1,185 @@
 import React, { useState } from "react";
-import { Table, Button, Space, Popconfirm, Tag, Tooltip } from "antd";
-import { EditOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
-import { Outlet } from "./types";
+import { Table, Button, Space, Popconfirm, Input, Select } from "antd";
+import { EditOutlined, DeleteOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import { useGetOutletsQuery, useDeleteOutletMutation } from "./api";
+import { Outlet } from "./types";
 import { useNotification } from "@/hooks/useNotification";
+import { useModal } from "@/hooks/useModal";
+import AddEditOutletDrawer from "./AddEditOutletDrawer";
+import { useDebounce } from "@/hooks/useDebounce";
+import { OUTLET_TYPES } from "@/types";
 
-interface OutletTableProps {
-  onEdit: (outlet: Outlet) => void;
-  onView: (outlet: Outlet) => void;
-  searchTerm?: string;
-  currentPage?: number;
-  pageSize?: number;
-  onPageChange?: (page: number, pageSize: number) => void;
-}
+const { Search } = Input;
+const { Option } = Select;
 
-const OutletTable: React.FC<OutletTableProps> = ({
-  onEdit,
-  onView,
-  searchTerm = "",
-  currentPage = 1,
-  pageSize = 10,
-  onPageChange,
-}) => {
-  const { success, error: showError } = useNotification();
-  const [deleteOutlet] = useDeleteOutletMutation();
+const OutletTable: React.FC = () => {
+  const [searchText, setSearchText] = useState("");
+  const debouncedSearchText = useDebounce(searchText, 400);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [selectedTypeId, setSelectedTypeId] = useState<string>("");
+  const { success, error } = useNotification();
+  const { open, close, isOpen } = useModal("outlet-drawer");
+  const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(null);
 
-  const { data, isLoading, error } = useGetOutletsQuery({
+  const { data: outletsResponse, isLoading, refetch } = useGetOutletsQuery({
     page: currentPage,
     limit: pageSize,
-    search: searchTerm,
-    sortBy: "createdAt",
-    sortOrder: "desc",
+    search: debouncedSearchText,
+    type: selectedTypeId,
   });
+
+  const [deleteOutlet] = useDeleteOutletMutation();
+
+  const handleSearch = (value: string) => {
+    setSearchText(value);
+    setCurrentPage(1);
+  };
+
+  const handleTypeFilter = (value: string) => {
+    setSelectedTypeId(value);
+    setCurrentPage(1);
+  };
+
+  const handleEdit = (outlet: Outlet) => {
+    setSelectedOutlet(outlet);
+    open(outlet);
+  };
 
   const handleDelete = async (id: string) => {
     try {
       await deleteOutlet(id).unwrap();
       success("Outlet deleted successfully");
-    } catch (error) {
-      showError("Failed to delete outlet");
+      refetch();
+    } catch (err) {
+      error("Failed to delete outlet");
     }
+  };
+
+  const handleAdd = () => {
+    setSelectedOutlet(null);
+    open();
+  };
+
+  const handleDrawerClose = () => {
+    close();
+    setSelectedOutlet(null);
+    refetch();
   };
 
   const columns = [
     {
-      title: "Outlet ID",
-      dataIndex: "outletId",
-      key: "outletId",
-      render: (outletId: string) => (
-        <Tag color="blue" className="font-mono">
-          {outletId}
-        </Tag>
-      ),
-    },
-    {
-      title: "Name",
+      title: "Outlet Name",
       dataIndex: "name",
       key: "name",
-      render: (name: string) => (
-        <span className="font-medium text-gray-900">{name}</span>
-      ),
+      // sorter: true,
     },
     {
-      title: "Created",
+      title: "Type",
+      dataIndex: "type",
+      key: "type",
+      // sorter: true,
+    },
+    {
+      title: "Created At",
       dataIndex: "createdAt",
       key: "createdAt",
-      render: (createdAt: string) => (
-        <span className="text-gray-600">
-          {new Date(createdAt).toLocaleDateString()}
-        </span>
-      ),
+      render: (date: string) => new Date(date).toLocaleDateString(),
+      // sorter: true,
     },
     {
       title: "Actions",
       key: "actions",
       render: (_: any, record: Outlet) => (
-        <Space size="small">
-          <Tooltip title="View Details">
-            <Button
-              type="text"
-              icon={<EyeOutlined />}
-              onClick={() => onView(record)}
-              className="text-blue-600 hover:text-blue-800"
-            />
-          </Tooltip>
-          <Tooltip title="Edit Outlet">
-            <Button
-              type="text"
-              icon={<EditOutlined />}
-              onClick={() => onEdit(record)}
-              className="text-green-600 hover:text-green-800"
-            />
-          </Tooltip>
-          <Tooltip title="Delete Outlet">
-            <Popconfirm
-              title="Are you sure you want to delete this outlet?"
-              description="This action cannot be undone."
-              onConfirm={() => handleDelete(record._id)}
-              okText="Yes"
-              cancelText="No"
-            >
-              <Button
-                type="text"
-                icon={<DeleteOutlined />}
-                className="text-red-600 hover:text-red-800"
-              />
-            </Popconfirm>
-          </Tooltip>
+        <Space size="middle">
+          <Button
+            type="link"
+            icon={<EditOutlined />}
+            onClick={() => handleEdit(record)}
+          >
+            Edit
+          </Button>
+          <Popconfirm
+            title="Are you sure you want to delete this outlet?"
+            onConfirm={() => handleDelete(record._id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button type="link" danger icon={<DeleteOutlined />}>
+              Delete
+            </Button>
+          </Popconfirm>
         </Space>
       ),
     },
   ];
 
-  if (error) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-red-600">Failed to load outlets</p>
-      </div>
-    );
-  }
-
   return (
-    <Table
-      columns={columns}
-      dataSource={data?.data || []}
-      loading={isLoading}
-      rowKey="_id"
-      pagination={{
-        current: currentPage,
-        pageSize: pageSize,
-        total: data?.pagination.total || 0,
-        showSizeChanger: true,
-        showQuickJumper: true,
-        showTotal: (total, range) =>
-          `${range[0]}-${range[1]} of ${total} outlets`,
-        onChange: onPageChange,
-      }}
-      className="bg-white rounded-lg shadow-sm"
-    />
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold text-gray-800">Outlets</h2>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={handleAdd}
+        >
+          Add Outlet
+        </Button>
+      </div>
+
+      <div className="flex justify-between items-center space-x-4">
+        <Search
+          placeholder="Search outlets..."
+          allowClear
+          enterButton={<SearchOutlined />}
+          size="large"
+          onSearch={handleSearch}
+          onChange={e => handleSearch(e.target.value)}
+          value={searchText}
+          className="flex-1 max-w-md"
+        />
+        <Select
+          placeholder="Filter by type"
+          allowClear
+          style={{ width: 200 }}
+          onChange={handleTypeFilter}
+          value={selectedTypeId || undefined}
+        >
+          {OUTLET_TYPES.map((type) => (
+            <Option key={type} value={type}>
+              {type}
+            </Option>
+          ))}
+        </Select>
+      </div>
+
+      <Table
+        columns={columns}
+        dataSource={outletsResponse?.data || []}
+        loading={isLoading}
+        rowKey="_id"
+        pagination={{
+          current: currentPage,
+          pageSize: pageSize,
+          total: outletsResponse?.pagination?.total || 0,
+          showSizeChanger: true,
+          showQuickJumper: true,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`,
+          onChange: (page, size) => {
+            setCurrentPage(page);
+            setPageSize(size || 10);
+          },
+        }}
+        className="bg-white rounded-lg shadow"
+      />
+
+      <AddEditOutletDrawer
+        open={isOpen}
+        onClose={handleDrawerClose}
+        outlet={selectedOutlet}
+      />
+    </div>
   );
 };
 

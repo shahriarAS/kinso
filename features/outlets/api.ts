@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
-import { Outlet, OutletInput, OutletInventory, OutletStats } from "@/features/outlets/types";
+import { Outlet, OutletInput } from "@/features/outlets/types";
 import { PaginatedResponse, ApiResponse } from "@/types";
 
 export const outletsApi = createApi({
@@ -17,6 +17,7 @@ export const outletsApi = createApi({
         search?: string;
         sortBy?: string;
         sortOrder?: "asc" | "desc";
+        type?: string;
       }
     >({
       query: (params) => ({
@@ -82,32 +83,6 @@ export const outletsApi = createApi({
       }),
       invalidatesTags: [{ type: "Outlet", id: "LIST" }],
     }),
-
-    // Get outlet inventory
-    getOutletInventory: builder.query<
-      ApiResponse<OutletInventory>,
-      string
-    >({
-      query: (outletId) => ({
-        url: `/${outletId}/inventory`,
-        method: "GET",
-      }),
-      providesTags: (result, error, outletId) => [
-        { type: "Outlet", id: outletId },
-      ],
-    }),
-
-    // Get outlet statistics
-    getOutletStats: builder.query<
-      ApiResponse<OutletStats>,
-      void
-    >({
-      query: () => ({
-        url: "/stats",
-        method: "GET",
-      }),
-      providesTags: ["Outlet"],
-    }),
   }),
 });
 
@@ -117,6 +92,4 @@ export const {
   useCreateOutletMutation,
   useUpdateOutletMutation,
   useDeleteOutletMutation,
-  useGetOutletInventoryQuery,
-  useGetOutletStatsQuery,
 } = outletsApi; 

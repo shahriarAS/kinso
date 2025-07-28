@@ -1,8 +1,9 @@
-import React, { useEffect } from "react";
-import { Drawer, Form, Input, Button } from "antd";
+import React, { useMemo } from "react";
 import { useCreateVendorMutation, useUpdateVendorMutation } from "./api";
 import { Vendor, VendorInput } from "./types";
 import { useNotification } from "@/hooks/useNotification";
+import { Form } from "antd";
+import { GenericDrawer, FormField } from "@/components/common";
 
 interface AddEditVendorDrawerProps {
   open: boolean;
@@ -15,32 +16,36 @@ const AddEditVendorDrawer: React.FC<AddEditVendorDrawerProps> = ({
   onClose,
   vendor,
 }) => {
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<VendorInput>();
   const { success, error } = useNotification();
   const [createVendor, { isLoading: isCreating }] = useCreateVendorMutation();
   const [updateVendor, { isLoading: isUpdating }] = useUpdateVendorMutation();
 
   const isEditing = !!vendor;
 
-  useEffect(() => {
-    if (open) {
-      if (vendor) {
-        form.setFieldsValue({
-          name: vendor.name,
-        });
-      } else {
-        form.resetFields();
-      }
-    }
-  }, [open, vendor, form]);
+  // Define form fields for GenericDrawer
+  const fields: FormField[] = useMemo(
+    () => [
+      {
+        name: "name",
+        label: "Vendor Name",
+        type: "input",
+        placeholder: "Enter vendor name",
+        rules: [
+          { required: true, message: "Please enter vendor name" },
+        ],
+      },
+    ],
+    []
+  );
+
+  // Set initial values for edit mode
+  const initialValues = isEditing && vendor ? { name: vendor.name } : undefined;
 
   const handleSubmit = async (values: VendorInput) => {
     try {
       if (isEditing && vendor) {
-        await updateVendor({
-          _id: vendor._id,
-          vendor: values,
-        }).unwrap();
+        await updateVendor({ _id: vendor._id, vendor: values }).unwrap();
         success("Vendor updated successfully");
       } else {
         await createVendor(values).unwrap();
@@ -53,48 +58,19 @@ const AddEditVendorDrawer: React.FC<AddEditVendorDrawerProps> = ({
     }
   };
 
-  const handleClose = () => {
-    form.resetFields();
-    onClose();
-  };
-
   return (
-    <Drawer
-      title={isEditing ? "Edit Vendor" : "Add Vendor"}
-      width={500}
+    <GenericDrawer
       open={open}
-      onClose={handleClose}
-      autoFocus={true}
-      footer={
-        <div className="flex justify-end space-x-2">
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button
-            type="primary"
-            loading={isCreating || isUpdating}
-            onClick={() => form.submit()}
-          >
-            {isEditing ? "Update" : "Create"}
-          </Button>
-        </div>
-      }
-    >
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={handleSubmit}
-        autoComplete="off"
-      >
-        <Form.Item
-          name="name"
-          label="Vendor Name"
-          rules={[
-            { required: true, message: "Please enter vendor name" },
-          ]}
-        >
-          <Input placeholder="Enter vendor name" />
-        </Form.Item> 
-      </Form>
-    </Drawer>
+      onClose={onClose}
+      title={isEditing ? "Edit Vendor" : "Add Vendor"}
+      form={form}
+      fields={fields}
+      initialValues={initialValues}
+      onSubmit={handleSubmit}
+      submitText={isEditing ? "Update" : "Create"}
+      loading={isCreating || isUpdating}
+      width={500}
+    />
   );
 };
 

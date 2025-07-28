@@ -7,12 +7,14 @@ import { Brand } from "./types";
 import { useNotification } from "@/hooks/useNotification";
 import { useModal } from "@/hooks/useModal";
 import AddEditBrandDrawer from "./AddEditBrandDrawer";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const { Search } = Input;
 const { Option } = Select;
 
 const BrandTable: React.FC = () => {
   const [searchText, setSearchText] = useState("");
+  const debouncedSearchText = useDebounce(searchText, 400);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [selectedVendorId, setSelectedVendorId] = useState<string>("");
@@ -23,7 +25,7 @@ const BrandTable: React.FC = () => {
   const { data: brandsResponse, isLoading, refetch } = useGetBrandsQuery({
     page: currentPage,
     limit: pageSize,
-    search: searchText,
+    search: debouncedSearchText,
     vendor: selectedVendorId,
   });
 
@@ -72,20 +74,20 @@ const BrandTable: React.FC = () => {
       title: "Brand Name",
       dataIndex: "name",
       key: "name",
-      sorter: true,
+      // sorter: true,
     },
     {
       title: "Vendor",
       dataIndex: ["vendor", "name"],
       key: "vendorName",
-      sorter: true,
+      // sorter: true,
     },
     {
       title: "Created At",
       dataIndex: "createdAt",
       key: "createdAt",
       render: (date: string) => new Date(date).toLocaleDateString(),
-      sorter: true,
+      // sorter: true,
     },
     {
       title: "Actions",
@@ -122,7 +124,6 @@ const BrandTable: React.FC = () => {
           type="primary"
           icon={<PlusOutlined />}
           onClick={handleAdd}
-          className="bg-blue-600 hover:bg-blue-700"
         >
           Add Brand
         </Button>
@@ -135,6 +136,8 @@ const BrandTable: React.FC = () => {
           enterButton={<SearchOutlined />}
           size="large"
           onSearch={handleSearch}
+          onChange={e => handleSearch(e.target.value)}
+          value={searchText}
           className="flex-1 max-w-md"
         />
         <Select

@@ -88,17 +88,25 @@ export async function handleGet(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
+    const search = searchParams.get("search") || "";
 
     const skip = (page - 1) * limit;
 
+    const query: any = {};
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+      ];
+    }
+
     // Execute query
     const [vendors, total] = await Promise.all([
-      Vendor.find({})
+      Vendor.find(query)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),
-      Vendor.countDocuments({}),
+      Vendor.countDocuments(query),
     ]);
 
     return NextResponse.json({
@@ -181,7 +189,7 @@ export async function handleUpdateById(
     const body = await request.json();
     const { name } = body;
     const { id } = await params;
-    
+
     const existingVendor = await Vendor.findById(id);
     if (!existingVendor) {
       return NextResponse.json(

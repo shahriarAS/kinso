@@ -1,29 +1,41 @@
 import React, { useState } from "react";
-import { Table, Button, Space, Popconfirm, Tag, Input } from "antd";
-import { EditOutlined, DeleteOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { Button, Input } from "antd";
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import { useGetVendorsQuery, useDeleteVendorMutation } from "./api";
 import { Vendor } from "./types";
 import { useNotification } from "@/hooks/useNotification";
 import { useModal } from "@/hooks/useModal";
 import AddEditVendorDrawer from "./AddEditVendorDrawer";
+import {
+  GenericTable,
+  type TableColumn,
+  type TableAction,
+} from "@/components/common";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const { Search } = Input;
 
 const VendorTable: React.FC = () => {
   const [searchText, setSearchText] = useState("");
+  const debouncedSearchText = useDebounce(searchText, 400);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const { success, error } = useNotification();
+  const { success, error: notifyError } = useNotification();
   const { open, close, isOpen } = useModal("vendor-drawer");
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
 
-  const { data: vendorsResponse, isLoading, refetch } = useGetVendorsQuery({
+  const {
+    data: vendorsResponse,
+    isLoading,
+    error,
+    refetch,
+  } = useGetVendorsQuery({
     page: currentPage,
     limit: pageSize,
-    search: searchText,
+    search: debouncedSearchText,
   });
 
-  const [deleteVendor] = useDeleteVendorMutation();
+  const [deleteVendor, { isLoading: isDeleting }] = useDeleteVendorMutation();
 
   const handleSearch = (value: string) => {
     setSearchText(value);
@@ -35,13 +47,13 @@ const VendorTable: React.FC = () => {
     open(vendor);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (vendor: Vendor) => {
     try {
-      await deleteVendor(id).unwrap();
+      await deleteVendor(vendor._id).unwrap();
       success("Vendor deleted successfully");
       refetch();
     } catch (err) {
-      error("Failed to delete vendor");
+      notifyError("Failed to delete vendor");
     }
   };
 
@@ -56,44 +68,43 @@ const VendorTable: React.FC = () => {
     refetch();
   };
 
-  const columns = [
+  const columns: TableColumn<Vendor>[] = [
     {
       title: "Vendor Name",
       dataIndex: "name",
       key: "name",
-      sorter: true,
+      // sorter: true,
     },
     {
       title: "Created At",
       dataIndex: "createdAt",
       key: "createdAt",
       render: (date: string) => new Date(date).toLocaleDateString(),
-      sorter: true,
+      // sorter: true,
+    },
+  ];
+
+  const actions: TableAction<Vendor>[] = [
+    {
+      key: "edit",
+      label: "Edit",
+      icon: "ant-design:edit-outlined",
+      type: "edit",
+      color: "blue",
+      onClick: handleEdit,
     },
     {
-      title: "Actions",
-      key: "actions",
-      render: (_: any, record: Vendor) => (
-        <Space size="middle">
-          <Button
-            type="link"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          >
-            Edit
-          </Button>
-          <Popconfirm
-            title="Are you sure you want to delete this vendor?"
-            onConfirm={() => handleDelete(record._id)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button type="link" danger icon={<DeleteOutlined />}>
-              Delete
-            </Button>
-          </Popconfirm>
-        </Space>
-      ),
+      key: "delete",
+      label: "Delete",
+      icon: "ant-design:delete-outlined",
+      type: "delete",
+      color: "red",
+      onClick: handleDelete,
+      confirm: {
+        title: "Are you sure you want to delete this vendor?",
+        description: "This action cannot be undone.",
+      },
+      loading: isDeleting,
     },
   ];
 
@@ -103,7 +114,7 @@ const VendorTable: React.FC = () => {
         <h2 className="text-2xl font-semibold text-gray-800">Vendors</h2>
         <Button
           type="primary"
-          icon={<PlusOutlined />}
+          icon={<PlusOutlined />} // still use AntD icon for button
           onClick={handleAdd}
           className="bg-blue-600 hover:bg-blue-700"
         >
@@ -118,14 +129,19 @@ const VendorTable: React.FC = () => {
           enterButton={<SearchOutlined />}
           size="large"
           onSearch={handleSearch}
+          onChange={e => handleSearch(e.target.value)}
+          value={searchText}
           className="max-w-md"
         />
       </div>
 
-      <Table
-        columns={columns}
-        dataSource={vendorsResponse?.data || []}
+      <GenericTable<Vendor>
+        data={vendorsResponse?.data || []}
         loading={isLoading}
+        error={error}
+        onRetry={refetch}
+        columns={columns}
+        actions={actions}
         rowKey="_id"
         pagination={{
           current: currentPage,
@@ -133,8 +149,7 @@ const VendorTable: React.FC = () => {
           total: vendorsResponse?.pagination?.total || 0,
           showSizeChanger: true,
           showQuickJumper: true,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} items`,
+          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
           onChange: (page, size) => {
             setCurrentPage(page);
             setPageSize(size || 10);

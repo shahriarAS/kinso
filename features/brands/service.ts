@@ -89,6 +89,7 @@ export async function handleGet(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
     const vendor = searchParams.get("vendor") || "";
+    const search = searchParams.get("search") || "";
 
     const skip = (page - 1) * limit;
 
@@ -96,6 +97,11 @@ export async function handleGet(request: NextRequest) {
     const query: any = {};
     if (vendor) {
       query.vendor = vendor;
+    }
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+      ];
     }
 
     // Execute query

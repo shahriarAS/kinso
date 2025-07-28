@@ -10,43 +10,43 @@ import { UserOutlined, LogoutOutlined, DownOutlined } from "@ant-design/icons";
 import { useFetchAuthUserQuery, useLogoutUserMutation } from "@/features/auth";
 
 const menuItems = [
-  {
-    icon: "lineicons:dashboard-square-1",
-    label: "Dashboard",
-    href: "/dashboard",
-  },
-  {
-    icon: "lineicons:cart-1",
-    label: "Point of Sale",
-    href: "/dashboard/pos",
-  },
-  {
-    icon: "lsicon:management-stockout-outline",
-    label: "Inventory",
-    href: "/dashboard/inventory",
-  },
-  {
-    icon: "mdi:package-variant",
-    label: "Stock Management",
-    href: "/dashboard/stock",
-  },
-  {
-    icon: "mdi:package-variant",
-    label: "Demand",
-    href: "/dashboard/demand",
-  },
-  {
-    icon: "lineicons:folder-1",
-    label: "Category",
-    href: "/dashboard/category",
-  },
+  // {
+  //   icon: "lineicons:dashboard-square-1",
+  //   label: "Dashboard",
+  //   href: "/dashboard",
+  // },
+  // {
+  //   icon: "lineicons:cart-1",
+  //   label: "Point of Sale",
+  //   href: "/dashboard/pos",
+  // },
+  // {
+  //   icon: "lsicon:management-stockout-outline",
+  //   label: "Inventory",
+  //   href: "/dashboard/inventory",
+  // },
+  // {
+  //   icon: "mdi:package-variant",
+  //   label: "Stock Management",
+  //   href: "/dashboard/stock",
+  // },
+  // {
+  //   icon: "mdi:package-variant",
+  //   label: "Demand",
+  //   href: "/dashboard/demand",
+  // },
+  // {
+  //   icon: "lineicons:folder-1",
+  //   label: "Category",
+  //   href: "/dashboard/category",
+  // },
+  // {
+  //   icon: "lineicons:buildings-1",
+  //   label: "Warehouse",
+  //   href: "/dashboard/warehouse",
+  // },
   {
     icon: "lineicons:buildings-1",
-    label: "Warehouse",
-    href: "/dashboard/warehouse",
-  },
-  {
-    icon: "lineicons:buildings-2",
     label: "Outlets",
     href: "/dashboard/outlets",
   },
@@ -60,26 +60,26 @@ const menuItems = [
     label: "Brands",
     href: "/dashboard/brands",
   },
-  {
-    icon: "tabler:currency-taka",
-    label: "Orders",
-    href: "/dashboard/orders",
-  },
-  {
-    icon: "lineicons:users",
-    label: "Customers",
-    href: "/dashboard/customers",
-  },
-  {
-    icon: "lineicons:user",
-    label: "Users",
-    href: "/dashboard/users",
-  },
-  {
-    icon: "lineicons:cog",
-    label: "Settings",
-    href: "/dashboard/settings",
-  },
+  // {
+  //   icon: "tabler:currency-taka",
+  //   label: "Orders",
+  //   href: "/dashboard/orders",
+  // },
+  // {
+  //   icon: "lineicons:users",
+  //   label: "Customers",
+  //   href: "/dashboard/customers",
+  // },
+  // {
+  //   icon: "lineicons:user",
+  //   label: "Users",
+  //   href: "/dashboard/users",
+  // },
+  // {
+  //   icon: "lineicons:cog",
+  //   label: "Settings",
+  //   href: "/dashboard/settings",
+  // },
 ];
 
 export default function DashboardSidebar() {

@@ -1,173 +1,186 @@
-"use client";
-
-import { useState } from "react";
-import { Category } from "@/features/categories/types";
-import {
-  useGetCategoriesQuery,
-  useDeleteCategoryMutation,
-} from "@/features/categories/api";
-import AddEditCategoryDrawer from "./AddEditCategoryDrawer";
+import React, { useState } from "react";
+import { Table, Button, Space, Popconfirm, Input, Select } from "antd";
+import { EditOutlined, DeleteOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { useGetCategoriesQuery, useDeleteCategoryMutation } from "./api";
+import { Category } from "./types";
 import { useNotification } from "@/hooks/useNotification";
-import {
-  GenericTable,
-  type TableColumn,
-  type TableAction,
-} from "@/components/common";
+import { useModal } from "@/hooks/useModal";
+import AddEditCategoryDrawer from "./AddEditCategoryDrawer";
+import { useDebounce } from "@/hooks/useDebounce";
 
-interface Props {
-  searchTerm: string;
-  currentPage: number;
-  pageSize: number;
-  onPageChange: (page: number) => void;
-}
+const { Search } = Input;
+const { Option } = Select;
 
-export default function CategoryTable({
-  searchTerm,
-  currentPage,
-  pageSize,
-  onPageChange,
-}: Props) {
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const { success, error: showError } = useNotification();
+const CategoryTable: React.FC = () => {
+  const [searchText, setSearchText] = useState("");
+  const debouncedSearchText = useDebounce(searchText, 400);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [selectedApplyVAT, setSelectedApplyVAT] = useState<boolean | undefined>(undefined);
+  const { success, error } = useNotification();
+  const { open, close, isOpen } = useModal("category-drawer");
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
-  // API hooks
-  const { data, isLoading, error, refetch } = useGetCategoriesQuery({
+  const { data: categoriesResponse, isLoading, refetch } = useGetCategoriesQuery({
     page: currentPage,
     limit: pageSize,
-    search: searchTerm,
+    search: debouncedSearchText,
+    applyVAT: selectedApplyVAT,
   });
 
-  const [deleteCategory, { isLoading: isDeleting }] =
-    useDeleteCategoryMutation();
+  const [deleteCategory] = useDeleteCategoryMutation();
 
-  const handleEdit = (category: Category) => {
-    setEditingCategory(category);
+  const handleSearch = (value: string) => {
+    setSearchText(value);
+    setCurrentPage(1);
   };
 
-  const handleDelete = async (category: Category) => {
+  const handleApplyVATFilter = (value: boolean) => {
+    setSelectedApplyVAT(value);
+    setCurrentPage(1);
+  };
+
+  const handleEdit = (category: Category) => {
+    setSelectedCategory(category);
+    open(category);
+  };
+
+  const handleDelete = async (id: string) => {
     try {
-      await deleteCategory(category._id).unwrap();
+      await deleteCategory(id).unwrap();
       success("Category deleted successfully");
-    } catch (error: unknown) {
-      if (
-        error &&
-        typeof error === "object" &&
-        "data" in error &&
-        error.data &&
-        typeof error.data === "object" &&
-        "message" in error.data
-      ) {
-        showError(
-          "Failed to delete category",
-          (error.data as { message: string }).message,
-        );
-      } else {
-        showError("Failed to delete category");
-      }
+      refetch();
+    } catch (err) {
+      error("Failed to delete category");
     }
   };
 
-  // Define columns using the generic interface
-  const columns: TableColumn<Category>[] = [
+  const handleAdd = () => {
+    setSelectedCategory(null);
+    open();
+  };
+
+  const handleDrawerClose = () => {
+    close();
+    setSelectedCategory(null);
+    refetch();
+  };
+
+  const columns = [
     {
-      title: <span className="font-medium text-base">Category ID</span>,
-      dataIndex: "categoryId",
-      key: "categoryId",
-      render: (text: string) => (
-        <span className="font-medium text-gray-900">{text}</span>
-      ),
+      title: "Category Name",
+      dataIndex: "name",
+      key: "name",
+      // sorter: true,
     },
     {
-      title: <span className="font-medium text-base">Category Name</span>,
-      dataIndex: "categoryName",
-      key: "categoryName",
-      render: (text: string) => (
-        <span className="font-medium text-gray-900">{text}</span>
-      ),
+      title: "Apply VAT",
+      dataIndex: "applyVAT",
+      key: "applyVAT",
+      render: (applyVAT: boolean) => applyVAT ? "Yes" : "No",
+      // sorter: true,
     },
     {
-      title: <span className="font-medium text-base">VAT Status</span>,
-      dataIndex: "vatStatus",
-      key: "vatStatus",
-      render: (status: boolean) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-          status 
-            ? "bg-green-100 text-green-800" 
-            : "bg-gray-100 text-gray-800"
-        }`}>
-          {status ? "VAT Enabled" : "VAT Disabled"}
-        </span>
-      ),
+      title: "Created At",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (date: string) => new Date(date).toLocaleDateString(),
+      // sorter: true,
     },
     {
-      title: <span className="font-medium text-base">Description</span>,
-      dataIndex: "description",
-      key: "description",
-      render: (text: string) => (
-        <span className="text-gray-700">{text || "-"}</span>
+      title: "Actions",
+      key: "actions",
+      render: (_: any, record: Category) => (
+        <Space size="middle">
+          <Button
+            type="link"
+            icon={<EditOutlined />}
+            onClick={() => handleEdit(record)}
+          >
+            Edit
+          </Button>
+          <Popconfirm
+            title="Are you sure you want to delete this category?"
+            onConfirm={() => handleDelete(record._id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button type="link" danger icon={<DeleteOutlined />}>
+              Delete
+            </Button>
+          </Popconfirm>
+        </Space>
       ),
     },
   ];
-
-  // Define actions using the generic interface
-  const actions: TableAction<Category>[] = [
-    {
-      key: "edit",
-      label: "Edit",
-      icon: "lineicons:pencil-1",
-      type: "edit",
-      color: "blue",
-      onClick: handleEdit,
-    },
-    {
-      key: "delete",
-      label: "Delete",
-      icon: "lineicons:trash-3",
-      type: "delete",
-      color: "red",
-      onClick: handleDelete,
-      confirm: {
-        title: "Delete Category",
-        description: "Are you sure you want to delete this category?",
-      },
-      loading: isDeleting,
-    },
-  ];
-
-  const categories = data?.data || [];
-  const pagination = data?.pagination;
 
   return (
-    <>
-      <GenericTable
-        data={categories}
-        loading={isLoading}
-        error={error}
-        onRetry={refetch}
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold text-gray-800">Categories</h2>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={handleAdd}
+        >
+          Add Category
+        </Button>
+      </div>
+
+      <div className="flex justify-between items-center space-x-4">
+        <Search
+          placeholder="Search categories..."
+          allowClear
+          enterButton={<SearchOutlined />}
+          size="large"
+          onSearch={handleSearch}
+          onChange={e => handleSearch(e.target.value)}
+          value={searchText}
+          className="flex-1 max-w-md"
+        />
+        <Select
+          placeholder="Filter by apply VAT"
+          allowClear
+          style={{ width: 200 }}
+          onChange={handleApplyVATFilter}
+          value={selectedApplyVAT || undefined}
+        >
+          {["Yes", "No"].map((applyVAT) => (
+            <Option key={applyVAT} value={applyVAT === "Yes"}>
+              {applyVAT === "Yes" ? "Yes" : "No"}
+            </Option>
+          ))}
+        </Select>
+      </div>
+
+      <Table
         columns={columns}
-        actions={actions}
-        pagination={
-          pagination
-            ? {
-                current: currentPage,
-                pageSize,
-                total: pagination.total,
-                onChange: onPageChange,
-                showSizeChanger: false,
-                showTotal: (total, range) =>
-                  `${range[0]}-${range[1]} of ${total} items`,
-              }
-            : undefined
-        }
+        dataSource={categoriesResponse?.data || []}
+        loading={isLoading}
+        rowKey="_id"
+        pagination={{
+          current: currentPage,
+          pageSize: pageSize,
+          total: categoriesResponse?.pagination?.total || 0,
+          showSizeChanger: true,
+          showQuickJumper: true,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`,
+          onChange: (page, size) => {
+            setCurrentPage(page);
+            setPageSize(size || 10);
+          },
+        }}
+        className="bg-white rounded-lg shadow"
       />
 
-      {/* Edit Drawer */}
       <AddEditCategoryDrawer
-        open={!!editingCategory}
-        setOpen={() => setEditingCategory(null)}
-        category={editingCategory}
-        onClose={() => setEditingCategory(null)}
+        open={isOpen}
+        onClose={handleDrawerClose}
+        category={selectedCategory}
       />
-    </>
+    </div>
   );
-}
+};
+
+export default CategoryTable; 

@@ -15,9 +15,7 @@ export const categoriesApi = createApi({
         page?: number;
         limit?: number;
         search?: string;
-        categoryId?: string;
-        categoryName?: string;
-        vatStatus?: boolean;
+        applyVAT?: boolean;
         sortBy?: string;
         sortOrder?: "asc" | "desc";
       }

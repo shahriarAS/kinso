@@ -27,17 +27,31 @@ export async function handleGet(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
+    const applyVAT = searchParams.get("applyVAT");
+    const search = searchParams.get("search") || "";
+
+    const query: any = {};
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+      ];
+    }
+    if (applyVAT === "true") {
+      query.applyVAT = true;
+    } else if (applyVAT === "false") {
+      query.applyVAT = false;
+    }
 
     const skip = (page - 1) * limit;
 
     // Execute query
     const [categories, total] = await Promise.all([
-      Category.find()
+      Category.find(query)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),
-      Category.countDocuments(),
+      Category.countDocuments(query),
     ]);
 
     return NextResponse.json({

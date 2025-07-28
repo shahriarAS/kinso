@@ -1,132 +1,90 @@
-"use client";
-import { Form } from "antd";
-import React from "react";
-import { Category } from "@/features/categories/types";
-import {
-  useCreateCategoryMutation,
-  useUpdateCategoryMutation,
-} from "@/features/categories/api";
+import React, { useMemo } from "react";
+import { useCreateCategoryMutation, useUpdateCategoryMutation } from "./api";
+import { Category, CategoryInput } from "./types";
 import { useNotification } from "@/hooks/useNotification";
-import { GenericDrawer, type FormField } from "@/components/common";
+import { Form } from "antd";
+import { GenericDrawer, FormField } from "@/components/common";
 
-interface Props {
+interface AddEditCategoryDrawerProps {
   open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose: () => void;
   category?: Category | null;
-  onClose?: () => void;
 }
 
-export default function AddEditCategoryDrawer({
+const AddEditCategoryDrawer: React.FC<AddEditCategoryDrawerProps> = ({
   open,
-  setOpen,
-  category,
   onClose,
-}: Props) {
-  const [form] = Form.useForm<Category>();
-  const { success, error: showError } = useNotification();
-
-  // API hooks
+  category,
+}) => {
+  const [form] = Form.useForm<CategoryInput>();
+  const { success, error } = useNotification();
   const [createCategory, { isLoading: isCreating }] =
     useCreateCategoryMutation();
   const [updateCategory, { isLoading: isUpdating }] =
     useUpdateCategoryMutation();
 
   const isEditing = !!category;
-  const isLoading = isCreating || isUpdating;
 
-  // Define form fields using the generic interface
-  const fields: FormField[] = [
-    {
-      name: "categoryId",
-      label: "Category ID",
-      type: "input",
-      placeholder: "Enter Category ID",
-      rules: [{ required: true, message: "Please enter category ID" }],
-    },
-    {
-      name: "categoryName",
-      label: "Category Name",
-      type: "input",
-      placeholder: "Enter Category Name",
-      rules: [{ required: true, message: "Please enter category name" }],
-    },
-    {
-      name: "vatStatus",
-      label: "VAT Status",
-      type: "select",
-      placeholder: "Select VAT status",
-      options: [
-        { label: "VAT Enabled", value: true },
-        { label: "VAT Disabled", value: false },
-      ],
-    },
-    {
-      name: "description",
-      label: "Description",
-      type: "textarea",
-      placeholder: "Enter Description",
-    },
-  ];
+  // Define form fields for GenericDrawer
+  const fields: FormField[] = useMemo(
+    () => [
+      {
+        name: "name",
+        label: "Category Name",
+        type: "input",
+        placeholder: "Enter category name",
+        rules: [{ required: true, message: "Please enter category name" }],
+      },
+      {
+        name: "applyVAT",
+        label: "Apply VAT",
+        type: "select",
+        placeholder: "Select category type",
+        options: [
+          { label: "Yes", value: true },
+          { label: "No", value: false },
+        ],
+      },
+    ],
+    [],
+  );
 
-  const handleSubmit = async (values: Category) => {
+  // Set initial values for edit mode
+  const initialValues =
+    isEditing && category
+      ? { name: category.name, applyVAT: category.applyVAT }
+      : undefined;
+
+  const handleSubmit = async (values: CategoryInput) => {
     try {
       if (isEditing && category) {
-        await updateCategory({
-          _id: category._id,
-          category: values,
-        }).unwrap();
+        await updateCategory({ _id: category._id, category: values }).unwrap();
         success("Category updated successfully");
       } else {
         await createCategory(values).unwrap();
         success("Category created successfully");
       }
-    } catch (error: unknown) {
-      if (
-        error &&
-        typeof error === "object" &&
-        "data" in error &&
-        error.data &&
-        typeof error.data === "object" &&
-        "message" in error.data
-      ) {
-        showError(
-          "Failed to save category",
-          (error.data as { message: string }).message,
-        );
-      } else {
-        showError("Failed to save category");
-      }
-      throw error; // Re-throw to prevent drawer from closing
-    }
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-    if (onClose) {
       onClose();
+      form.resetFields();
+    } catch (err) {
+      error("Failed to save category");
     }
   };
 
   return (
     <GenericDrawer
       open={open}
-      onClose={handleClose}
-      title={isEditing ? "Edit Category" : "Add New Category"}
+      onClose={onClose}
+      title={isEditing ? "Edit Category" : "Add Category"}
       form={form}
       fields={fields}
-      initialValues={
-        category
-          ? {
-              categoryId: category.categoryId,
-              categoryName: category.categoryName,
-              vatStatus: category.vatStatus,
-              description: category.description,
-            }
-          : undefined
-      }
+      initialValues={initialValues}
       onSubmit={handleSubmit}
-      loading={isLoading}
-      submitText={isEditing ? "Update" : "Save"}
+      submitText={isEditing ? "Update" : "Create"}
+      loading={isCreating || isUpdating}
+      width={500}
     />
   );
-}
+};
+
+export default AddEditCategoryDrawer;

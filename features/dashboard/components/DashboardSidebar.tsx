@@ -35,11 +35,11 @@ const menuItems = [
   //   label: "Demand",
   //   href: "/dashboard/demand",
   // },
-  // {
-  //   icon: "lineicons:folder-1",
-  //   label: "Category",
-  //   href: "/dashboard/category",
-  // },
+  {
+    icon: "lineicons:folder-1",
+    label: "Category",
+    href: "/dashboard/category",
+  },
   // {
   //   icon: "lineicons:buildings-1",
   //   label: "Warehouse",

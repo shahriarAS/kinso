@@ -58,15 +58,9 @@ const VendorTable: React.FC = () => {
 
   const columns = [
     {
-      title: "Vendor ID",
-      dataIndex: "vendorId",
-      key: "vendorId",
-      sorter: true,
-    },
-    {
       title: "Vendor Name",
-      dataIndex: "vendorName",
-      key: "vendorName",
+      dataIndex: "name",
+      key: "name",
       sorter: true,
     },
     {

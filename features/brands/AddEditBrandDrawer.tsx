@@ -2,8 +2,9 @@ import React, { useEffect } from "react";
 import { Drawer, Form, Input, Button, Select } from "antd";
 import { useCreateBrandMutation, useUpdateBrandMutation } from "./api";
 import { useGetAllVendorsQuery } from "@/features/vendors/api";
-import { Brand, ICreateBrandRequest, IUpdateBrandRequest } from "./types";
+import { Brand, BrandInput } from "./types";
 import { useNotification } from "@/hooks/useNotification";
+import { Vendor } from "../vendors";
 
 const { Option } = Select;
 
@@ -30,9 +31,8 @@ const AddEditBrandDrawer: React.FC<AddEditBrandDrawerProps> = ({
     if (open) {
       if (brand) {
         form.setFieldsValue({
-          brandId: brand.brandId,
-          brandName: brand.brandName,
-          vendorId: brand.vendorId,
+          name: brand.name,
+          vendor: brand.vendor._id,
         });
       } else {
         form.resetFields();
@@ -40,16 +40,16 @@ const AddEditBrandDrawer: React.FC<AddEditBrandDrawerProps> = ({
     }
   }, [open, brand, form]);
 
-  const handleSubmit = async (values: ICreateBrandRequest | IUpdateBrandRequest) => {
+  const handleSubmit = async (values: BrandInput) => {
     try {
       if (isEditing && brand) {
         await updateBrand({
           _id: brand._id,
-          brand: values as IUpdateBrandRequest,
+          brand: values,
         }).unwrap();
         success("Brand updated successfully");
       } else {
-        await createBrand(values as ICreateBrandRequest).unwrap();
+        await createBrand(values).unwrap();
         success("Brand created successfully");
       }
       onClose();
@@ -90,18 +90,7 @@ const AddEditBrandDrawer: React.FC<AddEditBrandDrawerProps> = ({
         autoComplete="off"
       >
         <Form.Item
-          name="brandId"
-          label="Brand ID"
-          rules={[
-            { required: true, message: "Please enter brand ID" },
-            { min: 2, message: "Brand ID must be at least 2 characters" },
-          ]}
-        >
-          <Input placeholder="Enter brand ID" />
-        </Form.Item>
-
-        <Form.Item
-          name="brandName"
+          name="name"
           label="Brand Name"
           rules={[
             { required: true, message: "Please enter brand name" },
@@ -112,7 +101,7 @@ const AddEditBrandDrawer: React.FC<AddEditBrandDrawerProps> = ({
         </Form.Item>
 
         <Form.Item
-          name="vendorId"
+          name="vendor"
           label="Vendor"
           rules={[
             { required: true, message: "Please select a vendor" },
@@ -121,16 +110,10 @@ const AddEditBrandDrawer: React.FC<AddEditBrandDrawerProps> = ({
           <Select
             placeholder="Select vendor"
             showSearch
-            optionFilterProp="children"
-            filterOption={(input, option) =>
-              (option?.children as unknown as string)
-                ?.toLowerCase()
-                .includes(input.toLowerCase())
-            }
           >
-            {vendorsResponse?.data?.map((vendor) => (
+            {vendorsResponse?.data?.map((vendor: Vendor) => (
               <Option key={vendor._id} value={vendor._id}>
-                {vendor.vendorName}
+                {vendor.name}
               </Option>
             ))}
           </Select>

@@ -24,7 +24,7 @@ const BrandTable: React.FC = () => {
     page: currentPage,
     limit: pageSize,
     search: searchText,
-    vendorId: selectedVendorId || undefined,
+    vendor: selectedVendorId,
   });
 
   const { data: vendorsResponse } = useGetAllVendorsQuery();
@@ -69,20 +69,14 @@ const BrandTable: React.FC = () => {
 
   const columns = [
     {
-      title: "Brand ID",
-      dataIndex: "brandId",
-      key: "brandId",
-      sorter: true,
-    },
-    {
       title: "Brand Name",
-      dataIndex: "brandName",
-      key: "brandName",
+      dataIndex: "name",
+      key: "name",
       sorter: true,
     },
     {
       title: "Vendor",
-      dataIndex: ["vendor", "vendorName"],
+      dataIndex: ["vendor", "name"],
       key: "vendorName",
       sorter: true,
     },
@@ -152,7 +146,7 @@ const BrandTable: React.FC = () => {
         >
           {vendorsResponse?.data?.map((vendor) => (
             <Option key={vendor._id} value={vendor._id}>
-              {vendor.vendorName}
+              {vendor.name}
             </Option>
           ))}
         </Select>

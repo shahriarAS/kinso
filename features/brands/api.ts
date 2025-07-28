@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
-import { Brand, BrandInput, BrandUpdateInput } from "./types";
+import { Brand, BrandInput } from "./types";
 import { PaginatedResponse, ApiResponse } from "@/types";
 
 export const brandsApi = createApi({
@@ -14,9 +14,8 @@ export const brandsApi = createApi({
         page?: number;
         limit?: number;
         search?: string;
-        brandId?: string;
-        brandName?: string;
-        vendorId?: string;
+        name?: string;
+        vendor?: string;
         sortBy?: string;
         sortOrder?: "asc" | "desc";
       }
@@ -60,7 +59,7 @@ export const brandsApi = createApi({
 
     updateBrand: builder.mutation<
       ApiResponse<Brand>,
-      { _id: string; brand: Partial<BrandUpdateInput> }
+      { _id: string; brand: Partial<BrandInput> }
     >({
       query: ({ _id, brand }) => ({
         url: `/${_id}`,

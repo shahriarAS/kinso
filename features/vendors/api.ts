@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
-import { Vendor, VendorInput, VendorUpdateInput } from "./types";
+import { Vendor, VendorInput } from "./types";
 import { PaginatedResponse, ApiResponse } from "@/types";
 
 export const vendorApi = createApi({
@@ -14,8 +14,7 @@ export const vendorApi = createApi({
         page?: number;
         limit?: number;
         search?: string;
-        vendorId?: string;
-        vendorName?: string;
+        name?: string;
         sortBy?: string;
         sortOrder?: "asc" | "desc";
       }
@@ -59,7 +58,7 @@ export const vendorApi = createApi({
 
     updateVendor: builder.mutation<
       ApiResponse<Vendor>,
-      { _id: string; vendor: Partial<VendorUpdateInput> }
+      { _id: string; vendor: Partial<VendorInput> }
     >({
       query: ({ _id, vendor }) => ({
         url: `/${_id}`,

@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
-import { Drawer, Form, Input, Button, message } from "antd";
+import { Drawer, Form, Input, Button } from "antd";
 import { useCreateVendorMutation, useUpdateVendorMutation } from "./api";
-import { Vendor, ICreateVendorRequest, IUpdateVendorRequest } from "./types";
+import { Vendor, VendorInput } from "./types";
 import { useNotification } from "@/hooks/useNotification";
 
 interface AddEditVendorDrawerProps {
@@ -26,8 +26,7 @@ const AddEditVendorDrawer: React.FC<AddEditVendorDrawerProps> = ({
     if (open) {
       if (vendor) {
         form.setFieldsValue({
-          vendorId: vendor.vendorId,
-          vendorName: vendor.vendorName,
+          name: vendor.name,
         });
       } else {
         form.resetFields();
@@ -35,16 +34,16 @@ const AddEditVendorDrawer: React.FC<AddEditVendorDrawerProps> = ({
     }
   }, [open, vendor, form]);
 
-  const handleSubmit = async (values: ICreateVendorRequest | IUpdateVendorRequest) => {
+  const handleSubmit = async (values: VendorInput) => {
     try {
       if (isEditing && vendor) {
         await updateVendor({
           _id: vendor._id,
-          vendor: values as IUpdateVendorRequest,
+          vendor: values,
         }).unwrap();
         success("Vendor updated successfully");
       } else {
-        await createVendor(values as ICreateVendorRequest).unwrap();
+        await createVendor(values).unwrap();
         success("Vendor created successfully");
       }
       onClose();
@@ -65,6 +64,7 @@ const AddEditVendorDrawer: React.FC<AddEditVendorDrawerProps> = ({
       width={500}
       open={open}
       onClose={handleClose}
+      autoFocus={true}
       footer={
         <div className="flex justify-end space-x-2">
           <Button onClick={handleClose}>Cancel</Button>
@@ -85,26 +85,14 @@ const AddEditVendorDrawer: React.FC<AddEditVendorDrawerProps> = ({
         autoComplete="off"
       >
         <Form.Item
-          name="vendorId"
-          label="Vendor ID"
-          rules={[
-            { required: true, message: "Please enter vendor ID" },
-            { min: 2, message: "Vendor ID must be at least 2 characters" },
-          ]}
-        >
-          <Input placeholder="Enter vendor ID" />
-        </Form.Item>
-
-        <Form.Item
-          name="vendorName"
+          name="name"
           label="Vendor Name"
           rules={[
             { required: true, message: "Please enter vendor name" },
-            { min: 2, message: "Vendor name must be at least 2 characters" },
           ]}
         >
           <Input placeholder="Enter vendor name" />
-        </Form.Item>
+        </Form.Item> 
       </Form>
     </Drawer>
   );

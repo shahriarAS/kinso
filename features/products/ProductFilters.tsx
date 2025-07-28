@@ -1,9 +1,7 @@
-"use client";
-import React from "react";
+"use client";;
 import { Input, Select } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { useGetAllCategoriesQuery } from "@/features/categories/api";
-import { useGetWarehousesQuery } from "@/features/warehouses";
 import { useGetAllBrandsQuery } from "../brands";
 import { useGetAllVendorsQuery } from "../vendors";
 

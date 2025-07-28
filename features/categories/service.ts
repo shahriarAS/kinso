@@ -3,6 +3,7 @@ import dbConnect from "@/lib/database";
 import Category from "./model";
 import { authorizeRequest } from "@/lib/auth";
 import { AuthenticatedRequest } from "@/features/auth";
+import Product from "@/features/products/model";
 
 // GET /api/categories - List all categories with pagination
 export async function handleGet(request: NextRequest) {
@@ -271,9 +272,13 @@ export async function handleDeleteById(
       );
     }
 
-    // TODO: Check if category is being used by any products
-    // This would require checking the Product model for references
-    // For now, we'll allow deletion but you should implement this check
+    const productCount = await Product.countDocuments({ category: id });
+    if (productCount > 0) {
+      return NextResponse.json(
+        { success: false, message: "Cannot delete category: it is used by products" },
+        { status: 409 },
+      );
+    }
 
     await Category.findByIdAndDelete(id);
 

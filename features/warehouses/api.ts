@@ -27,12 +27,12 @@ export const warehousesApi = createApi({
       providesTags: (result) =>
         result?.data
           ? [
-              ...result.data.map(({ _id }) => ({
-                type: "Warehouse" as const,
-                _id,
-              })),
-              { type: "Warehouse", id: "LIST" },
-            ]
+            ...result.data.map(({ _id }) => ({
+              type: "Warehouse" as const,
+              _id,
+            })),
+            { type: "Warehouse", id: "LIST" },
+          ]
           : [{ type: "Warehouse", id: "LIST" }],
     }),
 
@@ -82,61 +82,6 @@ export const warehousesApi = createApi({
       }),
       invalidatesTags: [{ type: "Warehouse", id: "LIST" }],
     }),
-
-    // Get warehouse inventory
-    getWarehouseInventory: builder.query<
-      ApiResponse<{
-        warehouse: Warehouse;
-        products: Array<{
-          product: {
-            _id: string;
-            name: string;
-            upc: string;
-            sku: string;
-            category: string;
-          };
-          quantity: number;
-          unit: string;
-          dp?: number;
-          mrp: number;
-        }>;
-        totalProducts: number;
-        totalValue: number;
-      }>,
-      string
-    >({
-      query: (warehouseId) => ({
-        url: `/${warehouseId}/inventory`,
-        method: "GET",
-      }),
-      providesTags: (result, error, warehouseId) => [
-        { type: "Warehouse", id: warehouseId },
-      ],
-    }),
-
-    // Get warehouse statistics
-    getWarehouseStats: builder.query<
-      ApiResponse<{
-        totalWarehouses: number;
-        totalProducts: number;
-        totalValue: number;
-        lowStockProducts: number;
-        warehouses: Array<{
-          _id: string;
-          name: string;
-          location: string;
-          productCount: number;
-          totalValue: number;
-        }>;
-      }>,
-      void
-    >({
-      query: () => ({
-        url: "/stats",
-        method: "GET",
-      }),
-      providesTags: ["Warehouse"],
-    }),
   }),
 });
 
@@ -146,6 +91,4 @@ export const {
   useCreateWarehouseMutation,
   useUpdateWarehouseMutation,
   useDeleteWarehouseMutation,
-  useGetWarehouseInventoryQuery,
-  useGetWarehouseStatsQuery,
 } = warehousesApi;

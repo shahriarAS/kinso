@@ -1,108 +1,102 @@
-"use client";
-
-import { useState } from "react";
-import {
-  useGetWarehousesQuery,
-  useDeleteWarehouseMutation,
-} from "@/features/warehouses/api";
-import type { Warehouse } from "@/features/warehouses/types";
-import AddEditWarehouseDrawer from "./AddEditWarehouseDrawer";
+import React, { useState } from "react";
+import { Button, Input, Select } from "antd";
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { useGetWarehousesQuery, useDeleteWarehouseMutation } from "./api";
+import { Warehouse } from "./types";
 import { useNotification } from "@/hooks/useNotification";
+import { useModal } from "@/hooks/useModal";
+import AddEditWarehouseDrawer from "./AddEditWarehouseDrawer";
+import { useDebounce } from "@/hooks/useDebounce";
+import { OUTLET_TYPES } from "@/types";
 import {
   GenericTable,
   type TableColumn,
   type TableAction,
 } from "@/components/common";
 
-interface Props {
-  searchTerm: string;
-  currentPage: number;
-  pageSize: number;
-  onPageChange: (page: number) => void;
-}
+const { Search } = Input;
+const { Option } = Select;
 
-export default function WarehouseTable({
-  searchTerm,
-  currentPage,
-  pageSize,
-  onPageChange,
-}: Props) {
-  const [editingWarehouse, setEditingWarehouse] = useState<Warehouse | null>(
-    null,
-  );
-  const { success, error: showError } = useNotification();
+const WarehouseTable: React.FC = () => {
+  const [searchText, setSearchText] = useState("");
+  const debouncedSearchText = useDebounce(searchText, 400);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [selectedTypeId, setSelectedTypeId] = useState<string>("");
+  const { success, error: notifyError } = useNotification();
+  const { open, close, isOpen } = useModal("warehouse-drawer");
+  const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null);
 
-  // API hooks
-  const { data, isLoading, error, refetch } = useGetWarehousesQuery({
+  const {
+    data: warehousesResponse,
+    isLoading,
+    error,
+    refetch,
+  } = useGetWarehousesQuery({
     page: currentPage,
     limit: pageSize,
-    search: searchTerm,
+    search: debouncedSearchText
   });
 
-  const [deleteWarehouse, { isLoading: isDeleting }] =
-    useDeleteWarehouseMutation();
+  const [deleteWarehouse, { isLoading: isDeleting }] = useDeleteWarehouseMutation();
+
+  const handleSearch = (value: string) => {
+    setSearchText(value);
+    setCurrentPage(1);
+  };
+
+  const handleTypeFilter = (value: string) => {
+    setSelectedTypeId(value);
+    setCurrentPage(1);
+  };
 
   const handleEdit = (warehouse: Warehouse) => {
-    setEditingWarehouse(warehouse);
+    setSelectedWarehouse(warehouse);
+    open(warehouse);
   };
 
   const handleDelete = async (warehouse: Warehouse) => {
     try {
       await deleteWarehouse(warehouse._id).unwrap();
       success("Warehouse deleted successfully");
-    } catch (error: unknown) {
-      if (
-        error &&
-        typeof error === "object" &&
-        "data" in error &&
-        error.data &&
-        typeof error.data === "object" &&
-        "message" in error.data
-      ) {
-        showError(
-          "Failed to delete warehouse",
-          (error.data as { message: string }).message,
-        );
-      } else {
-        showError("Failed to delete warehouse");
-      }
+      refetch();
+    } catch (err) {
+      notifyError("Failed to delete warehouse");
     }
   };
 
-  // Define columns using the generic interface
+  const handleAdd = () => {
+    setSelectedWarehouse(null);
+    open();
+  };
+
+  const handleDrawerClose = () => {
+    close();
+    setSelectedWarehouse(null);
+    refetch();
+  };
+
   const columns: TableColumn<Warehouse>[] = [
     {
-      title: <span className="font-medium text-base">Warehouse ID</span>,
-      dataIndex: "warehouseId",
-      key: "warehouseId",
-      render: (text: string) => (
-        <span className="font-mono text-blue-600 bg-blue-50 px-2 py-1 rounded">
-          {text}
-        </span>
-      ),
-    },
-    {
-      title: <span className="font-medium text-base">Name</span>,
+      title: "Warehouse Name",
       dataIndex: "name",
       key: "name",
-      render: (text: string) => (
-        <span className="font-medium text-gray-900">{text}</span>
-      ),
+      // sorter: true,
     },
     {
-      title: <span className="font-medium text-base">Location</span>,
-      dataIndex: "location",
-      key: "location",
-      render: (text: string) => <span className="text-gray-700">{text}</span>,
+      title: "Created At",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (date: string) => new Date(date).toLocaleDateString(),
+      // sorter: true,
     },
   ];
 
-  // Define actions using the generic interface
   const actions: TableAction<Warehouse>[] = [
     {
       key: "edit",
       label: "Edit",
-      icon: "lineicons:pencil-1",
+      icon: "ant-design:edit-outlined",
       type: "edit",
       color: "blue",
       onClick: handleEdit,
@@ -110,52 +104,74 @@ export default function WarehouseTable({
     {
       key: "delete",
       label: "Delete",
-      icon: "lineicons:trash-3",
+      icon: "ant-design:delete-outlined",
       type: "delete",
       color: "red",
       onClick: handleDelete,
       confirm: {
-        title: "Delete Warehouse",
-        description: "Are you sure you want to delete this warehouse?",
+        title: "Are you sure you want to delete this warehouse?",
+        description: "This action cannot be undone.",
       },
       loading: isDeleting,
     },
   ];
 
-  const warehouses = data?.data || [];
-  const pagination = data?.pagination;
-
   return (
-    <>
-      <GenericTable
-        data={warehouses}
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold text-gray-800">Warehouses</h2>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={handleAdd}
+        >
+          Add Warehouse
+        </Button>
+      </div>
+
+      <div className="flex justify-between items-center space-x-4">
+        <Search
+          placeholder="Search warehouses..."
+          allowClear
+          enterButton={<SearchOutlined />}
+          size="large"
+          onSearch={handleSearch}
+          onChange={e => handleSearch(e.target.value)}
+          value={searchText}
+          className="flex-1 max-w-md"
+        />
+      </div>
+
+      <GenericTable<Warehouse>
+        data={warehousesResponse?.data || []}
         loading={isLoading}
         error={error}
         onRetry={refetch}
         columns={columns}
         actions={actions}
-        pagination={
-          pagination
-            ? {
-                current: currentPage,
-                pageSize,
-                total: pagination.total,
-                onChange: onPageChange,
-                showSizeChanger: false,
-                showTotal: (total, range) =>
-                  `${range[0]}-${range[1]} of ${total} items`,
-              }
-            : undefined
-        }
+        rowKey="_id"
+        pagination={{
+          current: currentPage,
+          pageSize: pageSize,
+          total: warehousesResponse?.pagination?.total || 0,
+          showSizeChanger: true,
+          showQuickJumper: true,
+          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+          onChange: (page, size) => {
+            setCurrentPage(page);
+            setPageSize(size || 10);
+          },
+        }}
+        className="bg-white rounded-lg shadow"
       />
 
-      {/* Edit Drawer */}
       <AddEditWarehouseDrawer
-        open={!!editingWarehouse}
-        setOpen={() => setEditingWarehouse(null)}
-        warehouse={editingWarehouse}
-        onClose={() => setEditingWarehouse(null)}
+        open={isOpen}
+        onClose={handleDrawerClose}
+        warehouse={selectedWarehouse}
       />
-    </>
+    </div>
   );
-}
+};
+
+export default WarehouseTable; 

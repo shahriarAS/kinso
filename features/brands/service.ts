@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/database";
 import Brand from "./model";
+import Product from "@/features/products/model";
 import { authorizeRequest } from "@/lib/auth";
 import { AuthenticatedRequest } from "@/features/auth";
 
@@ -278,6 +279,16 @@ export async function handleDeleteById(
         { status: 404 },
       );
     }
+
+    // Check if brand is used by any products
+    const productCount = await Product.countDocuments({ brand: id });
+    if (productCount > 0) {
+      return NextResponse.json(
+        { success: false, message: "Cannot delete brand: it is used by products" },
+        { status: 409 },
+      );
+    }
+
     await Brand.findByIdAndDelete(id);
     return NextResponse.json({
       success: true,

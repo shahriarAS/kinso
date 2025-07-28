@@ -40,11 +40,11 @@ const menuItems = [
     label: "Category",
     href: "/dashboard/category",
   },
-  // {
-  //   icon: "lineicons:buildings-1",
-  //   label: "Warehouse",
-  //   href: "/dashboard/warehouse",
-  // },
+  {
+    icon: "lineicons:buildings-1",
+    label: "Warehouse",
+    href: "/dashboard/warehouse",
+  },
   {
     icon: "lineicons:buildings-1",
     label: "Outlets",

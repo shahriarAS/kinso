@@ -1,73 +1,52 @@
-"use client";
-import { Form } from "antd";
-import React from "react";
-import { Warehouse } from "@/features/warehouses/types";
-import {
-  useCreateWarehouseMutation,
-  useUpdateWarehouseMutation,
-} from "@/features/warehouses/api";
+import React, { useMemo } from "react";
+import { useCreateWarehouseMutation, useUpdateWarehouseMutation } from "./api";
+import { Warehouse, WarehouseInput } from "./types";
 import { useNotification } from "@/hooks/useNotification";
-import { GenericDrawer, type FormField } from "@/components/common";
+import { Form } from "antd";
+import { GenericDrawer, FormField } from "@/components/common";
+import { OUTLET_TYPES } from "@/types";
 
-interface Props {
+interface AddEditWarehouseDrawerProps {
   open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose: () => void;
   warehouse?: Warehouse | null;
-  onClose?: () => void;
 }
 
-export default function AddEditWarehouseDrawer({
+const AddEditWarehouseDrawer: React.FC<AddEditWarehouseDrawerProps> = ({
   open,
-  setOpen,
-  warehouse,
   onClose,
-}: Props) {
-  const [form] = Form.useForm<Warehouse>();
-  const { success, error: showError } = useNotification();
-
-  // API hooks
+  warehouse,
+}) => {
+  const [form] = Form.useForm<WarehouseInput>();
+  const { success, error } = useNotification();
   const [createWarehouse, { isLoading: isCreating }] =
     useCreateWarehouseMutation();
   const [updateWarehouse, { isLoading: isUpdating }] =
     useUpdateWarehouseMutation();
 
   const isEditing = !!warehouse;
-  const isLoading = isCreating || isUpdating;
 
-  // Define form fields using the generic interface
-  const fields: FormField[] = [
-    {
-      name: "warehouseId",
-      label: "Warehouse ID",
-      type: "input",
-      placeholder: "e.g., WH001",
-      rules: [
-        { required: true, message: "Please enter warehouse ID" },
-        { min: 2, message: "Warehouse ID must be at least 2 characters" },
-        { max: 20, message: "Warehouse ID must not exceed 20 characters" },
-        {
-          pattern: /^[A-Z0-9]+$/,
-          message: "Warehouse ID must contain only uppercase letters and numbers",
-        },
-      ],
-    },
-    {
-      name: "name",
-      label: "Warehouse Name",
-      type: "input",
-      placeholder: "Enter Warehouse Name",
-      rules: [{ required: true, message: "Please enter warehouse name" }],
-    },
-    {
-      name: "location",
-      label: "Location",
-      type: "input",
-      placeholder: "Enter Location",
-      rules: [{ required: true, message: "Please enter location" }],
-    },
-  ];
+  // Define form fields for GenericDrawer
+  const fields: FormField[] = useMemo(
+    () => [
+      {
+        name: "name",
+        label: "Warehouse Name",
+        type: "input",
+        placeholder: "Enter warehouse name",
+        rules: [{ required: true, message: "Please enter warehouse name" }],
+      }
+    ],
+    [],
+  );
 
-  const handleSubmit = async (values: Warehouse) => {
+  // Set initial values for edit mode
+  const initialValues =
+    isEditing && warehouse
+      ? { name: warehouse.name}
+      : undefined;
+
+  const handleSubmit = async (values: WarehouseInput) => {
     try {
       if (isEditing && warehouse) {
         await updateWarehouse({
@@ -79,52 +58,27 @@ export default function AddEditWarehouseDrawer({
         await createWarehouse(values).unwrap();
         success("Warehouse created successfully");
       }
-    } catch (error: unknown) {
-      if (
-        error &&
-        typeof error === "object" &&
-        "data" in error &&
-        error.data &&
-        typeof error.data === "object" &&
-        "message" in error.data
-      ) {
-        showError(
-          "Failed to save warehouse",
-          (error.data as { message: string }).message,
-        );
-      } else {
-        showError("Failed to save warehouse");
-      }
-      throw error; // Re-throw to prevent drawer from closing
-    }
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-    if (onClose) {
       onClose();
+      form.resetFields();
+    } catch (err) {
+      error("Failed to save warehouse");
     }
   };
 
   return (
     <GenericDrawer
       open={open}
-      onClose={handleClose}
-      title={isEditing ? "Edit Warehouse" : "Add New Warehouse"}
+      onClose={onClose}
+      title={isEditing ? "Edit Warehouse" : "Add Warehouse"}
       form={form}
       fields={fields}
-      initialValues={
-        warehouse
-          ? {
-              warehouseId: warehouse.warehouseId,
-              name: warehouse.name,
-              location: warehouse.location,
-            }
-          : undefined
-      }
+      initialValues={initialValues}
       onSubmit={handleSubmit}
-      loading={isLoading}
-      submitText={isEditing ? "Update" : "Save"}
+      submitText={isEditing ? "Update" : "Create"}
+      loading={isCreating || isUpdating}
+      width={500}
     />
   );
-}
+};
+
+export default AddEditWarehouseDrawer;

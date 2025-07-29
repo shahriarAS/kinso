@@ -8,9 +8,6 @@ import {
   createErrorResponse,
   createPaginatedResponse,
   createNotFoundResponse,
-  createValidationErrorResponse,
-  createConflictErrorResponse,
-  createUnauthorizedResponse,
 } from "@/lib/apiResponse";
 
 // GET /api/customers - List all customers with pagination and filters

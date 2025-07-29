@@ -65,16 +65,11 @@ const menuItems = [
     label: "Brands",
     href: "/dashboard/brands",
   },
-  // {
-  //   icon: "tabler:currency-taka",
-  //   label: "Orders",
-  //   href: "/dashboard/orders",
-  // },
-  // {
-  //   icon: "lineicons:users",
-  //   label: "Customers",
-  //   href: "/dashboard/customers",
-  // },
+  {
+    icon: "lineicons:users",
+    label: "Customers",
+    href: "/dashboard/customers",
+  },
   // {
   //   icon: "lineicons:user",
   //   label: "Users",

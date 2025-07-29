@@ -3,7 +3,7 @@
 import React from "react";
 import { Table, InputNumber, Button, Space, Typography, Card } from "antd";
 import { DeleteOutlined, MinusOutlined, PlusOutlined } from "@ant-design/icons";
-import type { CartItem } from "../types";
+import { CartItem } from "@/app/dashboard/pos/types";
 
 const { Text, Title } = Typography;
 

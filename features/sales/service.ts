@@ -74,7 +74,7 @@ export async function handlePost(request: NextRequest) {
       }
     }
 
-    // Validate items array
+    // Validate items array and check stock availability
     for (const item of items) {
       if (!item.stock || !item.quantity || !item.unitPrice) {
         return NextResponse.json(
@@ -91,6 +91,22 @@ export async function handlePost(request: NextRequest) {
       if (item.unitPrice <= 0) {
         return NextResponse.json(
           { success: false, message: "Item unit price must be greater than 0" },
+          { status: 400 },
+        );
+      }
+
+      // Check stock availability
+      const stockRecord = await Stock.findById(item.stock);
+      if (!stockRecord) {
+        return NextResponse.json(
+          { success: false, message: `Stock record not found for item ${item.stock}` },
+          { status: 400 },
+        );
+      }
+      
+      if (stockRecord.unit < item.quantity) {
+        return NextResponse.json(
+          { success: false, message: `Insufficient stock. Available: ${stockRecord.unit}, Requested: ${item.quantity}` },
           { status: 400 },
         );
       }
@@ -133,6 +149,13 @@ export async function handlePost(request: NextRequest) {
       notes: notes || "",
       createdBy: userId,
     });
+
+    // Update stock levels for each item
+    for (const item of items) {
+      await Stock.findByIdAndUpdate(item.stock, {
+        $inc: { unit: -item.quantity }
+      });
+    }
 
     // Update customer statistics if customer exists
     if (customer) {
@@ -377,7 +400,7 @@ export async function handlePut(
       }
     }
 
-    // Validate items array
+    // Validate items array and check stock availability
     for (const item of items) {
       if (!item.stock || !item.quantity || !item.unitPrice) {
         return NextResponse.json(
@@ -394,6 +417,22 @@ export async function handlePut(
       if (item.unitPrice <= 0) {
         return NextResponse.json(
           { success: false, message: "Item unit price must be greater than 0" },
+          { status: 400 },
+        );
+      }
+
+      // Check stock availability
+      const stockRecord = await Stock.findById(item.stock);
+      if (!stockRecord) {
+        return NextResponse.json(
+          { success: false, message: `Stock record not found for item ${item.stock}` },
+          { status: 400 },
+        );
+      }
+      
+      if (stockRecord.unit < item.quantity) {
+        return NextResponse.json(
+          { success: false, message: `Insufficient stock. Available: ${stockRecord.unit}, Requested: ${item.quantity}` },
           { status: 400 },
         );
       }

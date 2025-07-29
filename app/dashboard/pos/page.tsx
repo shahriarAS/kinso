@@ -7,7 +7,6 @@ import { useNotification } from "@/hooks/useNotification";
 import ProductGrid from "./ProductGrid";
 import CartDetails from "./CartDetails";
 import CustomerModal from "./CustomerModal";
-import { CartItem, CustomerOption, OutletOption } from "./types";
 import { useFetchAuthUserQuery } from "@/features/auth";
 import { salesApi } from "@/features/sales";
 import { outletsApi } from "@/features/outlets";
@@ -284,6 +283,12 @@ export default function POS() {
               onChange={(value) => {
                 setSelectedOutlet(value);
                 localStorage.setItem("selectedOutlet", value);
+                // Clear cart and everything when outlet is changed
+                setCart([]);
+                setDiscount(0);
+                setCustomTotal(null);
+                setCustomer("");
+                setSearch("");
               }}
               className="w-52"
               placeholder="Select Outlet"

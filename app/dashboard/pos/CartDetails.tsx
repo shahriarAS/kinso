@@ -316,6 +316,7 @@ export default function CartDetails({
         }
         open={checkoutModalOpen}
         onCancel={() => setCheckoutModalOpen(false)}
+        destroyOnHidden={true}
         footer={null}
         width={600}
         className="checkout-modal"

@@ -218,9 +218,13 @@ export default function SalesHistoryPage() {
               setSelectedSaleId(record.saleId);
               setViewDrawerOpen(true);
             }}
-          >
-            View
-          </Button>
+          />
+          <Button
+            type="default"
+            size="small"
+            icon={<DownloadOutlined />}
+            onClick={() => downloadInvoicePDF(record.saleId)}
+          />
         </Space>
       ),
     },

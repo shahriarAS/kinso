@@ -21,7 +21,7 @@ const menuItems = [
     href: "/dashboard/pos",
   },
   {
-    icon: "lineicons:receipt",
+    icon: "famicons:receipt-outline",
     label: "Sales History",
     href: "/dashboard/sales/history",
   },

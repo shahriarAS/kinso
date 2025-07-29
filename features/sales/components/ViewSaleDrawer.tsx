@@ -63,12 +63,17 @@ export default function ViewSaleDrawer({ open, onClose, saleId }: ViewSaleDrawer
       title: "Product",
       dataIndex: ["stock", "product", "name"],
       key: "product",
-      render: (productName: string, record: any) => (
-        <div>
-          <div className="font-medium">{productName || "Unknown Product"}</div>
-          <div className="text-xs text-gray-500">Barcode: {record.stock?.product?.barcode}</div>
-        </div>
-      ),
+      render: (productName: string, record: any) => {
+        const product = record.stock?.product;
+        return (
+          <div>
+            <div className="font-medium">{product?.name || "Unknown Product"}</div>
+            {product?.barcode && (
+              <div className="text-xs text-gray-500">Barcode: {product.barcode}</div>
+            )}
+          </div>
+        );
+      },
     },
     {
       title: "Quantity",

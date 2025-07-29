@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/database";
 import Sale from "./model";
 import Customer from "@/features/customers/model";
+import Stock from "@/features/stock/model";
 import { authorizeRequest } from "@/lib/auth";
 import { AuthenticatedRequest } from "@/features/auth";
 import { PaymentMethod, PAYMENT_METHODS } from "@/types";
@@ -98,8 +99,23 @@ export async function handlePost(request: NextRequest) {
     // Calculate total amount
     const totalAmount = items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0) - (discountAmount || 0);
 
-    // Generate sale ID
-    const saleId = `SALE-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    // Generate human-readable sale ID
+    const now = new Date();
+    const year = now.getFullYear().toString().slice(-2); // Last 2 digits of year
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hour = String(now.getHours()).padStart(2, '0');
+    const minute = String(now.getMinutes()).padStart(2, '0');
+    
+    // Get count of sales today to ensure uniqueness
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    const todayCount = await Sale.countDocuments({
+      createdAt: { $gte: startOfDay, $lt: endOfDay }
+    });
+    
+    const sequenceNumber = String(todayCount + 1).padStart(3, '0');
+    const saleId = `S-${year}${month}${day}${hour}${minute}-${sequenceNumber}`;
 
     // Get user from auth
     const userId = authResult.user?._id;
@@ -217,7 +233,13 @@ export async function handleGet(request: NextRequest) {
         .populate("outlet", "name")
         .populate("customer", "name")
         .populate("createdBy", "name")
-        .populate("items.stock", "product")
+        .populate({
+          path: "items.stock",
+          populate: {
+            path: "product",
+            select: "name barcode"
+          }
+        })
         .sort(sort)
         .skip(skip)
         .limit(limit)
@@ -261,7 +283,13 @@ export async function handleGetById(
       .populate("outlet", "name")
       .populate("customer", "name")
       .populate("createdBy", "name")
-      .populate("items.stock", "product")
+      .populate({
+        path: "items.stock",
+        populate: {
+          path: "product",
+          select: "name barcode"
+        }
+      })
       .lean();
     if (!sale) {
       return createNotFoundResponse("Sale");

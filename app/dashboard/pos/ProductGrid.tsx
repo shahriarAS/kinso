@@ -46,7 +46,7 @@ export default function ProductGrid({
         return (
           <div
             key={stock._id}
-            className="bg-white rounded-xl p-6 min-h-[220px] flex flex-col gap-3 border border-gray-200 hover:border-primary/30 transition-all duration-200 shadow-lg cursor-pointer group relative"
+            className="bg-white rounded-lg p-6 min-h-[220px] flex flex-col gap-3 border border-gray-200 hover:border-primary/30 transition-all duration-200 shadow-lg cursor-pointer group relative"
           >
             <div className="flex items-center gap-3 mb-1">
               <div className="flex flex-col flex-1">
@@ -66,7 +66,7 @@ export default function ProductGrid({
             <div className="flex items-center gap-2 mb-1">
               {product.category && (
                 <span
-                  className={`px-2 py-0.5 rounded text-xs font-medium ${getCategoryColor(product.category)}`}
+                  className={`px-2 py-0.5 rounded-xs text-xs font-medium ${getCategoryColor(product.category)}`}
                 >
                   {getCategoryName(product.category).charAt(0).toUpperCase() +
                     getCategoryName(product.category).slice(1)}
@@ -94,7 +94,7 @@ export default function ProductGrid({
             <Button
               type="primary"
               size="large"
-              className="w-full flex items-center justify-center gap-2 font-semibold mt-auto py-3 text-lg rounded-xl"
+              className="w-full flex items-center justify-center gap-2 font-semibold mt-auto py-3 text-lg rounded-sm"
               onClick={() => onAdd(stock)}
               icon={<Icon icon="mdi:cart-plus" className="text-2xl" />}
               disabled={stockQuantity === 0}

@@ -13,7 +13,7 @@ export default function POSLoadingSkeleton() {
             <Skeleton.Input
               active
               size="large"
-              className="w-full rounded-xl"
+              className="w-full rounded-lg"
               style={{ height: 40 }}
             />
           </div>
@@ -21,7 +21,7 @@ export default function POSLoadingSkeleton() {
             {[...Array(4)].map((_, i) => (
               <div
                 key={i}
-                className="bg-white rounded-xl p-6 min-h-[220px] flex flex-col gap-3 border border-gray-200 shadow-lg"
+                className="bg-white rounded-lg p-6 min-h-[220px] flex flex-col gap-3 border border-gray-200 shadow-lg"
               >
                 <div className="flex items-center gap-3 mb-1">
                   <Skeleton.Avatar active size={40} shape="square" />
@@ -81,7 +81,7 @@ export default function POSLoadingSkeleton() {
         </div>
         {/* CartDetails Skeleton (col-span-2) */}
         <div className="col-span-2">
-          <div className="bg-white border border-gray-200 rounded-3xl p-4 flex flex-col gap-3 shadow-lg min-h-[500px] overflow-hidden relative">
+          <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-3 shadow-lg min-h-[500px] overflow-hidden relative">
             <div className="font-semibold text-xl text-primary flex justify-between items-center mb-1">
               <Skeleton.Input
                 active
@@ -110,7 +110,7 @@ export default function POSLoadingSkeleton() {
               {[...Array(3)].map((_, i) => (
                 <div
                   key={i}
-                  className="flex items-center justify-between border-b border-gray-100 py-4 gap-4 bg-white/80 rounded-xl px-2"
+                  className="flex items-center justify-between border-b border-gray-100 py-4 gap-4 bg-white/80 rounded-md px-2"
                 >
                   <div className="flex items-center gap-3 w-1/3">
                     <div>

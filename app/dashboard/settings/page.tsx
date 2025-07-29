@@ -124,7 +124,7 @@ export default function SettingsPage() {
             subtitle="Manage your system and business settings."
           />
         </div>
-        <Card className="w-full bg-white border rounded-2xl shadow-sm p-0 relative overflow-visible">
+        <Card className="w-full bg-white border rounded-lg shadow-sm p-0 relative overflow-visible">
           <Tabs
             activeKey={activeTab}
             type="card"

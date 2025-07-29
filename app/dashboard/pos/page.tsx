@@ -288,7 +288,7 @@ export default function POS() {
   return (
     <>
       {/* No modal or PDFDownloadLink needed */}
-      <div className="h-full w-full p-6 px-4 relative overflow-x-hidden flex flex-col gap-4 bg-secondary rounded-3xl">
+      <div className="h-full w-full p-6 px-4 relative overflow-x-hidden flex flex-col gap-4 bg-secondary rounded-xl">
         {/* Header */}
         <div className="flex justify-between items-center mb-2">
           <h1 className="text-4xl font-bold text-primary tracking-tight">
@@ -324,7 +324,7 @@ export default function POS() {
           <div className={stockLoading ? "pointer-events-none opacity-50" : ""}>
             {/* The original grid content */}
             <div className="gap-4 grid grid-cols-5">
-              <div className="bg-white p-6 rounded-3xl col-span-3">
+              <div className="bg-white p-6 rounded-xl col-span-3">
                 <div className="mb-8 flex gap-4 items-center">
                   <Input
                     size="large"

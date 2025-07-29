@@ -71,7 +71,7 @@ export default function GenericDrawer<T = any>({
   loading = false,
   children,
   extra,
-  className = "rounded-3xl",
+  className = "rounded-2xl",
   formClassName = "border border-gray-200 shadow-sm rounded-xl p-4 pb-6",
   gridCols = 1,
 }: GenericDrawerProps<T>) {

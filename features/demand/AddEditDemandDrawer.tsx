@@ -206,7 +206,7 @@ export const AddEditDemandDrawer: React.FC<AddEditDemandDrawerProps> = ({
         />
 
         {products.length > 0 && (
-          <div className="bg-gray-50 p-4 rounded">
+          <div className="bg-gray-50 p-4 rounded-md">
             <div className="flex justify-between">
               <span className="font-medium">Total Items:</span>
               <span className="font-bold">{products.length}</span>

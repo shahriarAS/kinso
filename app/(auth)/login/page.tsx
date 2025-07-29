@@ -30,7 +30,7 @@ function Login() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
         {/* Login Card */}
-        <div className="bg-white rounded-2xl shadow-2xl shadow-blue-100/50 p-8 ">
+        <div className="bg-white rounded-xl shadow-2xl shadow-blue-100/50 p-8 ">
           {/* Error Alert */}
           {error && (
             <div className="mb-6">
@@ -39,7 +39,7 @@ function Login() {
                   (error as { data: { message: string } })?.data?.message
                 }
                 type="error"
-                className="rounded-lg"
+                className="rounded-md"
               />
             </div>
           )}
@@ -75,7 +75,7 @@ function Login() {
                 type="email"
                 prefix={<MailOutlined className="text-gray-400" />}
                 placeholder="Email address"
-                className="rounded-lg border-gray-300"
+                className="rounded-sm border-gray-300"
               />
             </Form.Item>
 
@@ -89,7 +89,7 @@ function Login() {
                 prefix={<LockOutlined className="text-gray-400" />}
                 type="password"
                 placeholder="Password"
-                className="rounded-lg border-gray-300"
+                className="rounded-sm border-gray-300"
               />
             </Form.Item>
 
@@ -99,7 +99,7 @@ function Login() {
                 block
                 type="primary"
                 htmlType="submit"
-                className="h-12 text-base font-semibold border-0 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+                className="h-12 text-base font-semibold border-0 rounded-sm shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
               >
                 {isLoading ? "Signing in..." : "Sign in"}
               </Button>

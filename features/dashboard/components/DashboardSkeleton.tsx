@@ -27,7 +27,7 @@ const DashboardSkeleton: React.FC = () => {
       <Row gutter={[16, 16]}>
         {[1, 2, 3, 4].map((i) => (
           <Col xs={24} sm={12} lg={6} key={i}>
-            <Card className="bg-white border rounded-2xl shadow-sm">
+            <Card className="bg-white border rounded-lg shadow-sm">
               <Skeleton active paragraph={false} title={{ width: 100 }} />
               <Skeleton.Input
                 active
@@ -68,7 +68,7 @@ const DashboardSkeleton: React.FC = () => {
                 </span>
               </Space>
             }
-            className="bg-white border rounded-2xl shadow-sm"
+            className="bg-white border rounded-lg shadow-sm"
           >
             <Skeleton active paragraph={false} title={false} />
             <Skeleton
@@ -86,7 +86,7 @@ const DashboardSkeleton: React.FC = () => {
                 <span className="text-primary font-semibold">Top Products</span>
               </Space>
             }
-            className="bg-white border rounded-2xl shadow-sm"
+            className="bg-white border rounded-lg shadow-sm"
           >
             <Skeleton active paragraph={false} title={false} />
             <Skeleton

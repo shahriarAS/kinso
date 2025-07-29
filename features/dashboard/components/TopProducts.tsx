@@ -16,7 +16,7 @@ const TopProducts: React.FC<TopProductsProps> = ({ topProducts }) => {
           <span className="text-primary font-semibold">Top Products</span>
         </Space>
       }
-      className="bg-white border rounded-2xl shadow-sm"
+      className="bg-white border rounded-lg shadow-sm"
     >
       <Table
         dataSource={topProducts}

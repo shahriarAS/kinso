@@ -182,7 +182,7 @@ export default function GenericTable<T = any>({
       minHeight="400px"
     >
       <div
-        className="bg-white border border-gray-300 rounded-3xl shadow-lg overflow-hidden flex flex-col"
+        className="bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden flex flex-col"
         style={{ maxHeight }}
       >
         <div

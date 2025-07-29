@@ -72,7 +72,7 @@ export default function CartDetails({
             options={customers}
             value={customer}
             onChange={setCustomer}
-            className="flex-1 rounded-3xl"
+            className="flex-1 rounded-sm"
             size="large"
             placeholder="Select Customer"
             showSearch

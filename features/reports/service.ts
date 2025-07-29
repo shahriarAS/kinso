@@ -32,7 +32,7 @@ export async function handleGetSalesReport(request: NextRequest) {
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
     const outletId = searchParams.get("outletId");
-    const categoryId = searchParams.get("categoryId");
+    const category = searchParams.get("category");
 
     // Validate required parameters
     if (!startDate || !endDate) {
@@ -112,10 +112,10 @@ export async function handleGetSalesReport(request: NextRequest) {
         },
       },
       { $unwind: "$productDetails" },
-      ...(categoryId ? [{ $match: { "productDetails.categoryId": categoryId } }] : []),
+      ...(category ? [{ $match: { "productDetails.category": category } }] : []),
       {
         $group: {
-          _id: "$productDetails.categoryId",
+          _id: "$productDetails.category",
           salesCount: { $sum: 1 },
           revenue: { $sum: { $multiply: ["$items.quantity", "$items.unitPrice"] } },
         },
@@ -123,7 +123,7 @@ export async function handleGetSalesReport(request: NextRequest) {
       {
         $project: {
           _id: 0,
-          categoryId: "$_id",
+          category: "$_id",
           salesCount: 1,
           revenue: 1,
         },
@@ -171,7 +171,7 @@ export async function handleGetInventoryReport(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const locationId = searchParams.get("locationId");
     const locationType = searchParams.get("locationType");
-    const productId = searchParams.get("productId");
+    const product = searchParams.get("product");
 
     // Build match conditions for stock
     const stockMatch: any = {};
@@ -181,17 +181,17 @@ export async function handleGetInventoryReport(request: NextRequest) {
     if (locationType) {
       stockMatch.locationType = locationType;
     }
-    if (productId) {
-      stockMatch.productId = productId;
+    if (product) {
+      stockMatch.product = product;
     }
 
     // Get stock data with product information
     const stockData = await Stock.find(stockMatch)
-      .populate("productId", "productId name")
+      .populate("product", "product name")
       .lean();
 
     const inventoryData = stockData.map((stock: any) => ({
-      productId: stock.productId?.productId || stock.productId,
+      product: stock.product?.product || stock.product,
       locationId: stock.locationId,
       locationType: stock.locationType,
       quantity: stock.quantity,
@@ -264,7 +264,7 @@ export async function handleGetCustomerReport(request: NextRequest) {
       { $match: orderMatch },
       {
         $group: {
-          _id: "$customerId",
+          _id: "$customer",
           totalPurchases: { $sum: 1 },
           lastPurchaseDate: { $max: "$createdAt" },
         },
@@ -285,7 +285,7 @@ export async function handleGetCustomerReport(request: NextRequest) {
       };
 
       return {
-        customerId: customer.customerId,
+        customer: customer.customer,
         name: customer.name,
         totalPurchases: purchaseData.totalPurchases,
         membershipActive: customer.membershipActive,

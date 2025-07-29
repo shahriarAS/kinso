@@ -11,7 +11,7 @@ export interface SalesReportResponse {
       revenue: number;
     }>;
     byCategory: Array<{
-      categoryId: string;
+      category: string;
       categoryName: string;
       salesCount: number;
       revenue: number;
@@ -33,7 +33,7 @@ export interface SalesReportResponse {
 export interface InventoryReportResponse {
   success: boolean;
   data: Array<{
-    productId: string;
+    product: string;
     productName: string;
     locationId: string;
     locationName: string;
@@ -58,7 +58,7 @@ export interface InventoryReportResponse {
 export interface CustomerReportResponse {
   success: boolean;
   data: Array<{
-    customerId: string;
+    customer: string;
     name: string;
     totalPurchases: number;
     totalSpent: number;
@@ -86,10 +86,10 @@ export interface ReportFilters {
   endDate?: string;
   outletId?: string;
   warehouseId?: string;
-  categoryId?: string;
-  vendorId?: string;
+  category?: string;
+  vendor?: string;
   paymentMethod?: string;
-  customerId?: string;
+  customer?: string;
   page?: number;
   limit?: number;
   sortBy?: string;
@@ -143,7 +143,7 @@ export interface ProfitLossReport {
     netProfit: number;
     netProfitMargin: number;
     byProduct: Array<{
-      productId: string;
+      product: string;
       productName: string;
       revenue: number;
       cost: number;
@@ -151,7 +151,7 @@ export interface ProfitLossReport {
       margin: number;
     }>;
     byCategory: Array<{
-      categoryId: string;
+      category: string;
       categoryName: string;
       revenue: number;
       cost: number;

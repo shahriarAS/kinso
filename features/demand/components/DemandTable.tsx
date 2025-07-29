@@ -75,7 +75,7 @@ export default function DemandTable({
   const handleDelete = async (demand: Demand) => {
     Modal.confirm({
       title: "Delete Demand",
-      content: `Are you sure you want to delete demand ${demand.demandId}?`,
+      content: `Are you sure you want to delete demand ${demand.demand}?`,
       okText: "Delete",
       okType: "danger",
       cancelText: "Cancel",
@@ -154,19 +154,19 @@ export default function DemandTable({
   const columns: TableColumn<Demand>[] = [
     {
       title: "Demand ID",
-      dataIndex: "demandId",
-      key: "demandId",
+      dataIndex: "demand",
+      key: "demand",
       width: 150,
     },
     {
       title: "Product",
-      dataIndex: "productId",
-      key: "productId",
+      dataIndex: "product",
+      key: "product",
       width: 200,
-      render: (productId: any) => (
+      render: (product: any) => (
         <div>
-          <div className="font-medium">{productId?.name}</div>
-          <div className="text-sm text-gray-500">{productId?.barcode}</div>
+          <div className="font-medium">{product?.name}</div>
+          <div className="text-sm text-gray-500">{product?.barcode}</div>
         </div>
       ),
     },

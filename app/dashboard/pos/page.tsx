@@ -216,8 +216,8 @@ export default function POS() {
   );
 
   const handleSaleComplete = async (saleData: {
-    outletId: string;
-    customerId?: string;
+    outlet: string;
+    customer?: string;
     paymentMethods: { method: string; amount: number }[];
     notes?: string;
   }) => {
@@ -238,7 +238,7 @@ export default function POS() {
 
       const salePayload = {
         outlet: selectedOutlet,
-        customer: saleData.customerId || undefined,
+        customer: saleData.customer || undefined,
         items: saleItems,
         paymentMethods: saleData.paymentMethods.map((pm) => ({
           method: pm.method as any,

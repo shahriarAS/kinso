@@ -19,8 +19,8 @@ export default function ConvertDemandModal({ open, demand, onClose, onSuccess }:
   const [convertDemand, { isLoading: isConverting }] = useConvertDemandToStockMutation();
 
   // Fetch product details to get available warehouses
-  const { data: productData } = useGetProductQuery(demand?.productId || "", {
-    skip: !demand?.productId,
+  const { data: productData } = useGetProductQuery(demand?.product || "", {
+    skip: !demand?.product,
   });
 
   const [availableWarehouses, setAvailableWarehouses] = useState<Array<{ id: string; name: string }>>([]);
@@ -49,7 +49,7 @@ export default function ConvertDemandModal({ open, demand, onClose, onSuccess }:
 
     try {
       await convertDemand({
-        demandId: demand._id,
+        demand: demand._id,
         warehouseId: values.warehouseId,
         quantity: values.quantity,
       }).unwrap();
@@ -90,8 +90,8 @@ export default function ConvertDemandModal({ open, demand, onClose, onSuccess }:
       <div className="mb-4 p-4 bg-gray-50 rounded">
         <h4 className="font-medium mb-2">Demand Details</h4>
         <div className="text-sm text-gray-600">
-          <div><strong>Demand ID:</strong> {demand.demandId}</div>
-          <div><strong>Product:</strong> {(demand.productId as any)?.name || "N/A"}</div>
+          <div><strong>Demand ID:</strong> {demand.demand}</div>
+          <div><strong>Product:</strong> {(demand.product as any)?.name || "N/A"}</div>
           <div><strong>Requested Quantity:</strong> {demand.quantity}</div>
         </div>
       </div>

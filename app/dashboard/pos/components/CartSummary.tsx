@@ -29,8 +29,8 @@ interface CartSummaryProps {
   onCreateCustomer: () => void;
   onCheckoutSuccess: () => void;
   onSaleComplete?: (saleData: {
-    outletId: string;
-    customerId?: string;
+    outlet: string;
+    customer?: string;
     paymentMethods: { method: string; amount: number }[];
     notes?: string;
   }) => void;
@@ -96,8 +96,8 @@ export default function CartSummary({
 
       if (onSaleComplete) {
         onSaleComplete({
-          outletId: selectedOutlet,
-          customerId: customer || undefined,
+          outlet: selectedOutlet,
+          customer: customer || undefined,
           paymentMethods: payments,
           notes: notes || (discount > 0 ? `Discount applied: ৳${discount}` : undefined),
         });

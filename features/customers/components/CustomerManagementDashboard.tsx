@@ -67,21 +67,21 @@ export default function CustomerManagementDashboard() {
 
     sales.forEach(sale => {
       if (sale.customer) {
-        const customerId = typeof sale.customer === 'string' ? sale.customer : sale.customer._id;
-        if (!customerSales[customerId]) {
-          customerSales[customerId] = {
+        const customer = typeof sale.customer === 'string' ? sale.customer : sale.customer._id;
+        if (!customerSales[customer]) {
+          customerSales[customer] = {
             totalSpent: 0,
             orderCount: 0,
             lastOrderDate: '',
             orders: [],
           };
         }
-        customerSales[customerId].totalSpent += sale.totalAmount;
-        customerSales[customerId].orderCount += 1;
-        customerSales[customerId].orders.push(sale);
+        customerSales[customer].totalSpent += sale.totalAmount;
+        customerSales[customer].orderCount += 1;
+        customerSales[customer].orders.push(sale);
         
-        if (sale.createdAt > customerSales[customerId].lastOrderDate) {
-          customerSales[customerId].lastOrderDate = sale.createdAt;
+        if (sale.createdAt > customerSales[customer].lastOrderDate) {
+          customerSales[customer].lastOrderDate = sale.createdAt;
         }
       }
     });
@@ -91,10 +91,10 @@ export default function CustomerManagementDashboard() {
 
     // Find top customers
     const topCustomers = Object.entries(customerSales)
-      .map(([customerId, salesData]) => {
-        const customer = customers.find(c => c._id === customerId);
+      .map(([customer, salesData]) => {
+        const foundCustomer = customers.find(c => c._id === customer);
         return {
-          customer,
+          customer: foundCustomer,
           totalSpent: salesData.totalSpent,
           orderCount: salesData.orderCount,
           lastOrderDate: salesData.lastOrderDate,

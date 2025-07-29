@@ -42,7 +42,7 @@ export default function AddEditDemandDrawer({ open, demand, onClose }: Props) {
         form.setFieldsValue({
           outletId: demand.outletId,
           warehouseId: demand.warehouseId,
-          productId: demand.productId,
+          product: demand.product,
           quantity: demand.quantity,
           demandDate: demand.demandDate ? demand.demandDate : undefined,
         });
@@ -57,7 +57,7 @@ export default function AddEditDemandDrawer({ open, demand, onClose }: Props) {
       const demandData: DemandInput = {
         outletId: values.outletId,
         warehouseId: values.warehouseId,
-        productId: values.productId,
+        product: values.product,
         quantity: values.quantity,
         demandDate: values.demandDate?.format("YYYY-MM-DD"),
       };
@@ -146,7 +146,7 @@ export default function AddEditDemandDrawer({ open, demand, onClose }: Props) {
         </Form.Item>
 
         <Form.Item
-          name="productId"
+          name="product"
           label="Product"
           rules={[{ required: true, message: "Please select a product" }]}
         >

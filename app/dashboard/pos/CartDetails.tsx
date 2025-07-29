@@ -19,8 +19,8 @@ interface CartDetailsProps {
   onCreateCustomer: () => void;
   onCheckoutSuccess: () => void;
   onSaleComplete?: (saleData: {
-    outletId: string;
-    customerId?: string;
+    outlet: string;
+    customer?: string;
     paymentMethods: { method: string; amount: number }[];
     notes?: string;
   }) => void;

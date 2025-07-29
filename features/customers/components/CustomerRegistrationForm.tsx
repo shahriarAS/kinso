@@ -55,7 +55,7 @@ const CustomerRegistrationForm: React.FC<CustomerRegistrationFormProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Form.Item
             label="Customer ID"
-            name="customerId"
+            name="customer"
             rules={[
               { required: true, message: "Please enter customer ID" },
               { min: 3, message: "Customer ID must be at least 3 characters" },

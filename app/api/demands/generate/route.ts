@@ -71,11 +71,11 @@ export async function POST(request: NextRequest) {
     // Group sales by product
     for (const sale of sales) {
       for (const item of sale.items) {
-        const productId = (item.stock as any)?.product;
-        if (!productId) continue;
+        const product = (item.stock as any)?.product;
+        if (!product) continue;
 
-        if (!productSales[productId]) {
-          productSales[productId] = {
+        if (!productSales[product]) {
+          productSales[product] = {
             totalQuantity: 0,
             totalRevenue: 0,
             saleDays: 0,
@@ -87,12 +87,12 @@ export async function POST(request: NextRequest) {
           };
         }
 
-        productSales[productId].totalQuantity += item.quantity;
-        productSales[productId].totalRevenue += item.quantity * item.unitPrice;
+        productSales[product].totalQuantity += item.quantity;
+        productSales[product].totalRevenue += item.quantity * item.unitPrice;
         
         const saleDate = new Date(sale.createdAt);
-        if (saleDate > productSales[productId].lastSaleDate) {
-          productSales[productId].lastSaleDate = saleDate;
+        if (saleDate > productSales[product].lastSaleDate) {
+          productSales[product].lastSaleDate = saleDate;
         }
       }
     }
@@ -104,24 +104,24 @@ export async function POST(request: NextRequest) {
       const saleDate = new Date(sale.createdAt).toISOString().split('T')[0];
       
       for (const item of sale.items) {
-        const productId = (item.stock as any)?.product;
-        if (!productId) continue;
+        const product = (item.stock as any)?.product;
+        if (!product) continue;
 
-        if (!dailySales[productId]) {
-          dailySales[productId] = {};
+        if (!dailySales[product]) {
+          dailySales[product] = {};
         }
         
-        if (!dailySales[productId][saleDate]) {
-          dailySales[productId][saleDate] = 0;
+        if (!dailySales[product][saleDate]) {
+          dailySales[product][saleDate] = 0;
         }
         
-        dailySales[productId][saleDate] += item.quantity;
+        dailySales[product][saleDate] += item.quantity;
       }
     }
 
     // Calculate statistics for each product
-    for (const [productId, salesData] of Object.entries(productSales)) {
-      const dailyQuantities = Object.values(dailySales[productId] || {});
+    for (const [product, salesData] of Object.entries(productSales)) {
+      const dailyQuantities = Object.values(dailySales[product] || {});
       
       if (dailyQuantities.length > 0) {
         salesData.averageDailySales = salesData.totalQuantity / days;
@@ -149,22 +149,22 @@ export async function POST(request: NextRequest) {
     const stockByProduct: Record<string, number> = {};
     
     for (const stock of currentStock) {
-      const productId = stock.product.toString();
-      stockByProduct[productId] = (stockByProduct[productId] || 0) + stock.unit;
+      const product = stock.product.toString();
+      stockByProduct[product] = (stockByProduct[product] || 0) + stock.unit;
     }
 
     // Generate demands
     const demands = [];
     let generatedCount = 0;
 
-    for (const [productId, salesData] of Object.entries(productSales)) {
+    for (const [product, salesData] of Object.entries(productSales)) {
       // Skip products that don't meet minimum threshold
       if (salesData.totalQuantity < minSalesThreshold) {
         continue;
       }
 
       // Calculate demand using sophisticated algorithm
-      const currentStockLevel = stockByProduct[productId] || 0;
+      const currentStockLevel = stockByProduct[product] || 0;
       
       // Base demand calculation
       let baseDemand = salesData.averageDailySales * demandDays;
@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
           location: outlet || warehouse,
           locationType: outlet ? "Outlet" : "Warehouse",
           products: [{
-            product: productId,
+            product: product,
             quantity: netDemand,
           }],
           status: "Pending",

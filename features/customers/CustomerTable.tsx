@@ -78,8 +78,8 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
   const columns: TableColumn<Customer>[] = [
     {
       title: <span className="font-medium text-base">Customer ID</span>,
-      dataIndex: "customerId",
-      key: "customerId",
+      dataIndex: "customer",
+      key: "customer",
       sorter: true,
       render: (text: string) => (
         <code className="bg-gray-100 px-2 py-1 rounded text-sm">{text}</code>

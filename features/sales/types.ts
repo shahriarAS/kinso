@@ -50,9 +50,7 @@ export interface SalesHistoryFilters {
   search?: string;
   paymentMethod?: string;
   outlet?: string;
-  outletId?: string;
-  customerId?: string;
-  productId?: string;
+  customer?: string;
   startDate?: string;
   endDate?: string;
 }

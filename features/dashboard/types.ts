@@ -100,8 +100,7 @@ export interface SalesAnalyticsResponse {
 export interface DashboardFilters {
   startDate?: string;
   endDate?: string;
-  outletId?: string;
-  warehouseId?: string;
+  outlet?: string;
 }
 
 export interface QuickStats {

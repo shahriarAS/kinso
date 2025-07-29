@@ -44,16 +44,16 @@ export default function ViewDemandDrawer({ open, demand, onClose }: Props) {
     >
       <Descriptions column={1} bordered>
         <Descriptions.Item label="Demand ID">
-          <span className="font-mono font-medium">{demand.demandId}</span>
+          <span className="font-mono font-medium">{demand.demand}</span>
         </Descriptions.Item>
 
         <Descriptions.Item label="Product">
           <div>
             <div className="font-medium">
-              {(demand.productId as any)?.name || "N/A"}
+              {(demand.product as any)?.name || "N/A"}
             </div>
             <div className="text-sm text-gray-500">
-              {(demand.productId as any)?.barcode || "N/A"}
+              {(demand.product as any)?.barcode || "N/A"}
             </div>
           </div>
         </Descriptions.Item>

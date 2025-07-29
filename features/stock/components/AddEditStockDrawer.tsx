@@ -32,11 +32,11 @@ const AddEditStockDrawer: React.FC<AddEditStockDrawerProps> = ({ open, onClose, 
       const stockLocationType = stock.locationType.toLowerCase() === "warehouse" ? "warehouse" : "outlet";
       setLocationType(stockLocationType);
       
-      const productId = typeof stock.product === 'string' ? stock.product : stock.product._id;
+      const product = typeof stock.product === 'string' ? stock.product : stock.product._id;
       const locationId = typeof stock.location === 'string' ? stock.location : stock.location._id;
       
       form.setFieldsValue({
-        product: productId,
+        product: product,
         locationType: stockLocationType,
         location: locationId,
         mrp: stock.mrp,

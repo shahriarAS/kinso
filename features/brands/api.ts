@@ -88,15 +88,6 @@ export const brandsApi = createApi({
       }),
       providesTags: ["Brand"],
     }),
-
-    getBrandsByVendor: builder.query<ApiResponse<Brand[]>, string>({
-      query: (vendorId) => ({
-        url: "/",
-        method: "GET",
-        params: { vendorId, limit: 1000 },
-      }),
-      providesTags: ["Brand"],
-    }),
   }),
 });
 
@@ -107,5 +98,4 @@ export const {
   useUpdateBrandMutation,
   useDeleteBrandMutation,
   useGetAllBrandsQuery,
-  useGetBrandsByVendorQuery,
 } = brandsApi; 

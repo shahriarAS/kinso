@@ -32,7 +32,7 @@ export default function AddEditCustomerDrawer({
   // Define form fields using the generic interface
   const fields: FormField[] = [
     {
-      name: "customerId",
+      name: "customer",
       label: "Customer ID",
       type: "input",
       placeholder: "Enter Customer ID",
@@ -122,7 +122,7 @@ export default function AddEditCustomerDrawer({
       initialValues={
         customer
           ? {
-              customerId: customer.customerId,
+              customer: customer.customer,
               customerName: customer.customerName,
               contactInfo: customer.contactInfo,
               purchaseAmount: customer.purchaseAmount,

@@ -97,15 +97,15 @@ export const demandApi = createApi({
     // Convert demand to stock
     convertDemandToStock: builder.mutation<
       ApiResponse<Demand>,
-      { demandId: string; conversionData: DemandConversionRequest }
+      { demand: string; conversionData: DemandConversionRequest }
     >({
-      query: ({ demandId, conversionData }) => ({
-        url: `/convert/${demandId}`,
+      query: ({ demand, conversionData }) => ({
+        url: `/convert/${demand}`,
         method: "POST",
         body: conversionData,
       }),
-      invalidatesTags: (result, error, { demandId }) => [
-        { type: "Demand", id: demandId },
+      invalidatesTags: (result, error, { demand }) => [
+        { type: "Demand", id: demand },
         { type: "Demand", id: "LIST" },
       ],
     }),

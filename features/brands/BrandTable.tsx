@@ -22,7 +22,7 @@ const BrandTable: React.FC = () => {
   const debouncedSearchText = useDebounce(searchText, 400);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [selectedVendorId, setSelectedVendorId] = useState<string>("");
+  const [selectedvendor, setSelectedvendor] = useState<string>("");
   const { success, error: notifyError } = useNotification();
   const { open, close, isOpen } = useModal("brand-drawer");
   const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
@@ -36,7 +36,7 @@ const BrandTable: React.FC = () => {
     page: currentPage,
     limit: pageSize,
     search: debouncedSearchText,
-    vendor: selectedVendorId,
+    vendor: selectedvendor,
   });
 
   const { data: vendorsResponse } = useGetAllVendorsQuery();
@@ -49,13 +49,13 @@ const BrandTable: React.FC = () => {
   };
 
   const handleVendorFilter = (value: string) => {
-    setSelectedVendorId(value);
+    setSelectedvendor(value);
     setCurrentPage(1);
   };
 
   const handleReset = () => {
     setSearchText("");
-    setSelectedVendorId("");
+    setSelectedvendor("");
     setCurrentPage(1);
   };
 
@@ -185,7 +185,7 @@ const BrandTable: React.FC = () => {
               size="large"
               style={{ width: "100%" }}
               onChange={handleVendorFilter}
-              value={selectedVendorId || undefined}
+              value={selectedvendor || undefined}
             >
               {vendorsResponse?.data?.map((vendor) => (
                 <Option key={vendor._id} value={vendor._id}>

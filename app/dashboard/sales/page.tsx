@@ -126,9 +126,9 @@ export default function SalesHistoryPage() {
   };
 
   return (
-    <div className="h-full w-full p-6 relative overflow-x-hidden flex flex-col gap-6">
+    <div className="relative flex flex-col w-full h-full gap-6 p-6 overflow-x-hidden">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <h1 className="text-4xl font-semibold text-primary">Sales History</h1>
         <Button
           type="primary"

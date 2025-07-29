@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Table, Space } from "antd";
+import { Card, Table, Space, Tag } from "antd";
 import { ClockCircleOutlined } from "@ant-design/icons";
 import { DashboardStats } from "@/features/dashboard/types";
 
@@ -8,12 +8,25 @@ interface RecentSalesProps {
 }
 
 const RecentSales: React.FC<RecentSalesProps> = ({ recentSales }) => {
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'completed':
+        return 'green';
+      case 'pending':
+        return 'orange';
+      case 'cancelled':
+        return 'red';
+      default:
+        return 'default';
+    }
+  };
+
   return (
     <Card
       title={
         <Space>
           <ClockCircleOutlined className="text-primary" />
-          <span className="text-primary font-semibold">Recent Sales</span>
+          <span className="font-semibold text-primary">Recent Sales</span>
         </Space>
       }
       className="bg-white border border-gray-200 rounded-lg"
@@ -22,16 +35,23 @@ const RecentSales: React.FC<RecentSalesProps> = ({ recentSales }) => {
         dataSource={recentSales}
         pagination={false}
         size="small"
+        rowKey="_id"
         columns={[
           {
             title: "Sale #",
-            dataIndex: "saleNumber",
-            key: "saleNumber",
+            dataIndex: "saleId",
+            key: "saleId",
+            render: (value: string) => (
+              <span className="font-mono text-sm">#{value}</span>
+            ),
           },
           {
             title: "Customer",
             dataIndex: "customerName",
             key: "customerName",
+            render: (value: string) => (
+              <span className="font-medium">{value || 'Walk-in Customer'}</span>
+            ),
           },
           {
             title: "Total",
@@ -77,7 +97,7 @@ const RecentSales: React.FC<RecentSalesProps> = ({ recentSales }) => {
                 </span>
               );
             },
-          },
+          }
         ]}
       />
     </Card>

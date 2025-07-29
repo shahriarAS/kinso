@@ -100,20 +100,20 @@ export default function SalesTable({
         );
       },
     },
-    {
-      title: "Payment Methods",
-      dataIndex: "paymentMethods",
-      key: "paymentMethods",
-      render: (methods: any[]) => (
-        <div className="flex flex-wrap gap-1">
-          {methods?.map((method, index) => (
-            <Tag key={index} color="blue" className="text-xs">
-              {method.method}: ৳{method.amount?.toFixed(2)}
-            </Tag>
-          )) || []}
-        </div>
-      ),
-    },
+    // {
+    //   title: "Payment Methods",
+    //   dataIndex: "paymentMethods",
+    //   key: "paymentMethods",
+    //   render: (methods: any[]) => (
+    //     <div className="flex flex-wrap gap-1">
+    //       {methods?.map((method, index) => (
+    //         <Tag key={index} color="blue" className="text-xs">
+    //           {method.method}: ৳{method.amount?.toFixed(2)}
+    //         </Tag>
+    //       )) || []}
+    //     </div>
+    //   ),
+    // },
     {
       title: "Date",
       dataIndex: "saleDate",
@@ -144,7 +144,7 @@ export default function SalesTable({
   ];
 
   return (
-    <Card className="border border-gray-200 flex-1">
+    <Card className="flex-1 border border-gray-200">
       <Table
         columns={columns}
         dataSource={salesData?.data || []}

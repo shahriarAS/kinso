@@ -13,9 +13,10 @@ export const dashboardApi = createApi({
       {
         startDate?: string;
         endDate?: string;
+        threshold?: number;
       }
     >({
-      query: (params) => ({
+      query: (params = {}) => ({
         url: "/stats",
         method: "GET",
         params,
@@ -27,12 +28,12 @@ export const dashboardApi = createApi({
     getSalesAnalytics: builder.query<
       { success: boolean; data: SalesAnalytics },
       {
-        period: "daily" | "weekly" | "monthly";
+        period?: "daily" | "weekly" | "monthly";
         startDate?: string;
         endDate?: string;
       }
     >({
-      query: (params) => ({
+      query: (params = {}) => ({
         url: "/sales-analytics",
         method: "GET",
         params,
@@ -43,11 +44,14 @@ export const dashboardApi = createApi({
     // Get inventory alerts
     getInventoryAlerts: builder.query<
       { success: boolean; data: InventoryAlerts },
-      void
+      {
+        threshold?: number;
+      }
     >({
-      query: () => ({
+      query: (params = {}) => ({
         url: "/inventory-alerts",
         method: "GET",
+        params,
       }),
       providesTags: ["Dashboard"],
     }),

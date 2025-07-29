@@ -1,6 +1,6 @@
 export interface RecentSale {
   _id: string;
-  saleNumber: string;
+  saleId: string;
   customerName: string;
   totalAmount: number;
   paymentMethods: Array<{ method: string; amount: number }>;
@@ -66,17 +66,14 @@ export interface InventoryAlerts {
 }
 
 export interface SalesAnalytics {
-  dailySales: RevenueChartPoint[];
-  monthlySales: Array<{
-    month: string;
-    revenue: number;
-    sales: number;
+  analytics: Array<{
+    period: string;
+    totalSales: number;
+    totalRevenue: number;
+    averageOrderValue: number;
   }>;
-  topCategories: Array<{
-    category: string;
-    revenue: number;
-    sales: number;
-  }>;
+  period: "daily" | "weekly" | "monthly";
+  totalPeriods: number;
 }
 
 export interface DashboardResponse {

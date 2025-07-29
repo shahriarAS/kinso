@@ -2,6 +2,20 @@
 
 This document outlines the consistent rounded corner system implemented across the Kinso application.
 
+## Shadow Policy
+
+**No shadows or drop shadows are used in this application.** Instead of shadows, we use borders with `border-gray-200` to create visual separation and depth. This approach provides:
+
+- Cleaner, more minimal visual design
+- Better consistency across components
+- Improved accessibility and contrast
+- Simpler maintenance without shadow variations
+
+### Border Usage
+- Use `border border-gray-200` instead of `shadow`
+- For stronger separation, use `border-2 border-gray-300`
+- Never use `shadow`, `shadow-sm`, `shadow-md`, `shadow-lg`, `drop-shadow`, or any shadow-related classes
+
 ## Border Radius Scale
 
 We use a consistent scale of border radius values defined in CSS custom properties:
@@ -92,7 +106,7 @@ Ant Design components are styled globally to use consistent border radius:
 <Button className="rounded-sm">Click me</Button>
 
 // Cards
-<div className="bg-white rounded-lg shadow-lg p-6">
+<div className="bg-white rounded-lg border border-gray-200 p-6">
   Card content
 </div>
 

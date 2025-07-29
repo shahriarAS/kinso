@@ -16,7 +16,7 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
   return (
     <Row gutter={[16, 16]}>
       <Col xs={24} sm={12} lg={6}>
-        <Card className="bg-white border rounded-lg shadow-sm">
+        <Card className="bg-white border border-gray-200 rounded-lg">
           <Statistic
             title={
               <span className="text-primary font-medium">Total Revenue</span>
@@ -30,7 +30,7 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
         </Card>
       </Col>
       <Col xs={24} sm={12} lg={6}>
-        <Card className="bg-white border rounded-lg shadow-sm">
+        <Card className="bg-white border border-gray-200 rounded-lg">
           <Statistic
             title={
               <span className="text-primary font-medium">Total Sales</span>
@@ -44,7 +44,7 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
         </Card>
       </Col>
       <Col xs={24} sm={12} lg={6}>
-        <Card className="bg-white border rounded-lg shadow-sm">
+        <Card className="bg-white border border-gray-200 rounded-lg">
           <Statistic
             title={
               <span className="text-primary font-medium">Total Customers</span>
@@ -56,7 +56,7 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
         </Card>
       </Col>
       <Col xs={24} sm={12} lg={6}>
-        <Card className="bg-white border rounded-lg shadow-sm">
+        <Card className="bg-white border border-gray-200 rounded-lg">
           <Statistic
             title={
               <span className="text-primary font-medium">Total Products</span>

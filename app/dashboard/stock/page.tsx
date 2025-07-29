@@ -260,7 +260,7 @@ export default function StockPage() {
         {/* Stock Statistics */}
         {showStats && stockStats && (
           <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="bg-white p-6 rounded-lg border border-gray-200">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
@@ -278,7 +278,7 @@ export default function StockPage() {
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="bg-white p-6 rounded-lg  border border-gray-200">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
@@ -296,7 +296,7 @@ export default function StockPage() {
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="bg-white p-6 rounded-lg  border border-gray-200">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div
@@ -334,7 +334,7 @@ export default function StockPage() {
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="bg-white p-6 rounded-lg  border border-gray-200">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div

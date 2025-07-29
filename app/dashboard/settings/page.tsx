@@ -124,7 +124,7 @@ export default function SettingsPage() {
             subtitle="Manage your system and business settings."
           />
         </div>
-        <Card className="w-full bg-white border rounded-lg shadow-sm p-0 relative overflow-visible">
+        <Card className="w-full bg-white border border-gray-200 rounded-lg p-0 relative overflow-visible">
           <Tabs
             activeKey={activeTab}
             type="card"
@@ -350,13 +350,12 @@ export default function SettingsPage() {
           transition:
             background 0.2s,
             color 0.2s,
-            box-shadow 0.2s;
+            border-color 0.2s;
         }
         .ant-input,
         .ant-input-password,
         .ant-input-textarea {
           transition:
-            box-shadow 0.2s,
             border-color 0.2s;
         }
         .animate-fade-in {

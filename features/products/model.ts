@@ -20,7 +20,6 @@ const ProductSchema: Schema = new Schema(
   },
   { timestamps: true },
 );
-ProductSchema.index({ barcode: 1 });
 ProductSchema.index({ name: 1 });
 
 export default mongoose.models.Product || mongoose.model<IProduct>("Product", ProductSchema);

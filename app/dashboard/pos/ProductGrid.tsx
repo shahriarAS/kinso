@@ -46,7 +46,7 @@ export default function ProductGrid({
         return (
           <div
             key={stock._id}
-            className="bg-white rounded-lg p-6 min-h-[220px] flex flex-col gap-3 border border-gray-200 hover:border-primary/30 transition-all duration-200 shadow-lg cursor-pointer group relative"
+            className="bg-white rounded-lg p-6 min-h-[220px] flex flex-col gap-3 border border-gray-200 hover:border-primary/30 transition-all duration-200 cursor-pointer group relative"
           >
             <div className="flex items-center gap-3 mb-1">
               <div className="flex flex-col flex-1">

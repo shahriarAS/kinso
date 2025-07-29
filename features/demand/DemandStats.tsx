@@ -56,7 +56,7 @@ export const DemandStats: React.FC<DemandStatsProps> = ({ demands, loading }) =>
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
       {stats.map((stat, index) => (
-        <Card key={index} className="hover:shadow-md transition-shadow">
+        <Card key={index} className="hover:border-primary/30 transition-all border border-gray-200">
           <Statistic
             title={
               <span className="text-gray-600 font-medium">{stat.title}</span>

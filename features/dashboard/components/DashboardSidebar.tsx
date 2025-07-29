@@ -165,7 +165,7 @@ function ProfileMenu({ collapsed }: { collapsed: boolean }) {
   };
 
   const menu = (
-    <div className="min-w-[180px] py-2 px-3 bg-[#232323] rounded-lg shadow-lg border border-white/10">
+    <div className="min-w-[180px] py-2 px-3 bg-[#232323] rounded-lg border border-white/10">
       <div className="flex items-center gap-2 mb-2">
         <Avatar
           size={32}

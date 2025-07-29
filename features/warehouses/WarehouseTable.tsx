@@ -162,7 +162,7 @@ const WarehouseTable: React.FC = () => {
             setPageSize(size || 10);
           },
         }}
-        className="bg-white rounded-lg shadow"
+        className="bg-white rounded-lg border border-gray-200"
       />
 
       <AddEditWarehouseDrawer

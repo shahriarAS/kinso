@@ -50,7 +50,7 @@ export default function CustomerFilters({
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+    <div className="bg-white p-6 rounded-lg border border-gray-200 mb-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900 flex items-center">
           <FilterOutlined className="mr-2" />

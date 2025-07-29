@@ -16,7 +16,7 @@ const RecentSales: React.FC<RecentSalesProps> = ({ recentSales }) => {
           <span className="text-primary font-semibold">Recent Sales</span>
         </Space>
       }
-      className="bg-white border rounded-lg shadow-sm"
+      className="bg-white border border-gray-200 rounded-lg"
     >
       <Table
         dataSource={recentSales}

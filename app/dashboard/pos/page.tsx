@@ -329,7 +329,7 @@ export default function POS() {
                   <Input
                     size="large"
                     placeholder="Search products..."
-                    className="w-full rounded-xl border-gray-300 shadow-sm"
+                    className="w-full rounded-xl border-gray-300"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     allowClear

@@ -142,7 +142,7 @@ const CategoryTable: React.FC = () => {
         </Button>
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+      <div className="bg-white p-6 rounded-lg border border-gray-200 mb-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900 flex items-center">
             <FilterOutlined className="mr-2" />
@@ -212,7 +212,7 @@ const CategoryTable: React.FC = () => {
             setPageSize(size || 10);
           },
         }}
-        className="bg-white rounded-lg shadow"
+        className="bg-white rounded-lg border border-gray-200"
       />
 
       <AddEditCategoryDrawer

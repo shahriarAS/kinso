@@ -72,7 +72,7 @@ export default function GenericDrawer<T = any>({
   children,
   extra,
   className = "rounded-2xl",
-  formClassName = "border border-gray-200 shadow-sm rounded-xl p-4 pb-6",
+  formClassName = "border border-gray-200 rounded-xl p-4 pb-6",
   gridCols = 1,
 }: GenericDrawerProps<T>) {
   useEffect(() => {

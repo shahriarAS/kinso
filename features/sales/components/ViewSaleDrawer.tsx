@@ -171,7 +171,7 @@ export default function ViewSaleDrawer({ open, onClose, saleId }: ViewSaleDrawer
       ) : sale ? (
         <div className="space-y-6">
           {/* Sale Information Card */}
-          <Card size="small" className="shadow-sm">
+          <Card size="small" className="border border-gray-200">
             <Row gutter={[16, 16]}>
               <Col xs={24} sm={12}>
                 <Space direction="vertical" size="small" className="w-full">
@@ -233,7 +233,7 @@ export default function ViewSaleDrawer({ open, onClose, saleId }: ViewSaleDrawer
                 <Text strong>Items ({sale.items?.length || 0})</Text>
               </Space>
             }
-            className="shadow-sm"
+            className="border border-gray-200"
           >
             <Table
               columns={itemColumns}
@@ -275,7 +275,7 @@ export default function ViewSaleDrawer({ open, onClose, saleId }: ViewSaleDrawer
                 <Text strong>Payment Details</Text>
               </Space>
             }
-            className="shadow-sm"
+            className="border border-gray-200"
           >
             <Row gutter={[24, 16]}>
               <Col xs={24} md={14}>
@@ -338,7 +338,7 @@ export default function ViewSaleDrawer({ open, onClose, saleId }: ViewSaleDrawer
 
           {/* Notes Section */}
           {sale.notes && (
-            <Card size="small" title={<Text strong>Notes</Text>} className="shadow-sm">
+            <Card size="small" title={<Text strong>Notes</Text>} className="border border-gray-200">
               <div className="p-3 bg-gray-50 rounded-lg">
                 <Text>{sale.notes}</Text>
               </div>

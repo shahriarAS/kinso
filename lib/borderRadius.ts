@@ -80,7 +80,7 @@ export const getRoundedStyle = (size: keyof typeof BORDER_RADIUS): { borderRadiu
  * <button className={getRoundedClass('button')}>Button</button>
  * 
  * // With custom classes:
- * <div className={`bg-white ${ROUNDED_CLASSES.lg} shadow-lg`}>Content</div>
+ * <div className={`bg-white ${ROUNDED_CLASSES.lg} border border-gray-200`}>Content</div>
  * 
  * // With CSS-in-JS:
  * <div style={{...getRoundedStyle('lg'), backgroundColor: 'white'}}>Content</div>

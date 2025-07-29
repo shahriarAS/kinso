@@ -13,6 +13,17 @@ function Login() {
   const router = useRouter();
   const [login, { isLoading, error, reset }] = useLoginUserMutation();
 
+  // Helper function to extract error message
+  const getErrorMessage = (error: unknown): string => {
+    if (error && typeof error === 'object' && 'data' in error) {
+      const errorData = (error as any).data;
+      if (errorData && typeof errorData.message === 'string') {
+        return errorData.message;
+      }
+    }
+    return "An unexpected error occurred";
+  };
+
   const onFinish = async (values: { email: string; password: string }) => {
     login(values)
       .unwrap()
@@ -30,19 +41,17 @@ function Login() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
         {/* Login Card */}
-        <div className="bg-white rounded-xl shadow-2xl shadow-blue-100/50 p-8 ">
-          {/* Error Alert */}
-          {error && (
+        <div className="bg-white rounded-xl border border-gray-200 p-8 ">
+          {error ? (
             <div className="mb-6">
               <Alert
-                message={
-                  (error as { data: { message: string } })?.data?.message
-                }
+                message={getErrorMessage(error)}
                 type="error"
                 className="rounded-md"
+                showIcon
               />
             </div>
-          )}
+          ) : null}
 
           {/* Header */}
           <div className="text-center mb-8">
@@ -99,7 +108,7 @@ function Login() {
                 block
                 type="primary"
                 htmlType="submit"
-                className="h-12 text-base font-semibold border-0 rounded-sm shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+                className="h-12 text-base font-semibold border border-gray-200 rounded-sm hover:border-primary/30 transform hover:-translate-y-0.5 transition-all duration-200"
               >
                 {isLoading ? "Signing in..." : "Sign in"}
               </Button>

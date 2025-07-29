@@ -135,7 +135,7 @@ export default function SalesTable({
   ];
 
   return (
-    <Card className="shadow-md flex-1">
+    <Card className="border border-gray-200 flex-1">
       <Table
         columns={columns}
         dataSource={salesData?.data || []}

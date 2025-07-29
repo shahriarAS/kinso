@@ -43,7 +43,7 @@ export default function SalesFilters({
   productsData,
 }: SalesFiltersProps) {
   return (
-    <Card className="shadow-md">
+    <Card className="border border-gray-200">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <div>
           <label className="block text-sm font-medium mb-1">Search</label>

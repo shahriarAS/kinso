@@ -53,7 +53,7 @@ export default function CartDetails({
   return (
     <>
       <Card
-        className="border-none shadow-md mb-2"
+        className="border border-gray-200 mb-2"
         styles={{
           body: { padding: 16 },
         }}

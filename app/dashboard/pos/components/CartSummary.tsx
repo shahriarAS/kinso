@@ -41,7 +41,7 @@ interface CartSummaryProps {
 const SectionHeader = ({ label }: { label: string }) => (
   <div className="flex items-center my-2">
     <div className="flex-1 h-px bg-gray-200" />
-    <div className="mx-3 px-4 py-1 bg-gray-100 rounded-full text-xs font-semibold text-gray-700 text-center shadow-sm">
+    <div className="mx-3 px-4 py-1 bg-gray-100 rounded-full text-xs font-semibold text-gray-700 text-center border border-gray-200">
       {label}
     </div>
     <div className="flex-1 h-px bg-gray-200" />
@@ -110,7 +110,7 @@ export default function CartSummary({
     <>
       <SectionHeader label="Summary" />
       <Card
-        className="border-none shadow-sm mb-2"
+        className="border border-gray-200 mb-2"
         styles={{
           body: { padding: 12 },
         }}

@@ -202,6 +202,7 @@ export async function handleGetStats(request: NextRequest) {
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
+    console.error("Error fetching dashboard stats:", error);
     return NextResponse.json(
       {
         success: false,
@@ -291,6 +292,7 @@ export async function handleGetInventoryAlerts(request: NextRequest) {
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
+    console.error("Error fetching inventory alerts:", error);
     return NextResponse.json(
       {
         success: false,
@@ -379,6 +381,7 @@ export async function handleGetSalesAnalytics(request: NextRequest) {
       },
     });
   } catch (error: any) {
+    console.error("Error fetching sales analytics:", error);
     return NextResponse.json(
       {
         success: false,

@@ -21,6 +21,11 @@ const menuItems = [
     href: "/dashboard/pos",
   },
   {
+    icon: "lineicons:receipt",
+    label: "Sales History",
+    href: "/dashboard/sales/history",
+  },
+  {
     icon: "lsicon:management-stockout-outline",
     label: "Products",
     href: "/dashboard/products",

@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Input, Select, Skeleton } from "antd";
+import { pdf } from "@react-pdf/renderer";
 import { useGetCustomersQuery } from "@/features/customers";
 import { useNotification } from "@/hooks/useNotification";
 import ProductGrid from "./ProductGrid";
@@ -11,9 +12,12 @@ import { useFetchAuthUserQuery } from "@/features/auth";
 import { salesApi } from "@/features/sales";
 import { outletsApi } from "@/features/outlets";
 import { useGetStocksQuery } from "@/features/stock";
+import { useGetSettingsQuery } from "@/features/settings/api";
 import type { Stock } from "@/features/stock/types";
 import type { Customer } from "@/features/customers/types";
 import toast from "react-hot-toast";
+import InvoicePDF from "@/components/common/InvoicePDF";
+import { mapSaleToInvoiceData } from "@/lib/invoiceUtils";
 
 export default function POS() {
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -27,6 +31,7 @@ export default function POS() {
   const { data: userData } = useFetchAuthUserQuery();
   const [createSale] = salesApi.useCreateSaleMutation();
   const { data: outletsData } = outletsApi.useGetOutletsQuery({ limit: 100 });
+  const { data: settingsData } = useGetSettingsQuery();
   const searchInputRef = useRef<any>(null);
   const { success, error } = useNotification();
 
@@ -151,6 +156,44 @@ export default function POS() {
     }, 100);
   };
 
+  // Download invoice PDF function
+  const downloadInvoicePDF = useCallback(
+    async (saleId: string) => {
+      if (!saleId || !settingsData) {
+        toast.error("Sale ID or settings not found");
+        return;
+      }
+      try {
+        // Fetch sale data directly from API
+        const response = await fetch(`/api/sales/${saleId}`);
+        const saleRes = await response.json();
+        if (!saleRes?.data) {
+          toast.error("Sale not found");
+          return;
+        }
+        const invoiceData = mapSaleToInvoiceData(
+          saleRes.data,
+          settingsData.data,
+          userData?.user?.name,
+        );
+        const blob = await pdf(<InvoicePDF data={invoiceData} />).toBlob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `invoice-${invoiceData.invoiceNumber}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        toast.success("Invoice downloaded successfully!");
+      } catch (err) {
+        toast.error("Failed to download Invoice");
+        console.error("Failed to download PDF", err);
+      }
+    },
+    [settingsData, userData]
+  );
+
   const handleSaleComplete = async (saleData: {
     outletId: string;
     customerId?: string;
@@ -184,9 +227,17 @@ export default function POS() {
         notes: saleData.notes,
       };
 
-      await createSale(salePayload).unwrap();
+      const result = await createSale(salePayload).unwrap();
 
       toast.success("Sale completed successfully!");
+      
+      // Download invoice PDF after successful sale
+      if (result?.data?.saleId) {
+        setTimeout(() => {
+          downloadInvoicePDF(result.data!.saleId);
+        }, 500); // Small delay to ensure UI updates
+      }
+      
       handleCheckoutSuccess();
     } catch (error: any) {
       toast.error("Failed to complete sale");

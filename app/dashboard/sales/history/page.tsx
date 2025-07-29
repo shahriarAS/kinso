@@ -1,13 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Card, Table, Select, DatePicker, Button, Space, Typography, Tag, Input } from "antd";
-import { SearchOutlined, ReloadOutlined, EyeOutlined } from "@ant-design/icons";
+import { SearchOutlined, ReloadOutlined, EyeOutlined, DownloadOutlined } from "@ant-design/icons";
 import { salesApi } from "@/features/sales";
+import { ViewSaleDrawer } from "@/features/sales/components";
 import { outletsApi } from "@/features/outlets";
 import { customersApi } from "@/features/customers";
 import type { SalesHistoryFilters } from "@/features/sales";
 import { PAYMENT_METHOD_OPTIONS } from "@/lib/constraints";
+import { pdf } from "@react-pdf/renderer";
+import { useGetSettingsQuery } from "@/features/settings/api";
+import { useFetchAuthUserQuery } from "@/features/auth";
+import InvoicePDF from "@/components/common/InvoicePDF";
+import { mapSaleToInvoiceData } from "@/lib/invoiceUtils";
+import toast from "react-hot-toast";
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
@@ -22,10 +29,52 @@ export default function SalesHistoryPage() {
   const [outletFilter, setOutletFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
+  const [viewDrawerOpen, setViewDrawerOpen] = useState(false);
+  const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
 
   const { data: salesData, isLoading, refetch } = salesApi.useGetSalesHistoryQuery(filters);
   const { data: outletsData } = outletsApi.useGetOutletsQuery({ limit: 100 });
   const { data: customersData } = customersApi.useGetCustomersQuery({ limit: 100 });
+  const { data: settingsData } = useGetSettingsQuery();
+  const { data: userData } = useFetchAuthUserQuery();
+
+  // Download invoice PDF function
+  const downloadInvoicePDF = useCallback(
+    async (saleId: string) => {
+      if (!saleId || !settingsData) {
+        toast.error("Sale ID or settings not found");
+        return;
+      }
+      try {
+        // Fetch sale data directly from API
+        const response = await fetch(`/api/sales/${saleId}`);
+        const saleRes = await response.json();
+        if (!saleRes?.data) {
+          toast.error("Sale not found");
+          return;
+        }
+        const invoiceData = mapSaleToInvoiceData(
+          saleRes.data,
+          settingsData.data,
+          userData?.user?.name,
+        );
+        const blob = await pdf(<InvoicePDF data={invoiceData} />).toBlob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `invoice-${invoiceData.invoiceNumber}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        toast.success("Invoice downloaded successfully!");
+      } catch (err) {
+        toast.error("Failed to download Invoice");
+        console.error("Failed to download PDF", err);
+      }
+    },
+    [settingsData, userData]
+  );
 
   const handleFilterChange = (key: keyof SalesHistoryFilters, value: any) => {
     setFilters(prev => ({
@@ -112,6 +161,30 @@ export default function SalesHistoryPage() {
       ),
     },
     {
+      title: "Paid Amount",
+      dataIndex: "paymentMethods",
+      key: "paidAmount",
+      render: (methods: any[]) => {
+        const paidAmount = methods?.reduce((sum, method) => sum + (method.amount || 0), 0) || 0;
+        return (
+          <span className="font-medium text-blue-600">৳{paidAmount.toFixed(2)}</span>
+        );
+      },
+    },
+    {
+      title: "Due Amount",
+      key: "dueAmount",
+      render: (record: any) => {
+        const paidAmount = record.paymentMethods?.reduce((sum: number, method: any) => sum + (method.amount || 0), 0) || 0;
+        const dueAmount = Math.max(0, record.totalAmount - paidAmount);
+        return (
+          <span className={`font-medium ${dueAmount > 0 ? 'text-red-600' : 'text-gray-500'}`}>
+            ৳{dueAmount.toFixed(2)}
+          </span>
+        );
+      },
+    },
+    {
       title: "Payment Methods",
       dataIndex: "paymentMethods",
       key: "paymentMethods",
@@ -135,15 +208,15 @@ export default function SalesHistoryPage() {
     {
       title: "Actions",
       key: "actions",
-      render: (_, record: any) => (
+      render: (_: any, record: any) => (
         <Space>
           <Button
             type="primary"
             size="small"
             icon={<EyeOutlined />}
             onClick={() => {
-              // TODO: Implement view sale details
-              console.log("View sale:", record);
+              setSelectedSaleId(record.saleId);
+              setViewDrawerOpen(true);
             }}
           >
             View
@@ -154,15 +227,16 @@ export default function SalesHistoryPage() {
   ];
 
   return (
-    <div className="h-full w-full p-6 relative overflow-x-hidden flex flex-col gap-6 bg-secondary rounded-3xl">
+    <div className="h-full w-full p-6 relative overflow-x-hidden flex flex-col gap-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-4xl font-bold text-primary tracking-tight">Sales History</h1>
+        <h1 className="text-4xl font-semibold text-primary">Sales History</h1>
         <Button
           type="primary"
           icon={<ReloadOutlined />}
           onClick={() => refetch()}
           loading={isLoading}
+          size="large"
         >
           Refresh
         </Button>
@@ -246,7 +320,7 @@ export default function SalesHistoryPage() {
           pagination={{
             current: currentPage,
             pageSize,
-            total: salesData?.total || 0,
+            total: (salesData as any)?.pagination?.total || 0,
             showSizeChanger: true,
             showQuickJumper: true,
             showTotal: (total, range) =>
@@ -257,6 +331,16 @@ export default function SalesHistoryPage() {
           className="rounded-lg"
         />
       </Card>
+
+      {/* View Sale Drawer */}
+      <ViewSaleDrawer
+        open={viewDrawerOpen}
+        onClose={() => {
+          setViewDrawerOpen(false);
+          setSelectedSaleId(null);
+        }}
+        saleId={selectedSaleId}
+      />
     </div>
   );
 } 

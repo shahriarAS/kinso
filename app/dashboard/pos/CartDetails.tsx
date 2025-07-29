@@ -267,7 +267,7 @@ export default function CartDetails({
               value={discount}
               onChange={(e) => setDiscount(Number(e.target.value))}
               className="w-20 text-right"
-              size="small"
+              size="large"
               prefix="৳"
             />
           </div>
@@ -280,7 +280,7 @@ export default function CartDetails({
               onChange={(e) => setCustomTotal(e.target.value)}
               placeholder={computedTotal.toFixed(2)}
               className="w-20 text-right"
-              size="small"
+              size="large"
               prefix="৳"
             />
           </div>
@@ -448,7 +448,6 @@ export default function CartDetails({
               size="large"
               onClick={confirmCheckout}
               className="flex-1"
-              disabled={paid < total}
               icon={<Icon icon="mdi:check" />}
             >
               Complete Sale

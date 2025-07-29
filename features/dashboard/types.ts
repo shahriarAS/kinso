@@ -3,6 +3,7 @@ export interface RecentSale {
   saleNumber: string;
   customerName: string;
   totalAmount: number;
+  paymentMethods: Array<{ method: string; amount: number }>;
   status: string;
   createdAt: string;
 }

@@ -66,8 +66,8 @@ export default function CustomerManagementDashboard() {
     }> = {};
 
     sales.forEach(sale => {
-      if (sale.customerId) {
-        const customerId = typeof sale.customerId === 'string' ? sale.customerId : sale.customerId._id;
+      if (sale.customer) {
+        const customerId = typeof sale.customer === 'string' ? sale.customer : sale.customer._id;
         if (!customerSales[customerId]) {
           customerSales[customerId] = {
             totalSpent: 0,
@@ -359,23 +359,34 @@ export default function CustomerManagementDashboard() {
             <div>
               <Text strong>Purchase History</Text>
               <div className="mt-2">
-                {salesData?.data
+                {salesData?.data && salesData.data
                   .filter(sale => 
-                    typeof sale.customerId === 'string' 
-                      ? sale.customerId === selectedCustomer._id
-                      : sale.customerId?._id === selectedCustomer._id
+                    typeof sale.customer === 'string' 
+                      ? sale.customer === selectedCustomer._id
+                      : sale.customer?._id === selectedCustomer._id
                   )
-                  .map(sale => (
-                    <div key={sale._id} className="border-b py-2">
-                      <div className="flex justify-between">
-                        <span>{sale.saleId}</span>
-                        <span className="font-semibold">৳{sale.totalAmount}</span>
+                  .map(sale => {
+                    const paidAmount = sale.paymentMethods?.reduce((sum: number, method: any) => sum + (method.amount || 0), 0) || 0;
+                    const dueAmount = Math.max(0, sale.totalAmount - paidAmount);
+                    
+                    return (
+                      <div key={sale._id} className="border-b py-2">
+                        <div className="flex justify-between items-start">
+                          <span>{sale.saleId}</span>
+                          <div className="text-right">
+                            <div className="font-semibold text-green-600">Total: ৳{sale.totalAmount.toFixed(2)}</div>
+                            <div className="text-sm text-blue-600">Paid: ৳{paidAmount.toFixed(2)}</div>
+                            {dueAmount > 0 && (
+                              <div className="text-sm text-red-600">Due: ৳{dueAmount.toFixed(2)}</div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {new Date(sale.createdAt).toLocaleDateString()}
+                        </div>
                       </div>
-                      <div className="text-sm text-gray-500">
-                        {new Date(sale.createdAt).toLocaleDateString()}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
               </div>
             </div>
           </div>

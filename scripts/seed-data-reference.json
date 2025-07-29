@@ -1,0 +1,237 @@
+{
+  "description": "Sample seed data for KINSO retail management system",
+  "generated": "2025-01-29",
+  "database": "MongoDB",
+  "relationships": {
+    "Brand -> Vendor": "Each brand belongs to a vendor",
+    "Product -> Vendor, Brand, Category": "Products are linked to vendor, brand, and category",
+    "User -> Outlet": "Users can be assigned to specific outlets (except admin)",
+    "Stock -> Product, Location": "Stock links products to warehouses or outlets",
+    "Sale -> Outlet, Customer, Stock, User": "Sales reference outlet, customer, stock items, and creator",
+    "Demand -> Product, Location": "Demands are for products at specific locations",
+    "Discount -> Product": "Discounts apply to specific products"
+  },
+  "collections": {
+    "categories": {
+      "count": 10,
+      "sample": {
+        "name": "Electronics",
+        "applyVAT": true
+      }
+    },
+    "vendors": {
+      "count": 10,
+      "sample": {
+        "name": "Samsung Bangladesh"
+      }
+    },
+    "brands": {
+      "count": 12,
+      "sample": {
+        "name": "Samsung",
+        "vendor": "ObjectId(vendor)"
+      }
+    },
+    "warehouses": {
+      "count": 5,
+      "sample": {
+        "name": "Central Warehouse Dhaka"
+      }
+    },
+    "outlets": {
+      "count": 10,
+      "sample": {
+        "name": "Dhanmondi Branch",
+        "type": "Super Shop"
+      }
+    },
+    "users": {
+      "count": 8,
+      "sample": {
+        "name": "Rafiq Ahmed",
+        "email": "rafiq@dhanmondi.com",
+        "password": "hashed_password",
+        "role": "manager",
+        "isActive": true,
+        "outlet": "ObjectId(outlet)"
+      },
+      "credentials": {
+        "admin": {
+          "email": "admin@kinso.com",
+          "password": "password123"
+        },
+        "all_others": {
+          "password": "password123"
+        }
+      }
+    },
+    "customers": {
+      "count": 5,
+      "sample": {
+        "name": "Mohammad Rahman",
+        "phone": "+8801712345678",
+        "email": "rahman@email.com",
+        "address": "House 15, Road 8, Dhanmondi, Dhaka",
+        "membershipActive": true,
+        "totalPurchaseLastMonth": 15750,
+        "totalSales": 45,
+        "totalSpent": 125400
+      }
+    },
+    "products": {
+      "count": 15,
+      "sample": {
+        "name": "Samsung Galaxy A54 128GB",
+        "barcode": "8801234567890",
+        "vendor": "ObjectId(vendor)",
+        "brand": "ObjectId(brand)",
+        "category": "ObjectId(category)"
+      }
+    },
+    "stocks": {
+      "count": "~120 (15 products × 8 locations average)",
+      "sample": {
+        "product": "ObjectId(product)",
+        "location": "ObjectId(warehouse_or_outlet)",
+        "locationType": "Warehouse|Outlet",
+        "mrp": 150,
+        "tp": 120,
+        "expireDate": "2026-01-29",
+        "unit": 65,
+        "batchNumber": "BATCH00101"
+      }
+    },
+    "discounts": {
+      "count": 4,
+      "sample": {
+        "product": "ObjectId(product)",
+        "type": "General|Membership",
+        "amount": 2000,
+        "startDate": "2025-01-29",
+        "endDate": "2025-02-28"
+      }
+    },
+    "demands": {
+      "count": 4,
+      "sample": {
+        "location": "ObjectId(outlet_or_warehouse)",
+        "locationType": "Outlet|Warehouse",
+        "products": [
+          {
+            "product": "ObjectId(product)",
+            "quantity": 10
+          }
+        ],
+        "status": "Pending|Approved|ConvertedToStock"
+      }
+    },
+    "sales": {
+      "count": 15,
+      "sample": {
+        "saleId": "SLE12345678",
+        "outlet": "ObjectId(outlet)",
+        "customer": "ObjectId(customer) | null",
+        "saleDate": "2025-01-15",
+        "totalAmount": 2850,
+        "items": [
+          {
+            "stock": "ObjectId(stock)",
+            "quantity": 2,
+            "unitPrice": 150,
+            "discountApplied": 25
+          }
+        ],
+        "paymentMethods": [
+          {
+            "method": "CASH|BKASH|ROCKET|NAGAD|BANK|CARD",
+            "amount": 2000
+          }
+        ],
+        "discountAmount": 25,
+        "notes": "Customer requested fast delivery",
+        "createdBy": "ObjectId(user)"
+      }
+    },
+    "settings": {
+      "count": 1,
+      "sample": {
+        "invoiceFooter": "Thank you for shopping with us! Please keep your receipt for any returns or exchanges.",
+        "invoiceFooterTitle": "Return Policy",
+        "companyName": "KINSO Retail Chain",
+        "companyEmail": "info@kinso.com.bd",
+        "companyPhone": "+880-2-9876543",
+        "companyAddress": "House 123, Road 15, Block C, Bashundhara R/A, Dhaka-1229, Bangladesh"
+      }
+    }
+  },
+  "businessLogic": {
+    "userRoles": [
+      "admin - Full system access, not tied to specific outlet",
+      "manager - Outlet management access",
+      "staff - Basic operations access"
+    ],
+    "outletTypes": [
+      "Super Shop - Larger stores",
+      "Micro Outlet - Smaller convenience stores"
+    ],
+    "paymentMethods": [
+      "CASH",
+      "BKASH",
+      "ROCKET", 
+      "NAGAD",
+      "BANK",
+      "CARD"
+    ],
+    "demandStatuses": [
+      "Pending - Awaiting approval",
+      "Approved - Ready for processing",
+      "ConvertedToStock - Completed and added to inventory"
+    ],
+    "discountTypes": [
+      "General - Available to all customers",
+      "Membership - Only for members"
+    ]
+  },
+  "sampleLocations": {
+    "warehouses": [
+      "Central Warehouse Dhaka",
+      "Chittagong Distribution Center",
+      "Sylhet Regional Warehouse",
+      "Rajshahi Storage Hub",
+      "Khulna Logistics Center"
+    ],
+    "outlets": [
+      "Dhanmondi Branch (Super Shop)",
+      "Gulshan Store (Super Shop)",
+      "Uttara Outlet (Micro Outlet)",
+      "Mirpur Branch (Super Shop)",
+      "Old Dhaka Store (Micro Outlet)",
+      "Chittagong Main (Super Shop)",
+      "Sylhet Express (Micro Outlet)",
+      "Rajshahi Center (Super Shop)",
+      "Khulna Plaza (Micro Outlet)",
+      "Comilla Branch (Micro Outlet)"
+    ]
+  },
+  "sampleVendorsAndBrands": {
+    "Samsung Bangladesh": ["Samsung", "LG"],
+    "Unilever Bangladesh": ["Dove", "Lux", "Lifebuoy"],
+    "Square Group": ["Square Pharmaceuticals"],
+    "ACI Limited": ["ACI Pure"],
+    "Bashundhara Group": ["Fresh", "Bashundhara Tissue"],
+    "Pran-RFL Group": ["Pran", "RFL"],
+    "Beximco Group": [],
+    "DBL Group": ["DBL Ceramic"],
+    "Yellow Pages": [],
+    "Fresh Food Ltd": []
+  },
+  "notes": [
+    "All passwords are hashed using bcryptjs with salt rounds of 12",
+    "Barcodes follow Bangladesh standard format starting with 880",
+    "Stock quantities and prices are randomly generated but realistic",
+    "Sales data includes realistic payment method distribution (70% cash, 30% digital)",
+    "Customer data includes realistic Bangladeshi addresses and phone numbers",
+    "All timestamps include both createdAt and updatedAt fields",
+    "Indexes are properly set on frequently queried fields"
+  ]
+}

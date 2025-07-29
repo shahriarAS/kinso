@@ -515,15 +515,35 @@ export async function handleConvertToStock(
       stockEntries.push(stockEntry);
     }
 
-    // Update demand status to ConvertedToStock
-    await Demand.findByIdAndUpdate(
-      id,
-      { status: "ConvertedToStock" },
-      { new: true, runValidators: true },
+    // Filter demand products to only include the converted ones
+    const convertedProductIds = products.map(p => p.productId);
+    const convertedProducts = demand.products.filter((dp: any) => 
+      convertedProductIds.includes(dp.product.toString())
     );
 
-    // Return all created stock entries
-    return createSuccessResponse(stockEntries, `Successfully converted demand to ${stockEntries.length} stock entries`);
+    // Update demand with only converted products and status
+    const updatedDemand = await Demand.findByIdAndUpdate(
+      id,
+      { 
+        status: "ConvertedToStock",
+        products: convertedProducts
+      },
+      { new: true, runValidators: true },
+    ).populate({
+      path: "products.product",
+      select: "name barcode category brand vendor",
+      populate: [
+        { path: "category", select: "name" },
+        { path: "brand", select: "name" },
+        { path: "vendor", select: "name" }
+      ]
+    });
+
+    // Return the updated demand along with created stock entries
+    return createSuccessResponse({
+      demand: updatedDemand,
+      stockEntries: stockEntries
+    }, `Successfully converted ${stockEntries.length} products from demand to stock`);
   } catch (error) {
     console.error("Error converting demand to stock:", error);
     return createErrorResponse("Failed to convert demand to stock");

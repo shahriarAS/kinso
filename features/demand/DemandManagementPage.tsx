@@ -159,10 +159,18 @@ export const DemandManagementPage: React.FC = () => {
     conversionData: DemandConversionRequest,
   ) => {
     try {
-      await convertToStock({ demand: demandId, conversionData }).unwrap();
-      success("Demand converted to stock successfully");
+      const response = await convertToStock({ demand: demandId, conversionData }).unwrap();
+      
+      // Update the selected demand with the response from the backend
+      // The backend now only includes the converted products in the demand
+      if (selectedDemand && response.data?.demand) {
+        setSelectedDemand(response.data.demand);
+      }
+      
+      const stockCount = response.data?.stockEntries?.length || 0;
+      success(`Demand converted to stock successfully. ${stockCount} stock entries created.`);
       setConvertDrawerOpen(false);
-      setSelectedDemand(null);
+      // Don't reset selectedDemand here so it can be viewed with conversion info
     } catch (error: any) {
       showError(
         "Failed to convert demand to stock",

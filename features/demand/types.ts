@@ -13,6 +13,8 @@ export interface Demand {
   status: "Pending" | "Approved" | "ConvertedToStock";
   createdAt: string;
   updatedAt: string;
+  // Optional field to track which products were actually converted
+  convertedProductIds?: string[];
 }
 
 export interface DemandInput {
@@ -58,4 +60,9 @@ export interface DemandGenerationRequest {
     minStock: number;
     suggestedQuantity: number;
   }>;
-} 
+}
+
+export interface DemandConversionResponse {
+  demand: Demand;
+  stockEntries: any[]; // You can import Stock type if needed
+}

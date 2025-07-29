@@ -3,6 +3,7 @@ import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
 import {
   Demand,
   DemandConversionRequest,
+  DemandConversionResponse,
   DemandFiltersTypes,
   DemandGenerationRequest,
   DemandInput
@@ -95,7 +96,7 @@ export const demandApi = createApi({
 
     // Convert demand to stock
     convertDemandToStock: builder.mutation<
-      ApiResponse<Demand>,
+      ApiResponse<DemandConversionResponse>,
       { demand: string; conversionData: DemandConversionRequest }
     >({
       query: ({ demand, conversionData }) => ({

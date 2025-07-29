@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Drawer, Descriptions, Table, Tag, Button, Space, Divider } from "antd";
+import { Drawer, Descriptions, Table, Tag, Button, Space, Divider, Alert } from "antd";
 import { CloseOutlined, EditOutlined, CheckCircleOutlined, ArrowRightOutlined } from "@ant-design/icons";
 import { Demand } from "./types";
 
@@ -126,6 +126,15 @@ export const ViewDemandDrawer: React.FC<ViewDemandDrawerProps> = ({
         {/* Basic Information */}
         <div>
           <h3 className="text-lg font-medium mb-4">Basic Information</h3>
+          {demand.status === "ConvertedToStock" && (
+            <Alert
+              message="Converted to Stock"
+              description="This demand has been converted to stock. Only the products that were actually converted are shown below."
+              type="success"
+              showIcon
+              className="mb-4"
+            />
+          )}
           <Descriptions bordered column={2}>
             <Descriptions.Item label="Location" span={1}>
               <span className="font-medium">

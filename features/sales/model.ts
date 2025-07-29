@@ -57,7 +57,6 @@ const SaleSchema: Schema = new Schema(
 );
 
 // Indexes for better query performance
-SaleSchema.index({ saleId: 1 });
 SaleSchema.index({ outlet: 1, createdAt: -1 });
 SaleSchema.index({ customer: 1, createdAt: -1 });
 SaleSchema.index({ saleDate: 1 });

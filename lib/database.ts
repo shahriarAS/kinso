@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import "@/lib/loadModels"; // Load all models to register schemas
 
 const MONGODB_URI =
   process.env.MONGODB_URI || "mongodb://localhost:27017/kinso-inventory";
@@ -43,6 +44,7 @@ async function dbConnect() {
       .connect(MONGODB_URI, opts)
       .then((mongooseInstance) => {
         console.log("Mongoose connected successfully");
+        console.log("All Mongoose models loaded and registered");
         return mongooseInstance;
       })
       .catch((error) => {

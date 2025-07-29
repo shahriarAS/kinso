@@ -166,7 +166,6 @@ export default function POS() {
     setDiscount(0);
     setCustomTotal(null);
     setCustomer("");
-    success("Sale completed! Cart cleared and ready for next sale.");
     refetchStock(); // Refetch stock after sale
     // Refocus search bar
     setTimeout(() => {
@@ -249,7 +248,7 @@ export default function POS() {
 
       const result = await createSale(salePayload).unwrap();
 
-      toast.success("Sale completed successfully!");
+      toast.success("Sale completed successfully! Cart cleared and ready for next sale.");
 
       // Download invoice PDF after successful sale
       if (result?.data?.saleId) {

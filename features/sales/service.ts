@@ -86,9 +86,9 @@ export async function handlePost(request: NextRequest) {
           { status: 400 },
         );
       }
-      if (!payment.amount || payment.amount <= 0) {
+      if (payment.amount === undefined || payment.amount === null || payment.amount < 0) {
         return NextResponse.json(
-          { success: false, message: "Payment amount must be greater than 0" },
+          { success: false, message: "Payment amount must be 0 or greater" },
           { status: 400 },
         );
       }
@@ -464,9 +464,9 @@ export async function handlePut(
           { status: 400 },
         );
       }
-      if (!payment.amount || payment.amount <= 0) {
+      if (payment.amount === undefined || payment.amount === null || payment.amount < 0) {
         return NextResponse.json(
-          { success: false, message: "Payment amount must be greater than 0" },
+          { success: false, message: "Payment amount must be 0 or greater" },
           { status: 400 },
         );
       }

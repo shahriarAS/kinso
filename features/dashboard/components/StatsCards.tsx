@@ -3,7 +3,7 @@ import { Card, Row, Col, Statistic } from "antd";
 import {
   ShoppingCartOutlined,
   UserOutlined,
-  DollarOutlined,
+  WalletOutlined,
   InboxOutlined,
 } from "@ant-design/icons";
 import { DashboardStats } from "@/features/dashboard/types";
@@ -24,7 +24,7 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
             value={stats.totalRevenue}
             precision={2}
             valueStyle={{ color: "#181818", fontWeight: 600, fontSize: 24 }}
-            prefix={<DollarOutlined className="mr-1 text-lg align-middle" />}
+            prefix={<WalletOutlined className="mr-1 text-lg align-middle" />}
             suffix={<span className="text-base font-semibold">৳</span>}
           />
         </Card>

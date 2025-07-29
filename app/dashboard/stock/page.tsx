@@ -295,7 +295,7 @@ export default function StockPage() {
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
-                    <span className="font-semibold text-green-600">$</span>
+                    <span className="font-semibold text-green-600">৳</span>
                   </div>
                 </div>
                 <div className="ml-4">
@@ -303,7 +303,7 @@ export default function StockPage() {
                     Total Value
                   </p>
                   <p className="text-2xl font-semibold text-gray-900">
-                    ${stockStats.totalValue.toLocaleString()}
+                    ৳{stockStats.totalValue.toLocaleString()}
                   </p>
                 </div>
               </div>

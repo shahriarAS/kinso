@@ -112,13 +112,13 @@ const StockTable: React.FC<StockTableProps> = ({
         title: "MRP",
         dataIndex: "mrp",
         key: "mrp",
-        render: (mrp: number) => `$${mrp.toFixed(2)}`,
+        render: (mrp: number) => `৳${mrp.toFixed(2)}`,
       },
       {
         title: "TP",
         dataIndex: "tp",
         key: "tp",
-        render: (tp: number) => `$${tp.toFixed(2)}`,
+        render: (tp: number) => `৳${tp.toFixed(2)}`,
       },
       {
         title: "Expire Date",

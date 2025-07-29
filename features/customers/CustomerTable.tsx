@@ -82,7 +82,7 @@ export default function CustomerTable({
   // Define columns using the generic interface
   const columns: TableColumn<Customer>[] = [
     {
-      title: <span className="font-medium text-base">Customer Name</span>,
+      title: <span className="text-base font-medium">Customer Name</span>,
       dataIndex: "name",
       key: "name",
       render: (name: string) => (
@@ -93,7 +93,7 @@ export default function CustomerTable({
       ),
     },
     {
-      title: <span className="font-medium text-base">Email</span>,
+      title: <span className="text-base font-medium">Email</span>,
       key: "email",
       render: (_, record: Customer) => (
         <div className="text-sm">
@@ -104,7 +104,7 @@ export default function CustomerTable({
       ),
     },
     // {
-    //   title: <span className="font-medium text-base">Membership</span>,
+    //   title: <span className="text-base font-medium">Membership</span>,
     //   key: "membershipActive",
     //   render: (_, record: Customer) => (
     //     <div className="flex items-center space-x-2">
@@ -115,23 +115,23 @@ export default function CustomerTable({
     //   ),
     // },
     {
-      title: <span className="font-medium text-base">Total Spent</span>,
+      title: <span className="text-base font-medium">Total Spent</span>,
       dataIndex: "totalSpent",
       key: "totalSpent",
       render: (amount: number) => (
-        <span className="font-medium text-green-600">${amount.toFixed(2)}</span>
+        <span className="font-medium text-green-600">৳{amount.toFixed(2)}</span>
       ),
     },
     {
-      title: <span className="font-medium text-base">Last Month</span>,
+      title: <span className="text-base font-medium">Last Month</span>,
       dataIndex: "totalPurchaseLastMonth",
       key: "totalPurchaseLastMonth",
       render: (amount: number) => (
-        <span className="text-blue-600">${amount.toFixed(2)}</span>
+        <span className="text-blue-600">৳{amount.toFixed(2)}</span>
       ),
     },
     {
-      title: <span className="font-medium text-base">Total Sales</span>,
+      title: <span className="text-base font-medium">Total Sales</span>,
       dataIndex: "totalSales",
       key: "totalSales",
       render: (count: number) => (
@@ -139,7 +139,7 @@ export default function CustomerTable({
       ),
     },
     // {
-    //   title: <span className="font-medium text-base">Created</span>,
+    //   title: <span className="text-base font-medium">Created</span>,
     //   dataIndex: "createdAt",
     //   key: "createdAt",
     //   render: (date: string) => {

@@ -10,7 +10,7 @@ import {
 import type { InvoiceData } from "@/types";
 
 const formatCurrency = (amount: number, showCurrency: boolean = false) =>
-  `${showCurrency ? "BDT" : ""} ${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+  `${showCurrency ? "৳" : "৳"} ${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
 const InvoicePDF: React.FC<{ data: InvoiceData }> = ({ data }) => {
   const paid =

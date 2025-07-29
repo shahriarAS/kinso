@@ -5,7 +5,7 @@ import {
   TeamOutlined,
   CrownOutlined,
   TrophyOutlined,
-  DollarOutlined,
+  WalletOutlined,
   ShoppingOutlined,
 } from "@ant-design/icons";
 import {
@@ -125,7 +125,7 @@ const CustomerStats: React.FC = () => {
             <Statistic
               title="Total Revenue"
               value={stats.totalPurchaseAmount}
-              prefix={<DollarOutlined className="text-green-600" />}
+              prefix={<WalletOutlined className="text-green-600" />}
               valueStyle={{ color: "#389e0d" }}
               precision={2}
             />

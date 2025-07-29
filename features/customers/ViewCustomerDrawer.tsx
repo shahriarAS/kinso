@@ -54,7 +54,7 @@ const ViewCustomerDrawer: React.FC<ViewCustomerDrawerProps> = ({
       <div className="space-y-6">
         {/* Customer Basic Info */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <h3 className="flex items-center mb-4 text-lg font-semibold text-gray-800">
             <UserOutlined className="mr-2" />
             Basic Information
           </h3>
@@ -75,7 +75,7 @@ const ViewCustomerDrawer: React.FC<ViewCustomerDrawerProps> = ({
 
         {/* Contact Information */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <h3 className="flex items-center mb-4 text-lg font-semibold text-gray-800">
             <PhoneOutlined className="mr-2" />
             Contact Information
           </h3>
@@ -115,18 +115,18 @@ const ViewCustomerDrawer: React.FC<ViewCustomerDrawerProps> = ({
 
         {/* Purchase History */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+          <h3 className="mb-4 text-lg font-semibold text-gray-800">
             Purchase History
           </h3>
           <Descriptions column={1} bordered size="small">
             <Descriptions.Item label="Total Amount Spent">
-              <span className="text-green-600 font-semibold text-lg">
-                ${customer.totalSpent.toFixed(2)}
+              <span className="text-lg font-semibold text-green-600">
+                ৳{customer.totalSpent.toFixed(2)}
               </span>
             </Descriptions.Item>
             <Descriptions.Item label="Last Month Purchase">
-              <span className="text-blue-600 font-medium">
-                ${customer.totalPurchaseLastMonth.toFixed(2)}
+              <span className="font-medium text-blue-600">
+                ৳{customer.totalPurchaseLastMonth.toFixed(2)}
               </span>
             </Descriptions.Item>
             <Descriptions.Item label="Total Number of Sales">
@@ -139,26 +139,26 @@ const ViewCustomerDrawer: React.FC<ViewCustomerDrawerProps> = ({
 
         {/* Statistics */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+          <h3 className="mb-4 text-lg font-semibold text-gray-800">
             Customer Statistics
           </h3>
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <div className="text-blue-600 text-sm font-medium">
+            <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
+              <div className="text-sm font-medium text-blue-600">
                 Average per Sale
               </div>
-              <div className="text-blue-800 text-xl font-bold">
-                $
+              <div className="text-xl font-bold text-blue-800">
+                ৳
                 {customer.totalSales > 0
                   ? (customer.totalSpent / customer.totalSales).toFixed(2)
                   : "0.00"}
               </div>
             </div>
-            <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-              <div className="text-green-600 text-sm font-medium">
+            <div className="p-4 border border-green-200 rounded-lg bg-green-50">
+              <div className="text-sm font-medium text-green-600">
                 Customer Value
               </div>
-              <div className="text-green-800 text-xl font-bold">
+              <div className="text-xl font-bold text-green-800">
                 {customer.membershipActive ? "Premium" : "Standard"}
               </div>
             </div>
@@ -168,7 +168,7 @@ const ViewCustomerDrawer: React.FC<ViewCustomerDrawerProps> = ({
         <Divider />
 
         {/* Timestamps */}
-        <div className="text-sm text-gray-500 space-y-1">
+        <div className="space-y-1 text-sm text-gray-500">
           <div>Created: {new Date(customer.createdAt).toLocaleString()}</div>
           <div>
             Last Updated: {new Date(customer.updatedAt).toLocaleString()}

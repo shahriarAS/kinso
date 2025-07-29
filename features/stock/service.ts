@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/database";
 import Stock from "./model";
+import Product from "@/features/products/model";
 import Warehouse from "../warehouses/model";
 import Outlet from "../outlets/model";
 import { authorizeRequest } from "@/lib/auth";

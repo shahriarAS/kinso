@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/database";
 import Product from "./model";
+import Vendor from "@/features/vendors/model";
+import Brand from "@/features/brands/model";
+import Category from "@/features/categories/model";
 import { authorizeRequest } from "@/lib/auth";
 import { AuthenticatedRequest } from "@/features/auth";
 import {
@@ -53,12 +56,11 @@ export async function handlePost(request: NextRequest) {
         409,
       );
 
-    // Check existence of vendor, brand, category (assuming respective models)
+    // Check existence of vendor, brand, category
     const [vendorExists, brandExists, categoryExists] = await Promise.all([
-      // Replace with actual Vendor, Brand, Category models
-      Product.db.model("Vendor").findById(vendor),
-      Product.db.model("Brand").findById(brand),
-      Product.db.model("Category").findById(category),
+      Vendor.findById(vendor),
+      Brand.findById(brand),
+      Category.findById(category),
     ]);
     if (!vendorExists) return createNotFoundResponse("Vendor");
     if (!brandExists) return createNotFoundResponse("Brand");
@@ -241,9 +243,9 @@ export async function handleUpdateById(
 
     // Check existence of vendor, brand, category
     const [vendorExists, brandExists, categoryExists] = await Promise.all([
-      Product.db.model("Vendor").findById(vendor),
-      Product.db.model("Brand").findById(brand),
-      Product.db.model("Category").findById(category),
+      Vendor.findById(vendor),
+      Brand.findById(brand),
+      Category.findById(category),
     ]);
     if (!vendorExists) return createNotFoundResponse("Vendor");
     if (!brandExists) return createNotFoundResponse("Brand");

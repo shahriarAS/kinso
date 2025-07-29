@@ -2,7 +2,7 @@
 import React from "react";
 import { Row, Col, Alert } from "antd";
 import { useGetDashboardStatsQuery } from "@/features/dashboard";
-import { DashboardHeader, DashboardSkeleton, RecentOrders, StatsCards, TopProducts } from "@/features/dashboard/components";
+import { DashboardHeader, DashboardSkeleton, RecentSales, StatsCards, TopProducts } from "@/features/dashboard/components";
 import {
   InventoryAlerts as InventoryAlertsType,
   DashboardStats,
@@ -65,7 +65,7 @@ const Dashboard: React.FC = () => {
 
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={12}>
-          <RecentOrders recentOrders={stats.recentOrders} />
+          <RecentSales recentOrders={stats.recentOrders} />
         </Col>
         <Col xs={24} lg={12}>
           <TopProducts topProducts={stats.topProducts} />

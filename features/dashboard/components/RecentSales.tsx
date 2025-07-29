@@ -7,7 +7,7 @@ interface RecentOrdersProps {
   recentOrders: DashboardStats["recentOrders"];
 }
 
-const RecentOrders: React.FC<RecentOrdersProps> = ({ recentOrders }) => {
+const RecentSales: React.FC<RecentOrdersProps> = ({ recentOrders }) => {
   return (
     <Card
       title={
@@ -45,4 +45,4 @@ const RecentOrders: React.FC<RecentOrdersProps> = ({ recentOrders }) => {
   );
 };
 
-export default RecentOrders;
+export default RecentSales;

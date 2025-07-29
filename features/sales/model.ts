@@ -13,7 +13,10 @@ export interface ISale extends Document {
     unitPrice: number;
     discountApplied: number;
   }[];
-  paymentMethod: PaymentMethod;
+  paymentMethods: {
+    method: PaymentMethod;
+    amount: number;
+  }[];
   discountAmount: number;
   notes?: string;
   createdBy: mongoose.Types.ObjectId;
@@ -36,11 +39,16 @@ const SaleSchema: Schema = new Schema(
         discountApplied: { type: Number, default: 0, min: 0 },
       },
     ],
-    paymentMethod: { 
-      type: String, 
-      required: true, 
-      enum: ["CASH", "BKASH", "ROCKET", "NAGAD", "BANK", "CARD"] 
-    },
+    paymentMethods: [
+      {
+        method: { 
+          type: String, 
+          required: true, 
+          enum: ["CASH", "BKASH", "ROCKET", "NAGAD", "BANK", "CARD"] 
+        },
+        amount: { type: Number, required: true, min: 0 },
+      }
+    ],
     discountAmount: { type: Number, default: 0, min: 0 },
     notes: { type: String, trim: true },
     createdBy: { type: Schema.Types.ObjectId, required: true, ref: "User" },

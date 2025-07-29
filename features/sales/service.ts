@@ -10,8 +10,6 @@ import {
   createErrorResponse,
   createPaginatedResponse,
   createNotFoundResponse,
-  createValidationErrorResponse,
-  createUnauthorizedResponse,
 } from "@/lib/apiResponse";
 
 // POST /api/sales - Create a new sale
@@ -35,7 +33,7 @@ export async function handlePost(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { outlet, customer, items, paymentMethod, discountAmount, notes } = body;
+    const { outlet, customer, items, paymentMethods, discountAmount, notes } = body;
 
     // Basic validation
     if (!outlet) {
@@ -52,11 +50,27 @@ export async function handlePost(request: NextRequest) {
       );
     }
 
-    if (!paymentMethod || !PAYMENT_METHODS.includes(paymentMethod as PaymentMethod)) {
+    if (!paymentMethods || !Array.isArray(paymentMethods) || paymentMethods.length === 0) {
       return NextResponse.json(
-        { success: false, message: "Valid payment method is required" },
+        { success: false, message: "Payment methods array is required and cannot be empty" },
         { status: 400 },
       );
+    }
+
+    // Validate payment methods
+    for (const payment of paymentMethods) {
+      if (!payment.method || !PAYMENT_METHODS.includes(payment.method as PaymentMethod)) {
+        return NextResponse.json(
+          { success: false, message: "Valid payment method is required for each payment" },
+          { status: 400 },
+        );
+      }
+      if (!payment.amount || payment.amount <= 0) {
+        return NextResponse.json(
+          { success: false, message: "Payment amount must be greater than 0" },
+          { status: 400 },
+        );
+      }
     }
 
     // Validate items array
@@ -98,7 +112,7 @@ export async function handlePost(request: NextRequest) {
       saleDate: new Date(),
       items,
       totalAmount,
-      paymentMethod,
+      paymentMethods,
       discountAmount: discountAmount || 0,
       notes: notes || "",
       createdBy: userId,
@@ -144,14 +158,14 @@ export async function handleGet(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
+    const search = searchParams.get("search");
     const outlet = searchParams.get("outlet");
     const customer = searchParams.get("customer");
+    const paymentMethod = searchParams.get("paymentMethod");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
-    const paymentMethod = searchParams.get("paymentMethod");
     const minAmount = searchParams.get("minAmount");
     const maxAmount = searchParams.get("maxAmount");
-    const search = searchParams.get("search");
     const sortBy = searchParams.get("sortBy") || "createdAt";
     const sortOrder = searchParams.get("sortOrder") || "desc";
 
@@ -166,7 +180,7 @@ export async function handleGet(request: NextRequest) {
       query.customer = customer;
     }
     if (paymentMethod) {
-      query.paymentMethod = paymentMethod;
+      query["paymentMethods.method"] = paymentMethod;
     }
     if (minAmount || maxAmount) {
       query.totalAmount = {};
@@ -279,7 +293,7 @@ export async function handlePut(
     }
     await dbConnect();
     const body = await request.json();
-    const { outlet, customer, items, totalAmount, paymentMethod, discountAmount, notes } = body;
+    const { outlet, customer, items, totalAmount, paymentMethods, discountAmount, notes } = body;
     const { id } = await params;
     
     const existingSale = await Sale.findOne({ saleId: id });
@@ -312,11 +326,27 @@ export async function handlePut(
       );
     }
 
-    if (!paymentMethod) {
+    if (!paymentMethods || !Array.isArray(paymentMethods) || paymentMethods.length === 0) {
       return NextResponse.json(
-        { success: false, message: "Payment method is required" },
+        { success: false, message: "Payment methods array is required and cannot be empty" },
         { status: 400 },
       );
+    }
+
+    // Validate payment methods
+    for (const payment of paymentMethods) {
+      if (!payment.method || !PAYMENT_METHODS.includes(payment.method as PaymentMethod)) {
+        return NextResponse.json(
+          { success: false, message: "Valid payment method is required for each payment" },
+          { status: 400 },
+        );
+      }
+      if (!payment.amount || payment.amount <= 0) {
+        return NextResponse.json(
+          { success: false, message: "Payment amount must be greater than 0" },
+          { status: 400 },
+        );
+      }
     }
 
     // Validate items array
@@ -348,7 +378,7 @@ export async function handlePut(
         customer: customer || null,
         items,
         totalAmount,
-        paymentMethod,
+        paymentMethods,
         discountAmount: discountAmount || 0,
         notes: notes || "",
       },

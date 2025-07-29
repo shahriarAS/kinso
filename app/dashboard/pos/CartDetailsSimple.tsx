@@ -12,7 +12,7 @@ import { Icon } from "@iconify/react";
 import { useState } from "react";
 import { useNotification } from "@/hooks/useNotification";
 import { CartItem, CustomerOption } from "./types";
-import { PAYMENT_METHOD_OPTIONS, PAYMENT_METHOD_ICONS } from "@/lib/constraints";
+import { PAYMENT_METHODS } from "@/lib/constraints";
 import { UserOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
@@ -32,10 +32,11 @@ interface CartDetailsProps {
   customers: CustomerOption[];
   onCreateCustomer: () => void;
   onCheckoutSuccess: () => void;
+  selectedWarehouse: string;
   onSaleComplete?: (saleData: {
     outletId: string;
     customerId?: string;
-    paymentMethods: { method: string; amount: number }[];
+    paymentMethod: string;
     notes?: string;
   }) => void;
   outlets?: { _id: string; name: string }[];
@@ -57,57 +58,32 @@ export default function CartDetails({
   customers,
   onCreateCustomer,
   onCheckoutSuccess,
+  selectedWarehouse,
   onSaleComplete,
   outlets = [],
   selectedOutlet = "",
 }: CartDetailsProps) {
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
-  const [paymentMethods, setPaymentMethods] = useState([{ method: "CASH", amount: 0 }]);
+  const [paymentMethod, setPaymentMethod] = useState("CASH");
   const [notes, setNotes] = useState("");
   const { success, error } = useNotification();
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const totalPaid = paymentMethods.reduce((sum, payment) => sum + payment.amount, 0);
-  const remaining = total - totalPaid;
 
   const handleCheckout = () => {
     if (cart.length === 0) {
       error("Cart is empty!");
       return;
     }
-    // Set initial payment amount to total when opening modal
-    setPaymentMethods([{ method: "CASH", amount: total }]);
     setCheckoutModalOpen(true);
   };
 
-  const addPaymentMethod = () => {
-    setPaymentMethods([...paymentMethods, { method: "CASH", amount: 0 }]);
-  };
-
-  const updatePaymentMethod = (index: number, field: "method" | "amount", value: string | number) => {
-    const updated = paymentMethods.map((payment, i) => 
-      i === index ? { ...payment, [field]: value } : payment
-    );
-    setPaymentMethods(updated);
-  };
-
-  const removePaymentMethod = (index: number) => {
-    if (paymentMethods.length > 1) {
-      setPaymentMethods(paymentMethods.filter((_, i) => i !== index));
-    }
-  };
-
   const confirmCheckout = () => {
-    if (Math.abs(remaining) > 0.01) { // Allow for small rounding differences
-      error("Payment amounts must equal the total!");
-      return;
-    }
-
     if (onSaleComplete) {
       onSaleComplete({
         outletId: selectedOutlet,
         customerId: customer || undefined,
-        paymentMethods,
+        paymentMethod,
         notes: notes || (discount > 0 ? `Discount applied: ৳${discount}` : undefined),
       });
     }
@@ -280,85 +256,20 @@ export default function CartDetails({
         onCancel={() => setCheckoutModalOpen(false)}
         onOk={confirmCheckout}
         okText="Complete Sale"
-        width={600}
-        okButtonProps={{ disabled: Math.abs(remaining) > 0.01 }}
+        width={500}
       >
         <div className="space-y-4">
           <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="block text-sm font-medium">Payment Methods</label>
-              <Button
-                type="dashed"
-                size="small"
-                onClick={addPaymentMethod}
-                icon={<Icon icon="mdi:plus" />}
-              >
-                Add Payment
-              </Button>
-            </div>
-            
-            <div className="space-y-3">
-              {paymentMethods.map((payment, index) => (
-                <div key={index} className="flex gap-2 items-center bg-gray-50 p-3 rounded-lg">
-                  <Select
-                    value={payment.method}
-                    onChange={(value) => updatePaymentMethod(index, "method", value)}
-                    className="flex-1"
-                    options={PAYMENT_METHOD_OPTIONS.map(method => ({
-                      label: (
-                        <span className="flex items-center gap-2">
-                          <Icon icon={PAYMENT_METHOD_ICONS[method.value]} />
-                          {method.label}
-                        </span>
-                      ),
-                      value: method.value,
-                    }))}
-                  />
-                  <Input
-                    type="number"
-                    value={payment.amount}
-                    onChange={(e) => updatePaymentMethod(index, "amount", Number(e.target.value))}
-                    placeholder="Amount"
-                    prefix="৳"
-                    className="w-32"
-                    min={0}
-                    step={0.01}
-                  />
-                  {paymentMethods.length > 1 && (
-                    <Button
-                      type="text"
-                      danger
-                      size="small"
-                      icon={<Icon icon="mdi:close" />}
-                      onClick={() => removePaymentMethod(index)}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Payment Summary */}
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-              <div className="flex justify-between text-sm">
-                <span>Total Amount:</span>
-                <span className="font-semibold">৳{total.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Total Paid:</span>
-                <span className="font-semibold">৳{totalPaid.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-sm border-t border-blue-200 pt-1 mt-1">
-                <span>Remaining:</span>
-                <span className={`font-semibold ${remaining > 0.01 ? 'text-red-600' : remaining < -0.01 ? 'text-orange-600' : 'text-green-600'}`}>
-                  ৳{remaining.toFixed(2)}
-                </span>
-              </div>
-              {Math.abs(remaining) > 0.01 && (
-                <div className="text-xs text-red-500 mt-1">
-                  {remaining > 0 ? 'Payment incomplete' : 'Overpayment detected'}
-                </div>
-              )}
-            </div>
+            <label className="block text-sm font-medium mb-1">Payment Method</label>
+            <Select
+              value={paymentMethod}
+              onChange={setPaymentMethod}
+              className="w-full"
+              options={PAYMENT_METHODS.map(method => ({
+                label: method,
+                value: method,
+              }))}
+            />
           </div>
           
           <div>
@@ -369,6 +280,13 @@ export default function CartDetails({
               placeholder="Add any notes for this sale..."
               rows={3}
             />
+          </div>
+
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="flex justify-between items-center">
+              <span className="font-medium">Total Amount:</span>
+              <span className="text-lg font-bold text-green-600">৳{total.toFixed(2)}</span>
+            </div>
           </div>
         </div>
       </Modal>

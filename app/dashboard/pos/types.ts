@@ -2,7 +2,7 @@ import type { Product } from "@/features/products/types";
 
 export interface CartItem {
   _id: string; // Product ID
-  stockId: string; // Stock entry ID for FIFO
+  stockId: string; // Stock entry ID for sales tracking
   name: string;
   barcode: string;
   quantity: number;
@@ -10,6 +10,8 @@ export interface CartItem {
   availableStock: number;
   category?: string;
   brand?: string;
+  batchNumber?: string;
+  expireDate?: string;
 }
 
 export interface CustomerOption {
@@ -17,12 +19,6 @@ export interface CustomerOption {
   value: string;
   disabled?: boolean;
   _id?: string;
-}
-
-export interface WarehouseOption {
-  label: string;
-  value: string;
-  _id: string;
 }
 
 export const categoryColors: Record<string, string> = {

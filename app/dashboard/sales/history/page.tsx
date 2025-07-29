@@ -102,19 +102,50 @@ export default function SalesHistoryPage() {
       ),
     },
     {
-      title: "Payment Method",
-      dataIndex: "paymentMethod",
-      key: "paymentMethod",
-      render: (method: string) => {
+      title: "Payment Methods",
+      dataIndex: "paymentMethods",
+      key: "paymentMethods",
+      render: (methods: any[]) => {
         const methodColors: Record<string, string> = {
           CASH: "green",
-          BKASH: "blue",
+          BKASH: "blue", 
           ROCKET: "purple",
           NAGAD: "orange",
           BANK: "cyan",
           CARD: "magenta",
         };
-        return <Tag color={methodColors[method] || "default"}>{method}</Tag>;
+        
+        if (!methods || methods.length === 0) {
+          return <Tag color="default">No payment info</Tag>;
+        }
+        
+        if (methods.length === 1) {
+          return (
+            <div>
+              <Tag color={methodColors[methods[0].method] || "default"}>
+                {methods[0].method}
+              </Tag>
+              <div className="text-xs text-gray-500">
+                ৳{methods[0].amount.toFixed(2)}
+              </div>
+            </div>
+          );
+        }
+        
+        return (
+          <div>
+            {methods.map((payment, index) => (
+              <div key={index} className="mb-1">
+                <Tag color={methodColors[payment.method] || "default"}>
+                  {payment.method}
+                </Tag>
+                <span className="text-xs text-gray-500 ml-1">
+                  ৳{payment.amount.toFixed(2)}
+                </span>
+              </div>
+            ))}
+          </div>
+        );
       },
     },
     {

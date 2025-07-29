@@ -1,7 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { authApi } from "@/features/auth";
 import { customersApi } from "@/features/customers";
-import { ordersApi } from "@/features/orders";
 import { warehousesApi } from "@/features/warehouses";
 import { categoriesApi } from "@/features/categories";
 import { usersApi } from "@/features/users";
@@ -24,7 +23,6 @@ const store = configureStore({
     [authApi.reducerPath]: authApi.reducer,
     [productsApi.reducerPath]: productsApi.reducer,
     [customersApi.reducerPath]: customersApi.reducer,
-    [ordersApi.reducerPath]: ordersApi.reducer,
     [warehousesApi.reducerPath]: warehousesApi.reducer,
     [categoriesApi.reducerPath]: categoriesApi.reducer,
     [usersApi.reducerPath]: usersApi.reducer,
@@ -48,7 +46,6 @@ const store = configureStore({
       authApi.middleware,
       productsApi.middleware,
       customersApi.middleware,
-      ordersApi.middleware,
       warehousesApi.middleware,
       categoriesApi.middleware,
       usersApi.middleware,

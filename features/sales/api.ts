@@ -1,14 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
-import type {
-  CreateSaleRequest,
-  Sale,
-  SaleReturnRequest,
-  SalesHistoryFilters,
-  SalesHistoryResponse,
-  ProductSearchResult,
-  SalesStatsResponse,
-} from "./types";
+import type { Sale, SaleInput } from "./types";
 import { ApiResponse } from "@/types";
 
 export const salesApi = createApi({
@@ -17,7 +9,7 @@ export const salesApi = createApi({
   tagTypes: ["Sales", "Products"],
   endpoints: (builder) => ({
     // Create new sale
-    createSale: builder.mutation<ApiResponse<Sale>, CreateSaleRequest>({
+    createSale: builder.mutation<ApiResponse<Sale>,SaleInput>({
       query: (saleData) => ({
         url: `/`,
         method: "POST",
@@ -27,23 +19,24 @@ export const salesApi = createApi({
     }),
 
     // Get sales history
-    getSalesHistory: builder.query<SalesHistoryResponse, SalesHistoryFilters>({
+    getSalesHistory: builder.query<ApiResponse<Sale[]>, {
+        page?: number;
+        limit?: number;
+        search?: string;
+        outlet?: string;
+        customer?: string;
+        paymentMethod?: string;
+        startDate?: string;
+        endDate?: string;
+        sortBy?: string;
+        sortOrder?: "asc" | "desc";
+      }>({
       query: (filters) => ({
-        url: `/history`,
-        method: "GET",
-        params: filters,
+      url: `/history`,
+      method: "GET",
+      params: filters,
       }),
       providesTags: ["Sales"],
-    }),
-
-    // Process sale return
-    processSaleReturn: builder.mutation<ApiResponse<Sale>, SaleReturnRequest>({
-      query: (returnData) => ({
-        url: `/returns`,
-        method: "POST",
-        body: returnData,
-      }),
-      invalidatesTags: ["Sales"],
     }),
 
     // Get sale by ID
@@ -58,7 +51,7 @@ export const salesApi = createApi({
     // Update sale
     updateSale: builder.mutation<
       ApiResponse<Sale>,
-      { saleId: string; saleData: Partial<CreateSaleRequest> }
+      { saleId: string; saleData: Partial<SaleInput> }
     >({
       query: ({ saleId, saleData }) => ({
         url: `/${saleId}`,
@@ -76,36 +69,13 @@ export const salesApi = createApi({
       }),
       invalidatesTags: ["Sales"],
     }),
-
-    // Search products for POS
-    searchProducts: builder.query<ApiResponse<ProductSearchResult[]>, { query: string; outletId?: string }>({
-      query: (params) => ({
-        url: `/search`,
-        method: "GET",
-        params,
-      }),
-      providesTags: ["Products"],
-    }),
-
-    // Get sales statistics
-    getSalesStats: builder.query<SalesStatsResponse, { startDate?: string; endDate?: string; outletId?: string }>({
-      query: (params) => ({
-        url: `/stats`,
-        method: "GET",
-        params,
-      }),
-      providesTags: ["Sales"],
-    }),
   }),
 });
 
 export const {
   useCreateSaleMutation,
   useGetSalesHistoryQuery,
-  useProcessSaleReturnMutation,
   useGetSaleByIdQuery,
   useUpdateSaleMutation,
   useDeleteSaleMutation,
-  useSearchProductsQuery,
-  useGetSalesStatsQuery,
 } = salesApi; 

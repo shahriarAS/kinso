@@ -17,12 +17,17 @@ export interface Sale {
     unitPrice: number;
     discountApplied: number;
   }[];
-  paymentMethod: PaymentMethod;
+  paymentMethods: PaymentMethodEntry[];
   discountAmount: number;
   notes?: string;
   createdBy: User;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface PaymentMethodEntry {
+  method: PaymentMethod;
+  amount: number;
 }
 
 export interface SaleInput {
@@ -34,7 +39,7 @@ export interface SaleInput {
     unitPrice: number;
     discountApplied: number;
   }[];
-  paymentMethod: PaymentMethod;
+  paymentMethods: PaymentMethodEntry[];
   discountAmount: number;
   notes?: string;
 }

@@ -15,11 +15,11 @@ const menuItems = [
   //   label: "Dashboard",
   //   href: "/dashboard",
   // },
-  // {
-  //   icon: "lineicons:cart-1",
-  //   label: "Point of Sale",
-  //   href: "/dashboard/pos",
-  // },
+  {
+    icon: "lineicons:cart-1",
+    label: "Point of Sale",
+    href: "/dashboard/pos",
+  },
   {
     icon: "lsicon:management-stockout-outline",
     label: "Products",

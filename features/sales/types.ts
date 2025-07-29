@@ -43,3 +43,15 @@ export interface SaleInput {
   discountAmount: number;
   notes?: string;
 }
+
+export interface SalesHistoryFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+  paymentMethod?: string;
+  outlet?: string;
+  outletId?: string;
+  customerId?: string;
+  startDate?: string;
+  endDate?: string;
+}

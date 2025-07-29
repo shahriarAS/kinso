@@ -1,12 +1,12 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Input, Select, Skeleton } from "antd";
 import { useGetCustomersQuery } from "@/features/customers";
 import { useNotification } from "@/hooks/useNotification";
 import ProductGrid from "./ProductGrid";
 import CartDetails from "./CartDetails";
 import CustomerModal from "./CustomerModal";
-import { CartItem, CustomerOption } from "./types";
+import { CartItem, CustomerOption, OutletOption } from "./types";
 import { useFetchAuthUserQuery } from "@/features/auth";
 import { salesApi } from "@/features/sales";
 import { outletsApi } from "@/features/outlets";
@@ -27,7 +27,7 @@ export default function POS() {
   const { data: userData } = useFetchAuthUserQuery();
   const [createSale] = salesApi.useCreateSaleMutation();
   const { data: outletsData } = outletsApi.useGetOutletsQuery({ limit: 100 });
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchInputRef = useRef<any>(null);
   const { success, error } = useNotification();
 
   const { data: customersData } = useGetCustomersQuery({
@@ -500,6 +500,7 @@ export default function POS() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     allowClear
+                    ref={searchInputRef}
                   />
                 </div>
                 {stockLoading ? (

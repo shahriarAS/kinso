@@ -4,9 +4,11 @@ import {
   Input,
   Select,
   Button,
+  Tooltip,
+  Modal,
+  Divider,
   Card,
   Typography,
-  Modal,
 } from "antd";
 import { Icon } from "@iconify/react";
 import { useState } from "react";
@@ -14,8 +16,6 @@ import { useNotification } from "@/hooks/useNotification";
 import { CartItem, CustomerOption } from "./types";
 import { PAYMENT_METHOD_OPTIONS, PAYMENT_METHOD_ICONS } from "@/lib/constraints";
 import { UserOutlined } from "@ant-design/icons";
-
-const { Title } = Typography;
 
 interface CartDetailsProps {
   cart: CartItem[];
@@ -42,6 +42,17 @@ interface CartDetailsProps {
   selectedOutlet?: string;
 }
 
+// Custom SectionHeader component
+const SectionHeader = ({ label }: { label: string }) => (
+  <div className="flex items-center my-2">
+    <div className="flex-1 h-px bg-gray-200" />
+    <div className="mx-3 px-4 py-1 bg-gray-100 rounded-full text-xs font-semibold text-gray-700 text-center shadow-sm">
+      {label}
+    </div>
+    <div className="flex-1 h-px bg-gray-200" />
+  </div>
+);
+
 export default function CartDetails({
   cart,
   onQty,
@@ -62,56 +73,49 @@ export default function CartDetails({
   selectedOutlet = "",
 }: CartDetailsProps) {
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
-  const [paymentMethods, setPaymentMethods] = useState([{ method: "CASH", amount: 0 }]);
+  const [payments, setPayments] = useState([{ method: "CASH", amount: 0 }]);
   const [notes, setNotes] = useState("");
   const { success, error } = useNotification();
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const totalPaid = paymentMethods.reduce((sum, payment) => sum + payment.amount, 0);
-  const remaining = total - totalPaid;
+  const paid = payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+  const due = Math.max(0, total - paid);
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (cart.length === 0) {
       error("Cart is empty!");
       return;
     }
-    // Set initial payment amount to total when opening modal
-    setPaymentMethods([{ method: "CASH", amount: total }]);
+    if (!customer) {
+      error("Please select a customer!");
+      return;
+    }
+    if (paid > total) {
+      error("Total paid cannot exceed total amount.");
+      return;
+    }
     setCheckoutModalOpen(true);
   };
 
-  const addPaymentMethod = () => {
-    setPaymentMethods([...paymentMethods, { method: "CASH", amount: 0 }]);
-  };
+  const confirmCheckout = async () => {
+    try {
+      const selectedCustomer = customers.find((c) => c.value === customer);
 
-  const updatePaymentMethod = (index: number, field: "method" | "amount", value: string | number) => {
-    const updated = paymentMethods.map((payment, i) => 
-      i === index ? { ...payment, [field]: value } : payment
-    );
-    setPaymentMethods(updated);
-  };
-
-  const removePaymentMethod = (index: number) => {
-    if (paymentMethods.length > 1) {
-      setPaymentMethods(paymentMethods.filter((_, i) => i !== index));
+      if (onSaleComplete) {
+        onSaleComplete({
+          outletId: selectedOutlet,
+          customerId: customer || undefined,
+          paymentMethods: payments,
+          notes: notes || (discount > 0 ? `Discount applied: ৳${discount}` : undefined),
+        });
+      }
+      
+      success("Sale completed successfully!");
+      setCheckoutModalOpen(false);
+      onCheckoutSuccess();
+    } catch (err: any) {
+      error("Failed to complete sale", err?.message);
     }
-  };
-
-  const confirmCheckout = () => {
-    if (Math.abs(remaining) > 0.01) { // Allow for small rounding differences
-      error("Payment amounts must equal the total!");
-      return;
-    }
-
-    if (onSaleComplete) {
-      onSaleComplete({
-        outletId: selectedOutlet,
-        customerId: customer || undefined,
-        paymentMethods,
-        notes: notes || (discount > 0 ? `Discount applied: ৳${discount}` : undefined),
-      });
-    }
-    setCheckoutModalOpen(false);
   };
 
   return (
@@ -124,9 +128,9 @@ export default function CartDetails({
       >
         <div className="flex items-center mb-2">
           <UserOutlined className="text-primary text-lg mr-2" />
-          <Title level={5} className="!mb-0">
+          <Typography.Title level={5} className="!mb-0">
             Bill Details
-          </Title>
+          </Typography.Title>
           <span className="ml-auto text-xs text-gray-400 font-normal">
             {new Date().toLocaleDateString()}
           </span>
@@ -149,148 +153,201 @@ export default function CartDetails({
             size="large"
             onClick={onCreateCustomer}
             icon={<Icon icon="mdi:account-plus" />}
-          />
+          >
+            New
+          </Button>
         </div>
       </Card>
-
-      <div className="bg-white border border-gray-200 rounded-3xl p-4 flex flex-col gap-3 shadow-lg min-h-[500px] overflow-hidden relative">
-        <div className="font-semibold text-xl text-primary flex justify-between items-center">
-          <span>Cart Items</span>
-          <span className="text-sm text-gray-400 font-normal">
-            {cart.length} item{cart.length !== 1 ? "s" : ""}
-          </span>
-        </div>
-
-        <div className="flex-1 flex flex-col gap-2 overflow-y-auto max-h-[300px]">
-          {cart.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <Icon icon="mdi:cart-outline" className="text-4xl mb-2" />
-              <p>Your cart is empty</p>
-            </div>
-          ) : (
-            cart.map((item) => (
+      <SectionHeader label="Cart Items" />
+      <Card
+        className="border-none shadow-sm mb-2"
+        styles={{
+          body: { padding: 12, minHeight: 120 },
+        }}
+      >
+        {cart.length === 0 ? (
+          <div className="text-gray-400 text-center py-4">No items in cart</div>
+        ) : (
+          cart.map((item) => {
+            const maxQty = item.availableStock;
+            return (
               <div
                 key={item.stockId}
-                className="flex items-center justify-between border-b border-gray-100 py-4 gap-4 bg-white/80 rounded-xl px-2"
+                className="flex items-center justify-between border-b border-gray-100 py-2 last:border-b-0 gap-2 hover:bg-gray-100 rounded-lg px-2 transition-colors"
               >
-                <div className="flex items-center gap-3 w-1/3">
+                <div className="flex items-center gap-2 w-[40%]">
                   <div>
-                    <div className="font-medium text-sm text-primary truncate max-w-[120px]">
+                    <Typography.Text
+                      strong
+                      className="text-primary text-sm line-clamp-2"
+                    >
                       {item.name}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      Stock: {item.availableStock}
-                    </div>
+                    </Typography.Text>
+                    <div className="text-xs text-gray-600">Barcode: {item.barcode || 'N/A'}</div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 w-2/3">
-                  <Button
-                    size="small"
-                    shape="circle"
-                    icon={<Icon icon="mdi:minus" />}
-                    onClick={() => onQty(item.stockId, item.quantity - 1)}
-                    disabled={item.quantity <= 1}
-                  />
-                  <span className="w-7 text-center font-medium">
-                    {item.quantity}
-                  </span>
-                  <Button
-                    size="small"
-                    shape="circle"
-                    icon={<Icon icon="mdi:plus" />}
-                    onClick={() => onQty(item.stockId, item.quantity + 1)}
-                    disabled={item.quantity >= item.availableStock}
-                  />
+                <div className="flex items-center gap-2 w-[60%]">
+                  <div className="flex items-center gap-1">
+                    <Button
+                      size="small"
+                      shape="circle"
+                      onClick={() => onQty(item.stockId, item.quantity - 1)}
+                      disabled={item.quantity <= 1}
+                      className="border-gray-300"
+                    >
+                      <Icon icon="mdi:minus" />
+                    </Button>
+                    <span className="w-7 text-center font-semibold text-base">
+                      {item.quantity}
+                    </span>
+                    <Button
+                      size="small"
+                      shape="circle"
+                      onClick={() => onQty(item.stockId, item.quantity + 1)}
+                      disabled={item.quantity >= maxQty}
+                      className="border-gray-300"
+                    >
+                      <Icon icon="mdi:plus" />
+                    </Button>
+                  </div>
                   <Input
-                    size="small"
                     type="number"
-                    value={item.price}
-                    onChange={(e) => onPrice(item.stockId, Number(e.target.value))}
-                    className="w-16"
                     min={0}
-                    step={0.01}
+                    value={item.price}
+                    size="middle"
+                    className="w-36 text-right font-semibold text-green-600"
+                    onChange={(e) => onPrice(item.stockId, Number(e.target.value))}
+                    prefix="৳"
+                    style={{ textAlign: "right" }}
                   />
-                  <span className="text-sm font-medium text-green-600 w-12 text-right">
-                    ৳{(item.price * item.quantity).toFixed(2)}
-                  </span>
-                  <Button
-                    size="small"
-                    shape="circle"
-                    danger
-                    icon={<Icon icon="mdi:trash-can" />}
-                    onClick={() => onRemove(item.stockId)}
-                  />
+                  <Typography.Text className="font-semibold text-green-700 text-sm w-20 text-right">
+                    ৳{item.price * item.quantity}
+                  </Typography.Text>
+                  <Tooltip title="Remove">
+                    <Button
+                      type="text"
+                      danger
+                      size="small"
+                      onClick={() => onRemove(item.stockId)}
+                      icon={<Icon icon="lineicons:close" />}
+                    />
+                  </Tooltip>
                 </div>
               </div>
-            ))
-          )}
-        </div>
-
-        {/* Cart Summary */}
-        <div className="pt-4 border-t border-gray-200 text-sm flex flex-col gap-1">
+            );
+          })
+        )}
+      </Card>
+      <SectionHeader label="Summary" />
+      <Card
+        className="border-none shadow-sm mb-2"
+        styles={{
+          body: { padding: 12 },
+        }}
+      >
+        <div className="flex flex-col gap-1">
           <div className="flex justify-between">
-            <span>Subtotal:</span>
-            <span>৳{subtotal.toFixed(2)}</span>
+            <Typography.Text type="secondary">Items</Typography.Text>
+            <Typography.Text className="font-medium text-base">
+              {cart.reduce((sum, item) => sum + item.quantity, 0)}
+            </Typography.Text>
+          </div>
+          <div className="flex justify-between">
+            <Typography.Text type="secondary">Subtotal</Typography.Text>
+            <Typography.Text className="font-medium text-base">
+              ৳{subtotal.toFixed(2)}
+            </Typography.Text>
           </div>
           <div className="flex justify-between items-center">
-            <span>Discount:</span>
+            <Typography.Text type="secondary">Discount</Typography.Text>
             <Input
               type="number"
+              min={0}
+              max={subtotal}
               value={discount}
               onChange={(e) => setDiscount(Number(e.target.value))}
               className="w-20 text-right"
               size="small"
-              min={0}
-              max={subtotal}
+              prefix="৳"
             />
           </div>
           <div className="flex justify-between items-center">
-            <span>Custom Total:</span>
+            <Typography.Text type="secondary">Custom Total</Typography.Text>
             <Input
               type="number"
+              min={0}
               value={total !== computedTotal ? total : ""}
               onChange={(e) => setCustomTotal(e.target.value)}
               placeholder={computedTotal.toFixed(2)}
               className="w-20 text-right"
               size="small"
-              min={0}
+              prefix="৳"
             />
           </div>
-          <div className="flex justify-between font-bold text-lg pt-2 border-t border-gray-300 items-center">
-            <span>Total:</span>
-            <span className="text-green-600">৳{total.toFixed(2)}</span>
+          <Divider className="my-1" />
+          <div className="flex justify-between items-center">
+            <Typography.Text strong className="text-lg">
+              Total
+            </Typography.Text>
+            <Typography.Text strong className="text-lg text-green-600">
+              ৳{total.toFixed(2)}
+            </Typography.Text>
           </div>
-          <Button
-            type="primary"
-            size="large"
-            className="w-full mt-4 rounded-xl"
-            onClick={handleCheckout}
-            disabled={cart.length === 0 || total <= 0}
-            icon={<Icon icon="mdi:cash-register" />}
-          >
-            Complete Sale
-          </Button>
         </div>
-      </div>
+      </Card>
+      <Button
+        type="primary"
+        size="large"
+        className="w-full rounded-xl font-semibold"
+        onClick={handleCheckout}
+        disabled={cart.length === 0 || !customer}
+        icon={<Icon icon="mdi:cash-register" className="text-xl" />}
+      >
+        Complete Sale
+      </Button>
 
       {/* Checkout Modal */}
       <Modal
-        title="Complete Sale"
+        title={
+          <div className="flex items-center gap-2">
+            <Icon icon="mdi:cash-register" className="text-xl text-primary" />
+            <span>Complete Sale</span>
+          </div>
+        }
         open={checkoutModalOpen}
         onCancel={() => setCheckoutModalOpen(false)}
-        onOk={confirmCheckout}
-        okText="Complete Sale"
+        footer={null}
         width={600}
-        okButtonProps={{ disabled: Math.abs(remaining) > 0.01 }}
+        className="checkout-modal"
       >
-        <div className="space-y-4">
+        <div className="space-y-6">
+          {/* Sale Summary */}
+          <Card size="small" className="bg-gray-50 border-none">
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span>Subtotal:</span>
+                <span className="font-semibold">৳{subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Discount:</span>
+                <span className="font-semibold text-red-600">-৳{discount.toFixed(2)}</span>
+              </div>
+              <Divider className="my-2" />
+              <div className="flex justify-between text-lg">
+                <span className="font-bold">Total:</span>
+                <span className="font-bold text-green-600">৳{total.toFixed(2)}</span>
+              </div>
+            </div>
+          </Card>
+
+          {/* Payment Methods */}
           <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="block text-sm font-medium">Payment Methods</label>
+            <div className="flex justify-between items-center mb-3">
+              <Typography.Title level={5} className="!mb-0">Payment Methods</Typography.Title>
               <Button
                 type="dashed"
                 size="small"
-                onClick={addPaymentMethod}
+                onClick={() => setPayments([...payments, { method: "CASH", amount: 0 }])}
                 icon={<Icon icon="mdi:plus" />}
               >
                 Add Payment
@@ -298,11 +355,15 @@ export default function CartDetails({
             </div>
             
             <div className="space-y-3">
-              {paymentMethods.map((payment, index) => (
-                <div key={index} className="flex gap-2 items-center bg-gray-50 p-3 rounded-lg">
+              {payments.map((payment, index) => (
+                <div key={index} className="flex gap-2 items-center p-3 bg-white border border-gray-200 rounded-lg">
                   <Select
                     value={payment.method}
-                    onChange={(value) => updatePaymentMethod(index, "method", value)}
+                    onChange={(value) => {
+                      const newPayments = [...payments];
+                      newPayments[index].method = value;
+                      setPayments(newPayments);
+                    }}
                     className="flex-1"
                     options={PAYMENT_METHOD_OPTIONS.map(method => ({
                       label: (
@@ -317,20 +378,24 @@ export default function CartDetails({
                   <Input
                     type="number"
                     value={payment.amount}
-                    onChange={(e) => updatePaymentMethod(index, "amount", Number(e.target.value))}
+                    onChange={(e) => {
+                      const newPayments = [...payments];
+                      newPayments[index].amount = Number(e.target.value);
+                      setPayments(newPayments);
+                    }}
                     placeholder="Amount"
                     prefix="৳"
                     className="w-32"
                     min={0}
                     step={0.01}
                   />
-                  {paymentMethods.length > 1 && (
+                  {payments.length > 1 && (
                     <Button
                       type="text"
                       danger
                       size="small"
                       icon={<Icon icon="mdi:close" />}
-                      onClick={() => removePaymentMethod(index)}
+                      onClick={() => setPayments(payments.filter((_, i) => i !== index))}
                     />
                   )}
                 </div>
@@ -338,37 +403,56 @@ export default function CartDetails({
             </div>
 
             {/* Payment Summary */}
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-              <div className="flex justify-between text-sm">
-                <span>Total Amount:</span>
-                <span className="font-semibold">৳{total.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Total Paid:</span>
-                <span className="font-semibold">৳{totalPaid.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-sm border-t border-blue-200 pt-1 mt-1">
-                <span>Remaining:</span>
-                <span className={`font-semibold ${remaining > 0.01 ? 'text-red-600' : remaining < -0.01 ? 'text-orange-600' : 'text-green-600'}`}>
-                  ৳{remaining.toFixed(2)}
-                </span>
-              </div>
-              {Math.abs(remaining) > 0.01 && (
-                <div className="text-xs text-red-500 mt-1">
-                  {remaining > 0 ? 'Payment incomplete' : 'Overpayment detected'}
+            <Card size="small" className="mt-3 bg-blue-50 border-blue-200">
+              <div className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span>Total Amount:</span>
+                  <span className="font-semibold">৳{total.toFixed(2)}</span>
                 </div>
-              )}
-            </div>
+                <div className="flex justify-between text-sm">
+                  <span>Total Paid:</span>
+                  <span className="font-semibold">৳{paid.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm border-t border-blue-200 pt-1">
+                  <span>Change/Due:</span>
+                  <span className={`font-semibold ${due > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    ৳{Math.abs(paid - total).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </Card>
           </div>
-          
+
+          {/* Notes */}
           <div>
-            <label className="block text-sm font-medium mb-1">Notes (optional)</label>
+            <Typography.Text strong className="block mb-2">Notes (optional)</Typography.Text>
             <Input.TextArea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add any notes for this sale..."
+              placeholder="Add notes for this sale..."
               rows={3}
             />
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-2 pt-4 border-t">
+            <Button
+              size="large"
+              onClick={() => setCheckoutModalOpen(false)}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="primary"
+              size="large"
+              onClick={confirmCheckout}
+              className="flex-1"
+              disabled={paid < total}
+              icon={<Icon icon="mdi:check" />}
+            >
+              Complete Sale
+            </Button>
           </div>
         </div>
       </Modal>

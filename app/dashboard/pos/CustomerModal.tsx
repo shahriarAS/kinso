@@ -26,15 +26,16 @@ export default function CustomerModal({
   const handleSubmit = async (values: CustomerInput) => {
     try {
       const result = await createCustomer(values).unwrap();
-      success("Customer created successfully!");
-      onCustomerCreated({
-        _id: result.data._id,
-        name: result.data.name,
-        value: result.data._id,
-      });
-      form.resetFields();
-      onClose();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (result?.data) {
+        success("Customer created successfully!");
+        onCustomerCreated({
+          _id: result.data._id,
+          name: result.data.name,
+          value: result.data._id,
+        });
+        form.resetFields();
+        onClose();
+      }
     } catch (error: any) {
       showError("Failed to create customer", error.data?.message);
     }

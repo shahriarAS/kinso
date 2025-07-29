@@ -122,7 +122,7 @@ export async function handlePost(request: NextRequest) {
     if (customer) {
       await Customer.findByIdAndUpdate(customer, {
         $inc: {
-          totalOrders: 1,
+          totalSales: 1,
           totalSpent: totalAmount,
         },
       });

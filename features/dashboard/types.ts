@@ -1,6 +1,6 @@
-export interface RecentOrder {
+export interface RecentSale {
   _id: string;
-  orderNumber: string;
+  saleNumber: string;
   customerName: string;
   totalAmount: number;
   status: string;
@@ -18,17 +18,17 @@ export interface TopProduct {
 export interface RevenueChartPoint {
   date: string;
   revenue: number;
-  orders: number;
+  sales: number;
 }
 
 export interface DashboardStats {
   totalRevenue: number;
-  totalOrders: number;
+  totalSales: number;
   totalCustomers: number;
   totalProducts: number;
-  pendingOrders: number;
+  pendingSales: number;
   lowStockProducts: number;
-  recentOrders: RecentOrder[];
+  recentSales: RecentSale[];
   topProducts: TopProduct[];
   revenueChart: RevenueChartPoint[];
 }
@@ -69,12 +69,12 @@ export interface SalesAnalytics {
   monthlySales: Array<{
     month: string;
     revenue: number;
-    orders: number;
+    sales: number;
   }>;
   topCategories: Array<{
     category: string;
     revenue: number;
-    orders: number;
+    sales: number;
   }>;
 }
 
@@ -105,18 +105,18 @@ export interface DashboardFilters {
 
 export interface QuickStats {
   todayRevenue: number;
-  todayOrders: number;
+  todaySales: number;
   todayCustomers: number;
   weekRevenue: number;
-  weekOrders: number;
+  weekSales: number;
   monthRevenue: number;
-  monthOrders: number;
+  monthSales: number;
 }
 
 export interface PerformanceMetrics {
   revenueGrowth: number;
-  orderGrowth: number;
+  salesGrowth: number;
   customerGrowth: number;
-  averageOrderValue: number;
+  averageSaleValue: number;
   customerRetentionRate: number;
 }

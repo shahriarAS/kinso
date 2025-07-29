@@ -52,7 +52,7 @@ const IntegrationSummary: React.FC = () => {
         
         <Alert
           message="Integration Complete"
-          description="The sales management system has been successfully integrated with the existing POS system. Users can now switch between the order system and sales system using the toggle in the cart."
+          description="The sales management system has been successfully integrated with the existing POS system. Users can now switch between the sales system and inventory management using the toggle in the cart."
           type="success"
           showIcon
         />

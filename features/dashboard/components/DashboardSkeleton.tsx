@@ -56,7 +56,7 @@ const DashboardSkeleton: React.FC = () => {
         </Col>
       </Row>
 
-      {/* Recent Orders and Top Products Skeleton */}
+      {/* Recent Sales and Top Products Skeleton */}
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={12}>
           <Card
@@ -64,7 +64,7 @@ const DashboardSkeleton: React.FC = () => {
               <Space>
                 <ClockCircleOutlined className="text-primary" />
                 <span className="text-primary font-semibold">
-                  Recent Orders
+                  Recent Sales
                 </span>
               </Space>
             }

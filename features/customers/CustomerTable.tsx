@@ -11,7 +11,6 @@ import {
   type TableAction,
 } from "@/components/common";
 import AddEditCustomerDrawer from "./AddEditCustomerDrawer";
-import ViewCustomerOrdersDrawer from "./ViewCustomerOrdersDrawer";
 
 interface CustomerTableProps {
   filters?: CustomerFilters;
@@ -25,7 +24,6 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
     sortOrder: "asc" as "asc" | "desc",
   });
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
-  const [viewingCustomer, setViewingCustomer] = useState<Customer | null>(null);
 
   const { data, isLoading, error, refetch } = useGetCustomersQuery({
     page: current,
@@ -61,10 +59,6 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
     setEditingCustomer(customer);
   };
 
-  const handleViewOrders = (customer: Customer) => {
-    setViewingCustomer(customer);
-  };
-
   const handleMembershipToggle = async (customer: Customer, checked: boolean) => {
     try {
       await updateMembership({ _id: customer._id, membershipStatus: checked }).unwrap();
@@ -78,10 +72,6 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
   const handleEditSuccess = () => {
     setEditingCustomer(null);
     refetch();
-  };
-
-  const handleViewOrdersClose = () => {
-    setViewingCustomer(null);
   };
 
   // Define columns using the generic interface
@@ -141,14 +131,6 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
 
   // Define actions using the generic interface
   const actions: TableAction<Customer>[] = [
-    {
-      key: "view-orders",
-      label: "View Orders",
-      icon: "lineicons:eye",
-      type: "view",
-      color: "blue",
-      onClick: handleViewOrders,
-    },
     {
       key: "edit",
       label: "Edit",
@@ -233,14 +215,6 @@ export default function CustomerTable({ filters = {} }: CustomerTableProps) {
         customer={editingCustomer}
         onSuccess={handleEditSuccess}
       />
-
-      {/* View Customer Orders Drawer */}
-      {viewingCustomer && (
-        <ViewCustomerOrdersDrawer
-          customer={viewingCustomer}
-          onClose={handleViewOrdersClose}
-        />
-      )}
     </>
   );
 }

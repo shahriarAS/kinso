@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/database";
 import Product from "@/features/products/model";
-import Order from "@/features/orders/model";
+import Sale from "@/features/sales/model";
 import Customer from "@/features/customers/model";
 import { authorizeRequest } from "@/lib/auth";
 import { AuthenticatedRequest } from "@/features/auth";
@@ -28,13 +28,13 @@ export async function handleGetStats(request: NextRequest) {
     const threshold = parseInt(searchParams.get("threshold") || "5", 10);
 
     // Total revenue
-    const totalRevenueAgg = await Order.aggregate([
+    const totalRevenueAgg = await Sale.aggregate([
       { $group: { _id: null, total: { $sum: "$totalAmount" } } },
     ]);
     const totalRevenue = totalRevenueAgg[0]?.total || 0;
 
-    // Total orders
-    const totalOrders = await Order.countDocuments();
+    // Total sales
+    const totalSales = await Sale.countDocuments();
 
     // Total customers
     const totalCustomers = await Customer.countDocuments();
@@ -53,23 +53,23 @@ export async function handleGetStats(request: NextRequest) {
       }
     }
 
-    // Recent orders (last 5)
-    const recentOrders = await Order.find()
+    // Recent sales (last 5)
+    const recentSales = await Sale.find()
       .sort({ createdAt: -1 })
       .limit(5)
-      .select("_id orderNumber customerName totalAmount createdAt")
+      .select("_id saleNumber customerName totalAmount createdAt")
       .lean();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const recentOrdersFormatted = recentOrders.map((o: any) => ({
-      _id: o._id,
-      orderNumber: o.orderNumber,
-      customerName: o.customerName,
-      totalAmount: o.totalAmount,
+    const recentSalesFormatted = recentSales.map((s: any) => ({
+      _id: s._id,
+      saleNumber: s.saleNumber,
+      customerName: s.customerName,
+      totalAmount: s.totalAmount,
       status: "N/A",
     }));
 
     // Top products (by total sold)
-    const topProductsAgg = await Order.aggregate([
+    const topProductsAgg = await Sale.aggregate([
       { $unwind: "$items" },
       {
         $group: {
@@ -103,31 +103,32 @@ export async function handleGetStats(request: NextRequest) {
     const today = new Date();
     const sevenDaysAgo = new Date(today);
     sevenDaysAgo.setDate(today.getDate() - 6);
-    const revenueChartAgg = await Order.aggregate([
+    const revenueChartAgg = await Sale.aggregate([
       { $match: { createdAt: { $gte: sevenDaysAgo } } },
       {
         $group: {
           _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
           revenue: { $sum: "$totalAmount" },
-          orders: { $sum: 1 },
+          sales: { $sum: 1 },
         },
       },
       { $sort: { _id: 1 } },
     ]);
-    const revenueChart = revenueChartAgg.map((d) => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const revenueChart = revenueChartAgg.map((d: any) => ({
       date: d._id,
       revenue: d.revenue,
-      orders: d.orders,
+      sales: d.sales,
     }));
 
     return NextResponse.json({
       totalRevenue,
-      totalOrders,
+      totalSales,
       totalCustomers,
       totalProducts,
-      pendingOrders: 0, // No status field in model
+      pendingSales: 0, // No status field in model
       lowStockProducts,
-      recentOrders: recentOrdersFormatted,
+      recentSales: recentSalesFormatted,
       topProducts: topProductsAgg,
       revenueChart,
     });

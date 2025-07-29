@@ -33,9 +33,9 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats }) => {
         <Card className="bg-white border rounded-2xl shadow-sm">
           <Statistic
             title={
-              <span className="text-primary font-medium">Total Orders</span>
+              <span className="text-primary font-medium">Total Sales</span>
             }
-            value={stats.totalOrders}
+            value={stats.totalSales}
             valueStyle={{ color: "#181818", fontWeight: 600, fontSize: 24 }}
             prefix={
               <ShoppingCartOutlined className="mr-1 text-lg align-middle" />

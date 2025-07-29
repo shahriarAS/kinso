@@ -93,7 +93,7 @@ export async function handlePost(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { name, contactInfo, membershipActive, totalPurchaseLastMonth, totalOrders, totalSpent } = body;
+    const { name, contactInfo, membershipActive, totalPurchaseLastMonth, totalSales, totalSpent } = body;
 
     // Basic validation
     if (!name || name.trim().length === 0) {
@@ -113,7 +113,7 @@ export async function handlePost(request: NextRequest) {
       },
       membershipActive: membershipActive || false,
       totalPurchaseLastMonth: totalPurchaseLastMonth || 0,
-      totalOrders: totalOrders || 0,
+      totalSales: totalSales || 0,
       totalSpent: totalSpent || 0,
     });
 
@@ -186,7 +186,7 @@ export async function handleUpdateById(
     await dbConnect();
 
     const body = await request.json();
-    const { name, contactInfo, membershipActive, totalPurchaseLastMonth, totalOrders, totalSpent } = body;
+    const { name, contactInfo, membershipActive, totalPurchaseLastMonth, totalSales, totalSpent } = body;
 
     // Check if customer exists
     const existingCustomer = await CustomerModel.findById(id);
@@ -214,7 +214,7 @@ export async function handleUpdateById(
         },
         membershipActive: membershipActive !== undefined ? membershipActive : existingCustomer.membershipActive,
         totalPurchaseLastMonth: totalPurchaseLastMonth !== undefined ? totalPurchaseLastMonth : existingCustomer.totalPurchaseLastMonth,
-        totalOrders: totalOrders !== undefined ? totalOrders : existingCustomer.totalOrders,
+        totalSales: totalSales !== undefined ? totalSales : existingCustomer.totalSales,
         totalSpent: totalSpent !== undefined ? totalSpent : existingCustomer.totalSpent,
       },
       { new: true, runValidators: true },

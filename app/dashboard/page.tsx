@@ -33,14 +33,14 @@ const Dashboard: React.FC = () => {
     );
   }
 
-  const stats: DashboardStats = dashboardStats || {
+  const stats: DashboardStats = dashboardStats?.data || {
     totalRevenue: 0,
-    totalOrders: 0,
+    totalSales: 0,
     totalCustomers: 0,
     totalProducts: 0,
-    pendingOrders: 0,
+    pendingSales: 0,
     lowStockProducts: 0,
-    recentOrders: [],
+    recentSales: [],
     topProducts: [],
     revenueChart: [],
   };
@@ -65,7 +65,7 @@ const Dashboard: React.FC = () => {
 
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={12}>
-          <RecentSales recentOrders={stats.recentOrders} />
+          <RecentSales recentSales={stats.recentSales} />
         </Col>
         <Col xs={24} lg={12}>
           <TopProducts topProducts={stats.topProducts} />

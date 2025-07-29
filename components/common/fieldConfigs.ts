@@ -61,7 +61,7 @@ export const commonFormFields = {
       { label: "Active", value: "active" },
       { label: "Inactive", value: "inactive" },
     ],
-    order: [
+    sale: [
       { label: "Pending", value: "pending" },
       { label: "Processing", value: "processing" },
       { label: "Shipped", value: "shipped" },
@@ -281,17 +281,17 @@ export const createFormConfig = {
     commonFormFields.notes(),
   ],
 
-  // Order form
-  order: () => [
+  // Sale form
+  sale: () => [
     {
-      name: "orderNumber",
-      label: "Order Number",
+      name: "saleNumber",
+      label: "Sale Number",
       type: "input",
-      placeholder: "Enter order number",
-      rules: [{ required: true, message: "Please enter order number" }],
+      placeholder: "Enter sale number",
+      rules: [{ required: true, message: "Please enter sale number" }],
     },
-    commonFormFields.status(commonFormFields.statusOptions.order),
-    commonFormFields.date("orderDate", "Order Date"),
+    commonFormFields.status(commonFormFields.statusOptions.sale),
+    commonFormFields.date("saleDate", "Sale Date"),
     commonFormFields.notes(),
   ],
 
@@ -328,10 +328,10 @@ export const createFilterConfig = {
     commonFilterFields.status(commonFormFields.statusOptions.active),
   ],
 
-  // Order filters
-  order: () => [
-    commonFilterFields.search("Search orders..."),
-    commonFilterFields.status(commonFormFields.statusOptions.order),
-    commonFilterFields.dateRange("orderDate", "Order Date"),
+  // Sale filters
+  sale: () => [
+    commonFilterFields.search("Search sales..."),
+    commonFilterFields.status(commonFormFields.statusOptions.sale),
+    commonFilterFields.dateRange("saleDate", "Sale Date"),
   ],
 };

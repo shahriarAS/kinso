@@ -8,7 +8,7 @@ export interface Customer {
   };
   membershipActive: boolean;
   totalPurchaseLastMonth: number;
-  totalOrders: number;
+  totalSales: number;
   totalSpent: number;
   createdAt: string;
   updatedAt: string;
@@ -26,7 +26,7 @@ export interface CustomerUpdateInput {
   };
   membershipActive?: boolean;
   totalPurchaseLastMonth?: number;
-  totalOrders?: number;
+  totalSales?: number;
   totalSpent?: number;
 }
 
@@ -74,16 +74,16 @@ export interface CustomerStats {
   }>;
 }
 
-export interface CustomerOrderHistory {
+export interface CustomerSalesHistory {
   _id: string;
   customerName: string;
-  orders: Array<{
-    orderId: string;
-    orderNumber: string;
+  sales: Array<{
+    saleId: string;
+    saleNumber: string;
     totalAmount: number;
-    orderDate: string;
+    saleDate: string;
     status: string;
   }>;
-  totalOrders: number;
+  totalSales: number;
   totalSpent: number;
 }

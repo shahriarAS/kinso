@@ -89,13 +89,14 @@ export default function DashboardSidebar() {
   return (
     <aside
       className={twMerge(
-        "h-full py-6 flex flex-col gap-16 transition-all duration-300",
+        "h-full flex flex-col transition-all duration-300",
         collapsed ? "w-20" : "w-72",
       )}
     >
+      {/* Fixed Header */}
       <div
         className={twMerge(
-          "flex justify-between items-center transition-all duration-300",
+          "flex justify-between items-center py-6 transition-all duration-300 flex-shrink-0",
           collapsed ? "px-4" : "px-8",
         )}
       >
@@ -120,13 +121,15 @@ export default function DashboardSidebar() {
           />
         </span>
       </div>
-      <div className="flex flex-col flex-1 gap-2">
+      
+      {/* Scrollable Menu Items */}
+      <div className="flex flex-col flex-1 gap-2 overflow-x-hidden overflow-y-auto no-scrollbar">
         {menuItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
             className={twMerge(
-              "flex items-center gap-4 text-white font-medium py-3 cursor-pointer transition-all duration-75  border-l-4 border-transparent",
+              "flex items-center gap-4 text-white font-medium py-3 cursor-pointer transition-all duration-75 border-l-4 border-transparent",
               pathname === item.href
                 ? "bg-gradient-to-r from-secondary/10 to-40% border-secondary"
                 : "hover:bg-secondary/5",
@@ -148,8 +151,11 @@ export default function DashboardSidebar() {
           </Link>
         ))}
       </div>
-      {/* Profile context menu at the bottom */}
-      <ProfileMenu collapsed={collapsed} />
+      
+      {/* Fixed Profile Menu at Bottom */}
+      <div className="flex-shrink-0">
+        <ProfileMenu collapsed={collapsed} />
+      </div>
     </aside>
   );
 }
@@ -193,7 +199,7 @@ function ProfileMenu({ collapsed }: { collapsed: boolean }) {
     <div
       className={twMerge(
         "w-full flex items-center justify-center py-4 border-t border-white/10",
-        collapsed ? "px-0" : "px-4",
+        collapsed ? "px-2" : "px-4",
       )}
     >
       {isLoading ? (

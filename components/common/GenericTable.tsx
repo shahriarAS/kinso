@@ -45,7 +45,7 @@ export interface GenericTableProps<T = any> {
 
   // Columns and actions
   columns: TableColumn<T>[];
-  actions?: TableAction<T>[];
+  actions?: TableAction<T>[] | ((record: T) => TableAction<T>[]);
 
   // Pagination
   pagination?: {
@@ -153,21 +153,24 @@ export default function GenericTable<T = any>({
   // Add actions column if actions are provided
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const tableColumns: any[] = [...columns];
-  if (actions.length > 0) {
+  if (actions && (Array.isArray(actions) ? actions.length > 0 : true)) {
     tableColumns.push({
       title: <span className="font-medium text-base">Action</span>,
       key: "action",
       fixed: "right" as const,
-      width: actions.length * 50 + 20,
-      render: (_: unknown, record: T) => (
-        <Space size="small">
-          {actions.map((action) => (
-            <Tooltip key={action.key} title={action.label}>
-              {getActionButton(action, record)}
-            </Tooltip>
-          ))}
-        </Space>
-      ),
+      width: Array.isArray(actions) ? actions.length * 50 + 20 : 250,
+      render: (_: unknown, record: T) => {
+        const recordActions = Array.isArray(actions) ? actions : actions(record);
+        return (
+          <Space size="small">
+            {recordActions.map((action) => (
+              <Tooltip key={action.key} title={action.label}>
+                {getActionButton(action, record)}
+              </Tooltip>
+            ))}
+          </Space>
+        );
+      },
     });
   }
 

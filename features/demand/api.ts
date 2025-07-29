@@ -99,7 +99,7 @@ export const demandApi = createApi({
       { demand: string; conversionData: DemandConversionRequest }
     >({
       query: ({ demand, conversionData }) => ({
-        url: `/convert/${demand}`,
+        url: `/${demand}/convert`,
         method: "POST",
         body: conversionData,
       }),

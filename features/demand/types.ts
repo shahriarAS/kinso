@@ -1,8 +1,10 @@
 import { Product } from "../products";
+import { Warehouse } from "../warehouses";
+import { Outlet } from "../outlets";
 
 export interface Demand {
   _id: string;
-  location: string;
+  location: string | Warehouse | Outlet;
   locationType: "Warehouse" | "Outlet";
   products: {
     product: Product;
@@ -37,10 +39,14 @@ export interface DemandFiltersTypes {
 }
 
 export interface DemandConversionRequest {
-  mrp: number;
-  tp: number;
-  expireDate: string;
-  batchNumber: string;
+  products: Array<{
+    productId: string;
+    quantity: number;
+    mrp: number;
+    tp: number;
+    expireDate: string;
+    batchNumber: string;
+  }>;
 }
 
 export interface DemandGenerationRequest {

@@ -31,15 +31,15 @@ const menuItems = [
     href: "/dashboard/products",
   },
   {
-    icon: "mdi:package-variant",
+    icon: "vaadin:stock",
     label: "Stock Management",
     href: "/dashboard/stock",
   },
-  // {
-  //   icon: "mdi:package-variant",
-  //   label: "Demand",
-  //   href: "/dashboard/demand",
-  // },
+  {
+    icon: "carbon:intent-request-create",
+    label: "Demand",
+    href: "/dashboard/demand",
+  },
   {
     icon: "lineicons:folder-1",
     label: "Category",
@@ -51,7 +51,7 @@ const menuItems = [
     href: "/dashboard/warehouse",
   },
   {
-    icon: "lineicons:buildings-1",
+    icon: "iconoir:shop",
     label: "Outlets",
     href: "/dashboard/outlets",
   },

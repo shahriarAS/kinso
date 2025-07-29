@@ -82,10 +82,6 @@ export default function CartSummary({
       error("Please select a customer!");
       return;
     }
-    if (paid > total) {
-      error("Total paid cannot exceed total amount.");
-      return;
-    }
     setCheckoutModalOpen(true);
   };
 
@@ -255,13 +251,19 @@ export default function CartSummary({
                     value={payment.amount}
                     onChange={(e) => {
                       const newPayments = [...payments];
-                      newPayments[index].amount = Number(e.target.value);
+                      const newAmount = Number(e.target.value);
+                      const otherPaymentsTotal = payments
+                        .filter((_, i) => i !== index)
+                        .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+                      const maxAllowed = total - otherPaymentsTotal;
+                      newPayments[index].amount = Math.min(newAmount, maxAllowed);
                       setPayments(newPayments);
                     }}
                     placeholder="Amount"
                     prefix="৳"
                     className="w-32"
                     min={0}
+                    max={total}
                     step={0.01}
                   />
                   {payments.length > 1 && (
@@ -288,12 +290,14 @@ export default function CartSummary({
                   <span>Total Paid:</span>
                   <span className="font-semibold">৳{paid.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-sm border-t border-blue-200 pt-1">
-                  <span>Change/Due:</span>
-                  <span className={`font-semibold ${due > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                    ৳{Math.abs(paid - total).toFixed(2)}
-                  </span>
-                </div>
+                {due > 0 && (
+                  <div className="flex justify-between text-sm border-t border-blue-200 pt-1">
+                    <span>Due:</span>
+                    <span className="font-semibold text-red-600">
+                      ৳{due.toFixed(2)}
+                    </span>
+                  </div>
+                )}
               </div>
             </Card>
           </div>

@@ -6,9 +6,9 @@ import { CartItem } from "../types";
 
 interface CartItemsProps {
   cart: CartItem[];
-  onQty: (stockId: string, qty: number) => void;
-  onRemove: (stockId: string) => void;
-  onPrice: (stockId: string, price: number) => void;
+  onQty: (stock: string, qty: number) => void;
+  onRemove: (stock: string) => void;
+  onPrice: (stock: string, price: number) => void;
 }
 
 // Custom SectionHeader component
@@ -44,7 +44,7 @@ export default function CartItems({
             const maxQty = item.availableStock;
             return (
               <div
-                key={item.stockId}
+                key={item.stock}
                 className="flex items-center justify-between border-b border-gray-100 py-2 last:border-b-0 gap-2 hover:bg-gray-100 rounded-lg px-2 transition-colors"
               >
                 <div className="flex items-center gap-2 w-[40%]">
@@ -63,7 +63,7 @@ export default function CartItems({
                     <Button
                       size="small"
                       shape="circle"
-                      onClick={() => onQty(item.stockId, item.quantity - 1)}
+                      onClick={() => onQty(item.stock, item.quantity - 1)}
                       disabled={item.quantity <= 1}
                       className="border-gray-300"
                     >
@@ -75,7 +75,7 @@ export default function CartItems({
                     <Button
                       size="small"
                       shape="circle"
-                      onClick={() => onQty(item.stockId, item.quantity + 1)}
+                      onClick={() => onQty(item.stock, item.quantity + 1)}
                       disabled={item.quantity >= maxQty}
                       className="border-gray-300"
                     >
@@ -88,7 +88,7 @@ export default function CartItems({
                     value={item.price}
                     size="middle"
                     className="w-36 text-right font-semibold text-green-600"
-                    onChange={(e) => onPrice(item.stockId, Number(e.target.value))}
+                    onChange={(e) => onPrice(item.stock, Number(e.target.value))}
                     prefix="৳"
                     style={{ textAlign: "right" }}
                   />
@@ -100,7 +100,7 @@ export default function CartItems({
                       type="text"
                       danger
                       size="small"
-                      onClick={() => onRemove(item.stockId)}
+                      onClick={() => onRemove(item.stock)}
                       icon={<Icon icon="lineicons:close" />}
                     />
                   </Tooltip>

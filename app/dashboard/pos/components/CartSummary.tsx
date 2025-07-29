@@ -14,7 +14,6 @@ import { useState } from "react";
 import { useNotification } from "@/hooks/useNotification";
 import { CartItem, CustomerOption } from "../types";
 import { PAYMENT_METHOD_OPTIONS, PAYMENT_METHOD_ICONS } from "@/lib/constraints";
-import { UserOutlined } from "@ant-design/icons";
 
 interface CartSummaryProps {
   cart: CartItem[];
@@ -113,45 +112,6 @@ export default function CartSummary({
 
   return (
     <>
-      <Card
-        className="border-none shadow-md mb-2"
-        styles={{
-          body: { padding: 16 },
-        }}
-      >
-        <div className="flex items-center mb-2">
-          <UserOutlined className="text-primary text-lg mr-2" />
-          <Typography.Title level={5} className="!mb-0">
-            Bill Details
-          </Typography.Title>
-          <span className="ml-auto text-xs text-gray-400 font-normal">
-            {new Date().toLocaleDateString()}
-          </span>
-        </div>
-        <div className="flex gap-2">
-          <Select
-            options={customers}
-            value={customer}
-            onChange={setCustomer}
-            className="flex-1 rounded-3xl"
-            size="large"
-            placeholder="Select Customer"
-            showSearch
-            filterOption={(input, option) =>
-              (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-            }
-          />
-          <Button
-            type="primary"
-            size="large"
-            onClick={onCreateCustomer}
-            icon={<Icon icon="mdi:account-plus" />}
-          >
-            New
-          </Button>
-        </div>
-      </Card>
-
       <SectionHeader label="Summary" />
       <Card
         className="border-none shadow-sm mb-2"

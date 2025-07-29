@@ -2,7 +2,7 @@
 
 export interface CartItem {
   _id: string;
-  stockId: string;
+  stock: string;
   name: string;
   barcode: string;
   quantity: number;

@@ -90,19 +90,19 @@ export default function POS() {
     if (!stock.product || stock.unit <= 0) return;
 
     setCart((prev) => {
-      const found = prev.find((item) => item.stockId === stock._id);
+      const found = prev.find((item) => item.stock === stock._id);
       if (found) {
         // Cap at max stock
         const newQty = Math.min(found.quantity + 1, stock.unit);
         return prev.map((item) =>
-          item.stockId === stock._id ? { ...item, quantity: newQty } : item,
+          item.stock === stock._id ? { ...item, quantity: newQty } : item,
         );
       }
 
       // Create new cart item with stock information
       const newCartItem: CartItem = {
         _id: stock.product._id,
-        stockId: stock._id,
+        stock: stock._id,
         name: stock.product.name,
         barcode: stock.product.barcode || "",
         quantity: 1,
@@ -125,32 +125,32 @@ export default function POS() {
   };
 
   // Handle quantity change
-  const handleQtyChange = (stockId: string, qty: number) => {
-    const cartItem = cart.find((item) => item.stockId === stockId);
+  const handleQtyChange = (stock: string, qty: number) => {
+    const cartItem = cart.find((item) => item.stock === stock);
     if (!cartItem) return;
 
     const maxQty = cartItem.availableStock;
     setCart((prev) =>
       prev.map((item) =>
-        item.stockId === stockId
+        item.stock === stock
           ? { ...item, quantity: Math.max(1, Math.min(qty, maxQty)) }
           : item,
       ),
     );
   };
 
-  const handlePriceChange = (stockId: string, price: number) => {
+  const handlePriceChange = (stock: string, price: number) => {
     setCart((prev) =>
       prev.map((item) =>
-        item.stockId === stockId
+        item.stock === stock
           ? { ...item, price: Math.max(0, price) }
           : item,
       ),
     );
   };
 
-  const handleRemoveFromCart = (stockId: string) => {
-    setCart((prev) => prev.filter((item) => item.stockId !== stockId));
+  const handleRemoveFromCart = (stock: string) => {
+    setCart((prev) => prev.filter((item) => item.stock !== stock));
   };
 
   const handleCustomerCreated = (newCustomer: {
@@ -228,7 +228,7 @@ export default function POS() {
       }
 
       const saleItems = cart.map((item) => ({
-        stock: item.stockId, // Use stock ID as required by the API
+        stock: item.stock, // Use stock ID as required by the API
         quantity: item.quantity,
         unitPrice: item.price,
         discountApplied: 0, // Individual item discounts if needed

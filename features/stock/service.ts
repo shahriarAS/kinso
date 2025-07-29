@@ -172,15 +172,6 @@ export async function handlePost(request: NextRequest) {
       );
     }
 
-    // Check if batchNumber already exists
-    const existingBatch = await Stock.findOne({ batchNumber });
-    if (existingBatch) {
-      return NextResponse.json(
-        { success: false, message: "Batch number already exists" },
-        { status: 400 },
-      );
-    }
-
     // Create stock entry
     const stockData = {
       product,
@@ -333,15 +324,6 @@ export async function handlePut(request: NextRequest, { params }: { params: Prom
     if (!batchNumber) {
       return NextResponse.json(
         { success: false, message: "Batch number is required" },
-        { status: 400 },
-      );
-    }
-
-    // Check if batchNumber already exists for different stock
-    const existingBatch = await Stock.findOne({ batchNumber, _id: { $ne: id } });
-    if (existingBatch) {
-      return NextResponse.json(
-        { success: false, message: "Batch number already exists" },
         { status: 400 },
       );
     }
@@ -531,7 +513,7 @@ export async function handleTransferStock(request: NextRequest) {
       }
 
       transferResults.push({
-        stockId: stock._id,
+        stock: stock._id,
         batchNumber: stock.batchNumber,
         transferredQuantity: transferAmount,
         fromLocation: fromLocation,

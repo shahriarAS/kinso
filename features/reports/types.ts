@@ -113,7 +113,7 @@ export interface ReportResponse {
 export interface StockMovementReport {
   success: boolean;
   data: Array<{
-    stockId: string;
+    stock: string;
     productName: string;
     fromLocation?: string;
     toLocation: string;

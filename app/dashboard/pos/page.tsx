@@ -288,7 +288,7 @@ export default function POS() {
   return (
     <>
       {/* No modal or PDFDownloadLink needed */}
-      <div className="relative flex flex-col w-full h-full gap-4 p-6 px-4 overflow-x-hidden bg-secondary rounded-xl">
+      <div className="relative flex flex-col w-full h-full gap-4 p-6 px-4 overflow-x-hidden rounded-xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-4xl font-bold tracking-tight text-primary">

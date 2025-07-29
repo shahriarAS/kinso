@@ -220,7 +220,7 @@ export default function StockPage() {
 
   return (
     <div className="min-h-screen p-6 bg-gray-50">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center justify-between">

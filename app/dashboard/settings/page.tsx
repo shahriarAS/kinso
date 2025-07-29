@@ -158,12 +158,6 @@ export default function SettingsPage() {
                     </div>
                     <Form.Item
                       name="invoiceFooterTitle"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please enter the warranty policy title.",
-                        },
-                      ]}
                       extra="This title will appear above the warranty policy on invoices."
                       className="mb-2"
                     >
@@ -175,12 +169,6 @@ export default function SettingsPage() {
                     </Form.Item>
                     <Form.Item
                       name="invoiceFooter"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please enter the warranty policy.",
-                        },
-                      ]}
                       extra="This policy will be printed at the bottom of every invoice."
                       className="mb-0"
                     >
@@ -246,12 +234,6 @@ export default function SettingsPage() {
                       <Form.Item
                         name="companyName"
                         label="Business Name"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please enter the business name.",
-                          },
-                        ]}
                         extra="Your registered business name."
                       >
                         <Input
@@ -265,10 +247,6 @@ export default function SettingsPage() {
                         name="companyEmail"
                         label="Business Email"
                         rules={[
-                          {
-                            required: true,
-                            message: "Please enter the business email.",
-                          },
                           {
                             type: "email",
                             message: "Please enter a valid email address.",
@@ -288,12 +266,6 @@ export default function SettingsPage() {
                       <Form.Item
                         name="companyPhone"
                         label="Phone"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please enter the phone number.",
-                          },
-                        ]}
                         extra="Primary contact number."
                       >
                         <Input
@@ -306,12 +278,6 @@ export default function SettingsPage() {
                       <Form.Item
                         name="companyAddress"
                         label="Address"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please enter the business address.",
-                          },
-                        ]}
                         extra="Business address for invoices."
                       >
                         <Input

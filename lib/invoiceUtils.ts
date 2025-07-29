@@ -43,9 +43,9 @@ export function mapSaleToInvoiceData(
       phone: sale.customer?.phone || "N/A",
     },
     company: {
-      name: settings?.companyName || "Kinso",
-      address: settings?.companyAddress || "Business Address",
-      logo: "Kinso", // You might want to add logo support to settings
+      name: settings?.companyName || "",
+      address: settings?.companyAddress || "",
+      logo: "/images/brand/invoice-logo.png",
       mobile: settings?.companyPhone,
       email: settings?.companyEmail,
       soldBy: userFullName,

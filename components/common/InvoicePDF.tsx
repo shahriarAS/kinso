@@ -28,28 +28,32 @@ const InvoicePDF: React.FC<{ data: InvoiceData }> = ({ data }) => {
         <View style={styles.header}>
           {/* Logo and Company Info */}
           <View>
-            {data.company.logo && data.company.logo !== "Kinso" ? (
+            {data.company?.logo && data.company.logo.startsWith('/images/') ? (
               <Image src={data.company.logo} style={styles.logoBoxImage} />
             ) : (
               <View style={styles.logoBoxText}>
                 <Text style={styles.logoText}>Kinso</Text>
               </View>
             )}
-            <Text style={styles.companyName}>{data.company.name}</Text>
-            <Text style={styles.companyInfo}>
-              Address: {data.company.address}
-            </Text>
-            {data.company.mobile && (
+            {data.company?.name && (
+              <Text style={styles.companyName}>{data.company.name}</Text>
+            )}
+            {data.company?.address && (
+              <Text style={styles.companyInfo}>
+                Address: {data.company.address}
+              </Text>
+            )}
+            {data.company?.mobile && (
               <Text style={styles.companyInfo}>
                 Mobile: {data.company.mobile}
               </Text>
             )}
-            {data.company.email && (
+            {data.company?.email && (
               <Text style={styles.companyInfo}>
                 Email: {data.company.email}
               </Text>
             )}
-            {data.company.soldBy && (
+            {data.company?.soldBy && (
               <Text style={styles.companyInfo}>
                 Sold By: {data.company.soldBy}
               </Text>
@@ -65,10 +69,14 @@ const InvoicePDF: React.FC<{ data: InvoiceData }> = ({ data }) => {
             }}
           >
             <Text style={styles.invoiceTitle}>INVOICE</Text>
-            <Text style={styles.invoiceMeta}>
-              Invoice No: {data.invoiceNumber}
-            </Text>
-            <Text style={styles.invoiceMeta}>Date: {data.date}</Text>
+            {data.invoiceNumber && (
+              <Text style={styles.invoiceMeta}>
+                Invoice No: {data.invoiceNumber}
+              </Text>
+            )}
+            {data.date && (
+              <Text style={styles.invoiceMeta}>Date: {data.date}</Text>
+            )}
             <View style={styles.billingTo}>
               <Text
                 style={{
@@ -79,15 +87,17 @@ const InvoicePDF: React.FC<{ data: InvoiceData }> = ({ data }) => {
               >
                 Billing To
               </Text>
-              <Text style={{ textAlign: "right", marginBottom: 2 }}>
-                {data.customer.name}
-              </Text>
-              {data.customer.phone && (
+              {data.customer?.name && (
+                <Text style={{ textAlign: "right", marginBottom: 2 }}>
+                  {data.customer.name}
+                </Text>
+              )}
+              {data.customer?.phone && (
                 <Text style={{ textAlign: "right", marginBottom: 2 }}>
                   {data.customer.phone}
                 </Text>
               )}
-              {data.customer.email && (
+              {data.customer?.email && (
                 <Text style={{ textAlign: "right", marginBottom: 2 }}>
                   {data.customer.email}
                 </Text>
@@ -308,15 +318,16 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   logoBoxImage: {
-    width: 56,
-    height: 56,
+    width: 116,
+    height: 26,
     alignItems: "center",
     justifyContent: "center",
+    marginTop: 4,
     marginBottom: 8,
   },
   logoBoxText: {
-    width: 56,
-    height: 56,
+    width: 80,
+    height: 80,
     borderRadius: 8,
     backgroundColor: "#18181b",
     alignItems: "center",

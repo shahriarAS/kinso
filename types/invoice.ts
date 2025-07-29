@@ -8,26 +8,26 @@ interface InvoiceItem {
 }
 
 interface CompanyInfo {
-  name: string;
-  address: string;
-  logo: string;
+  name?: string;
+  address?: string;
+  logo?: string;
   mobile?: string;
   email?: string;
   soldBy?: string;
 }
 
 interface CustomerInfo {
-  name: string;
+  name?: string;
   email?: string;
-  phone: string;
+  phone?: string;
 }
 
 export interface InvoiceData {
   _id?: string;
-  invoiceNumber: string;
-  date: string;
-  customer: CustomerInfo;
-  company: CompanyInfo;
+  invoiceNumber?: string;
+  date?: string;
+  customer?: CustomerInfo;
+  company?: CompanyInfo;
   items: InvoiceItem[];
   subtotal: number;
   discount: number;

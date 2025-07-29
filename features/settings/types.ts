@@ -35,15 +35,15 @@ export interface SettingsResponse {
 }
 
 export interface CompanyInfo {
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
 }
 
 export interface InvoiceSettings {
-  footer: string;
-  footerTitle: string;
+  footer?: string;
+  footerTitle?: string;
 }
 
 export interface SystemSettings {

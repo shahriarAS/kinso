@@ -102,7 +102,7 @@ export default function DashboardSidebar() {
       >
         <span
           className={twMerge(
-            "text-2xl font-medium whitespace-nowrap overflow-hidden transition-all duration-300",
+            "text-2xl font-medium whitespace-nowrap overflow-hidden transition-all duration-300 uppercase",
             collapsed
               ? "max-w-0 opacity-0 pointer-events-none select-none"
               : "max-w-xs opacity-100",

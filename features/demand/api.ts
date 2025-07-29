@@ -2,13 +2,12 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithErrorHandling from "@/store/baseQueryWithErrorHandling";
 import {
   Demand,
-  DemandInput,
-  DemandFiltersTypes,
-  DemandResponse,
-  DemandGenerationRequest,
   DemandConversionRequest,
+  DemandFiltersTypes,
+  DemandGenerationRequest,
+  DemandInput
 } from "./types";
-import { ApiResponse } from "@/types";
+import { ApiResponse, PaginatedResponse } from "@/types";
 
 export const demandApi = createApi({
   reducerPath: "demandApi",
@@ -16,7 +15,7 @@ export const demandApi = createApi({
   tagTypes: ["Demand"],
   endpoints: (builder) => ({
     // Get all demands with pagination and filters
-    getDemands: builder.query<DemandResponse, DemandFiltersTypes>({
+    getDemands: builder.query<PaginatedResponse<Demand>, DemandFiltersTypes>({
       query: (filters) => ({
         url: "/",
         method: "GET",
@@ -25,12 +24,12 @@ export const demandApi = createApi({
       providesTags: (result) =>
         result?.data
           ? [
-              ...result.data.map(({ _id }) => ({
-                type: "Demand" as const,
-                _id,
-              })),
-              { type: "Demand", id: "LIST" },
-            ]
+            ...result.data.map(({ _id }) => ({
+              type: "Demand" as const,
+              _id,
+            })),
+            { type: "Demand", id: "LIST" },
+          ]
           : [{ type: "Demand", id: "LIST" }],
     }),
 

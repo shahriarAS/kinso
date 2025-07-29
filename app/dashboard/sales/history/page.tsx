@@ -7,6 +7,7 @@ import { salesApi } from "@/features/sales";
 import ViewSaleDrawer from "@/features/sales/components/ViewSaleDrawer";
 import { outletsApi } from "@/features/outlets";
 import { customersApi } from "@/features/customers";
+import { productsApi } from "@/features/products";
 import type { SalesHistoryFilters } from "@/features/sales";
 import { pdf } from "@react-pdf/renderer";
 import { useGetSettingsQuery } from "@/features/settings/api";
@@ -24,6 +25,8 @@ export default function SalesHistoryPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [paymentMethodFilter, setPaymentMethodFilter] = useState("");
   const [outletFilter, setOutletFilter] = useState("");
+  const [customerFilter, setCustomerFilter] = useState("");
+  const [productFilter, setProductFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
   const [viewDrawerOpen, setViewDrawerOpen] = useState(false);
@@ -32,6 +35,7 @@ export default function SalesHistoryPage() {
   const { data: salesData, isLoading, refetch } = salesApi.useGetSalesHistoryQuery(filters);
   const { data: outletsData } = outletsApi.useGetOutletsQuery({ limit: 100 });
   const { data: customersData } = customersApi.useGetCustomersQuery({ limit: 100 });
+  const { data: productsData } = productsApi.useGetProductsQuery({ limit: 100 });
   const { data: settingsData } = useGetSettingsQuery();
   const { data: userData } = useFetchAuthUserQuery();
 
@@ -137,9 +141,15 @@ export default function SalesHistoryPage() {
         setPaymentMethodFilter={setPaymentMethodFilter}
         outletFilter={outletFilter}
         setOutletFilter={setOutletFilter}
+        customerFilter={customerFilter}
+        setCustomerFilter={setCustomerFilter}
+        productFilter={productFilter}
+        setProductFilter={setProductFilter}
         onFilterChange={handleFilterChange}
         onDateRangeChange={handleDateRangeChange}
         outletsData={outletsData}
+        customersData={customersData}
+        productsData={productsData}
       />
 
       {/* Table */}

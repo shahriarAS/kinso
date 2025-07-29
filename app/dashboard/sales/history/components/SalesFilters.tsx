@@ -14,9 +14,15 @@ interface SalesFiltersProps {
   setPaymentMethodFilter: (value: string) => void;
   outletFilter: string;
   setOutletFilter: (value: string) => void;
+  customerFilter: string;
+  setCustomerFilter: (value: string) => void;
+  productFilter: string;
+  setProductFilter: (value: string) => void;
   onFilterChange: (key: keyof SalesHistoryFilters, value: any) => void;
   onDateRangeChange: (dates: any) => void;
   outletsData?: { data?: Array<{ _id: string; name: string }> };
+  customersData?: { data?: Array<{ _id: string; name: string; email?: string }> };
+  productsData?: { data?: Array<{ _id: string; name: string; barcode: string }> };
 }
 
 export default function SalesFilters({
@@ -26,13 +32,19 @@ export default function SalesFilters({
   setPaymentMethodFilter,
   outletFilter,
   setOutletFilter,
+  customerFilter,
+  setCustomerFilter,
+  productFilter,
+  setProductFilter,
   onFilterChange,
   onDateRangeChange,
   outletsData,
+  customersData,
+  productsData,
 }: SalesFiltersProps) {
   return (
     <Card className="shadow-md">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <div>
           <label className="block text-sm font-medium mb-1">Search</label>
           <Input
@@ -82,6 +94,54 @@ export default function SalesFilters({
             {outletsData?.data?.map((outlet) => (
               <Select.Option key={outlet._id} value={outlet._id}>
                 {outlet.name}
+              </Select.Option>
+            ))}
+          </Select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Customer</label>
+          <Select
+            placeholder="Select Customer"
+            value={customerFilter}
+            onChange={(value) => {
+              setCustomerFilter(value);
+              onFilterChange('customer', value);
+            }}
+            className="w-full"
+            allowClear
+            showSearch
+            filterOption={(input, option) =>
+              option?.label?.toString().toLowerCase().includes(input.toLowerCase()) || false
+            }
+          >
+            {customersData?.data?.map((customer) => (
+              <Select.Option key={customer._id} value={customer._id}>
+                {customer.name} {customer.email && `(${customer.email})`}
+              </Select.Option>
+            ))}
+          </Select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Product</label>
+          <Select
+            placeholder="Select Product"
+            value={productFilter}
+            onChange={(value) => {
+              setProductFilter(value);
+              onFilterChange('product', value);
+            }}
+            className="w-full"
+            allowClear
+            showSearch
+            filterOption={(input, option) =>
+              option?.label?.toString().toLowerCase().includes(input.toLowerCase()) || false
+            }
+          >
+            {productsData?.data?.map((product) => (
+              <Select.Option key={product._id} value={product._id}>
+                {product.name} {product.barcode && `(${product.barcode})`}
               </Select.Option>
             ))}
           </Select>

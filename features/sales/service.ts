@@ -200,6 +200,7 @@ export async function handleGet(request: NextRequest) {
     const search = searchParams.get("search");
     const outlet = searchParams.get("outlet");
     const customer = searchParams.get("customer");
+    const product = searchParams.get("product");
     const paymentMethod = searchParams.get("paymentMethod");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
@@ -217,6 +218,9 @@ export async function handleGet(request: NextRequest) {
     }
     if (customer) {
       query.customer = customer;
+    }
+    if (product) {
+      query["items.stock"] = { $in: await Stock.find({ product }).select("_id") };
     }
     if (paymentMethod) {
       query["paymentMethods.method"] = paymentMethod;

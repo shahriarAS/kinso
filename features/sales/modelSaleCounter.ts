@@ -11,4 +11,4 @@ const SaleCounterSchema = new Schema<ISaleCounter>({
 });
 
 export default mongoose.models.SaleCounter ||
-  mongoose.model<ISaleCounter>("SaleCounter", SaleCounterSchema); 
+  mongoose.model<ISaleCounter>("SaleCounter", SaleCounterSchema);

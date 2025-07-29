@@ -45,10 +45,7 @@ export const brandsApi = createApi({
       providesTags: (result, error, id) => [{ type: "Brand", id }],
     }),
 
-    createBrand: builder.mutation<
-      ApiResponse<Brand>,
-      BrandInput
-    >({
+    createBrand: builder.mutation<ApiResponse<Brand>, BrandInput>({
       query: (brand) => ({
         url: "/",
         method: "POST",
@@ -98,4 +95,4 @@ export const {
   useUpdateBrandMutation,
   useDeleteBrandMutation,
   useGetAllBrandsQuery,
-} = brandsApi; 
+} = brandsApi;

@@ -142,9 +142,7 @@ export default function POS() {
   const handlePriceChange = (stock: string, price: number) => {
     setCart((prev) =>
       prev.map((item) =>
-        item.stock === stock
-          ? { ...item, price: Math.max(0, price) }
-          : item,
+        item.stock === stock ? { ...item, price: Math.max(0, price) } : item,
       ),
     );
   };

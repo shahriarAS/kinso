@@ -4,7 +4,7 @@ import { ApiResponse, PaginatedResponse } from "@/types";
 export function createSuccessResponse<T>(
   data: T,
   message?: string,
-  status: number = 200
+  status: number = 200,
 ): NextResponse<ApiResponse<T>> {
   return NextResponse.json(
     {
@@ -12,20 +12,20 @@ export function createSuccessResponse<T>(
       data,
       ...(message && { message }),
     },
-    { status }
+    { status },
   );
 }
 
 export function createErrorResponse(
   message: string,
-  status: number = 500
+  status: number = 500,
 ): NextResponse<ApiResponse<never>> {
   return NextResponse.json(
     {
       success: false,
       message,
     },
-    { status }
+    { status },
   );
 }
 
@@ -37,7 +37,7 @@ export function createPaginatedResponse<T>(
     total: number;
     totalPages: number;
   },
-  message?: string
+  message?: string,
 ): NextResponse<PaginatedResponse<T>> {
   return NextResponse.json({
     success: true,
@@ -47,22 +47,32 @@ export function createPaginatedResponse<T>(
   });
 }
 
-export function createNotFoundResponse(resource: string): NextResponse<ApiResponse<never>> {
+export function createNotFoundResponse(
+  resource: string,
+): NextResponse<ApiResponse<never>> {
   return createErrorResponse(`${resource} not found`, 404);
 }
 
-export function createValidationErrorResponse(message: string): NextResponse<ApiResponse<never>> {
+export function createValidationErrorResponse(
+  message: string,
+): NextResponse<ApiResponse<never>> {
   return createErrorResponse(message, 400);
 }
 
-export function createConflictErrorResponse(message: string): NextResponse<ApiResponse<never>> {
+export function createConflictErrorResponse(
+  message: string,
+): NextResponse<ApiResponse<never>> {
   return createErrorResponse(message, 409);
 }
 
-export function createUnauthorizedResponse(message: string = "Unauthorized"): NextResponse<ApiResponse<never>> {
+export function createUnauthorizedResponse(
+  message: string = "Unauthorized",
+): NextResponse<ApiResponse<never>> {
   return createErrorResponse(message, 401);
 }
 
-export function createForbiddenResponse(message: string = "Forbidden"): NextResponse<ApiResponse<never>> {
+export function createForbiddenResponse(
+  message: string = "Forbidden",
+): NextResponse<ApiResponse<never>> {
   return createErrorResponse(message, 403);
-} 
+}

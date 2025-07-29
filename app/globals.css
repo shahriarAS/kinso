@@ -8,11 +8,11 @@
 
 /* Consistent Border Radius System */
 :root {
-  --radius-xs: 4px;   /* Small elements like badges, chips */
-  --radius-sm: 6px;   /* Buttons, form inputs */
-  --radius-md: 8px;   /* Cards, dropdowns, modals */
-  --radius-lg: 12px;  /* Larger cards, containers */
-  --radius-xl: 16px;  /* Large containers, panels */
+  --radius-xs: 4px; /* Small elements like badges, chips */
+  --radius-sm: 6px; /* Buttons, form inputs */
+  --radius-md: 8px; /* Cards, dropdowns, modals */
+  --radius-lg: 12px; /* Larger cards, containers */
+  --radius-xl: 16px; /* Large containers, panels */
   --radius-2xl: 24px; /* Drawers, large modals */
   --radius-full: 9999px; /* Fully rounded elements */
 }
@@ -139,13 +139,27 @@
 }
 
 /* Consistent rounded corner utility classes */
-.rounded-consistent-xs { border-radius: var(--radius-xs) !important; }
-.rounded-consistent-sm { border-radius: var(--radius-sm) !important; }
-.rounded-consistent-md { border-radius: var(--radius-md) !important; }
-.rounded-consistent-lg { border-radius: var(--radius-lg) !important; }
-.rounded-consistent-xl { border-radius: var(--radius-xl) !important; }
-.rounded-consistent-2xl { border-radius: var(--radius-2xl) !important; }
-.rounded-consistent-full { border-radius: var(--radius-full) !important; }
+.rounded-consistent-xs {
+  border-radius: var(--radius-xs) !important;
+}
+.rounded-consistent-sm {
+  border-radius: var(--radius-sm) !important;
+}
+.rounded-consistent-md {
+  border-radius: var(--radius-md) !important;
+}
+.rounded-consistent-lg {
+  border-radius: var(--radius-lg) !important;
+}
+.rounded-consistent-xl {
+  border-radius: var(--radius-xl) !important;
+}
+.rounded-consistent-2xl {
+  border-radius: var(--radius-2xl) !important;
+}
+.rounded-consistent-full {
+  border-radius: var(--radius-full) !important;
+}
 
 @media (max-width: 900px) {
   .inventory-table {

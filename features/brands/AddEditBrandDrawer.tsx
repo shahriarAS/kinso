@@ -45,23 +45,24 @@ const AddEditBrandDrawer: React.FC<AddEditBrandDrawerProps> = ({
         label: "Vendor",
         type: "select",
         placeholder: "Select vendor",
-        options: vendorsResponse?.data?.map((vendor: Vendor) => ({
-          label: vendor.name,
-          value: vendor._id,
-        })) || [],
-        rules: [
-          { required: true, message: "Please select a vendor" },
-        ],
+        options:
+          vendorsResponse?.data?.map((vendor: Vendor) => ({
+            label: vendor.name,
+            value: vendor._id,
+          })) || [],
+        rules: [{ required: true, message: "Please select a vendor" }],
       },
     ],
-    [vendorsResponse?.data]
+    [vendorsResponse?.data],
   );
 
   // Set initial values for edit mode
-  const initialValues = brand ? {
-    name: brand.name,
-    vendor: brand.vendor._id,
-  } : undefined;
+  const initialValues = brand
+    ? {
+        name: brand.name,
+        vendor: brand.vendor._id,
+      }
+    : undefined;
 
   const handleSubmit = async (values: BrandInput) => {
     if (isEditing && brand) {
@@ -92,4 +93,4 @@ const AddEditBrandDrawer: React.FC<AddEditBrandDrawerProps> = ({
   );
 };
 
-export default AddEditBrandDrawer; 
+export default AddEditBrandDrawer;

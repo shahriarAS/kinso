@@ -10,10 +10,15 @@ export interface IOutlet extends Document {
 const OutletSchema: Schema = new Schema(
   {
     name: { type: String, required: true, trim: true },
-    type: { type: String, required: true, enum: ["Micro Outlet", "Super Shop"] },
+    type: {
+      type: String,
+      required: true,
+      enum: ["Micro Outlet", "Super Shop"],
+    },
   },
   { timestamps: true },
 );
 OutletSchema.index({ name: 1 });
 
-export default mongoose.models.Outlet || mongoose.model<IOutlet>("Outlet", OutletSchema);
+export default mongoose.models.Outlet ||
+  mongoose.model<IOutlet>("Outlet", OutletSchema);

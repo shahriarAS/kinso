@@ -63,4 +63,5 @@ UserSchema.index({ isActive: 1 });
 UserSchema.index({ createdAt: -1 });
 
 // Check if model already exists to prevent overwrite error
-export default mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
+export default mongoose.models.User ||
+  mongoose.model<IUser>("User", UserSchema);

@@ -1,19 +1,14 @@
 "use client";
 
-import {
-  Input,
-  Select,
-  Button,
-  Modal,
-  Divider,
-  Card,
-  Typography,
-} from "antd";
+import { Input, Select, Button, Modal, Divider, Card, Typography } from "antd";
 import { Icon } from "@iconify/react";
 import { useState } from "react";
 import { useNotification } from "@/hooks/useNotification";
 import { CartItem, CustomerOption } from "../types";
-import { PAYMENT_METHOD_OPTIONS, PAYMENT_METHOD_ICONS } from "@/lib/constraints";
+import {
+  PAYMENT_METHOD_OPTIONS,
+  PAYMENT_METHOD_ICONS,
+} from "@/lib/constraints";
 
 interface CartSummaryProps {
   cart: CartItem[];
@@ -69,7 +64,10 @@ export default function CartSummary({
   const [notes, setNotes] = useState("");
   const { success, error } = useNotification();
 
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
   const paid = payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
   const due = Math.max(0, total - paid);
 
@@ -94,10 +92,12 @@ export default function CartSummary({
           outlet: selectedOutlet,
           customer: customer || undefined,
           paymentMethods: payments,
-          notes: notes || (discount > 0 ? `Discount applied: ৳${discount}` : undefined),
+          notes:
+            notes ||
+            (discount > 0 ? `Discount applied: ৳${discount}` : undefined),
         });
       }
-      
+
       success("Sale completed successfully!");
       setCheckoutModalOpen(false);
       onCheckoutSuccess();
@@ -201,12 +201,16 @@ export default function CartSummary({
               </div>
               <div className="flex justify-between">
                 <span>Discount:</span>
-                <span className="font-semibold text-red-600">-৳{discount.toFixed(2)}</span>
+                <span className="font-semibold text-red-600">
+                  -৳{discount.toFixed(2)}
+                </span>
               </div>
               <Divider className="my-2" />
               <div className="flex justify-between text-lg">
                 <span className="font-bold">Total:</span>
-                <span className="font-bold text-green-600">৳{total.toFixed(2)}</span>
+                <span className="font-bold text-green-600">
+                  ৳{total.toFixed(2)}
+                </span>
               </div>
             </div>
           </Card>
@@ -214,20 +218,27 @@ export default function CartSummary({
           {/* Payment Methods */}
           <div>
             <div className="flex justify-between items-center mb-3">
-              <Typography.Title level={5} className="!mb-0">Payment Methods</Typography.Title>
+              <Typography.Title level={5} className="!mb-0">
+                Payment Methods
+              </Typography.Title>
               <Button
                 type="dashed"
                 size="small"
-                onClick={() => setPayments([...payments, { method: "CASH", amount: 0 }])}
+                onClick={() =>
+                  setPayments([...payments, { method: "CASH", amount: 0 }])
+                }
                 icon={<Icon icon="mdi:plus" />}
               >
                 Add Payment
               </Button>
             </div>
-            
+
             <div className="space-y-3">
               {payments.map((payment, index) => (
-                <div key={index} className="flex gap-2 items-center p-3 bg-white border border-gray-200 rounded-lg">
+                <div
+                  key={index}
+                  className="flex gap-2 items-center p-3 bg-white border border-gray-200 rounded-lg"
+                >
                   <Select
                     value={payment.method}
                     onChange={(value) => {
@@ -236,7 +247,7 @@ export default function CartSummary({
                       setPayments(newPayments);
                     }}
                     className="flex-1"
-                    options={PAYMENT_METHOD_OPTIONS.map(method => ({
+                    options={PAYMENT_METHOD_OPTIONS.map((method) => ({
                       label: (
                         <span className="flex items-center gap-2">
                           <Icon icon={PAYMENT_METHOD_ICONS[method.value]} />
@@ -256,7 +267,10 @@ export default function CartSummary({
                         .filter((_, i) => i !== index)
                         .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
                       const maxAllowed = total - otherPaymentsTotal;
-                      newPayments[index].amount = Math.min(newAmount, maxAllowed);
+                      newPayments[index].amount = Math.min(
+                        newAmount,
+                        maxAllowed,
+                      );
                       setPayments(newPayments);
                     }}
                     placeholder="Amount"
@@ -272,7 +286,9 @@ export default function CartSummary({
                       danger
                       size="small"
                       icon={<Icon icon="mdi:close" />}
-                      onClick={() => setPayments(payments.filter((_, i) => i !== index))}
+                      onClick={() =>
+                        setPayments(payments.filter((_, i) => i !== index))
+                      }
                     />
                   )}
                 </div>
@@ -304,7 +320,9 @@ export default function CartSummary({
 
           {/* Notes */}
           <div>
-            <Typography.Text strong className="block mb-2">Notes (optional)</Typography.Text>
+            <Typography.Text strong className="block mb-2">
+              Notes (optional)
+            </Typography.Text>
             <Input.TextArea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}

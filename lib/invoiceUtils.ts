@@ -6,10 +6,12 @@ import { ToWords } from "to-words";
 export function mapSaleToInvoiceData(
   sale: Sale,
   settings?: Settings,
-  userFullName?: string
+  userFullName?: string,
 ): InvoiceData {
   // Calculate paid and due amounts
-  const paid = sale.paymentMethods?.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) || 0;
+  const paid =
+    sale.paymentMethods?.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) ||
+    0;
   const due = Math.max(0, sale.totalAmount - paid);
 
   // Map sale items to invoice items
@@ -17,7 +19,7 @@ export function mapSaleToInvoiceData(
     const product = item.stock?.product;
     const productName = product?.name || `Item ${index + 1}`;
     const barcode = product?.barcode;
-    
+
     return {
       title: productName,
       description: barcode ? `Barcode: ${barcode}` : undefined,
@@ -52,7 +54,7 @@ export function mapSaleToInvoiceData(
     subtotal,
     discount: sale.discountAmount || 0,
     total: sale.totalAmount,
-    payments: sale.paymentMethods?.map(p => ({
+    payments: sale.paymentMethods?.map((p) => ({
       method: p.method,
       amount: p.amount,
     })),
@@ -71,7 +73,7 @@ const toWords = new ToWords();
 
 function numberToWords(amount: number): string {
   if (amount === 0) return "zero taka only";
-  
+
   try {
     const words = toWords.convert(amount);
     return `${words} taka only`.toLowerCase();

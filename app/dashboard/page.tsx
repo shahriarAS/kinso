@@ -2,11 +2,14 @@
 import React from "react";
 import { Row, Col, Alert } from "antd";
 import { useGetDashboardStatsQuery } from "@/features/dashboard";
-import { DashboardHeader, DashboardSkeleton, RecentSales, StatsCards, TopProducts } from "@/features/dashboard/components";
 import {
-  InventoryAlerts as InventoryAlertsType,
-  DashboardStats,
-} from "@/features/dashboard/types";
+  DashboardHeader,
+  DashboardSkeleton,
+  RecentSales,
+  StatsCards,
+  TopProducts,
+} from "@/features/dashboard/components";
+import { DashboardStats } from "@/features/dashboard/types";
 
 const Dashboard: React.FC = () => {
   const {

@@ -6,7 +6,12 @@ import Warehouse from "../warehouses/model";
 import Outlet from "../outlets/model";
 import { authorizeRequest } from "@/lib/auth";
 import { AuthenticatedRequest } from "@/features/auth";
-import { LocationType, LOCATION_TYPES, DemandStatus, DEMAND_STATUSES } from "@/types";
+import {
+  LocationType,
+  LOCATION_TYPES,
+  DemandStatus,
+  DEMAND_STATUSES,
+} from "@/types";
 import {
   createSuccessResponse,
   createErrorResponse,
@@ -45,16 +50,25 @@ export async function handlePost(request: NextRequest) {
       );
     }
 
-    if (!locationType || !LOCATION_TYPES.includes(locationType as LocationType)) {
+    if (
+      !locationType ||
+      !LOCATION_TYPES.includes(locationType as LocationType)
+    ) {
       return NextResponse.json(
-        { success: false, message: "Location type must be either 'Warehouse' or 'Outlet'" },
+        {
+          success: false,
+          message: "Location type must be either 'Warehouse' or 'Outlet'",
+        },
         { status: 400 },
       );
     }
 
     if (!products || !Array.isArray(products) || products.length === 0) {
       return NextResponse.json(
-        { success: false, message: "Products array is required and must not be empty" },
+        {
+          success: false,
+          message: "Products array is required and must not be empty",
+        },
         { status: 400 },
       );
     }
@@ -63,7 +77,10 @@ export async function handlePost(request: NextRequest) {
     for (const product of products) {
       if (!product.product || !product.quantity || product.quantity <= 0) {
         return NextResponse.json(
-          { success: false, message: "Each product must have a valid product and quantity > 0" },
+          {
+            success: false,
+            message: "Each product must have a valid product and quantity > 0",
+          },
           { status: 400 },
         );
       }
@@ -71,7 +88,10 @@ export async function handlePost(request: NextRequest) {
 
     if (!status || !DEMAND_STATUSES.includes(status as DemandStatus)) {
       return NextResponse.json(
-        { success: false, message: "Status must be one of: Pending, Approved, ConvertedToStock" },
+        {
+          success: false,
+          message: "Status must be one of: Pending, Approved, ConvertedToStock",
+        },
         { status: 400 },
       );
     }
@@ -92,8 +112,8 @@ export async function handlePost(request: NextRequest) {
         populate: [
           { path: "category", select: "name" },
           { path: "brand", select: "name" },
-          { path: "vendor", select: "name" }
-        ]
+          { path: "vendor", select: "name" },
+        ],
       })
       .lean();
 
@@ -103,10 +123,14 @@ export async function handlePost(request: NextRequest) {
 
     // Populate location based on locationType
     if (populatedDemand.locationType === "Warehouse") {
-      const warehouse = await Warehouse.findById(populatedDemand.location).select("name").lean();
+      const warehouse = await Warehouse.findById(populatedDemand.location)
+        .select("name")
+        .lean();
       populatedDemand.location = warehouse;
     } else if (populatedDemand.locationType === "Outlet") {
-      const outlet = await Outlet.findById(populatedDemand.location).select("name type").lean();
+      const outlet = await Outlet.findById(populatedDemand.location)
+        .select("name type")
+        .lean();
       populatedDemand.location = outlet;
     }
 
@@ -167,8 +191,8 @@ export async function handleGet(request: NextRequest) {
           populate: [
             { path: "category", select: "name" },
             { path: "brand", select: "name" },
-            { path: "vendor", select: "name" }
-          ]
+            { path: "vendor", select: "name" },
+          ],
         })
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -181,14 +205,18 @@ export async function handleGet(request: NextRequest) {
     const demands = await Promise.all(
       demandsRaw.map(async (demand: any) => {
         if (demand.locationType === "Warehouse") {
-          const warehouse = await Warehouse.findById(demand.location).select("name").lean();
+          const warehouse = await Warehouse.findById(demand.location)
+            .select("name")
+            .lean();
           demand.location = warehouse;
         } else if (demand.locationType === "Outlet") {
-          const outlet = await Outlet.findById(demand.location).select("name type").lean();
+          const outlet = await Outlet.findById(demand.location)
+            .select("name type")
+            .lean();
           demand.location = outlet;
         }
         return demand;
-      })
+      }),
     );
 
     return createPaginatedResponse(demands, {
@@ -230,23 +258,27 @@ export async function handleGetById(
         populate: [
           { path: "category", select: "name" },
           { path: "brand", select: "name" },
-          { path: "vendor", select: "name" }
-        ]
+          { path: "vendor", select: "name" },
+        ],
       })
       .lean();
     if (!demand) {
       return createNotFoundResponse("Demand");
     }
-    
+
     // Populate location based on locationType
     if (demand.locationType === "Warehouse") {
-      const warehouse = await Warehouse.findById(demand.location).select("name").lean();
+      const warehouse = await Warehouse.findById(demand.location)
+        .select("name")
+        .lean();
       demand.location = warehouse;
     } else if (demand.locationType === "Outlet") {
-      const outlet = await Outlet.findById(demand.location).select("name type").lean();
+      const outlet = await Outlet.findById(demand.location)
+        .select("name type")
+        .lean();
       demand.location = outlet;
     }
-    
+
     return createSuccessResponse(demand);
   } catch (error) {
     console.error("Error fetching demand:", error);
@@ -276,7 +308,7 @@ export async function handleUpdateById(
     const body = await request.json();
     const { location, locationType, products, status } = body;
     const { id } = await params;
-    
+
     const existingDemand = await Demand.findById(id);
     if (!existingDemand) {
       return NextResponse.json(
@@ -286,9 +318,15 @@ export async function handleUpdateById(
     }
 
     // Validation
-    if (locationType && !LOCATION_TYPES.includes(locationType as LocationType)) {
+    if (
+      locationType &&
+      !LOCATION_TYPES.includes(locationType as LocationType)
+    ) {
       return NextResponse.json(
-        { success: false, message: "Location type must be either 'Warehouse' or 'Outlet'" },
+        {
+          success: false,
+          message: "Location type must be either 'Warehouse' or 'Outlet'",
+        },
         { status: 400 },
       );
     }
@@ -305,7 +343,11 @@ export async function handleUpdateById(
       for (const product of products) {
         if (!product.product || !product.quantity || product.quantity <= 0) {
           return NextResponse.json(
-            { success: false, message: "Each product must have a valid product and quantity > 0" },
+            {
+              success: false,
+              message:
+                "Each product must have a valid product and quantity > 0",
+            },
             { status: 400 },
           );
         }
@@ -314,7 +356,10 @@ export async function handleUpdateById(
 
     if (status && !DEMAND_STATUSES.includes(status as DemandStatus)) {
       return NextResponse.json(
-        { success: false, message: "Status must be one of: Pending, Approved, ConvertedToStock" },
+        {
+          success: false,
+          message: "Status must be one of: Pending, Approved, ConvertedToStock",
+        },
         { status: 400 },
       );
     }
@@ -326,19 +371,17 @@ export async function handleUpdateById(
     if (products) updateData.products = products;
     if (status) updateData.status = status;
 
-    const updatedDemand = await Demand.findByIdAndUpdate(
-      id,
-      updateData,
-      { new: true, runValidators: true },
-    )
-    .populate({
+    const updatedDemand = await Demand.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    }).populate({
       path: "products.product",
       select: "name barcode category brand vendor",
       populate: [
         { path: "category", select: "name" },
         { path: "brand", select: "name" },
-        { path: "vendor", select: "name" }
-      ]
+        { path: "vendor", select: "name" },
+      ],
     });
 
     if (!updatedDemand) {
@@ -348,10 +391,14 @@ export async function handleUpdateById(
     // Populate location based on locationType
     let populatedDemand = updatedDemand.toObject();
     if (populatedDemand.locationType === "Warehouse") {
-      const warehouse = await Warehouse.findById(populatedDemand.location).select("name").lean();
+      const warehouse = await Warehouse.findById(populatedDemand.location)
+        .select("name")
+        .lean();
       populatedDemand.location = warehouse;
     } else if (populatedDemand.locationType === "Outlet") {
-      const outlet = await Outlet.findById(populatedDemand.location).select("name type").lean();
+      const outlet = await Outlet.findById(populatedDemand.location)
+        .select("name type")
+        .lean();
       populatedDemand.location = outlet;
     }
 
@@ -432,7 +479,10 @@ export async function handleConvertToStock(
     // Validate demand status
     if (demand.status !== "Approved") {
       return NextResponse.json(
-        { success: false, message: "Only approved demands can be converted to stock" },
+        {
+          success: false,
+          message: "Only approved demands can be converted to stock",
+        },
         { status: 400 },
       );
     }
@@ -440,7 +490,10 @@ export async function handleConvertToStock(
     // Validate products array
     if (!products || !Array.isArray(products) || products.length === 0) {
       return NextResponse.json(
-        { success: false, message: "Products array is required and must not be empty" },
+        {
+          success: false,
+          message: "Products array is required and must not be empty",
+        },
         { status: 400 },
       );
     }
@@ -449,51 +502,74 @@ export async function handleConvertToStock(
     for (const product of products) {
       if (!product.productId) {
         return NextResponse.json(
-          { success: false, message: "Product ID is required for each product" },
+          {
+            success: false,
+            message: "Product ID is required for each product",
+          },
           { status: 400 },
         );
       }
 
       if (!product.quantity || product.quantity <= 0) {
         return NextResponse.json(
-          { success: false, message: "Quantity must be greater than 0 for each product" },
+          {
+            success: false,
+            message: "Quantity must be greater than 0 for each product",
+          },
           { status: 400 },
         );
       }
 
       if (!product.mrp || product.mrp <= 0) {
         return NextResponse.json(
-          { success: false, message: "MRP must be greater than 0 for each product" },
+          {
+            success: false,
+            message: "MRP must be greater than 0 for each product",
+          },
           { status: 400 },
         );
       }
 
       if (!product.tp || product.tp <= 0) {
         return NextResponse.json(
-          { success: false, message: "TP must be greater than 0 for each product" },
+          {
+            success: false,
+            message: "TP must be greater than 0 for each product",
+          },
           { status: 400 },
         );
       }
 
       if (!product.expireDate) {
         return NextResponse.json(
-          { success: false, message: "Expire date is required for each product" },
+          {
+            success: false,
+            message: "Expire date is required for each product",
+          },
           { status: 400 },
         );
       }
 
       if (!product.batchNumber || product.batchNumber.trim().length === 0) {
         return NextResponse.json(
-          { success: false, message: "Batch number is required for each product" },
+          {
+            success: false,
+            message: "Batch number is required for each product",
+          },
           { status: 400 },
         );
       }
 
       // Check if batch number already exists
-      const existingBatch = await Stock.findOne({ batchNumber: product.batchNumber.trim() });
+      const existingBatch = await Stock.findOne({
+        batchNumber: product.batchNumber.trim(),
+      });
       if (existingBatch) {
         return NextResponse.json(
-          { success: false, message: `Batch number '${product.batchNumber}' already exists` },
+          {
+            success: false,
+            message: `Batch number '${product.batchNumber}' already exists`,
+          },
           { status: 409 },
         );
       }
@@ -516,17 +592,17 @@ export async function handleConvertToStock(
     }
 
     // Filter demand products to only include the converted ones
-    const convertedProductIds = products.map(p => p.productId);
-    const convertedProducts = demand.products.filter((dp: any) => 
-      convertedProductIds.includes(dp.product.toString())
+    const convertedProductIds = products.map((p) => p.productId);
+    const convertedProducts = demand.products.filter((dp: any) =>
+      convertedProductIds.includes(dp.product.toString()),
     );
 
     // Update demand with only converted products and status
     const updatedDemand = await Demand.findByIdAndUpdate(
       id,
-      { 
+      {
         status: "ConvertedToStock",
-        products: convertedProducts
+        products: convertedProducts,
       },
       { new: true, runValidators: true },
     ).populate({
@@ -535,17 +611,20 @@ export async function handleConvertToStock(
       populate: [
         { path: "category", select: "name" },
         { path: "brand", select: "name" },
-        { path: "vendor", select: "name" }
-      ]
+        { path: "vendor", select: "name" },
+      ],
     });
 
     // Return the updated demand along with created stock entries
-    return createSuccessResponse({
-      demand: updatedDemand,
-      stockEntries: stockEntries
-    }, `Successfully converted ${stockEntries.length} products from demand to stock`);
+    return createSuccessResponse(
+      {
+        demand: updatedDemand,
+        stockEntries: stockEntries,
+      },
+      `Successfully converted ${stockEntries.length} products from demand to stock`,
+    );
   } catch (error) {
     console.error("Error converting demand to stock:", error);
     return createErrorResponse("Failed to convert demand to stock");
   }
-} 
+}

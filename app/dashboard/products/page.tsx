@@ -27,8 +27,12 @@ export default function ProductsPage() {
           Add Product
         </Button>
       </div>
-      <AddEditProductDrawer open={open} setOpen={setOpen} onClose={() => setOpen(false)} />
-      
+      <AddEditProductDrawer
+        open={open}
+        setOpen={setOpen}
+        onClose={() => setOpen(false)}
+      />
+
       {/* Filters */}
       <ProductFilters
         searchTerm={searchTerm}
@@ -45,7 +49,7 @@ export default function ProductsPage() {
         onMaxPriceChange={setMaxPrice}
         onPageChange={setCurrentPage}
       />
-      
+
       {/* Table */}
       <ProductTable
         searchTerm={searchTerm}

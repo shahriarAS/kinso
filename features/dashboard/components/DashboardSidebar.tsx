@@ -10,11 +10,11 @@ import { UserOutlined, LogoutOutlined, DownOutlined } from "@ant-design/icons";
 import { useFetchAuthUserQuery, useLogoutUserMutation } from "@/features/auth";
 
 const menuItems = [
-  // {
-  //   icon: "lineicons:dashboard-square-1",
-  //   label: "Dashboard",
-  //   href: "/dashboard",
-  // },
+  {
+    icon: "lineicons:dashboard-square-1",
+    label: "Dashboard",
+    href: "/dashboard",
+  },
   {
     icon: "lineicons:cart-1",
     label: "Point of Sale",
@@ -75,11 +75,11 @@ const menuItems = [
   //   label: "Users",
   //   href: "/dashboard/users",
   // },
-  // {
-  //   icon: "lineicons:cog",
-  //   label: "Settings",
-  //   href: "/dashboard/settings",
-  // },
+  {
+    icon: "lineicons:cog",
+    label: "Settings",
+    href: "/dashboard/settings",
+  },
 ];
 
 export default function DashboardSidebar() {

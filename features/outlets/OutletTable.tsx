@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { Button, Input, Select } from "antd";
-import { PlusOutlined, SearchOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+  PlusOutlined,
+  SearchOutlined,
+  FilterOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import { useGetOutletsQuery, useDeleteOutletMutation } from "./api";
 import { Outlet } from "./types";
 import { useNotification } from "@/hooks/useNotification";
@@ -133,11 +138,7 @@ const OutletTable: React.FC = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold text-gray-800">Outlets</h2>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={handleAdd}
-        >
+        <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
           Add Outlet
         </Button>
       </div>
@@ -168,11 +169,13 @@ const OutletTable: React.FC = () => {
               size="large"
               allowClear
               value={searchText}
-              onChange={e => handleSearch(e.target.value)}
-              onPressEnter={e => handleSearch((e.target as HTMLInputElement).value)}
+              onChange={(e) => handleSearch(e.target.value)}
+              onPressEnter={(e) =>
+                handleSearch((e.target as HTMLInputElement).value)
+              }
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Type
@@ -209,7 +212,8 @@ const OutletTable: React.FC = () => {
           total: outletsResponse?.pagination?.total || 0,
           showSizeChanger: true,
           showQuickJumper: true,
-          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`,
           onChange: (page, size) => {
             setCurrentPage(page);
             setPageSize(size || 10);
@@ -227,4 +231,4 @@ const OutletTable: React.FC = () => {
   );
 };
 
-export default OutletTable; 
+export default OutletTable;

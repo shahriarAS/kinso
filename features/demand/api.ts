@@ -6,7 +6,7 @@ import {
   DemandConversionResponse,
   DemandFiltersTypes,
   DemandGenerationRequest,
-  DemandInput
+  DemandInput,
 } from "./types";
 import { ApiResponse, PaginatedResponse } from "@/types";
 
@@ -25,12 +25,12 @@ export const demandApi = createApi({
       providesTags: (result) =>
         result?.data
           ? [
-            ...result.data.map(({ _id }) => ({
-              type: "Demand" as const,
-              _id,
-            })),
-            { type: "Demand", id: "LIST" },
-          ]
+              ...result.data.map(({ _id }) => ({
+                type: "Demand" as const,
+                _id,
+              })),
+              { type: "Demand", id: "LIST" },
+            ]
           : [{ type: "Demand", id: "LIST" }],
     }),
 
@@ -44,10 +44,7 @@ export const demandApi = createApi({
     }),
 
     // Create new demand
-    createDemand: builder.mutation<
-      ApiResponse<Demand>,
-      DemandInput
-    >({
+    createDemand: builder.mutation<ApiResponse<Demand>, DemandInput>({
       query: (demand) => ({
         url: "/",
         method: "POST",
@@ -113,7 +110,10 @@ export const demandApi = createApi({
     // Update demand status
     updateDemandStatus: builder.mutation<
       ApiResponse<Demand>,
-      { _id: string; status: "pending" | "approved" | "converted" | "cancelled" }
+      {
+        _id: string;
+        status: "pending" | "approved" | "converted" | "cancelled";
+      }
     >({
       query: ({ _id, status }) => ({
         url: `/${_id}/status`,
@@ -137,4 +137,4 @@ export const {
   useGenerateDemandsMutation,
   useConvertDemandToStockMutation,
   useUpdateDemandStatusMutation,
-} = demandApi; 
+} = demandApi;

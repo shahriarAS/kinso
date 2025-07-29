@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { Button, Input } from "antd";
-import { PlusOutlined, SearchOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+  PlusOutlined,
+  SearchOutlined,
+  FilterOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import { useGetVendorsQuery, useDeleteVendorMutation } from "./api";
 import { Vendor } from "./types";
 import { useNotification } from "@/hooks/useNotification";
@@ -152,8 +157,10 @@ const VendorTable: React.FC = () => {
               size="large"
               allowClear
               value={searchText}
-              onChange={e => handleSearch(e.target.value)}
-              onPressEnter={e => handleSearch((e.target as HTMLInputElement).value)}
+              onChange={(e) => handleSearch(e.target.value)}
+              onPressEnter={(e) =>
+                handleSearch((e.target as HTMLInputElement).value)
+              }
             />
           </div>
         </div>
@@ -173,7 +180,8 @@ const VendorTable: React.FC = () => {
           total: vendorsResponse?.pagination?.total || 0,
           showSizeChanger: true,
           showQuickJumper: true,
-          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`,
           onChange: (page, size) => {
             setCurrentPage(page);
             setPageSize(size || 10);
@@ -191,4 +199,4 @@ const VendorTable: React.FC = () => {
   );
 };
 
-export default VendorTable; 
+export default VendorTable;

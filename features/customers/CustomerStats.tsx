@@ -1,12 +1,28 @@
 import React from "react";
 import { Card, Statistic, Row, Col, Spin, Button } from "antd";
-import { UserOutlined, TeamOutlined, CrownOutlined, TrophyOutlined, DollarOutlined, ShoppingOutlined } from "@ant-design/icons";
-import { useGetCustomerStatsQuery, useAutoActivateMembershipMutation } from "./api";
+import {
+  UserOutlined,
+  TeamOutlined,
+  CrownOutlined,
+  TrophyOutlined,
+  DollarOutlined,
+  ShoppingOutlined,
+} from "@ant-design/icons";
+import {
+  useGetCustomerStatsQuery,
+  useAutoActivateMembershipMutation,
+} from "./api";
 import { useNotification } from "@/hooks/useNotification";
 
 const CustomerStats: React.FC = () => {
-  const { data: statsResponse, isLoading, error, refetch } = useGetCustomerStatsQuery();
-  const [autoActivateMembership, { isLoading: isActivating }] = useAutoActivateMembershipMutation();
+  const {
+    data: statsResponse,
+    isLoading,
+    error,
+    refetch,
+  } = useGetCustomerStatsQuery();
+  const [autoActivateMembership, { isLoading: isActivating }] =
+    useAutoActivateMembershipMutation();
   const { success, error: notifyError } = useNotification();
 
   const stats = statsResponse?.data;
@@ -14,7 +30,9 @@ const CustomerStats: React.FC = () => {
   const handleAutoActivateMembership = async () => {
     try {
       const result = await autoActivateMembership({ threshold: 1000 }).unwrap();
-      success(`${result.data?.updatedCount || 0} customers upgraded to membership`);
+      success(
+        `${result.data?.updatedCount || 0} customers upgraded to membership`,
+      );
       refetch();
     } catch (err) {
       notifyError("Failed to auto-activate memberships");
@@ -43,7 +61,9 @@ const CustomerStats: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-xl font-semibold text-gray-800">Customer Overview</h3>
+        <h3 className="text-xl font-semibold text-gray-800">
+          Customer Overview
+        </h3>
         <Button
           type="primary"
           loading={isActivating}
@@ -61,7 +81,7 @@ const CustomerStats: React.FC = () => {
               title="Total Customers"
               value={stats.totalCustomers}
               prefix={<TeamOutlined className="text-blue-500" />}
-              valueStyle={{ color: '#1890ff' }}
+              valueStyle={{ color: "#1890ff" }}
             />
           </Card>
         </Col>
@@ -72,7 +92,7 @@ const CustomerStats: React.FC = () => {
               title="Active Members"
               value={stats.members}
               prefix={<CrownOutlined className="text-green-500" />}
-              valueStyle={{ color: '#52c41a' }}
+              valueStyle={{ color: "#52c41a" }}
               suffix={`/ ${stats.totalCustomers}`}
             />
           </Card>
@@ -84,7 +104,7 @@ const CustomerStats: React.FC = () => {
               title="Non-Members"
               value={stats.nonMembers}
               prefix={<UserOutlined className="text-gray-500" />}
-              valueStyle={{ color: '#8c8c8c' }}
+              valueStyle={{ color: "#8c8c8c" }}
             />
           </Card>
         </Col>
@@ -95,7 +115,7 @@ const CustomerStats: React.FC = () => {
               title="New This Month"
               value={stats.newCustomersThisMonth}
               prefix={<TrophyOutlined className="text-purple-500" />}
-              valueStyle={{ color: '#722ed1' }}
+              valueStyle={{ color: "#722ed1" }}
             />
           </Card>
         </Col>
@@ -106,7 +126,7 @@ const CustomerStats: React.FC = () => {
               title="Total Revenue"
               value={stats.totalPurchaseAmount}
               prefix={<DollarOutlined className="text-green-600" />}
-              valueStyle={{ color: '#389e0d' }}
+              valueStyle={{ color: "#389e0d" }}
               precision={2}
             />
           </Card>
@@ -118,7 +138,7 @@ const CustomerStats: React.FC = () => {
               title="Avg Purchase"
               value={stats.averagePurchaseAmount}
               prefix={<ShoppingOutlined className="text-orange-500" />}
-              valueStyle={{ color: '#fa8c16' }}
+              valueStyle={{ color: "#fa8c16" }}
               precision={2}
             />
           </Card>
@@ -131,17 +151,23 @@ const CustomerStats: React.FC = () => {
           <div className="flex-1">
             <div className="flex justify-between text-sm mb-2">
               <span>Members</span>
-              <span>{((stats.members / stats.totalCustomers) * 100).toFixed(1)}%</span>
+              <span>
+                {((stats.members / stats.totalCustomers) * 100).toFixed(1)}%
+              </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
                 className="bg-green-500 h-2 rounded-full"
-                style={{ width: `${(stats.members / stats.totalCustomers) * 100}%` }}
+                style={{
+                  width: `${(stats.members / stats.totalCustomers) * 100}%`,
+                }}
               ></div>
             </div>
           </div>
           <div className="text-right">
-            <div className="text-lg font-semibold text-green-600">{stats.members}</div>
+            <div className="text-lg font-semibold text-green-600">
+              {stats.members}
+            </div>
             <div className="text-sm text-gray-500">Active Members</div>
           </div>
         </div>

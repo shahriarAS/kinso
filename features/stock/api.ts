@@ -49,10 +49,7 @@ export const stockApi = createApi({
     }),
 
     // Create new stock
-    createStock: builder.mutation<
-      ApiResponse<Stock>,
-      StockInput
-    >({
+    createStock: builder.mutation<ApiResponse<Stock>, StockInput>({
       query: (stock) => ({
         url: "/",
         method: "POST",
@@ -105,7 +102,7 @@ export const stockApi = createApi({
         body: transferData,
       }),
       invalidatesTags: [{ type: "Stock", id: "LIST" }],
-    })
+    }),
   }),
 });
 
@@ -119,4 +116,4 @@ export const {
 } = stockApi;
 
 // Alias for backward compatibility
-export const useAddStockMutation = useCreateStockMutation; 
+export const useAddStockMutation = useCreateStockMutation;

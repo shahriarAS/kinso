@@ -39,7 +39,10 @@ export async function handlePost(request: NextRequest) {
 
     if (!type || !OUTLET_TYPES.includes(type as OutletType)) {
       return NextResponse.json(
-        { success: false, message: "Outlet type must be 'Micro Outlet' or 'Super Shop'" },
+        {
+          success: false,
+          message: "Outlet type must be 'Micro Outlet' or 'Super Shop'",
+        },
         { status: 400 },
       );
     }
@@ -47,7 +50,9 @@ export async function handlePost(request: NextRequest) {
     // Check if outlet already exists with same name
     const existingOutlet = await Outlet.findOne({ name: name.trim() });
     if (existingOutlet) {
-      return createConflictErrorResponse("Outlet with this name already exists");
+      return createConflictErrorResponse(
+        "Outlet with this name already exists",
+      );
     }
 
     // Create outlet
@@ -97,18 +102,12 @@ export async function handleGet(request: NextRequest) {
       query.type = type;
     }
     if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: "i" } },
-      ];
+      query.$or = [{ name: { $regex: search, $options: "i" } }];
     }
 
     // Execute query
     const [outlets, total] = await Promise.all([
-      Outlet.find(query)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
+      Outlet.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
       Outlet.countDocuments(query),
     ]);
 
@@ -192,7 +191,7 @@ export async function handleUpdateById(
     const body = await request.json();
     const { name, type } = body;
     const { id } = await params;
-    
+
     const existingOutlet = await Outlet.findById(id);
     if (!existingOutlet) {
       return NextResponse.json(
@@ -210,7 +209,10 @@ export async function handleUpdateById(
     }
     if (!type || !["Micro Outlet", "Super Shop"].includes(type)) {
       return NextResponse.json(
-        { success: false, message: "Outlet type must be 'Micro Outlet' or 'Super Shop'" },
+        {
+          success: false,
+          message: "Outlet type must be 'Micro Outlet' or 'Super Shop'",
+        },
         { status: 400 },
       );
     }

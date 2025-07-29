@@ -1,4 +1,4 @@
-"use client";;
+"use client";
 import { Form } from "antd";
 import { useEffect, useState, useMemo } from "react";
 import { GenericDrawer, type FormField } from "@/components/common";
@@ -35,7 +35,7 @@ export default function MoveStockDrawer({
   const [maxQuantity, setMaxQuantity] = useState(0);
   const [fromLocationOptions, setFromLocationOptions] = useState<any[]>([]);
   const [toLocationOptions, setToLocationOptions] = useState<any[]>([]);
-  
+
   // Watch form values for location types
   const fromLocationType = Form.useWatch("fromLocationType", form);
   const toLocationType = Form.useWatch("toLocationType", form);
@@ -46,23 +46,32 @@ export default function MoveStockDrawer({
   const { data: warehousesData } = useGetWarehousesQuery({ limit: 1000 });
   const { data: outletsData } = outletsApi.useGetOutletsQuery({ limit: 1000 });
 
-  const productOptions = useMemo(() =>
-    productsData?.data?.map((product: any) => ({
-      label: `${product.name} (${product.barcode})`,
-      value: product._id,
-    })) || [], [productsData]);
+  const productOptions = useMemo(
+    () =>
+      productsData?.data?.map((product: any) => ({
+        label: `${product.name} (${product.barcode})`,
+        value: product._id,
+      })) || [],
+    [productsData],
+  );
 
-  const warehouseOptions = useMemo(() =>
-    warehousesData?.data?.map((warehouse: any) => ({
-      label: warehouse.name,
-      value: warehouse._id,
-    })) || [], [warehousesData]);
+  const warehouseOptions = useMemo(
+    () =>
+      warehousesData?.data?.map((warehouse: any) => ({
+        label: warehouse.name,
+        value: warehouse._id,
+      })) || [],
+    [warehousesData],
+  );
 
-  const outletOptions = useMemo(() =>
-    outletsData?.data?.map((outlet: any) => ({
-      label: `${outlet.name} (${outlet.type})`,
-      value: outlet._id,
-    })) || [], [outletsData]);
+  const outletOptions = useMemo(
+    () =>
+      outletsData?.data?.map((outlet: any) => ({
+        label: `${outlet.name} (${outlet.type})`,
+        value: outlet._id,
+      })) || [],
+    [outletsData],
+  );
 
   const locationTypeOptions = [
     { label: "Warehouse", value: "Warehouse" },
@@ -85,7 +94,9 @@ export default function MoveStockDrawer({
       type: "select",
       placeholder: "Select Location Type",
       options: locationTypeOptions,
-      rules: [{ required: true, message: "Please select source location type" }],
+      rules: [
+        { required: true, message: "Please select source location type" },
+      ],
     },
     {
       name: "fromLocation",
@@ -101,7 +112,9 @@ export default function MoveStockDrawer({
       type: "select",
       placeholder: "Select Location Type",
       options: locationTypeOptions,
-      rules: [{ required: true, message: "Please select destination location type" }],
+      rules: [
+        { required: true, message: "Please select destination location type" },
+      ],
     },
     {
       name: "toLocation",
@@ -109,7 +122,9 @@ export default function MoveStockDrawer({
       type: "select",
       placeholder: "Select Destination Location",
       options: toLocationOptions,
-      rules: [{ required: true, message: "Please select destination location" }],
+      rules: [
+        { required: true, message: "Please select destination location" },
+      ],
     },
     {
       name: "unit",
@@ -118,13 +133,15 @@ export default function MoveStockDrawer({
       placeholder: "Enter quantity to transfer",
       rules: [
         { required: true, message: "Please enter quantity" },
-        { 
+        {
           validator: (_: any, value: any) => {
             if (!value || value < 1) {
               return Promise.reject(new Error("Quantity must be at least 1"));
             }
             if (value > maxQuantity) {
-              return Promise.reject(new Error(`Maximum available quantity is ${maxQuantity}`));
+              return Promise.reject(
+                new Error(`Maximum available quantity is ${maxQuantity}`),
+              );
             }
             return Promise.resolve();
           },
@@ -196,7 +213,7 @@ export default function MoveStockDrawer({
         unit: values.unit,
         reason: values.reason,
       };
-      
+
       await transferStock(transferData).unwrap();
       success("Stock transferred successfully");
       handleClose();
@@ -215,10 +232,16 @@ export default function MoveStockDrawer({
   useEffect(() => {
     if (open && selectedStock) {
       const fromLocType = selectedStock.locationType as "Warehouse" | "Outlet";
-      const locationId = typeof selectedStock.location === 'string' ? selectedStock.location : selectedStock.location._id;
-      
+      const locationId =
+        typeof selectedStock.location === "string"
+          ? selectedStock.location
+          : selectedStock.location._id;
+
       form.setFieldsValue({
-        product: typeof selectedStock.product === 'string' ? selectedStock.product : selectedStock.product._id,
+        product:
+          typeof selectedStock.product === "string"
+            ? selectedStock.product
+            : selectedStock.product._id,
         fromLocationType: fromLocType,
         fromLocation: locationId,
         unit: selectedStock.unit,
@@ -240,4 +263,4 @@ export default function MoveStockDrawer({
       width={600}
     />
   );
-} 
+}

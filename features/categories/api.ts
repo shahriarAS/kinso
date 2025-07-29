@@ -47,10 +47,7 @@ export const categoriesApi = createApi({
     }),
 
     // Create new category
-    createCategory: builder.mutation<
-      ApiResponse<Category>,
-      CategoryInput
-    >({
+    createCategory: builder.mutation<ApiResponse<Category>, CategoryInput>({
       query: (category) => ({
         url: "/",
         method: "POST",

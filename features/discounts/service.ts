@@ -217,7 +217,7 @@ export async function handleUpdateById(
     const body = await request.json();
     const { product, type, amount, startDate, endDate } = body;
     const { id } = await params;
-    
+
     const existingDiscount = await Discount.findById(id);
     if (!existingDiscount) {
       return NextResponse.json(
@@ -247,11 +247,10 @@ export async function handleUpdateById(
     if (startDate) updateData.startDate = new Date(startDate);
     if (endDate) updateData.endDate = new Date(endDate);
 
-    const updatedDiscount = await Discount.findByIdAndUpdate(
-      id,
-      updateData,
-      { new: true, runValidators: true },
-    );
+    const updatedDiscount = await Discount.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!updatedDiscount) {
       return NextResponse.json(
@@ -312,4 +311,4 @@ export async function handleDeleteById(
       { status: 500 },
     );
   }
-} 
+}

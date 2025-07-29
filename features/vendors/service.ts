@@ -95,18 +95,12 @@ export async function handleGet(request: NextRequest) {
 
     const query: any = {};
     if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: "i" } },
-      ];
+      query.$or = [{ name: { $regex: search, $options: "i" } }];
     }
 
     // Execute query
     const [vendors, total] = await Promise.all([
-      Vendor.find(query)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
+      Vendor.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
       Vendor.countDocuments(query),
     ]);
 
@@ -267,7 +261,10 @@ export async function handleDeleteById(
     const productCount = await Product.countDocuments({ vendor: id });
     if (productCount > 0) {
       return NextResponse.json(
-        { success: false, message: "Cannot delete vendor: it is used by products" },
+        {
+          success: false,
+          message: "Cannot delete vendor: it is used by products",
+        },
         { status: 409 },
       );
     }

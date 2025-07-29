@@ -2,10 +2,22 @@
 
 import React, { useState, useCallback, useMemo } from "react";
 import { Button, Modal, Spin, Alert } from "antd";
-import { PlusOutlined, ReloadOutlined, SwapOutlined, BarChartOutlined } from "@ant-design/icons";
+import {
+  PlusOutlined,
+  ReloadOutlined,
+  SwapOutlined,
+  BarChartOutlined,
+} from "@ant-design/icons";
 import { toast } from "react-hot-toast";
-import { useGetStocksQuery, useDeleteStockMutation } from "@/features/stock/api";
-import { AddEditStockDrawer, StockTable, StockFilters } from "@/features/stock/components";
+import {
+  useGetStocksQuery,
+  useDeleteStockMutation,
+} from "@/features/stock/api";
+import {
+  AddEditStockDrawer,
+  StockTable,
+  StockFilters,
+} from "@/features/stock/components";
 import MoveStockDrawer from "@/features/stock/components/MoveStockDrawer";
 import type { Stock } from "@/features/stock/types";
 
@@ -387,23 +399,24 @@ export default function StockPage() {
           onEdit={handleEdit}
           onDelete={handleDelete}
           onMoveStock={handleMoveStock}
-          pagination={stockData?.pagination ? {
-            current: page,
-            pageSize: limit,
-            total: stockData.pagination.total,
-            onChange: (newPage, newPageSize) => {
-              setPage(newPage);
-              if (newPageSize) setLimit(newPageSize);
-            },
-          } : undefined}
+          pagination={
+            stockData?.pagination
+              ? {
+                  current: page,
+                  pageSize: limit,
+                  total: stockData.pagination.total,
+                  onChange: (newPage, newPageSize) => {
+                    setPage(newPage);
+                    if (newPageSize) setLimit(newPageSize);
+                  },
+                }
+              : undefined
+          }
         />
       </div>
 
       {/* Drawers */}
-      <AddEditStockDrawer
-        open={addDrawerOpen}
-        onClose={handleCloseAddDrawer}
-      />
+      <AddEditStockDrawer open={addDrawerOpen} onClose={handleCloseAddDrawer} />
 
       <AddEditStockDrawer
         open={editDrawerOpen}

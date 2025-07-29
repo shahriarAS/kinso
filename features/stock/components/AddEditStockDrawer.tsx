@@ -16,12 +16,19 @@ interface AddEditStockDrawerProps {
   stock?: Stock | null; // Stock to edit, null for adding new stock
 }
 
-const AddEditStockDrawer: React.FC<AddEditStockDrawerProps> = ({ open, onClose, stock }) => {
+const AddEditStockDrawer: React.FC<AddEditStockDrawerProps> = ({
+  open,
+  onClose,
+  stock,
+}) => {
   const [form] = Form.useForm<StockInput>();
   const { success } = useNotification();
-  const [locationType, setLocationType] = useState<"warehouse" | "outlet">("warehouse");
+  const [locationType, setLocationType] = useState<"warehouse" | "outlet">(
+    "warehouse",
+  );
   const [addStock, { isLoading: isAddingStock }] = useAddStockMutation();
-  const [updateStock, { isLoading: isUpdatingStock }] = useUpdateStockMutation();
+  const [updateStock, { isLoading: isUpdatingStock }] =
+    useUpdateStockMutation();
 
   const isEditing = !!stock;
   const isLoading = isAddingStock || isUpdatingStock;
@@ -29,12 +36,19 @@ const AddEditStockDrawer: React.FC<AddEditStockDrawerProps> = ({ open, onClose, 
   // Set location type and form values when stock prop changes
   useEffect(() => {
     if (stock && open) {
-      const stockLocationType = stock.locationType.toLowerCase() === "warehouse" ? "warehouse" : "outlet";
+      const stockLocationType =
+        stock.locationType.toLowerCase() === "warehouse"
+          ? "warehouse"
+          : "outlet";
       setLocationType(stockLocationType);
-      
-      const product = typeof stock.product === 'string' ? stock.product : stock.product._id;
-      const locationId = typeof stock.location === 'string' ? stock.location : stock.location._id;
-      
+
+      const product =
+        typeof stock.product === "string" ? stock.product : stock.product._id;
+      const locationId =
+        typeof stock.location === "string"
+          ? stock.location
+          : stock.location._id;
+
       form.setFieldsValue({
         product: product,
         locationType: stockLocationType,
@@ -43,7 +57,9 @@ const AddEditStockDrawer: React.FC<AddEditStockDrawerProps> = ({ open, onClose, 
         tp: stock.tp,
         unit: stock.unit,
         batchNumber: stock.batchNumber,
-        expireDate: stock.expireDate ? dayjs(stock.expireDate).format("YYYY-MM-DD") : "",
+        expireDate: stock.expireDate
+          ? dayjs(stock.expireDate).format("YYYY-MM-DD")
+          : "",
       });
     } else if (!stock && open) {
       // Reset form for new stock
@@ -56,20 +72,22 @@ const AddEditStockDrawer: React.FC<AddEditStockDrawerProps> = ({ open, onClose, 
   const { data: outletsData } = useGetOutletsQuery({ limit: 1000 });
   const { data: warehousesData } = useGetWarehousesQuery({ limit: 1000 });
 
-  const productOptions = productsData?.data?.map((product) => ({
-    label: `${product.name} (${product.barcode})`,
-    value: product._id,
-  })) || [];
+  const productOptions =
+    productsData?.data?.map((product) => ({
+      label: `${product.name} (${product.barcode})`,
+      value: product._id,
+    })) || [];
 
-  const locationOptions = locationType === "outlet"
-    ? outletsData?.data?.map((outlet) => ({
-        label: `${outlet.name} (${outlet.type})`,
-        value: outlet._id,
-      })) || []
-    : warehousesData?.data?.map((warehouse) => ({
-        label: warehouse.name,
-        value: warehouse._id,
-      })) || [];
+  const locationOptions =
+    locationType === "outlet"
+      ? outletsData?.data?.map((outlet) => ({
+          label: `${outlet.name} (${outlet.type})`,
+          value: outlet._id,
+        })) || []
+      : warehousesData?.data?.map((warehouse) => ({
+          label: warehouse.name,
+          value: warehouse._id,
+        })) || [];
 
   // Define form fields for GenericDrawer
   const fields: FormField[] = [
@@ -116,7 +134,10 @@ const AddEditStockDrawer: React.FC<AddEditStockDrawerProps> = ({ open, onClose, 
       placeholder: "Enter MRP",
       rules: [
         { required: true, message: "Please enter MRP" },
-        { pattern: /^[0-9]+(\.[0-9]+)?$/, message: "Please enter a valid price" },
+        {
+          pattern: /^[0-9]+(\.[0-9]+)?$/,
+          message: "Please enter a valid price",
+        },
       ],
     },
     {
@@ -126,7 +147,10 @@ const AddEditStockDrawer: React.FC<AddEditStockDrawerProps> = ({ open, onClose, 
       placeholder: "Enter TP",
       rules: [
         { required: true, message: "Please enter TP" },
-        { pattern: /^[0-9]+(\.[0-9]+)?$/, message: "Please enter a valid price" },
+        {
+          pattern: /^[0-9]+(\.[0-9]+)?$/,
+          message: "Please enter a valid price",
+        },
       ],
     },
     {
@@ -136,7 +160,10 @@ const AddEditStockDrawer: React.FC<AddEditStockDrawerProps> = ({ open, onClose, 
       placeholder: "Enter number of units",
       rules: [
         { required: true, message: "Please enter units" },
-        { pattern: /^[1-9][0-9]*$/, message: "Units must be a positive number" },
+        {
+          pattern: /^[1-9][0-9]*$/,
+          message: "Units must be a positive number",
+        },
       ],
     },
     {
@@ -160,7 +187,8 @@ const AddEditStockDrawer: React.FC<AddEditStockDrawerProps> = ({ open, onClose, 
       const stockData: StockInput = {
         product: values.product,
         location: values.location,
-        locationType: values.locationType === "warehouse" ? "Warehouse" : "Outlet",
+        locationType:
+          values.locationType === "warehouse" ? "Warehouse" : "Outlet",
         mrp: parseFloat(values.mrp),
         tp: parseFloat(values.tp),
         expireDate: values.expireDate,
@@ -176,7 +204,7 @@ const AddEditStockDrawer: React.FC<AddEditStockDrawerProps> = ({ open, onClose, 
         success("Stock added successfully");
       }
     } catch (error) {
-      console.error('Stock operation failed:', error);
+      console.error("Stock operation failed:", error);
     }
   };
 
@@ -195,4 +223,4 @@ const AddEditStockDrawer: React.FC<AddEditStockDrawerProps> = ({ open, onClose, 
   );
 };
 
-export default AddEditStockDrawer; 
+export default AddEditStockDrawer;

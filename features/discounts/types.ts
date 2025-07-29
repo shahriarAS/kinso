@@ -54,4 +54,4 @@ export interface ActiveDiscount {
   type: "General" | "Membership";
   amount: number;
   isActive: boolean;
-} 
+}

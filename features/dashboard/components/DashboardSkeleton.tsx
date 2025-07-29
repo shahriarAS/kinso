@@ -63,9 +63,7 @@ const DashboardSkeleton: React.FC = () => {
             title={
               <Space>
                 <ClockCircleOutlined className="text-primary" />
-                <span className="text-primary font-semibold">
-                  Recent Sales
-                </span>
+                <span className="text-primary font-semibold">Recent Sales</span>
               </Space>
             }
             className="bg-white border border-gray-200 rounded-lg"

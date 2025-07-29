@@ -47,10 +47,7 @@ export const outletsApi = createApi({
     }),
 
     // Create new outlet
-    createOutlet: builder.mutation<
-      ApiResponse<Outlet>,
-      OutletInput
-    >({
+    createOutlet: builder.mutation<ApiResponse<Outlet>, OutletInput>({
       query: (outlet) => ({
         url: "/",
         method: "POST",
@@ -92,4 +89,4 @@ export const {
   useCreateOutletMutation,
   useUpdateOutletMutation,
   useDeleteOutletMutation,
-} = outletsApi; 
+} = outletsApi;

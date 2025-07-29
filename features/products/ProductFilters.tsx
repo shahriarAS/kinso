@@ -1,6 +1,10 @@
 "use client";
 import { Input, Select, Button } from "antd";
-import { SearchOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+  SearchOutlined,
+  FilterOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import { useGetAllCategoriesQuery } from "@/features/categories/api";
 import { useGetAllBrandsQuery } from "../brands";
 import { useGetAllVendorsQuery } from "../vendors";
@@ -99,7 +103,9 @@ export default function ProductFilters({
             allowClear
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
-            onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
+            onPressEnter={(e) =>
+              handleSearch((e.target as HTMLInputElement).value)
+            }
           />
         </div>
 

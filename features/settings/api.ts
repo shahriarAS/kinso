@@ -14,7 +14,10 @@ export const settingsApi = createApi({
       }),
       providesTags: ["Settings"],
     }),
-    updateSettings: builder.mutation<{ success: boolean; message: string; data: Settings }, Partial<Settings>>({
+    updateSettings: builder.mutation<
+      { success: boolean; message: string; data: Settings },
+      Partial<Settings>
+    >({
       query: (body) => ({
         url: "/",
         method: "POST",

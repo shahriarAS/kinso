@@ -47,7 +47,12 @@ export async function handleGetStats(request: NextRequest) {
     let lowStockProducts = 0;
     for (const product of products) {
       if (Array.isArray(product.stock)) {
-        if (product.stock.some((s: any) => typeof s.unit === 'number' && s.unit > 0 && s.unit < threshold)) {
+        if (
+          product.stock.some(
+            (s: any) =>
+              typeof s.unit === "number" && s.unit > 0 && s.unit < threshold,
+          )
+        ) {
           lowStockProducts++;
         }
       }
@@ -57,7 +62,9 @@ export async function handleGetStats(request: NextRequest) {
     const recentSales = await Sale.find()
       .sort({ createdAt: -1 })
       .limit(5)
-      .select("_id saleNumber customerName totalAmount paymentMethods createdAt")
+      .select(
+        "_id saleNumber customerName totalAmount paymentMethods createdAt",
+      )
       .lean();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const recentSalesFormatted = recentSales.map((s: any) => ({

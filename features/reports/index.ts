@@ -1,11 +1,11 @@
 export { reportsApi } from "./api";
 
-export type { 
-  SalesReportResponse, 
-  InventoryReportResponse, 
+export type {
+  SalesReportResponse,
+  InventoryReportResponse,
   CustomerReportResponse,
   ReportFilters,
   ReportRequest,
   StockMovementReport,
-  ProfitLossReport
-} from "./types"; 
+  ProfitLossReport,
+} from "./types";

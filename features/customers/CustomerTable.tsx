@@ -7,7 +7,10 @@ import {
   type TableColumn,
   type TableAction,
 } from "@/components/common";
-import { useGetCustomersQuery, useDeleteCustomerMutation } from "@/features/customers";
+import {
+  useGetCustomersQuery,
+  useDeleteCustomerMutation,
+} from "@/features/customers";
 import type { Customer } from "@/features/customers/types";
 import AddEditCustomerDrawer from "./AddEditCustomerDrawer";
 import ViewCustomerDrawer from "./ViewCustomerDrawer";
@@ -42,7 +45,8 @@ export default function CustomerTable({
     membershipStatus: membershipFilter,
   });
 
-  const [deleteCustomer, { isLoading: isDeleting }] = useDeleteCustomerMutation();
+  const [deleteCustomer, { isLoading: isDeleting }] =
+    useDeleteCustomerMutation();
 
   const handleEdit = (customer: Customer) => {
     setEditingCustomer(customer);
@@ -115,9 +119,7 @@ export default function CustomerTable({
       dataIndex: "totalSpent",
       key: "totalSpent",
       render: (amount: number) => (
-        <span className="font-medium text-green-600">
-          ${amount.toFixed(2)}
-        </span>
+        <span className="font-medium text-green-600">${amount.toFixed(2)}</span>
       ),
     },
     {
@@ -125,9 +127,7 @@ export default function CustomerTable({
       dataIndex: "totalPurchaseLastMonth",
       key: "totalPurchaseLastMonth",
       render: (amount: number) => (
-        <span className="text-blue-600">
-          ${amount.toFixed(2)}
-        </span>
+        <span className="text-blue-600">${amount.toFixed(2)}</span>
       ),
     },
     {

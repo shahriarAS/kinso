@@ -1,4 +1,8 @@
-import { handleGetById, handleUpdateById, handleDeleteById } from "@/features/outlets/service";
+import {
+  handleGetById,
+  handleUpdateById,
+  handleDeleteById,
+} from "@/features/outlets/service";
 
 export const GET = handleGetById;
 

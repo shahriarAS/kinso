@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { Button, Input, Select } from "antd";
-import { PlusOutlined, SearchOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+  PlusOutlined,
+  SearchOutlined,
+  FilterOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import { useGetCategoriesQuery, useDeleteCategoryMutation } from "./api";
 import { Category } from "./types";
 import { useNotification } from "@/hooks/useNotification";
@@ -21,10 +26,14 @@ const CategoryTable: React.FC = () => {
   const debouncedSearchText = useDebounce(searchText, 400);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [selectedApplyVAT, setSelectedApplyVAT] = useState<boolean | undefined>(undefined);
+  const [selectedApplyVAT, setSelectedApplyVAT] = useState<boolean | undefined>(
+    undefined,
+  );
   const { success, error: notifyError } = useNotification();
   const { open, close, isOpen } = useModal("category-drawer");
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+    null,
+  );
 
   const {
     data: categoriesResponse,
@@ -38,7 +47,8 @@ const CategoryTable: React.FC = () => {
     applyVAT: selectedApplyVAT,
   });
 
-  const [deleteCategory, { isLoading: isDeleting }] = useDeleteCategoryMutation();
+  const [deleteCategory, { isLoading: isDeleting }] =
+    useDeleteCategoryMutation();
 
   const handleSearch = (value: string) => {
     setSearchText(value);
@@ -93,7 +103,7 @@ const CategoryTable: React.FC = () => {
       title: "Apply VAT",
       dataIndex: "applyVAT",
       key: "applyVAT",
-      render: (applyVAT: boolean) => applyVAT ? "Yes" : "No",
+      render: (applyVAT: boolean) => (applyVAT ? "Yes" : "No"),
       // sorter: true,
     },
     {
@@ -133,11 +143,7 @@ const CategoryTable: React.FC = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold text-gray-800">Categories</h2>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={handleAdd}
-        >
+        <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
           Add Category
         </Button>
       </div>
@@ -168,11 +174,13 @@ const CategoryTable: React.FC = () => {
               size="large"
               allowClear
               value={searchText}
-              onChange={e => handleSearch(e.target.value)}
-              onPressEnter={e => handleSearch((e.target as HTMLInputElement).value)}
+              onChange={(e) => handleSearch(e.target.value)}
+              onPressEnter={(e) =>
+                handleSearch((e.target as HTMLInputElement).value)
+              }
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Apply VAT
@@ -206,7 +214,8 @@ const CategoryTable: React.FC = () => {
           total: categoriesResponse?.pagination?.total || 0,
           showSizeChanger: true,
           showQuickJumper: true,
-          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`,
           onChange: (page, size) => {
             setCurrentPage(page);
             setPageSize(size || 10);
@@ -224,4 +233,4 @@ const CategoryTable: React.FC = () => {
   );
 };
 
-export default CategoryTable; 
+export default CategoryTable;

@@ -112,12 +112,16 @@ export async function handleGetSalesReport(request: NextRequest) {
         },
       },
       { $unwind: "$productDetails" },
-      ...(category ? [{ $match: { "productDetails.category": category } }] : []),
+      ...(category
+        ? [{ $match: { "productDetails.category": category } }]
+        : []),
       {
         $group: {
           _id: "$productDetails.category",
           salesCount: { $sum: 1 },
-          revenue: { $sum: { $multiply: ["$items.quantity", "$items.unitPrice"] } },
+          revenue: {
+            $sum: { $multiply: ["$items.quantity", "$items.unitPrice"] },
+          },
         },
       },
       {
@@ -304,4 +308,4 @@ export async function handleGetCustomerReport(request: NextRequest) {
       { status: 500 },
     );
   }
-} 
+}

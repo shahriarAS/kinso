@@ -54,12 +54,12 @@ async function dbConnect() {
 
   try {
     cached.conn = await cached.promise;
-    
+
     // Ensure connection is ready
     if (cached.conn.connection.readyState !== 1) {
       throw new Error("Mongoose connection not ready");
     }
-    
+
     console.log("Database connection established");
   } catch (e) {
     cached.promise = null;

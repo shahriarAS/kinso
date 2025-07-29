@@ -46,7 +46,14 @@ export async function handlePost(request: NextRequest) {
     }
     await dbConnect();
     const body = await request.json();
-    const { invoiceFooter, invoiceFooterTitle, companyName, companyEmail, companyPhone, companyAddress } = body;
+    const {
+      invoiceFooter,
+      invoiceFooterTitle,
+      companyName,
+      companyEmail,
+      companyPhone,
+      companyAddress,
+    } = body;
     const settings = await Settings.getSingleton();
     if (typeof invoiceFooter === "string") {
       settings.invoiceFooter = invoiceFooter;

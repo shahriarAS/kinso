@@ -160,7 +160,9 @@ export default function GenericTable<T = any>({
       fixed: "right" as const,
       width: Array.isArray(actions) ? actions.length * 50 + 20 : 250,
       render: (_: unknown, record: T) => {
-        const recordActions = Array.isArray(actions) ? actions : actions(record);
+        const recordActions = Array.isArray(actions)
+          ? actions
+          : actions(record);
         return (
           <Space size="small">
             {recordActions.map((action) => (

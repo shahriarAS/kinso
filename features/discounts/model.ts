@@ -22,4 +22,5 @@ const DiscountSchema: Schema = new Schema(
 );
 DiscountSchema.index({ product: 1, type: 1 });
 
-export default mongoose.models.Discount || mongoose.model<IDiscount>("Discount", DiscountSchema);
+export default mongoose.models.Discount ||
+  mongoose.model<IDiscount>("Discount", DiscountSchema);

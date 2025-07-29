@@ -48,10 +48,7 @@ export const customersApi = createApi({
     }),
 
     // Create new customer
-    createCustomer: builder.mutation<
-      ApiResponse<Customer>,
-      CustomerInput
-    >({
+    createCustomer: builder.mutation<ApiResponse<Customer>, CustomerInput>({
       query: (customer) => ({
         url: "/",
         method: "POST",

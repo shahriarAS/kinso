@@ -15,9 +15,10 @@ function Login() {
 
   // Helper function to extract error message
   const getErrorMessage = (error: unknown): string => {
-    if (error && typeof error === 'object' && 'data' in error) {
+    if (error && typeof error === "object" && "data" in error) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const errorData = (error as any).data;
-      if (errorData && typeof errorData.message === 'string') {
+      if (errorData && typeof errorData.message === "string") {
         return errorData.message;
       }
     }

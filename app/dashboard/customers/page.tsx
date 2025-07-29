@@ -9,7 +9,9 @@ import { Icon } from "@iconify/react";
 export default function CustomersPage() {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [membershipFilter, setMembershipFilter] = useState<boolean | undefined>(undefined);
+  const [membershipFilter, setMembershipFilter] = useState<boolean | undefined>(
+    undefined,
+  );
   const [statusFilter, setStatusFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
@@ -25,7 +27,7 @@ export default function CustomersPage() {
         </Button>
       </div>
       <AddEditCustomerDrawer open={open} onClose={() => setOpen(false)} />
-      
+
       {/* Filters */}
       <CustomerFilters
         searchTerm={searchTerm}
@@ -36,7 +38,7 @@ export default function CustomersPage() {
         onStatusChange={setStatusFilter}
         onPageChange={setCurrentPage}
       />
-      
+
       {/* Table */}
       <CustomerTable
         searchTerm={searchTerm}

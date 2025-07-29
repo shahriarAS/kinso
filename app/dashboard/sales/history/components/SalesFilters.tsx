@@ -21,8 +21,12 @@ interface SalesFiltersProps {
   onFilterChange: (key: keyof SalesHistoryFilters, value: any) => void;
   onDateRangeChange: (dates: any) => void;
   outletsData?: { data?: Array<{ _id: string; name: string }> };
-  customersData?: { data?: Array<{ _id: string; name: string; email?: string }> };
-  productsData?: { data?: Array<{ _id: string; name: string; barcode: string }> };
+  customersData?: {
+    data?: Array<{ _id: string; name: string; email?: string }>;
+  };
+  productsData?: {
+    data?: Array<{ _id: string; name: string; barcode: string }>;
+  };
 }
 
 export default function SalesFilters({
@@ -53,20 +57,22 @@ export default function SalesFilters({
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
-              onFilterChange('search', e.target.value);
+              onFilterChange("search", e.target.value);
             }}
             allowClear
           />
         </div>
-        
+
         <div>
-          <label className="block text-sm font-medium mb-1">Payment Method</label>
+          <label className="block text-sm font-medium mb-1">
+            Payment Method
+          </label>
           <Select
             placeholder="Select Payment Method"
             value={paymentMethodFilter}
             onChange={(value) => {
               setPaymentMethodFilter(value);
-              onFilterChange('paymentMethod', value);
+              onFilterChange("paymentMethod", value);
             }}
             className="w-full"
             allowClear
@@ -86,7 +92,7 @@ export default function SalesFilters({
             value={outletFilter}
             onChange={(value) => {
               setOutletFilter(value);
-              onFilterChange('outlet', value);
+              onFilterChange("outlet", value);
             }}
             className="w-full"
             allowClear
@@ -106,13 +112,16 @@ export default function SalesFilters({
             value={customerFilter}
             onChange={(value) => {
               setCustomerFilter(value);
-              onFilterChange('customer', value);
+              onFilterChange("customer", value);
             }}
             className="w-full"
             allowClear
             showSearch
             filterOption={(input, option) =>
-              option?.label?.toString().toLowerCase().includes(input.toLowerCase()) || false
+              option?.label
+                ?.toString()
+                .toLowerCase()
+                .includes(input.toLowerCase()) || false
             }
           >
             {customersData?.data?.map((customer) => (
@@ -130,13 +139,16 @@ export default function SalesFilters({
             value={productFilter}
             onChange={(value) => {
               setProductFilter(value);
-              onFilterChange('product', value);
+              onFilterChange("product", value);
             }}
             className="w-full"
             allowClear
             showSearch
             filterOption={(input, option) =>
-              option?.label?.toString().toLowerCase().includes(input.toLowerCase()) || false
+              option?.label
+                ?.toString()
+                .toLowerCase()
+                .includes(input.toLowerCase()) || false
             }
           >
             {productsData?.data?.map((product) => (

@@ -32,10 +32,18 @@ export default function SalesHistoryPage() {
   const [viewDrawerOpen, setViewDrawerOpen] = useState(false);
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
 
-  const { data: salesData, isLoading, refetch } = salesApi.useGetSalesHistoryQuery(filters);
+  const {
+    data: salesData,
+    isLoading,
+    refetch,
+  } = salesApi.useGetSalesHistoryQuery(filters);
   const { data: outletsData } = outletsApi.useGetOutletsQuery({ limit: 100 });
-  const { data: customersData } = customersApi.useGetCustomersQuery({ limit: 100 });
-  const { data: productsData } = productsApi.useGetProductsQuery({ limit: 100 });
+  const { data: customersData } = customersApi.useGetCustomersQuery({
+    limit: 100,
+  });
+  const { data: productsData } = productsApi.useGetProductsQuery({
+    limit: 100,
+  });
   const { data: settingsData } = useGetSettingsQuery();
   const { data: userData } = useFetchAuthUserQuery();
 
@@ -74,11 +82,11 @@ export default function SalesHistoryPage() {
         console.error("Failed to download PDF", err);
       }
     },
-    [settingsData, userData]
+    [settingsData, userData],
   );
 
   const handleFilterChange = (key: keyof SalesHistoryFilters, value: any) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       [key]: value,
       page: 1, // Reset to first page when filters change
@@ -87,14 +95,14 @@ export default function SalesHistoryPage() {
 
   const handleDateRangeChange = (dates: any) => {
     if (dates && dates.length === 2) {
-      setFilters(prev => ({
+      setFilters((prev) => ({
         ...prev,
-        startDate: dates[0].format('YYYY-MM-DD'),
-        endDate: dates[1].format('YYYY-MM-DD'),
+        startDate: dates[0].format("YYYY-MM-DD"),
+        endDate: dates[1].format("YYYY-MM-DD"),
         page: 1,
       }));
     } else {
-      setFilters(prev => ({
+      setFilters((prev) => ({
         ...prev,
         startDate: undefined,
         endDate: undefined,
@@ -105,7 +113,7 @@ export default function SalesHistoryPage() {
 
   const handlePaginationChange = (page: number, pageSize: number) => {
     setCurrentPage(page);
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       page,
       limit: pageSize,
@@ -174,4 +182,4 @@ export default function SalesHistoryPage() {
       />
     </div>
   );
-} 
+}

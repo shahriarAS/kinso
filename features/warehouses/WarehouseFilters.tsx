@@ -1,7 +1,11 @@
 "use client";
 import React, { useCallback } from "react";
 import { Input, Button } from "antd";
-import { SearchOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+  SearchOutlined,
+  FilterOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 
 interface WarehouseFilters {
   search?: string;
@@ -63,19 +67,17 @@ export default function WarehouseFilters({
             allowClear
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
-            onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
+            onPressEnter={(e) =>
+              handleSearch((e.target as HTMLInputElement).value)
+            }
           />
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Location
           </label>
-          <Input
-            placeholder="Location"
-            size="large"
-            allowClear
-          />
+          <Input placeholder="Location" size="large" allowClear />
         </div>
       </div>
     </div>

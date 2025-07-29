@@ -43,15 +43,15 @@ export async function handleGet(request: NextRequest) {
 
     // Build query
     const query: any = {};
-    
+
     if (location) {
       query.location = location;
     }
-    
+
     if (locationType) {
       query.locationType = locationType;
     }
-    
+
     if (product) {
       query.product = product;
     }
@@ -71,14 +71,18 @@ export async function handleGet(request: NextRequest) {
     const stocks = await Promise.all(
       stocksRaw.map(async (stock: any) => {
         if (stock.locationType === "Warehouse") {
-          const warehouse = await Warehouse.findById(stock.location).select("name").lean();
+          const warehouse = await Warehouse.findById(stock.location)
+            .select("name")
+            .lean();
           stock.location = warehouse;
         } else if (stock.locationType === "Outlet") {
-          const outlet = await Outlet.findById(stock.location).select("name type").lean();
+          const outlet = await Outlet.findById(stock.location)
+            .select("name type")
+            .lean();
           stock.location = outlet;
         }
         return stock;
-      })
+      }),
     );
 
     return createPaginatedResponse(stocks, {
@@ -113,7 +117,16 @@ export async function handlePost(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { product, location, locationType, mrp, tp, expireDate, unit, batchNumber } = body;
+    const {
+      product,
+      location,
+      locationType,
+      mrp,
+      tp,
+      expireDate,
+      unit,
+      batchNumber,
+    } = body;
 
     // Validation
     if (!product) {
@@ -130,9 +143,15 @@ export async function handlePost(request: NextRequest) {
       );
     }
 
-    if (!locationType || !LOCATION_TYPES.includes(locationType as LocationType)) {
+    if (
+      !locationType ||
+      !LOCATION_TYPES.includes(locationType as LocationType)
+    ) {
       return NextResponse.json(
-        { success: false, message: "Location type must be either 'Warehouse' or 'Outlet'" },
+        {
+          success: false,
+          message: "Location type must be either 'Warehouse' or 'Outlet'",
+        },
         { status: 400 },
       );
     }
@@ -194,7 +213,10 @@ export async function handlePost(request: NextRequest) {
 }
 
 // GET /api/stocks/:id - Get specific stock
-export async function handleGetById(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function handleGetById(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const authResult = await authorizeRequest(
       request as NextRequest & AuthenticatedRequest,
@@ -225,10 +247,14 @@ export async function handleGetById(request: NextRequest, { params }: { params: 
     // Manually populate location based on locationType
     let stock = stockRaw as any;
     if (stock.locationType === "Warehouse") {
-      const warehouse = await Warehouse.findById(stock.location).select("name").lean();
+      const warehouse = await Warehouse.findById(stock.location)
+        .select("name")
+        .lean();
       stock.location = warehouse;
     } else if (stock.locationType === "Outlet") {
-      const outlet = await Outlet.findById(stock.location).select("name type").lean();
+      const outlet = await Outlet.findById(stock.location)
+        .select("name type")
+        .lean();
       stock.location = outlet;
     }
 
@@ -240,7 +266,10 @@ export async function handleGetById(request: NextRequest, { params }: { params: 
 }
 
 // PUT /api/stocks/:id - Update stock
-export async function handlePut(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function handlePut(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const authResult = await authorizeRequest(
       request as NextRequest & AuthenticatedRequest,
@@ -260,7 +289,16 @@ export async function handlePut(request: NextRequest, { params }: { params: Prom
 
     const { id } = await params;
     const body = await request.json();
-    const { product, location, locationType, mrp, tp, expireDate, unit, batchNumber } = body;
+    const {
+      product,
+      location,
+      locationType,
+      mrp,
+      tp,
+      expireDate,
+      unit,
+      batchNumber,
+    } = body;
 
     // Find existing stock
     const existingStock = await Stock.findById(id);
@@ -286,9 +324,15 @@ export async function handlePut(request: NextRequest, { params }: { params: Prom
       );
     }
 
-    if (!locationType || !LOCATION_TYPES.includes(locationType as LocationType)) {
+    if (
+      !locationType ||
+      !LOCATION_TYPES.includes(locationType as LocationType)
+    ) {
       return NextResponse.json(
-        { success: false, message: "Location type must be either 'Warehouse' or 'Outlet'" },
+        {
+          success: false,
+          message: "Location type must be either 'Warehouse' or 'Outlet'",
+        },
         { status: 400 },
       );
     }
@@ -341,7 +385,7 @@ export async function handlePut(request: NextRequest, { params }: { params: Prom
         unit,
         batchNumber,
       },
-      { new: true }
+      { new: true },
     ).lean();
 
     return createSuccessResponse(updatedStock);
@@ -352,7 +396,10 @@ export async function handlePut(request: NextRequest, { params }: { params: Prom
 }
 
 // DELETE /api/stocks/:id - Delete stock
-export async function handleDelete(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function handleDelete(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const authResult = await authorizeRequest(
       request as NextRequest & AuthenticatedRequest,
@@ -405,14 +452,14 @@ export async function handleTransferStock(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { 
-      product, 
-      fromLocation, 
-      toLocation, 
-      fromLocationType, 
-      toLocationType, 
+    const {
+      product,
+      fromLocation,
+      toLocation,
+      fromLocationType,
+      toLocationType,
       unit,
-      reason = "Stock Transfer"
+      reason = "Stock Transfer",
     } = body;
 
     // Validation
@@ -425,7 +472,10 @@ export async function handleTransferStock(request: NextRequest) {
 
     if (!fromLocation || !toLocation) {
       return NextResponse.json(
-        { success: false, message: "Source and destination locations are required" },
+        {
+          success: false,
+          message: "Source and destination locations are required",
+        },
         { status: 400 },
       );
     }
@@ -449,10 +499,10 @@ export async function handleTransferStock(request: NextRequest) {
       product,
       location: fromLocation,
       locationType: fromLocationType,
-      unit: { $gt: 0 }
+      unit: { $gt: 0 },
     })
-    .sort({ createdAt: 1 }) // FIFO: oldest first
-    .lean();
+      .sort({ createdAt: 1 }) // FIFO: oldest first
+      .lean();
 
     if (!availableStock.length) {
       return NextResponse.json(
@@ -462,11 +512,17 @@ export async function handleTransferStock(request: NextRequest) {
     }
 
     // Calculate total available quantity
-    const totalAvailable = availableStock.reduce((sum, stock) => sum + stock.unit, 0);
-    
+    const totalAvailable = availableStock.reduce(
+      (sum, stock) => sum + stock.unit,
+      0,
+    );
+
     if (totalAvailable < unit) {
       return NextResponse.json(
-        { success: false, message: `Insufficient stock. Available: ${totalAvailable}, Requested: ${unit}` },
+        {
+          success: false,
+          message: `Insufficient stock. Available: ${totalAvailable}, Requested: ${unit}`,
+        },
         { status: 400 },
       );
     }
@@ -479,10 +535,10 @@ export async function handleTransferStock(request: NextRequest) {
       if (remainingQuantity <= 0) break;
 
       const transferAmount = Math.min(stock.unit, remainingQuantity);
-      
+
       // Reduce stock from source
       await Stock.findByIdAndUpdate(stock._id, {
-        $inc: { unit: -transferAmount }
+        $inc: { unit: -transferAmount },
       });
 
       // Add stock to destination (create new entry or update existing)
@@ -490,13 +546,13 @@ export async function handleTransferStock(request: NextRequest) {
         product,
         location: toLocation,
         locationType: toLocationType,
-        batchNumber: stock.batchNumber
+        batchNumber: stock.batchNumber,
       });
 
       if (existingDestinationStock) {
         // Update existing stock entry
         await Stock.findByIdAndUpdate(existingDestinationStock._id, {
-          $inc: { unit: transferAmount }
+          $inc: { unit: transferAmount },
         });
       } else {
         // Create new stock entry at destination
@@ -508,7 +564,7 @@ export async function handleTransferStock(request: NextRequest) {
           tp: stock.tp,
           expireDate: stock.expireDate,
           unit: transferAmount,
-          batchNumber: stock.batchNumber
+          batchNumber: stock.batchNumber,
         });
       }
 
@@ -517,17 +573,19 @@ export async function handleTransferStock(request: NextRequest) {
         batchNumber: stock.batchNumber,
         transferredQuantity: transferAmount,
         fromLocation: fromLocation,
-        toLocation: toLocation
+        toLocation: toLocation,
       });
 
       remainingQuantity -= transferAmount;
     }
 
-    return createSuccessResponse({
-      totalTransferred: unit,
-      transfers: transferResults
-    }, `Successfully transferred ${unit} units`);
-
+    return createSuccessResponse(
+      {
+        totalTransferred: unit,
+        transfers: transferResults,
+      },
+      `Successfully transferred ${unit} units`,
+    );
   } catch (error) {
     console.error("Error transferring stock:", error);
     return createErrorResponse("Failed to transfer stock");

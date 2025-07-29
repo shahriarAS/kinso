@@ -34,7 +34,8 @@ export async function handlePost(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { outlet, customer, items, paymentMethods, discountAmount, notes } = body;
+    const { outlet, customer, items, paymentMethods, discountAmount, notes } =
+      body;
 
     // Basic validation
     if (!outlet) {
@@ -46,23 +47,39 @@ export async function handlePost(request: NextRequest) {
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
-        { success: false, message: "Items array is required and cannot be empty" },
+        {
+          success: false,
+          message: "Items array is required and cannot be empty",
+        },
         { status: 400 },
       );
     }
 
-    if (!paymentMethods || !Array.isArray(paymentMethods) || paymentMethods.length === 0) {
+    if (
+      !paymentMethods ||
+      !Array.isArray(paymentMethods) ||
+      paymentMethods.length === 0
+    ) {
       return NextResponse.json(
-        { success: false, message: "Payment methods array is required and cannot be empty" },
+        {
+          success: false,
+          message: "Payment methods array is required and cannot be empty",
+        },
         { status: 400 },
       );
     }
 
     // Validate payment methods
     for (const payment of paymentMethods) {
-      if (!payment.method || !PAYMENT_METHODS.includes(payment.method as PaymentMethod)) {
+      if (
+        !payment.method ||
+        !PAYMENT_METHODS.includes(payment.method as PaymentMethod)
+      ) {
         return NextResponse.json(
-          { success: false, message: "Valid payment method is required for each payment" },
+          {
+            success: false,
+            message: "Valid payment method is required for each payment",
+          },
           { status: 400 },
         );
       }
@@ -78,7 +95,10 @@ export async function handlePost(request: NextRequest) {
     for (const item of items) {
       if (!item.stock || !item.quantity || !item.unitPrice) {
         return NextResponse.json(
-          { success: false, message: "Each item must have stock, quantity, and unitPrice" },
+          {
+            success: false,
+            message: "Each item must have stock, quantity, and unitPrice",
+          },
           { status: 400 },
         );
       }
@@ -99,38 +119,54 @@ export async function handlePost(request: NextRequest) {
       const stockRecord = await Stock.findById(item.stock);
       if (!stockRecord) {
         return NextResponse.json(
-          { success: false, message: `Stock record not found for item ${item.stock}` },
+          {
+            success: false,
+            message: `Stock record not found for item ${item.stock}`,
+          },
           { status: 400 },
         );
       }
-      
+
       if (stockRecord.unit < item.quantity) {
         return NextResponse.json(
-          { success: false, message: `Insufficient stock. Available: ${stockRecord.unit}, Requested: ${item.quantity}` },
+          {
+            success: false,
+            message: `Insufficient stock. Available: ${stockRecord.unit}, Requested: ${item.quantity}`,
+          },
           { status: 400 },
         );
       }
     }
 
     // Calculate total amount
-    const totalAmount = items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0) - (discountAmount || 0);
+    const totalAmount =
+      items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0) -
+      (discountAmount || 0);
 
     // Generate human-readable sale ID
     const now = new Date();
     const year = now.getFullYear().toString().slice(-2); // Last 2 digits of year
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hour = String(now.getHours()).padStart(2, '0');
-    const minute = String(now.getMinutes()).padStart(2, '0');
-    
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const hour = String(now.getHours()).padStart(2, "0");
+    const minute = String(now.getMinutes()).padStart(2, "0");
+
     // Get count of sales today to ensure uniqueness
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    const startOfDay = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    );
+    const endOfDay = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 1,
+    );
     const todayCount = await Sale.countDocuments({
-      createdAt: { $gte: startOfDay, $lt: endOfDay }
+      createdAt: { $gte: startOfDay, $lt: endOfDay },
     });
-    
-    const sequenceNumber = String(todayCount + 1).padStart(3, '0');
+
+    const sequenceNumber = String(todayCount + 1).padStart(3, "0");
     const saleId = `S-${year}${month}${day}-${sequenceNumber}`;
 
     // Get user from auth
@@ -153,7 +189,7 @@ export async function handlePost(request: NextRequest) {
     // Update stock levels for each item
     for (const item of items) {
       await Stock.findByIdAndUpdate(item.stock, {
-        $inc: { unit: -item.quantity }
+        $inc: { unit: -item.quantity },
       });
     }
 
@@ -220,7 +256,9 @@ export async function handleGet(request: NextRequest) {
       query.customer = customer;
     }
     if (product) {
-      query["items.stock"] = { $in: await Stock.find({ product }).select("_id") };
+      query["items.stock"] = {
+        $in: await Stock.find({ product }).select("_id"),
+      };
     }
     if (paymentMethod) {
       query["paymentMethods.method"] = paymentMethod;
@@ -258,14 +296,14 @@ export async function handleGet(request: NextRequest) {
     const [sales, total] = await Promise.all([
       Sale.find(query)
         .populate("outlet", "name")
-        .populate("customer", "name")
+        .populate("customer", "name email phone")
         .populate("createdBy", "name")
         .populate({
           path: "items.stock",
           populate: {
             path: "product",
-            select: "name barcode"
-          }
+            select: "name barcode",
+          },
         })
         .sort(sort)
         .skip(skip)
@@ -308,14 +346,14 @@ export async function handleGetById(
     const { id } = await params;
     const sale = await Sale.findOne({ saleId: id })
       .populate("outlet", "name")
-      .populate("customer", "name")
+      .populate("customer", "name email phone")
       .populate("createdBy", "name")
       .populate({
         path: "items.stock",
         populate: {
           path: "product",
-          select: "name barcode"
-        }
+          select: "name barcode",
+        },
       })
       .lean();
     if (!sale) {
@@ -348,9 +386,17 @@ export async function handlePut(
     }
     await dbConnect();
     const body = await request.json();
-    const { outlet, customer, items, totalAmount, paymentMethods, discountAmount, notes } = body;
+    const {
+      outlet,
+      customer,
+      items,
+      totalAmount,
+      paymentMethods,
+      discountAmount,
+      notes,
+    } = body;
     const { id } = await params;
-    
+
     const existingSale = await Sale.findOne({ saleId: id });
     if (!existingSale) {
       return NextResponse.json(
@@ -369,30 +415,49 @@ export async function handlePut(
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
-        { success: false, message: "Items array is required and cannot be empty" },
+        {
+          success: false,
+          message: "Items array is required and cannot be empty",
+        },
         { status: 400 },
       );
     }
 
     if (!totalAmount || totalAmount <= 0) {
       return NextResponse.json(
-        { success: false, message: "Total amount is required and must be greater than 0" },
+        {
+          success: false,
+          message: "Total amount is required and must be greater than 0",
+        },
         { status: 400 },
       );
     }
 
-    if (!paymentMethods || !Array.isArray(paymentMethods) || paymentMethods.length === 0) {
+    if (
+      !paymentMethods ||
+      !Array.isArray(paymentMethods) ||
+      paymentMethods.length === 0
+    ) {
       return NextResponse.json(
-        { success: false, message: "Payment methods array is required and cannot be empty" },
+        {
+          success: false,
+          message: "Payment methods array is required and cannot be empty",
+        },
         { status: 400 },
       );
     }
 
     // Validate payment methods
     for (const payment of paymentMethods) {
-      if (!payment.method || !PAYMENT_METHODS.includes(payment.method as PaymentMethod)) {
+      if (
+        !payment.method ||
+        !PAYMENT_METHODS.includes(payment.method as PaymentMethod)
+      ) {
         return NextResponse.json(
-          { success: false, message: "Valid payment method is required for each payment" },
+          {
+            success: false,
+            message: "Valid payment method is required for each payment",
+          },
           { status: 400 },
         );
       }
@@ -408,7 +473,10 @@ export async function handlePut(
     for (const item of items) {
       if (!item.stock || !item.quantity || !item.unitPrice) {
         return NextResponse.json(
-          { success: false, message: "Each item must have stock, quantity, and unitPrice" },
+          {
+            success: false,
+            message: "Each item must have stock, quantity, and unitPrice",
+          },
           { status: 400 },
         );
       }
@@ -429,14 +497,20 @@ export async function handlePut(
       const stockRecord = await Stock.findById(item.stock);
       if (!stockRecord) {
         return NextResponse.json(
-          { success: false, message: `Stock record not found for item ${item.stock}` },
+          {
+            success: false,
+            message: `Stock record not found for item ${item.stock}`,
+          },
           { status: 400 },
         );
       }
-      
+
       if (stockRecord.unit < item.quantity) {
         return NextResponse.json(
-          { success: false, message: `Insufficient stock. Available: ${stockRecord.unit}, Requested: ${item.quantity}` },
+          {
+            success: false,
+            message: `Insufficient stock. Available: ${stockRecord.unit}, Requested: ${item.quantity}`,
+          },
           { status: 400 },
         );
       }

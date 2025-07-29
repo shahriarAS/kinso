@@ -55,7 +55,9 @@ export default function CartItems({
                     >
                       {item.name}
                     </Typography.Text>
-                    <div className="text-xs text-gray-600">Barcode: {item.barcode || 'N/A'}</div>
+                    <div className="text-xs text-gray-600">
+                      Barcode: {item.barcode || "N/A"}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 w-[60%]">
@@ -88,7 +90,9 @@ export default function CartItems({
                     value={item.price}
                     size="middle"
                     className="w-36 text-right font-semibold text-green-600"
-                    onChange={(e) => onPrice(item.stock, Number(e.target.value))}
+                    onChange={(e) =>
+                      onPrice(item.stock, Number(e.target.value))
+                    }
                     prefix="৳"
                     style={{ textAlign: "right" }}
                   />

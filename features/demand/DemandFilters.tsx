@@ -1,6 +1,10 @@
 "use client";
 import { Input, Select, Button } from "antd";
-import { SearchOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+  SearchOutlined,
+  FilterOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -77,7 +81,9 @@ function DemandFilters({
             allowClear
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
-            onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
+            onPressEnter={(e) =>
+              handleSearch((e.target as HTMLInputElement).value)
+            }
           />
         </div>
 

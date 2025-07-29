@@ -35,18 +35,21 @@ export const DemandGenerationDrawer: React.FC<DemandGenerationDrawerProps> = ({
   loading,
 }) => {
   const [form] = Form.useForm<FormValues>();
-  const [generatedProducts, setGeneratedProducts] = useState<ProductDemand[]>([]);
+  const [generatedProducts, setGeneratedProducts] = useState<ProductDemand[]>(
+    [],
+  );
   const [showGenerated, setShowGenerated] = useState(false);
 
   // API hooks
-  const { data: productsData, isLoading: productsLoading } = useGetProductsQuery({});
+  const { data: productsData, isLoading: productsLoading } =
+    useGetProductsQuery({});
   const { data: warehousesData } = useGetWarehousesQuery({});
   const { data: outletsData } = useGetOutletsQuery({});
 
   const handleGenerateDemand = async () => {
     try {
       const values = await form.validateFields();
-      
+
       // Mock algorithm for demand generation based on sales trends
       const mockGeneratedProducts: ProductDemand[] = (productsData?.data || [])
         .slice(0, 10) // Take first 10 products for demo
@@ -55,7 +58,7 @@ export const DemandGenerationDrawer: React.FC<DemandGenerationDrawerProps> = ({
           const currentStock = Math.floor(Math.random() * 100) + 10;
           const minStock = Math.floor(Math.random() * 20) + 5;
           const suggestedQuantity = Math.max(0, minStock * 2 - currentStock);
-          
+
           return {
             product: product._id,
             productName: product.name,
@@ -64,7 +67,7 @@ export const DemandGenerationDrawer: React.FC<DemandGenerationDrawerProps> = ({
             suggestedQuantity,
           };
         })
-        .filter(p => p.suggestedQuantity > 0); // Only products that need restocking
+        .filter((p) => p.suggestedQuantity > 0); // Only products that need restocking
 
       setGeneratedProducts(mockGeneratedProducts);
       setShowGenerated(true);
@@ -85,16 +88,16 @@ export const DemandGenerationDrawer: React.FC<DemandGenerationDrawerProps> = ({
       await handleGenerateDemand();
       return;
     }
-    
+
     // Second step: create demand (only if we have products with quantities)
     if (totalQuantity === 0) {
       return;
     }
-    
+
     const demandData: DemandGenerationRequest = {
       location: values.location,
       locationType: values.locationType,
-      products: generatedProducts.map(p => ({
+      products: generatedProducts.map((p) => ({
         product: p.product,
         currentStock: p.currentStock,
         minStock: p.minStock,
@@ -117,7 +120,9 @@ export const DemandGenerationDrawer: React.FC<DemandGenerationDrawerProps> = ({
       dataIndex: "currentStock",
       key: "currentStock",
       render: (stock: number) => (
-        <span className={stock < 20 ? "text-red-600 font-medium" : ""}>{stock}</span>
+        <span className={stock < 20 ? "text-red-600 font-medium" : ""}>
+          {stock}
+        </span>
       ),
     },
     {
@@ -142,14 +147,20 @@ export const DemandGenerationDrawer: React.FC<DemandGenerationDrawerProps> = ({
       title: "Priority",
       key: "priority",
       render: (_: any, record: ProductDemand) => {
-        const priority = record.currentStock <= record.minStock ? "High" : "Medium";
+        const priority =
+          record.currentStock <= record.minStock ? "High" : "Medium";
         const color = priority === "High" ? "red" : "orange";
-        return <span className={`text-${color}-600 font-medium`}>{priority}</span>;
+        return (
+          <span className={`text-${color}-600 font-medium`}>{priority}</span>
+        );
       },
     },
   ];
 
-  const totalQuantity = generatedProducts.reduce((sum, p) => sum + p.suggestedQuantity, 0);
+  const totalQuantity = generatedProducts.reduce(
+    (sum, p) => sum + p.suggestedQuantity,
+    0,
+  );
 
   const fields: FormField[] = [
     {
@@ -169,21 +180,27 @@ export const DemandGenerationDrawer: React.FC<DemandGenerationDrawerProps> = ({
       type: "custom",
       rules: [{ required: true, message: "Please select location" }],
       render: (form) => (
-        <Form.Item noStyle shouldUpdate={(prevValues, currentValues) => 
-          prevValues.locationType !== currentValues.locationType
-        }>
+        <Form.Item
+          noStyle
+          shouldUpdate={(prevValues, currentValues) =>
+            prevValues.locationType !== currentValues.locationType
+          }
+        >
           {({ getFieldValue }) => {
-            const locationType = getFieldValue('locationType');
-            const locations = locationType === "Warehouse" 
-              ? warehousesData?.data || []
-              : outletsData?.data || [];
-            
+            const locationType = getFieldValue("locationType");
+            const locations =
+              locationType === "Warehouse"
+                ? warehousesData?.data || []
+                : outletsData?.data || [];
+
             return (
               <Select
                 placeholder="Select location"
                 showSearch
                 filterOption={(input, option) =>
-                  (option?.label as string)?.toLowerCase().includes(input.toLowerCase())
+                  (option?.label as string)
+                    ?.toLowerCase()
+                    .includes(input.toLowerCase())
                 }
                 options={locations.map((location: any) => ({
                   label: location.name,
@@ -211,7 +228,11 @@ export const DemandGenerationDrawer: React.FC<DemandGenerationDrawerProps> = ({
       fields={fields}
       initialValues={{ locationType: "Warehouse" }}
       onSubmit={handleFormSubmit}
-      submitText={showGenerated ? `Create Demand (${totalQuantity} items)` : "Generate Demand"}
+      submitText={
+        showGenerated
+          ? `Create Demand (${totalQuantity} items)`
+          : "Generate Demand"
+      }
       loading={loading || productsLoading}
       gridCols={2}
       extra={null}
@@ -227,12 +248,13 @@ export const DemandGenerationDrawer: React.FC<DemandGenerationDrawerProps> = ({
 
       {/* Generated Demand */}
       {showGenerated && (
-        <Card 
+        <Card
           title={
             <div className="flex items-center justify-between">
               <span>Generated Demand</span>
               <span className="text-sm text-gray-500">
-                {generatedProducts.length} products • {totalQuantity} total quantity
+                {generatedProducts.length} products • {totalQuantity} total
+                quantity
               </span>
             </div>
           }
@@ -250,7 +272,10 @@ export const DemandGenerationDrawer: React.FC<DemandGenerationDrawerProps> = ({
                 />
               </div>
               <Table
-                dataSource={generatedProducts.map((item, index) => ({ ...item, key: index }))}
+                dataSource={generatedProducts.map((item, index) => ({
+                  ...item,
+                  key: index,
+                }))}
                 columns={columns}
                 pagination={false}
                 size="small"

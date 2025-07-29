@@ -100,9 +100,7 @@ export async function handleGet(request: NextRequest) {
       query.vendor = vendor;
     }
     if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: "i" } },
-      ];
+      query.$or = [{ name: { $regex: search, $options: "i" } }];
     }
 
     // Execute query
@@ -155,9 +153,7 @@ export async function handleGetById(
     }
     await dbConnect();
     const { id } = await params;
-    const brand = await Brand.findById(id)
-      .populate("vendor", "name")
-      .lean();
+    const brand = await Brand.findById(id).populate("vendor", "name").lean();
     if (!brand) {
       return NextResponse.json(
         { success: false, message: "Brand not found" },
@@ -199,7 +195,7 @@ export async function handleUpdateById(
     const body = await request.json();
     const { name, vendor } = body;
     const { id } = await params;
-    
+
     const existingBrand = await Brand.findById(id);
     if (!existingBrand) {
       return NextResponse.json(
@@ -284,7 +280,10 @@ export async function handleDeleteById(
     const productCount = await Product.countDocuments({ brand: id });
     if (productCount > 0) {
       return NextResponse.json(
-        { success: false, message: "Cannot delete brand: it is used by products" },
+        {
+          success: false,
+          message: "Cannot delete brand: it is used by products",
+        },
         { status: 409 },
       );
     }
@@ -301,4 +300,4 @@ export async function handleDeleteById(
       { status: 500 },
     );
   }
-} 
+}

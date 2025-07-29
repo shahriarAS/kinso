@@ -42,7 +42,7 @@ const store = configureStore({
       serializableCheck: {
         ignoredActions: ["persist/PERSIST"],
       },
-    }    ).concat(
+    }).concat(
       authApi.middleware,
       productsApi.middleware,
       customersApi.middleware,

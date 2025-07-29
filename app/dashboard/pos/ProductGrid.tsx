@@ -37,7 +37,7 @@ export default function ProductGrid({
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
       {stocks.map((stock) => {
         if (!stock.product) return null;
-        
+
         const product = stock.product;
         const stockQuantity = stock.unit;
         const lowStock = isLowStock(stockQuantity);
@@ -54,7 +54,7 @@ export default function ProductGrid({
                   {product.name}
                 </span>
                 <span className="text-sm text-gray-500">
-                  Barcode: {product.barcode || 'N/A'}
+                  Barcode: {product.barcode || "N/A"}
                 </span>
                 {stock.batchNumber && (
                   <span className="text-xs text-gray-400">

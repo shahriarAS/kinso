@@ -1,7 +1,19 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Drawer, InputNumber, Input, DatePicker, Button, Table, Alert, Divider, Card, message, Popconfirm } from "antd";
+import {
+  Drawer,
+  InputNumber,
+  Input,
+  DatePicker,
+  Button,
+  Table,
+  Alert,
+  Divider,
+  Card,
+  message,
+  Popconfirm,
+} from "antd";
 import { CloseOutlined, DeleteOutlined } from "@ant-design/icons";
 import { Icon } from "@iconify/react";
 import { Demand, DemandConversionRequest } from "./types";
@@ -11,7 +23,10 @@ interface ConvertDemandDrawerProps {
   demand: Demand | null;
   open: boolean;
   onClose: () => void;
-  onConvert: (demandId: string, conversionData: DemandConversionRequest) => void;
+  onConvert: (
+    demandId: string,
+    conversionData: DemandConversionRequest,
+  ) => void;
   loading: boolean;
 }
 
@@ -31,21 +46,25 @@ export const ConvertDemandDrawer: React.FC<ConvertDemandDrawerProps> = ({
   onConvert,
   loading,
 }) => {
-  const [productStockData, setProductStockData] = useState<Record<string, ProductStockInfo>>({});
-  const [removedProducts, setRemovedProducts] = useState<Set<string>>(new Set());
+  const [productStockData, setProductStockData] = useState<
+    Record<string, ProductStockInfo>
+  >({});
+  const [removedProducts, setRemovedProducts] = useState<Set<string>>(
+    new Set(),
+  );
 
   useEffect(() => {
     if (demand && open) {
       // Initialize product stock data
       const initialData: Record<string, ProductStockInfo> = {};
-      demand.products.forEach(product => {
+      demand.products.forEach((product) => {
         initialData[product.product._id] = {
           productId: product.product._id,
           quantity: product.quantity,
           mrp: 0,
           tp: 0,
-          expireDate: '',
-          batchNumber: '',
+          expireDate: "",
+          batchNumber: "",
         };
       });
       setProductStockData(initialData);
@@ -55,8 +74,12 @@ export const ConvertDemandDrawer: React.FC<ConvertDemandDrawerProps> = ({
 
   if (!demand) return null;
 
-  const updateProductStockInfo = (productId: string, field: keyof ProductStockInfo, value: any) => {
-    setProductStockData(prev => ({
+  const updateProductStockInfo = (
+    productId: string,
+    field: keyof ProductStockInfo,
+    value: any,
+  ) => {
+    setProductStockData((prev) => ({
       ...prev,
       [productId]: {
         ...prev[productId],
@@ -66,11 +89,11 @@ export const ConvertDemandDrawer: React.FC<ConvertDemandDrawerProps> = ({
   };
 
   const removeProduct = (productId: string) => {
-    setRemovedProducts(prev => new Set([...prev, productId]));
+    setRemovedProducts((prev) => new Set([...prev, productId]));
   };
 
   const restoreProduct = (productId: string) => {
-    setRemovedProducts(prev => {
+    setRemovedProducts((prev) => {
       const newSet = new Set(prev);
       newSet.delete(productId);
       return newSet;
@@ -78,19 +101,30 @@ export const ConvertDemandDrawer: React.FC<ConvertDemandDrawerProps> = ({
   };
 
   const getIncludedProducts = () => {
-    return demand?.products.filter(product => !removedProducts.has(product.product._id)) || [];
+    return (
+      demand?.products.filter(
+        (product) => !removedProducts.has(product.product._id),
+      ) || []
+    );
   };
 
   const validateAllProducts = () => {
     const includedProducts = getIncludedProducts();
-    
+
     if (includedProducts.length === 0) {
       return false;
     }
 
     for (const product of includedProducts) {
       const stockInfo = productStockData[product.product._id];
-      if (!stockInfo || !stockInfo.quantity || !stockInfo.mrp || !stockInfo.tp || !stockInfo.expireDate || !stockInfo.batchNumber) {
+      if (
+        !stockInfo ||
+        !stockInfo.quantity ||
+        !stockInfo.mrp ||
+        !stockInfo.tp ||
+        !stockInfo.expireDate ||
+        !stockInfo.batchNumber
+      ) {
         return false;
       }
     }
@@ -99,19 +133,23 @@ export const ConvertDemandDrawer: React.FC<ConvertDemandDrawerProps> = ({
 
   const handleSubmit = async () => {
     const includedProducts = getIncludedProducts();
-    
+
     if (includedProducts.length === 0) {
       message.error("At least one product must be included for conversion");
       return;
     }
 
     if (!validateAllProducts()) {
-      message.error("Please fill in all stock information for all included products");
+      message.error(
+        "Please fill in all stock information for all included products",
+      );
       return;
     }
 
     const conversionData: DemandConversionRequest = {
-      products: includedProducts.map(product => productStockData[product.product._id]).filter(Boolean),
+      products: includedProducts
+        .map((product) => productStockData[product.product._id])
+        .filter(Boolean),
     };
 
     onConvert(demand._id, conversionData);
@@ -146,7 +184,9 @@ export const ConvertDemandDrawer: React.FC<ConvertDemandDrawerProps> = ({
           placeholder="Qty"
           min={1}
           value={productStockData[record.product._id]?.quantity}
-          onChange={(value) => updateProductStockInfo(record.product._id, 'quantity', value || 1)}
+          onChange={(value) =>
+            updateProductStockInfo(record.product._id, "quantity", value || 1)
+          }
           className="w-full"
           size="small"
           disabled={removedProducts.has(record.product._id)}
@@ -163,7 +203,9 @@ export const ConvertDemandDrawer: React.FC<ConvertDemandDrawerProps> = ({
           min={0}
           step={0.01}
           value={productStockData[record.product._id]?.mrp}
-          onChange={(value) => updateProductStockInfo(record.product._id, 'mrp', value || 0)}
+          onChange={(value) =>
+            updateProductStockInfo(record.product._id, "mrp", value || 0)
+          }
           className="w-full"
           size="small"
           disabled={removedProducts.has(record.product._id)}
@@ -172,7 +214,7 @@ export const ConvertDemandDrawer: React.FC<ConvertDemandDrawerProps> = ({
     },
     {
       title: "TP (₹)",
-      key: "tp", 
+      key: "tp",
       width: 120,
       render: (_: any, record: any) => (
         <InputNumber
@@ -180,7 +222,9 @@ export const ConvertDemandDrawer: React.FC<ConvertDemandDrawerProps> = ({
           min={0}
           step={0.01}
           value={productStockData[record.product._id]?.tp}
-          onChange={(value) => updateProductStockInfo(record.product._id, 'tp', value || 0)}
+          onChange={(value) =>
+            updateProductStockInfo(record.product._id, "tp", value || 0)
+          }
           className="w-full"
           size="small"
           disabled={removedProducts.has(record.product._id)}
@@ -196,9 +240,19 @@ export const ConvertDemandDrawer: React.FC<ConvertDemandDrawerProps> = ({
           placeholder="Expire Date"
           size="small"
           className="w-full"
-          value={productStockData[record.product._id]?.expireDate ? dayjs(productStockData[record.product._id].expireDate) : null}
-          onChange={(date) => updateProductStockInfo(record.product._id, 'expireDate', date ? date.format('YYYY-MM-DD') : '')}
-          disabledDate={(current) => current && current < dayjs().endOf('day')}
+          value={
+            productStockData[record.product._id]?.expireDate
+              ? dayjs(productStockData[record.product._id].expireDate)
+              : null
+          }
+          onChange={(date) =>
+            updateProductStockInfo(
+              record.product._id,
+              "expireDate",
+              date ? date.format("YYYY-MM-DD") : "",
+            )
+          }
+          disabledDate={(current) => current && current < dayjs().endOf("day")}
           format="YYYY-MM-DD"
           disabled={removedProducts.has(record.product._id)}
         />
@@ -213,7 +267,13 @@ export const ConvertDemandDrawer: React.FC<ConvertDemandDrawerProps> = ({
           placeholder="Batch No."
           size="small"
           value={productStockData[record.product._id]?.batchNumber}
-          onChange={(e) => updateProductStockInfo(record.product._id, 'batchNumber', e.target.value)}
+          onChange={(e) =>
+            updateProductStockInfo(
+              record.product._id,
+              "batchNumber",
+              e.target.value,
+            )
+          }
           maxLength={50}
           disabled={removedProducts.has(record.product._id)}
         />
@@ -223,10 +283,10 @@ export const ConvertDemandDrawer: React.FC<ConvertDemandDrawerProps> = ({
       title: "Action",
       key: "action",
       width: 80,
-      fixed: 'right' as const,
+      fixed: "right" as const,
       render: (_: any, record: any) => {
         const isRemoved = removedProducts.has(record.product._id);
-        
+
         if (isRemoved) {
           return (
             <Button
@@ -239,7 +299,7 @@ export const ConvertDemandDrawer: React.FC<ConvertDemandDrawerProps> = ({
             </Button>
           );
         }
-        
+
         return (
           <Popconfirm
             title="Remove Product"
@@ -269,10 +329,7 @@ export const ConvertDemandDrawer: React.FC<ConvertDemandDrawerProps> = ({
     <Drawer
       title={
         <div className="flex items-center gap-2">
-          <Icon
-          icon={"mingcute:transfer-line" }
-            className="text-blue-600"
-          />
+          <Icon icon={"mingcute:transfer-line"} className="text-blue-600" />
           <span className="text-lg font-semibold">Convert Demand to Stock</span>
         </div>
       }
@@ -290,16 +347,15 @@ export const ConvertDemandDrawer: React.FC<ConvertDemandDrawerProps> = ({
       }
     >
       <div className="space-y-6">
-
         {/* Demand Summary */}
         <Card title="Demand Summary" size="small">
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
               <span className="text-gray-500">Location:</span>
               <div className="font-medium">
-                {typeof demand.location === 'string' 
-                  ? demand.location 
-                  : demand.location?.name || 'N/A'}
+                {typeof demand.location === "string"
+                  ? demand.location
+                  : demand.location?.name || "N/A"}
               </div>
             </div>
             <div>
@@ -352,9 +408,9 @@ export const ConvertDemandDrawer: React.FC<ConvertDemandDrawerProps> = ({
             size="small"
             rowKey={(record) => record.product._id}
             scroll={{ x: 1100 }}
-            rowClassName={(record) => 
-              removedProducts.has(record.product._id) 
-                ? "opacity-50 bg-gray-50" 
+            rowClassName={(record) =>
+              removedProducts.has(record.product._id)
+                ? "opacity-50 bg-gray-50"
                 : ""
             }
           />

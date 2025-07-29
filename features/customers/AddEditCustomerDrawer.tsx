@@ -18,8 +18,10 @@ const AddEditCustomerDrawer: React.FC<AddEditCustomerDrawerProps> = ({
 }) => {
   const [form] = Form.useForm<CustomerInput>();
   const { success, error } = useNotification();
-  const [createCustomer, { isLoading: isCreating }] = useCreateCustomerMutation();
-  const [updateCustomer, { isLoading: isUpdating }] = useUpdateCustomerMutation();
+  const [createCustomer, { isLoading: isCreating }] =
+    useCreateCustomerMutation();
+  const [updateCustomer, { isLoading: isUpdating }] =
+    useUpdateCustomerMutation();
 
   const isEditing = !!customer;
 
@@ -43,7 +45,10 @@ const AddEditCustomerDrawer: React.FC<AddEditCustomerDrawerProps> = ({
         placeholder: "Enter phone number",
         rules: [
           { required: true, message: "Please enter phone number" },
-          { pattern: /^[\+]?[1-9][\d]{0,15}$/, message: "Please enter a valid phone number" },
+          {
+            pattern: /^[\+]?[1-9][\d]{0,15}$/,
+            message: "Please enter a valid phone number",
+          },
         ],
       },
       {
@@ -73,28 +78,30 @@ const AddEditCustomerDrawer: React.FC<AddEditCustomerDrawerProps> = ({
       //   ),
       // }
     ],
-    []
+    [],
   );
 
   // Set initial values for edit mode
-  const initialValues = customer ? {
-    name: customer.name,
-    phone: customer.phone || "",
-    email: customer.email || "",
-    address: customer?.address || "",
-    membershipActive: customer.membershipActive,
-    totalSpent: customer.totalSpent,
-    totalPurchaseLastMonth: customer.totalPurchaseLastMonth,
-    totalSales: customer.totalSales,
-  } : {
-    membershipActive: false,
-    totalSpent: 0,
-    totalPurchaseLastMonth: 0,
-    totalSales: 0,
-    phone: "",
-    email: "",
-    address: "",
-  };
+  const initialValues = customer
+    ? {
+        name: customer.name,
+        phone: customer.phone || "",
+        email: customer.email || "",
+        address: customer?.address || "",
+        membershipActive: customer.membershipActive,
+        totalSpent: customer.totalSpent,
+        totalPurchaseLastMonth: customer.totalPurchaseLastMonth,
+        totalSales: customer.totalSales,
+      }
+    : {
+        membershipActive: false,
+        totalSpent: 0,
+        totalPurchaseLastMonth: 0,
+        totalSales: 0,
+        phone: "",
+        email: "",
+        address: "",
+      };
 
   const handleSubmit = async (values: any) => {
     try {
@@ -119,7 +126,10 @@ const AddEditCustomerDrawer: React.FC<AddEditCustomerDrawerProps> = ({
       }
       onClose();
     } catch (err: any) {
-      error(err?.data?.message || `Failed to ${isEditing ? 'update' : 'create'} customer`);
+      error(
+        err?.data?.message ||
+          `Failed to ${isEditing ? "update" : "create"} customer`,
+      );
     }
   };
 

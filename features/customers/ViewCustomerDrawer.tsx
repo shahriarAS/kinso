@@ -1,6 +1,12 @@
 import React from "react";
 import { Drawer, Descriptions, Tag, Button, Space, Divider } from "antd";
-import { EditOutlined, UserOutlined, PhoneOutlined, MailOutlined, HomeOutlined } from "@ant-design/icons";
+import {
+  EditOutlined,
+  UserOutlined,
+  PhoneOutlined,
+  MailOutlined,
+  HomeOutlined,
+} from "@ant-design/icons";
 import { Customer } from "./types";
 
 interface ViewCustomerDrawerProps {
@@ -39,11 +45,7 @@ const ViewCustomerDrawer: React.FC<ViewCustomerDrawerProps> = ({
       width={500}
       extra={
         onEdit && (
-          <Button
-            type="primary"
-            icon={<EditOutlined />}
-            onClick={handleEdit}
-          >
+          <Button type="primary" icon={<EditOutlined />} onClick={handleEdit}>
             Edit Customer
           </Button>
         )
@@ -78,18 +80,33 @@ const ViewCustomerDrawer: React.FC<ViewCustomerDrawerProps> = ({
             Contact Information
           </h3>
           <Descriptions column={1} bordered size="small">
-            <Descriptions.Item 
-              label={<span><PhoneOutlined className="mr-1" />Phone</span>}
+            <Descriptions.Item
+              label={
+                <span>
+                  <PhoneOutlined className="mr-1" />
+                  Phone
+                </span>
+              }
             >
               {customer?.phone || "Not provided"}
             </Descriptions.Item>
-            <Descriptions.Item 
-              label={<span><MailOutlined className="mr-1" />Email</span>}
+            <Descriptions.Item
+              label={
+                <span>
+                  <MailOutlined className="mr-1" />
+                  Email
+                </span>
+              }
             >
               {customer?.email || "Not provided"}
             </Descriptions.Item>
-            <Descriptions.Item 
-              label={<span><HomeOutlined className="mr-1" />Address</span>}
+            <Descriptions.Item
+              label={
+                <span>
+                  <HomeOutlined className="mr-1" />
+                  Address
+                </span>
+              }
             >
               {customer?.address || "Not provided"}
             </Descriptions.Item>
@@ -127,15 +144,22 @@ const ViewCustomerDrawer: React.FC<ViewCustomerDrawerProps> = ({
           </h3>
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <div className="text-blue-600 text-sm font-medium">Average per Sale</div>
+              <div className="text-blue-600 text-sm font-medium">
+                Average per Sale
+              </div>
               <div className="text-blue-800 text-xl font-bold">
-                ${customer.totalSales > 0 ? (customer.totalSpent / customer.totalSales).toFixed(2) : '0.00'}
+                $
+                {customer.totalSales > 0
+                  ? (customer.totalSpent / customer.totalSales).toFixed(2)
+                  : "0.00"}
               </div>
             </div>
             <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-              <div className="text-green-600 text-sm font-medium">Customer Value</div>
+              <div className="text-green-600 text-sm font-medium">
+                Customer Value
+              </div>
               <div className="text-green-800 text-xl font-bold">
-                {customer.membershipActive ? 'Premium' : 'Standard'}
+                {customer.membershipActive ? "Premium" : "Standard"}
               </div>
             </div>
           </div>
@@ -146,7 +170,9 @@ const ViewCustomerDrawer: React.FC<ViewCustomerDrawerProps> = ({
         {/* Timestamps */}
         <div className="text-sm text-gray-500 space-y-1">
           <div>Created: {new Date(customer.createdAt).toLocaleString()}</div>
-          <div>Last Updated: {new Date(customer.updatedAt).toLocaleString()}</div>
+          <div>
+            Last Updated: {new Date(customer.updatedAt).toLocaleString()}
+          </div>
         </div>
       </div>
     </Drawer>

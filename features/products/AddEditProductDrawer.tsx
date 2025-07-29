@@ -134,9 +134,16 @@ export default function AddEditProductDrawer({
     return {
       name: product.name,
       barcode: product.barcode,
-      vendor: typeof product.vendor === "string" ? product.vendor : product.vendor._id,
-      brand: typeof product.brand === "string" ? product.brand : product.brand._id,
-      category: typeof product.category === "string" ? product.category : product.category._id,
+      vendor:
+        typeof product.vendor === "string"
+          ? product.vendor
+          : product.vendor._id,
+      brand:
+        typeof product.brand === "string" ? product.brand : product.brand._id,
+      category:
+        typeof product.category === "string"
+          ? product.category
+          : product.category._id,
     };
   };
 

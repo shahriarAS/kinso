@@ -1,8 +1,22 @@
 "use client";
 
 import React from "react";
-import { Drawer, Descriptions, Table, Tag, Button, Space, Divider, Alert } from "antd";
-import { CloseOutlined, EditOutlined, CheckCircleOutlined, ArrowRightOutlined } from "@ant-design/icons";
+import {
+  Drawer,
+  Descriptions,
+  Table,
+  Tag,
+  Button,
+  Space,
+  Divider,
+  Alert,
+} from "antd";
+import {
+  CloseOutlined,
+  EditOutlined,
+  CheckCircleOutlined,
+  ArrowRightOutlined,
+} from "@ant-design/icons";
 import { Demand } from "./types";
 
 interface ViewDemandDrawerProps {
@@ -138,9 +152,9 @@ export const ViewDemandDrawer: React.FC<ViewDemandDrawerProps> = ({
           <Descriptions bordered column={2}>
             <Descriptions.Item label="Location" span={1}>
               <span className="font-medium">
-                {typeof demand.location === 'string' 
-                  ? demand.location 
-                  : demand.location?.name || 'N/A'}
+                {typeof demand.location === "string"
+                  ? demand.location
+                  : demand.location?.name || "N/A"}
               </span>
             </Descriptions.Item>
             <Descriptions.Item label="Location Type" span={1}>
@@ -150,10 +164,14 @@ export const ViewDemandDrawer: React.FC<ViewDemandDrawerProps> = ({
               <Tag color={getStatusColor(demand.status)}>{demand.status}</Tag>
             </Descriptions.Item>
             <Descriptions.Item label="Total Items" span={1}>
-              <span className="font-medium text-blue-600">{demand.products.length}</span>
+              <span className="font-medium text-blue-600">
+                {demand.products.length}
+              </span>
             </Descriptions.Item>
             <Descriptions.Item label="Total Quantity" span={1}>
-              <span className="font-medium text-green-600">{totalQuantity}</span>
+              <span className="font-medium text-green-600">
+                {totalQuantity}
+              </span>
             </Descriptions.Item>
             <Descriptions.Item label="Created At" span={1}>
               {new Date(demand.createdAt).toLocaleString()}
@@ -177,7 +195,10 @@ export const ViewDemandDrawer: React.FC<ViewDemandDrawerProps> = ({
             rowKey={(record) => record.product._id}
             bordered
             summary={(pageData) => {
-              const total = pageData.reduce((sum, record) => sum + record.quantity, 0);
+              const total = pageData.reduce(
+                (sum, record) => sum + record.quantity,
+                0,
+              );
               return (
                 <Table.Summary.Row>
                   <Table.Summary.Cell index={0} colSpan={5}>

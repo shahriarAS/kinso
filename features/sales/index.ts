@@ -1,2 +1,2 @@
 export { salesApi } from "./api";
-export * from "./types"; 
+export * from "./types";

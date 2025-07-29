@@ -18,7 +18,7 @@ export const authApi = createApi({
       }),
       invalidatesTags: ["Auth"],
     }),
-    
+
     logoutUser: builder.mutation<{ success: boolean; message: string }, void>({
       query: () => ({
         url: "/logout",
@@ -42,8 +42,11 @@ export const authApi = createApi({
         }
       },
     }),
-    
-    registerUser: builder.mutation<{ success: boolean; message: string }, RegisterInput>({
+
+    registerUser: builder.mutation<
+      { success: boolean; message: string },
+      RegisterInput
+    >({
       query: ({ name, email, password, password2 }) => ({
         url: "/register",
         method: "POST",
@@ -56,7 +59,7 @@ export const authApi = createApi({
       }),
       invalidatesTags: ["Auth"],
     }),
-    
+
     fetchAuthUser: builder.query<AuthResponse, void>({
       query: () => ({
         url: "/profile",

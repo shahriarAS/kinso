@@ -1,4 +1,4 @@
-"use client";;
+"use client";
 import { WarehouseTable } from "@/features/warehouses";
 
 export default function OutletsPage() {
@@ -7,4 +7,4 @@ export default function OutletsPage() {
       <WarehouseTable />
     </div>
   );
-} 
+}

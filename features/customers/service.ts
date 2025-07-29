@@ -53,7 +53,11 @@ export async function handleGet(request: NextRequest) {
 
     // Execute query
     const [customers, total] = await Promise.all([
-      CustomerModel.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      CustomerModel.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
       CustomerModel.countDocuments(query),
     ]);
 
@@ -120,7 +124,7 @@ export async function handlePost(request: NextRequest) {
       phone: phone.trim(),
       email: email.trim(),
       address: address?.trim() || undefined,
-      membershipActive: membershipActive || false
+      membershipActive: membershipActive || false,
     });
 
     return createSuccessResponse(customer, undefined, 201);
@@ -230,7 +234,10 @@ export async function handleUpdateById(
         phone: phone.trim(),
         email: email.trim(),
         address: address?.trim() || undefined,
-        membershipActive: membershipActive !== undefined ? membershipActive : existingCustomer.membershipActive,
+        membershipActive:
+          membershipActive !== undefined
+            ? membershipActive
+            : existingCustomer.membershipActive,
       },
       { new: true, runValidators: true },
     );

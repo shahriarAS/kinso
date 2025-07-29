@@ -41,7 +41,10 @@ export const dashboardApi = createApi({
     }),
 
     // Get inventory alerts
-    getInventoryAlerts: builder.query<{ success: boolean; data: InventoryAlerts }, void>({
+    getInventoryAlerts: builder.query<
+      { success: boolean; data: InventoryAlerts },
+      void
+    >({
       query: () => ({
         url: "/inventory-alerts",
         method: "GET",

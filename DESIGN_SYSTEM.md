@@ -12,6 +12,7 @@ This document outlines the consistent rounded corner system implemented across t
 - Simpler maintenance without shadow variations
 
 ### Border Usage
+
 - Use `border border-gray-200` instead of `shadow`
 - For stronger separation, use `border-2 border-gray-300`
 - Never use `shadow`, `shadow-sm`, `shadow-md`, `shadow-lg`, `drop-shadow`, or any shadow-related classes
@@ -31,6 +32,7 @@ We use a consistent scale of border radius values defined in CSS custom properti
 ## Implementation
 
 ### 1. CSS Custom Properties
+
 The border radius values are defined in `/app/globals.css`:
 
 ```css
@@ -46,12 +48,13 @@ The border radius values are defined in `/app/globals.css`:
 ```
 
 ### 2. Tailwind Configuration
+
 Tailwind CSS classes are extended in `/tailwind.config.js` to use these consistent values:
 
 ```javascript
 borderRadius: {
   'xs': 'var(--radius-xs)',
-  'sm': 'var(--radius-sm)', 
+  'sm': 'var(--radius-sm)',
   'md': 'var(--radius-md)',
   'lg': 'var(--radius-lg)',
   'xl': 'var(--radius-xl)',
@@ -61,6 +64,7 @@ borderRadius: {
 ```
 
 ### 3. Ant Design Components
+
 Ant Design components are styled globally to use consistent border radius:
 
 ```css
@@ -89,15 +93,15 @@ Ant Design components are styled globally to use consistent border radius:
 
 ### Component-Specific Recommendations
 
-| Component Type | Recommended Class | Size | Use Case |
-|----------------|------------------|------|----------|
-| Buttons | `rounded-sm` | 6px | All button elements |
-| Form Inputs | `rounded-sm` | 6px | Input, Select, TextArea |
-| Cards | `rounded-lg` | 12px | Content cards, containers |
-| Modals | `rounded-md` | 8px | Dialog boxes, popups |
-| Badges/Tags | `rounded-xs` | 4px | Small status indicators |
-| Avatars | `rounded-full` | Full | Profile pictures, icons |
-| Drawers | `rounded-2xl` | 24px | Side panels |
+| Component Type | Recommended Class | Size | Use Case                  |
+| -------------- | ----------------- | ---- | ------------------------- |
+| Buttons        | `rounded-sm`      | 6px  | All button elements       |
+| Form Inputs    | `rounded-sm`      | 6px  | Input, Select, TextArea   |
+| Cards          | `rounded-lg`      | 12px | Content cards, containers |
+| Modals         | `rounded-md`      | 8px  | Dialog boxes, popups      |
+| Badges/Tags    | `rounded-xs`      | 4px  | Small status indicators   |
+| Avatars        | `rounded-full`    | Full | Profile pictures, icons   |
+| Drawers        | `rounded-2xl`     | 24px | Side panels               |
 
 ### Examples
 
@@ -134,12 +138,13 @@ When updating existing components:
    - `rounded` → `rounded-xs` (for small elements)
 
 2. **Use utility functions**:
+
    ```tsx
    import { getRoundedClass } from '@/lib/borderRadius';
-   
+
    // Instead of hardcoding classes
    <div className="rounded-lg">
-   
+
    // Use the utility
    <div className={getRoundedClass('card')}>
    ```

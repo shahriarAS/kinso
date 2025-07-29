@@ -15,17 +15,30 @@ export interface IDemand extends Document {
 const DemandSchema: Schema = new Schema(
   {
     location: { type: Schema.Types.ObjectId, required: true },
-    locationType: { type: String, required: true, enum: ["Warehouse", "Outlet"] },
+    locationType: {
+      type: String,
+      required: true,
+      enum: ["Warehouse", "Outlet"],
+    },
     products: [
       {
-        product: { type: Schema.Types.ObjectId, required: true, ref: "Product" },
+        product: {
+          type: Schema.Types.ObjectId,
+          required: true,
+          ref: "Product",
+        },
         quantity: { type: Number, required: true, min: 1 },
       },
     ],
-    status: { type: String, required: true, enum: ["Pending", "Approved", "ConvertedToStock"] },
+    status: {
+      type: String,
+      required: true,
+      enum: ["Pending", "Approved", "ConvertedToStock"],
+    },
   },
   { timestamps: true },
 );
 DemandSchema.index({ location: 1, status: 1 });
 
-export default mongoose.models.Demand || mongoose.model<IDemand>("Demand", DemandSchema);
+export default mongoose.models.Demand ||
+  mongoose.model<IDemand>("Demand", DemandSchema);

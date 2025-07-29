@@ -63,7 +63,7 @@ export default function SalesTable({
       key: "totalAmount",
       render: (amount: number) => (
         <span className="font-semibold text-green-600">
-          ৳{amount?.toFixed(2) || '0.00'}
+          ৳{amount?.toFixed(2) || "0.00"}
         </span>
       ),
     },
@@ -72,9 +72,12 @@ export default function SalesTable({
       dataIndex: "paymentMethods",
       key: "paidAmount",
       render: (methods: any[]) => {
-        const paidAmount = methods?.reduce((sum, method) => sum + (method.amount || 0), 0) || 0;
+        const paidAmount =
+          methods?.reduce((sum, method) => sum + (method.amount || 0), 0) || 0;
         return (
-          <span className="font-medium text-blue-600">৳{paidAmount.toFixed(2)}</span>
+          <span className="font-medium text-blue-600">
+            ৳{paidAmount.toFixed(2)}
+          </span>
         );
       },
     },
@@ -82,10 +85,16 @@ export default function SalesTable({
       title: "Due Amount",
       key: "dueAmount",
       render: (record: any) => {
-        const paidAmount = record.paymentMethods?.reduce((sum: number, method: any) => sum + (method.amount || 0), 0) || 0;
+        const paidAmount =
+          record.paymentMethods?.reduce(
+            (sum: number, method: any) => sum + (method.amount || 0),
+            0,
+          ) || 0;
         const dueAmount = Math.max(0, record.totalAmount - paidAmount);
         return (
-          <span className={`font-medium ${dueAmount > 0 ? 'text-red-600' : 'text-gray-500'}`}>
+          <span
+            className={`font-medium ${dueAmount > 0 ? "text-red-600" : "text-gray-500"}`}
+          >
             ৳{dueAmount.toFixed(2)}
           </span>
         );

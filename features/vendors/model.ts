@@ -14,4 +14,5 @@ const VendorSchema: Schema = new Schema(
 );
 VendorSchema.index({ name: 1 });
 
-export default mongoose.models.Vendor || mongoose.model<IVendor>("Vendor", VendorSchema);
+export default mongoose.models.Vendor ||
+  mongoose.model<IVendor>("Vendor", VendorSchema);

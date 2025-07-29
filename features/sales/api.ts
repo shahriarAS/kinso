@@ -9,7 +9,7 @@ export const salesApi = createApi({
   tagTypes: ["Sales", "Products"],
   endpoints: (builder) => ({
     // Create new sale
-    createSale: builder.mutation<ApiResponse<Sale>,SaleInput>({
+    createSale: builder.mutation<ApiResponse<Sale>, SaleInput>({
       query: (saleData) => ({
         url: `/`,
         method: "POST",
@@ -19,7 +19,9 @@ export const salesApi = createApi({
     }),
 
     // Get sales history
-    getSalesHistory: builder.query<ApiResponse<Sale[]>, {
+    getSalesHistory: builder.query<
+      ApiResponse<Sale[]>,
+      {
         page?: number;
         limit?: number;
         search?: string;
@@ -30,11 +32,12 @@ export const salesApi = createApi({
         endDate?: string;
         sortBy?: string;
         sortOrder?: "asc" | "desc";
-      }>({
+      }
+    >({
       query: (filters) => ({
-      url: `/history`,
-      method: "GET",
-      params: filters,
+        url: `/history`,
+        method: "GET",
+        params: filters,
       }),
       providesTags: ["Sales"],
     }),
@@ -78,4 +81,4 @@ export const {
   useGetSaleByIdQuery,
   useUpdateSaleMutation,
   useDeleteSaleMutation,
-} = salesApi; 
+} = salesApi;

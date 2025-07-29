@@ -33,9 +33,7 @@ export async function handleGet(request: NextRequest) {
 
     const query: any = {};
     if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: "i" } },
-      ];
+      query.$or = [{ name: { $regex: search, $options: "i" } }];
     }
     if (applyVAT === "true") {
       query.applyVAT = true;
@@ -275,7 +273,10 @@ export async function handleDeleteById(
     const productCount = await Product.countDocuments({ category: id });
     if (productCount > 0) {
       return NextResponse.json(
-        { success: false, message: "Cannot delete category: it is used by products" },
+        {
+          success: false,
+          message: "Cannot delete category: it is used by products",
+        },
         { status: 409 },
       );
     }

@@ -31,12 +31,10 @@ const AddEditVendorDrawer: React.FC<AddEditVendorDrawerProps> = ({
         label: "Vendor Name",
         type: "input",
         placeholder: "Enter vendor name",
-        rules: [
-          { required: true, message: "Please enter vendor name" },
-        ],
+        rules: [{ required: true, message: "Please enter vendor name" }],
       },
     ],
-    []
+    [],
   );
 
   // Set initial values for edit mode
@@ -74,4 +72,4 @@ const AddEditVendorDrawer: React.FC<AddEditVendorDrawerProps> = ({
   );
 };
 
-export default AddEditVendorDrawer; 
+export default AddEditVendorDrawer;

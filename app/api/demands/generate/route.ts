@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/database";
 import Sale from "@/features/sales/model";
 import Stock from "@/features/stock/model";
-import Product from "@/features/products/model";
 import Demand from "@/features/demand/model";
 import { authorizeRequest } from "@/lib/auth";
 import { AuthenticatedRequest } from "@/features/auth";
@@ -27,14 +26,14 @@ export async function POST(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { 
-      outlet, 
-      warehouse, 
-      days = 30, 
+    const {
+      outlet,
+      warehouse,
+      days = 30,
       minSalesThreshold = 1,
       demandDays = 7,
       safetyStockFactor = 1.2,
-      seasonalAdjustment = 1.0
+      seasonalAdjustment = 1.0,
     } = body;
 
     // Calculate date range
@@ -43,6 +42,7 @@ export async function POST(request: NextRequest) {
     startDate.setDate(startDate.getDate() - days);
 
     // Build sales query
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const salesQuery: any = {
       createdAt: { $gte: startDate, $lte: endDate },
     };
@@ -57,20 +57,24 @@ export async function POST(request: NextRequest) {
       .lean();
 
     // Analyze sales patterns
-    const productSales: Record<string, {
-      totalQuantity: number;
-      totalRevenue: number;
-      saleDays: number;
-      lastSaleDate: Date;
-      averageDailySales: number;
-      maxDailySales: number;
-      minDailySales: number;
-      salesFrequency: number;
-    }> = {};
+    const productSales: Record<
+      string,
+      {
+        totalQuantity: number;
+        totalRevenue: number;
+        saleDays: number;
+        lastSaleDate: Date;
+        averageDailySales: number;
+        maxDailySales: number;
+        minDailySales: number;
+        salesFrequency: number;
+      }
+    > = {};
 
     // Group sales by product
     for (const sale of sales) {
       for (const item of sale.items) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const product = (item.stock as any)?.product;
         if (!product) continue;
 
@@ -89,7 +93,7 @@ export async function POST(request: NextRequest) {
 
         productSales[product].totalQuantity += item.quantity;
         productSales[product].totalRevenue += item.quantity * item.unitPrice;
-        
+
         const saleDate = new Date(sale.createdAt);
         if (saleDate > productSales[product].lastSaleDate) {
           productSales[product].lastSaleDate = saleDate;
@@ -99,22 +103,23 @@ export async function POST(request: NextRequest) {
 
     // Calculate daily sales patterns
     const dailySales: Record<string, Record<string, number>> = {};
-    
+
     for (const sale of sales) {
-      const saleDate = new Date(sale.createdAt).toISOString().split('T')[0];
-      
+      const saleDate = new Date(sale.createdAt).toISOString().split("T")[0];
+
       for (const item of sale.items) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const product = (item.stock as any)?.product;
         if (!product) continue;
 
         if (!dailySales[product]) {
           dailySales[product] = {};
         }
-        
+
         if (!dailySales[product][saleDate]) {
           dailySales[product][saleDate] = 0;
         }
-        
+
         dailySales[product][saleDate] += item.quantity;
       }
     }
@@ -122,7 +127,7 @@ export async function POST(request: NextRequest) {
     // Calculate statistics for each product
     for (const [product, salesData] of Object.entries(productSales)) {
       const dailyQuantities = Object.values(dailySales[product] || {});
-      
+
       if (dailyQuantities.length > 0) {
         salesData.averageDailySales = salesData.totalQuantity / days;
         salesData.maxDailySales = Math.max(...dailyQuantities);
@@ -133,6 +138,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get current stock levels
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const stockQuery: any = {
       unit: { $gt: 0 },
     };
@@ -147,7 +153,7 @@ export async function POST(request: NextRequest) {
 
     const currentStock = await Stock.find(stockQuery).lean();
     const stockByProduct: Record<string, number> = {};
-    
+
     for (const stock of currentStock) {
       const product = stock.product.toString();
       stockByProduct[product] = (stockByProduct[product] || 0) + stock.unit;
@@ -165,35 +171,38 @@ export async function POST(request: NextRequest) {
 
       // Calculate demand using sophisticated algorithm
       const currentStockLevel = stockByProduct[product] || 0;
-      
+
       // Base demand calculation
       let baseDemand = salesData.averageDailySales * demandDays;
-      
+
       // Apply safety stock factor
       baseDemand *= safetyStockFactor;
-      
+
       // Apply seasonal adjustment
       baseDemand *= seasonalAdjustment;
-      
+
       // Consider sales frequency and variability
-      const variabilityFactor = salesData.maxDailySales / (salesData.averageDailySales || 1);
+      const variabilityFactor =
+        salesData.maxDailySales / (salesData.averageDailySales || 1);
       baseDemand *= Math.min(variabilityFactor, 2.0); // Cap at 2x
-      
+
       // Consider sales frequency (more frequent sales = higher demand)
       const frequencyFactor = Math.min(salesData.salesFrequency * 2, 1.5);
       baseDemand *= frequencyFactor;
-      
+
       // Subtract current stock
       const netDemand = Math.max(0, Math.ceil(baseDemand - currentStockLevel));
-      
+
       if (netDemand > 0) {
         const demand = {
           location: outlet || warehouse,
           locationType: outlet ? "Outlet" : "Warehouse",
-          products: [{
-            product: product,
-            quantity: netDemand,
-          }],
+          products: [
+            {
+              product: product,
+              quantity: netDemand,
+            },
+          ],
           status: "Pending",
         };
 
@@ -216,7 +225,11 @@ export async function POST(request: NextRequest) {
           totalProducts: Object.keys(productSales).length,
           productsWithDemand: demands.length,
           analysisPeriod: days,
-          averageDailySales: Object.values(productSales).reduce((sum, data) => sum + data.averageDailySales, 0) / Object.keys(productSales).length,
+          averageDailySales:
+            Object.values(productSales).reduce(
+              (sum, data) => sum + data.averageDailySales,
+              0,
+            ) / Object.keys(productSales).length,
         },
       },
       message: `Successfully generated ${generatedCount} demands`,
@@ -228,4 +241,4 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     );
   }
-} 
+}

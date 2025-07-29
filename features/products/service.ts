@@ -35,15 +35,23 @@ export async function handlePost(request: NextRequest) {
     const { name, barcode, vendor, brand, category } = body;
 
     // Basic validation
-    if (!name?.trim()) return createValidationErrorResponse("Product name is required");
-    if (!barcode?.trim()) return createValidationErrorResponse("Product barcode is required");
-    if (!vendor) return createValidationErrorResponse("Product vendor is required");
-    if (!brand) return createValidationErrorResponse("Product brand is required");
-    if (!category) return createValidationErrorResponse("Product category is required");
+    if (!name?.trim())
+      return createValidationErrorResponse("Product name is required");
+    if (!barcode?.trim())
+      return createValidationErrorResponse("Product barcode is required");
+    if (!vendor)
+      return createValidationErrorResponse("Product vendor is required");
+    if (!brand)
+      return createValidationErrorResponse("Product brand is required");
+    if (!category)
+      return createValidationErrorResponse("Product category is required");
 
     // Barcode uniqueness
     if (await Product.findOne({ barcode: barcode.trim() }))
-      return createErrorResponse("Product with this barcode already exists", 409);
+      return createErrorResponse(
+        "Product with this barcode already exists",
+        409,
+      );
 
     // Check existence of vendor, brand, category (assuming respective models)
     const [vendorExists, brandExists, categoryExists] = await Promise.all([
@@ -213,15 +221,23 @@ export async function handleUpdateById(
     }
 
     // Validation
-    if (!name?.trim()) return createValidationErrorResponse("Product name is required");
-    if (!barcode?.trim()) return createValidationErrorResponse("Product barcode is required");
-    if (!vendor) return createValidationErrorResponse("Product vendor is required");
-    if (!brand) return createValidationErrorResponse("Product brand is required");
-    if (!category) return createValidationErrorResponse("Product category is required");
+    if (!name?.trim())
+      return createValidationErrorResponse("Product name is required");
+    if (!barcode?.trim())
+      return createValidationErrorResponse("Product barcode is required");
+    if (!vendor)
+      return createValidationErrorResponse("Product vendor is required");
+    if (!brand)
+      return createValidationErrorResponse("Product brand is required");
+    if (!category)
+      return createValidationErrorResponse("Product category is required");
 
     // Barcode uniqueness (exclude current product)
     if (await Product.findOne({ _id: { $ne: id }, barcode: barcode.trim() }))
-      return createErrorResponse("Product with this barcode already exists", 409);
+      return createErrorResponse(
+        "Product with this barcode already exists",
+        409,
+      );
 
     // Check existence of vendor, brand, category
     const [vendorExists, brandExists, categoryExists] = await Promise.all([

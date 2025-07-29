@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     if (!query) {
       return NextResponse.json(
         { message: "Query parameter is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     console.error("Product search error:", error);
     return NextResponse.json(
       { success: false, message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
-} 
+}

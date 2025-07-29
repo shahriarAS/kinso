@@ -31,12 +31,12 @@ export const productsApi = createApi({
       providesTags: (result) =>
         result?.data
           ? [
-            ...result.data.map(({ _id }) => ({
-              type: "Product" as const,
-              _id,
-            })),
-            { type: "Product", id: "LIST" },
-          ]
+              ...result.data.map(({ _id }) => ({
+                type: "Product" as const,
+                _id,
+              })),
+              { type: "Product", id: "LIST" },
+            ]
           : [{ type: "Product", id: "LIST" }],
     }),
 
@@ -50,10 +50,7 @@ export const productsApi = createApi({
     }),
 
     // Create new product
-    createProduct: builder.mutation<
-      ApiResponse<Product>,
-      ProductInput
-    >({
+    createProduct: builder.mutation<ApiResponse<Product>, ProductInput>({
       query: (product) => ({
         url: "/",
         method: "POST",
@@ -94,5 +91,5 @@ export const {
   useGetProductQuery,
   useCreateProductMutation,
   useUpdateProductMutation,
-  useDeleteProductMutation
+  useDeleteProductMutation,
 } = productsApi;

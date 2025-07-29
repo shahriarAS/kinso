@@ -41,13 +41,13 @@ const SaleSchema: Schema = new Schema(
     ],
     paymentMethods: [
       {
-        method: { 
-          type: String, 
-          required: true, 
-          enum: ["CASH", "BKASH", "ROCKET", "NAGAD", "BANK", "CARD"] 
+        method: {
+          type: String,
+          required: true,
+          enum: ["CASH", "BKASH", "ROCKET", "NAGAD", "BANK", "CARD"],
         },
         amount: { type: Number, required: true, min: 0 },
-      }
+      },
     ],
     discountAmount: { type: Number, default: 0, min: 0 },
     notes: { type: String, trim: true },
@@ -64,4 +64,5 @@ SaleSchema.index({ saleDate: 1 });
 SaleSchema.index({ paymentMethod: 1 });
 SaleSchema.index({ createdBy: 1 });
 
-export default mongoose.models.Sale || mongoose.model<ISale>("Sale", SaleSchema);
+export default mongoose.models.Sale ||
+  mongoose.model<ISale>("Sale", SaleSchema);

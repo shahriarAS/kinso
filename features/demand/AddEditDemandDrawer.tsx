@@ -83,7 +83,7 @@ export const AddEditDemandDrawer: React.FC<AddEditDemandDrawerProps> = ({
     }
 
     // Validate that all products have been selected
-    const hasEmptyProducts = products.some(p => !p.product);
+    const hasEmptyProducts = products.some((p) => !p.product);
     if (hasEmptyProducts) {
       message.error("Please select all products");
       return;
@@ -103,67 +103,80 @@ export const AddEditDemandDrawer: React.FC<AddEditDemandDrawerProps> = ({
     setProducts([...products, { product: "", quantity: 1 }]);
   }, [products]);
 
-  const updateProduct = useCallback((index: number, field: string, value: any) => {
-    const updatedProducts = [...products];
-    updatedProducts[index] = { ...updatedProducts[index], [field]: value };
-    setProducts(updatedProducts);
-  }, [products]);
+  const updateProduct = useCallback(
+    (index: number, field: string, value: any) => {
+      const updatedProducts = [...products];
+      updatedProducts[index] = { ...updatedProducts[index], [field]: value };
+      setProducts(updatedProducts);
+    },
+    [products],
+  );
 
-  const removeProduct = useCallback((index: number) => {
-    setProducts(products.filter((_, i) => i !== index));
-  }, [products]);
+  const removeProduct = useCallback(
+    (index: number) => {
+      setProducts(products.filter((_, i) => i !== index));
+    },
+    [products],
+  );
 
-  const productColumns = useMemo(() => [
-    {
-      title: "Product",
-      dataIndex: "product",
-      key: "product",
-      render: (value: string, record: any, index: number) => (
-        <Select
-          value={value || undefined}
-          onChange={(val) => updateProduct(index, "product", val)}
-          placeholder="Select product"
-          showSearch
-          filterOption={(input, option) =>
-            (option?.label as string)?.toLowerCase().includes(input.toLowerCase())
-          }
-          options={productsData?.data?.map((product) => ({
-            label: `${product.name} - ${product.barcode}`,
-            value: product._id,
-          })) || []}
-          className="w-full"
-        />
-      ),
-    },
-    {
-      title: "Quantity",
-      dataIndex: "quantity",
-      key: "quantity",
-      width: 150,
-      render: (value: number, record: any, index: number) => (
-        <InputNumber
-          min={1}
-          value={value}
-          onChange={(val) => updateProduct(index, "quantity", val || 1)}
-          className="w-full"
-        />
-      ),
-    },
-    {
-      title: "Action",
-      key: "action",
-      width: 80,
-      render: (_: any, record: any, index: number) => (
-        <Button
-          type="text"
-          danger
-          icon={<DeleteOutlined />}
-          onClick={() => removeProduct(index)}
-          size="small"
-        />
-      ),
-    },
-  ], [productsData?.data, updateProduct, removeProduct]);
+  const productColumns = useMemo(
+    () => [
+      {
+        title: "Product",
+        dataIndex: "product",
+        key: "product",
+        render: (value: string, record: any, index: number) => (
+          <Select
+            value={value || undefined}
+            onChange={(val) => updateProduct(index, "product", val)}
+            placeholder="Select product"
+            showSearch
+            filterOption={(input, option) =>
+              (option?.label as string)
+                ?.toLowerCase()
+                .includes(input.toLowerCase())
+            }
+            options={
+              productsData?.data?.map((product) => ({
+                label: `${product.name} - ${product.barcode}`,
+                value: product._id,
+              })) || []
+            }
+            className="w-full"
+          />
+        ),
+      },
+      {
+        title: "Quantity",
+        dataIndex: "quantity",
+        key: "quantity",
+        width: 150,
+        render: (value: number, record: any, index: number) => (
+          <InputNumber
+            min={1}
+            value={value}
+            onChange={(val) => updateProduct(index, "quantity", val || 1)}
+            className="w-full"
+          />
+        ),
+      },
+      {
+        title: "Action",
+        key: "action",
+        width: 80,
+        render: (_: any, record: any, index: number) => (
+          <Button
+            type="text"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => removeProduct(index)}
+            size="small"
+          />
+        ),
+      },
+    ],
+    [productsData?.data, updateProduct, removeProduct],
+  );
 
   const initialValues = demand
     ? {
@@ -176,52 +189,55 @@ export const AddEditDemandDrawer: React.FC<AddEditDemandDrawerProps> = ({
         location: undefined,
       };
 
-  const ProductsSection = useMemo(() => (
-    <>
-      <Divider orientation="left">Products</Divider>
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h4 className="font-medium">Products List</h4>
-          <Button
-            type="dashed"
-            icon={<PlusOutlined />}
-            onClick={addProduct}
-            disabled={productsLoading}
-          >
-            Add Product
-          </Button>
-        </div>
-
-        <Table
-          dataSource={products.map((product, index) => ({
-            ...product,
-            key: index,
-          }))}
-          columns={productColumns}
-          pagination={false}
-          size="small"
-          locale={{
-            emptyText: "No products added. Click 'Add Product' to start.",
-          }}
-        />
-
-        {products.length > 0 && (
-          <div className="bg-gray-50 p-4 rounded-md">
-            <div className="flex justify-between">
-              <span className="font-medium">Total Items:</span>
-              <span className="font-bold">{products.length}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="font-medium">Total Quantity:</span>
-              <span className="font-bold text-blue-600">
-                {products.reduce((sum, p) => sum + (p.quantity || 0), 0)}
-              </span>
-            </div>
+  const ProductsSection = useMemo(
+    () => (
+      <>
+        <Divider orientation="left">Products</Divider>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h4 className="font-medium">Products List</h4>
+            <Button
+              type="dashed"
+              icon={<PlusOutlined />}
+              onClick={addProduct}
+              disabled={productsLoading}
+            >
+              Add Product
+            </Button>
           </div>
-        )}
-      </div>
-    </>
-  ), [products, productsLoading, addProduct, productColumns]);
+
+          <Table
+            dataSource={products.map((product, index) => ({
+              ...product,
+              key: index,
+            }))}
+            columns={productColumns}
+            pagination={false}
+            size="small"
+            locale={{
+              emptyText: "No products added. Click 'Add Product' to start.",
+            }}
+          />
+
+          {products.length > 0 && (
+            <div className="bg-gray-50 p-4 rounded-md">
+              <div className="flex justify-between">
+                <span className="font-medium">Total Items:</span>
+                <span className="font-bold">{products.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Total Quantity:</span>
+                <span className="font-bold text-blue-600">
+                  {products.reduce((sum, p) => sum + (p.quantity || 0), 0)}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      </>
+    ),
+    [products, productsLoading, addProduct, productColumns],
+  );
 
   return (
     <Drawer
@@ -233,14 +249,12 @@ export const AddEditDemandDrawer: React.FC<AddEditDemandDrawerProps> = ({
         body: { paddingBottom: 80 },
       }}
       footer={
-        <div style={{ textAlign: 'right' }}>
+        <div style={{ textAlign: "right" }}>
           <Space>
-            <Button onClick={onClose}>
-              Cancel
-            </Button>
-            <Button 
-              type="primary" 
-              onClick={() => form.submit()} 
+            <Button onClick={onClose}>Cancel</Button>
+            <Button
+              type="primary"
+              onClick={() => form.submit()}
               loading={loading}
             >
               {demand ? "Update" : "Create"}
@@ -260,7 +274,9 @@ export const AddEditDemandDrawer: React.FC<AddEditDemandDrawerProps> = ({
             <Form.Item
               name="locationType"
               label="Location Type"
-              rules={[{ required: true, message: "Please select location type" }]}
+              rules={[
+                { required: true, message: "Please select location type" },
+              ]}
             >
               <Select
                 size="large"
@@ -273,28 +289,38 @@ export const AddEditDemandDrawer: React.FC<AddEditDemandDrawerProps> = ({
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item noStyle shouldUpdate={(prevValues, currentValues) => 
-              prevValues.locationType !== currentValues.locationType
-            }>
+            <Form.Item
+              noStyle
+              shouldUpdate={(prevValues, currentValues) =>
+                prevValues.locationType !== currentValues.locationType
+              }
+            >
               {({ getFieldValue }) => {
-                const locationType = getFieldValue('locationType');
-                const locations = locationType === "Warehouse" 
-                  ? warehousesData?.data || []
-                  : outletsData?.data || [];
-                
+                const locationType = getFieldValue("locationType");
+                const locations =
+                  locationType === "Warehouse"
+                    ? warehousesData?.data || []
+                    : outletsData?.data || [];
+
                 return (
                   <Form.Item
                     name="location"
                     label="Location"
-                    rules={[{ required: true, message: "Please select location" }]}
+                    rules={[
+                      { required: true, message: "Please select location" },
+                    ]}
                   >
                     <Select
                       size="large"
                       placeholder="Select location"
                       showSearch
-                      loading={locationType === "Warehouse" ? warehousesLoading : false}
+                      loading={
+                        locationType === "Warehouse" ? warehousesLoading : false
+                      }
                       filterOption={(input, option) =>
-                        (option?.label as string)?.toLowerCase().includes(input.toLowerCase())
+                        (option?.label as string)
+                          ?.toLowerCase()
+                          .includes(input.toLowerCase())
                       }
                       options={locations.map((location: any) => ({
                         label: location.name,

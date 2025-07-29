@@ -44,10 +44,7 @@ export const vendorApi = createApi({
       providesTags: (result, error, id) => [{ type: "Vendor", id }],
     }),
 
-    createVendor: builder.mutation<
-      ApiResponse<Vendor>,
-      VendorInput
-    >({
+    createVendor: builder.mutation<ApiResponse<Vendor>, VendorInput>({
       query: (vendor) => ({
         url: "/",
         method: "POST",
@@ -97,4 +94,4 @@ export const {
   useUpdateVendorMutation,
   useDeleteVendorMutation,
   useGetAllVendorsQuery,
-} = vendorApi; 
+} = vendorApi;

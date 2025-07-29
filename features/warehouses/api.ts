@@ -27,12 +27,12 @@ export const warehousesApi = createApi({
       providesTags: (result) =>
         result?.data
           ? [
-            ...result.data.map(({ _id }) => ({
-              type: "Warehouse" as const,
-              _id,
-            })),
-            { type: "Warehouse", id: "LIST" },
-          ]
+              ...result.data.map(({ _id }) => ({
+                type: "Warehouse" as const,
+                _id,
+              })),
+              { type: "Warehouse", id: "LIST" },
+            ]
           : [{ type: "Warehouse", id: "LIST" }],
     }),
 
@@ -46,10 +46,7 @@ export const warehousesApi = createApi({
     }),
 
     // Create new warehouse
-    createWarehouse: builder.mutation<
-      ApiResponse<Warehouse>,
-      WarehouseInput
-    >({
+    createWarehouse: builder.mutation<ApiResponse<Warehouse>, WarehouseInput>({
       query: (warehouse) => ({
         url: "/",
         method: "POST",

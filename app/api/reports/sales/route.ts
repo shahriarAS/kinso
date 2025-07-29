@@ -1,3 +1,3 @@
 import { handleGetSalesReport } from "@/features/reports/service";
 
-export const GET = handleGetSalesReport; 
+export const GET = handleGetSalesReport;

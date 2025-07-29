@@ -1,10 +1,10 @@
 "use client";
 import React, { useState, useMemo, useCallback } from "react";
 import { Tag } from "antd";
-import { 
-  GenericTable, 
-  type TableColumn, 
-  type TableAction 
+import {
+  GenericTable,
+  type TableColumn,
+  type TableAction,
 } from "@/components/common";
 import { Stock } from "../types";
 import MoveStockDrawer from "./MoveStockDrawer";
@@ -34,16 +34,19 @@ const StockTable: React.FC<StockTableProps> = ({
   const [moveDrawerOpen, setMoveDrawerOpen] = useState(false);
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
 
-  const handleMoveStock = useCallback((stock: Stock) => {
-    if (stock.unit === 0) return;
-    
-    if (onMoveStock) {
-      onMoveStock(stock);
-    } else {
-      setSelectedStock(stock);
-      setMoveDrawerOpen(true);
-    }
-  }, [onMoveStock]);
+  const handleMoveStock = useCallback(
+    (stock: Stock) => {
+      if (stock.unit === 0) return;
+
+      if (onMoveStock) {
+        onMoveStock(stock);
+      } else {
+        setSelectedStock(stock);
+        setMoveDrawerOpen(true);
+      }
+    },
+    [onMoveStock],
+  );
 
   const handleCloseMoveDrawer = useCallback(() => {
     setMoveDrawerOpen(false);
@@ -53,7 +56,9 @@ const StockTable: React.FC<StockTableProps> = ({
   const getStockStatus = useCallback((stock: Stock) => {
     const expireDate = new Date(stock.expireDate);
     const today = new Date();
-    const daysUntilExpiry = Math.ceil((expireDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const daysUntilExpiry = Math.ceil(
+      (expireDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+    );
 
     if (daysUntilExpiry < 0) return <Tag color="red">Expired</Tag>;
     if (daysUntilExpiry <= 30) return <Tag color="orange">Expiring Soon</Tag>;
@@ -61,86 +66,99 @@ const StockTable: React.FC<StockTableProps> = ({
     return <Tag color="green">Good</Tag>;
   }, []);
 
-  const columns: TableColumn<Stock>[] = useMemo(() => [
-    {
-      title: "Product",
-      key: "product",
-      render: (stock: Stock) => (
-        <div>
-          <div className="font-medium">
-            {typeof stock.product === 'string' ? stock.product : stock.product.name}
-          </div>
-          <div className="text-sm text-gray-500">
-            {typeof stock.product === 'string' ? '' : stock.product.barcode}
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Location",
-      key: "location",
-      render: (stock: Stock) => (
-        <div>
-          <div className="font-medium">
-            {typeof stock.location === 'string' ? stock.location : stock.location.name}
-          </div>
-          <div className="text-sm text-gray-500">{stock.locationType}</div>
-        </div>
-      ),
-    },
-    {
-      title: "Units",
-      dataIndex: "unit",
-      key: "unit",
-      render: (unit: number) => (
-        <span className={`font-medium ${unit < 10 ? "text-red-600" : ""}`}>
-          {unit}
-        </span>
-      ),
-    },
-    {
-      title: "MRP",
-      dataIndex: "mrp",
-      key: "mrp",
-      render: (mrp: number) => `$${mrp.toFixed(2)}`,
-    },
-    {
-      title: "TP",
-      dataIndex: "tp",
-      key: "tp",
-      render: (tp: number) => `$${tp.toFixed(2)}`,
-    },
-    {
-      title: "Expire Date",
-      dataIndex: "expireDate",
-      key: "expireDate",
-      render: (expireDate: string) => {
-        const date = new Date(expireDate);
-        const today = new Date();
-        const daysUntilExpiry = Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-        
-        return (
+  const columns: TableColumn<Stock>[] = useMemo(
+    () => [
+      {
+        title: "Product",
+        key: "product",
+        render: (stock: Stock) => (
           <div>
-            <div className="font-medium">{date.toLocaleDateString()}</div>
-            <div className={`text-sm ${daysUntilExpiry < 0 ? "text-red-600" : daysUntilExpiry <= 30 ? "text-orange-600" : "text-gray-500"}`}>
-              {daysUntilExpiry < 0 ? "Expired" : `${daysUntilExpiry} days left`}
+            <div className="font-medium">
+              {typeof stock.product === "string"
+                ? stock.product
+                : stock.product.name}
+            </div>
+            <div className="text-sm text-gray-500">
+              {typeof stock.product === "string" ? "" : stock.product.barcode}
             </div>
           </div>
-        );
+        ),
       },
-    },
-    {
-      title: "Entry Date",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      render: (createdAt: string) => new Date(createdAt).toLocaleDateString(),
-    },
-    {
-      title: "Status",
-      key: "status",
-      render: (stock: Stock) => getStockStatus(stock),
-    },
-  ], [getStockStatus]);
+      {
+        title: "Location",
+        key: "location",
+        render: (stock: Stock) => (
+          <div>
+            <div className="font-medium">
+              {typeof stock.location === "string"
+                ? stock.location
+                : stock.location.name}
+            </div>
+            <div className="text-sm text-gray-500">{stock.locationType}</div>
+          </div>
+        ),
+      },
+      {
+        title: "Units",
+        dataIndex: "unit",
+        key: "unit",
+        render: (unit: number) => (
+          <span className={`font-medium ${unit < 10 ? "text-red-600" : ""}`}>
+            {unit}
+          </span>
+        ),
+      },
+      {
+        title: "MRP",
+        dataIndex: "mrp",
+        key: "mrp",
+        render: (mrp: number) => `$${mrp.toFixed(2)}`,
+      },
+      {
+        title: "TP",
+        dataIndex: "tp",
+        key: "tp",
+        render: (tp: number) => `$${tp.toFixed(2)}`,
+      },
+      {
+        title: "Expire Date",
+        dataIndex: "expireDate",
+        key: "expireDate",
+        render: (expireDate: string) => {
+          const date = new Date(expireDate);
+          const today = new Date();
+          const daysUntilExpiry = Math.ceil(
+            (date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+          );
+
+          return (
+            <div>
+              <div className="font-medium">{date.toLocaleDateString()}</div>
+              <div
+                className={`text-sm ${daysUntilExpiry < 0 ? "text-red-600" : daysUntilExpiry <= 30 ? "text-orange-600" : "text-gray-500"}`}
+              >
+                {daysUntilExpiry < 0
+                  ? "Expired"
+                  : `${daysUntilExpiry} days left`}
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        title: "Entry Date",
+        dataIndex: "createdAt",
+        key: "createdAt",
+        render: (createdAt: string) => new Date(createdAt).toLocaleDateString(),
+      },
+      {
+        title: "Status",
+        key: "status",
+        render: (stock: Stock) => getStockStatus(stock),
+      },
+    ],
+    [getStockStatus],
+  );
 
   // Define actions
   const actions: TableAction<Stock>[] = useMemo(() => {
@@ -205,4 +223,4 @@ const StockTable: React.FC<StockTableProps> = ({
   );
 };
 
-export default StockTable; 
+export default StockTable;

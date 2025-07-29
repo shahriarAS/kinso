@@ -85,7 +85,10 @@ export const discountsApi = createApi({
     }),
 
     // Delete discount
-    deleteDiscount: builder.mutation<{ success: boolean; message: string }, string>({
+    deleteDiscount: builder.mutation<
+      { success: boolean; message: string },
+      string
+    >({
       query: (_id) => ({
         url: `/${_id}`,
         method: "DELETE",
@@ -94,7 +97,10 @@ export const discountsApi = createApi({
     }),
 
     // Get all active discounts
-    getActiveDiscounts: builder.query<{ success: boolean; data: Discount[] }, void>({
+    getActiveDiscounts: builder.query<
+      { success: boolean; data: Discount[] },
+      void
+    >({
       query: () => ({
         url: "/",
         method: "GET",
@@ -112,4 +118,4 @@ export const {
   useUpdateDiscountMutation,
   useDeleteDiscountMutation,
   useGetActiveDiscountsQuery,
-} = discountsApi; 
+} = discountsApi;

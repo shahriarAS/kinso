@@ -6,4 +6,4 @@ import {
 
 export const GET = handleGetById;
 export const PUT = handleUpdateById;
-export const DELETE = handleDeleteById; 
+export const DELETE = handleDeleteById;

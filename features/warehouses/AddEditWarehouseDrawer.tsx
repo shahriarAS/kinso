@@ -35,16 +35,14 @@ const AddEditWarehouseDrawer: React.FC<AddEditWarehouseDrawerProps> = ({
         type: "input",
         placeholder: "Enter warehouse name",
         rules: [{ required: true, message: "Please enter warehouse name" }],
-      }
+      },
     ],
     [],
   );
 
   // Set initial values for edit mode
   const initialValues =
-    isEditing && warehouse
-      ? { name: warehouse.name}
-      : undefined;
+    isEditing && warehouse ? { name: warehouse.name } : undefined;
 
   const handleSubmit = async (values: WarehouseInput) => {
     try {

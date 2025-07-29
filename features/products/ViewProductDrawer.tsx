@@ -60,22 +60,22 @@ export default function ViewProductDrawer({
             </Descriptions.Item>
             <Descriptions.Item label="Vendor">
               <span className="capitalize">
-                {typeof product.vendor === "string" 
-                  ? product.vendor 
+                {typeof product.vendor === "string"
+                  ? product.vendor
                   : product.vendor.name}
               </span>
             </Descriptions.Item>
             <Descriptions.Item label="Brand">
               <span className="capitalize">
-                {typeof product.brand === "string" 
-                  ? product.brand 
+                {typeof product.brand === "string"
+                  ? product.brand
                   : product.brand.name}
               </span>
             </Descriptions.Item>
             <Descriptions.Item label="Category">
               <span className="capitalize">
-                {typeof product.category === "string" 
-                  ? product.category 
+                {typeof product.category === "string"
+                  ? product.category
                   : product.category.name}
               </span>
             </Descriptions.Item>

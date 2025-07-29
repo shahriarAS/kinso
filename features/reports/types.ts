@@ -160,4 +160,4 @@ export interface ProfitLossReport {
     }>;
   };
   message?: string;
-} 
+}

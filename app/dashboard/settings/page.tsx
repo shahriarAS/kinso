@@ -99,7 +99,8 @@ export default function SettingsPage() {
       setPendingTab(key);
       Modal.confirm({
         title: "Unsaved Changes",
-        content: "You have unsaved changes. Are you sure you want to switch tabs and lose your changes?",
+        content:
+          "You have unsaved changes. Are you sure you want to switch tabs and lose your changes?",
         okText: "Switch Tab",
         cancelText: "Stay",
         onOk: () => {
@@ -199,7 +200,10 @@ export default function SettingsPage() {
                       type="default"
                       size="large"
                       disabled={isLoading || isSaving}
-                      onClick={() => { generalForm.resetFields(); setGeneralTouched(false); }}
+                      onClick={() => {
+                        generalForm.resetFields();
+                        setGeneralTouched(false);
+                      }}
                       className="transition-all duration-200"
                     >
                       Reset
@@ -229,7 +233,12 @@ export default function SettingsPage() {
                   layout="vertical"
                   form={businessForm}
                   onFinish={handleBusinessSave}
-                  initialValues={{ companyName: "", companyEmail: "", companyPhone: "", companyAddress: "" }}
+                  initialValues={{
+                    companyName: "",
+                    companyEmail: "",
+                    companyPhone: "",
+                    companyAddress: "",
+                  }}
                   onValuesChange={() => setBusinessTouched(true)}
                 >
                   <Row gutter={16}>
@@ -238,11 +247,17 @@ export default function SettingsPage() {
                         name="companyName"
                         label="Business Name"
                         rules={[
-                          { required: true, message: "Please enter the business name." },
+                          {
+                            required: true,
+                            message: "Please enter the business name.",
+                          },
                         ]}
                         extra="Your registered business name."
                       >
-                        <Input placeholder="Business Name" disabled={isLoading || isSaving} />
+                        <Input
+                          placeholder="Business Name"
+                          disabled={isLoading || isSaving}
+                        />
                       </Form.Item>
                     </Col>
                     <Col {...colProps}>
@@ -250,12 +265,21 @@ export default function SettingsPage() {
                         name="companyEmail"
                         label="Business Email"
                         rules={[
-                          { required: true, message: "Please enter the business email." },
-                          { type: "email", message: "Please enter a valid email address." },
+                          {
+                            required: true,
+                            message: "Please enter the business email.",
+                          },
+                          {
+                            type: "email",
+                            message: "Please enter a valid email address.",
+                          },
                         ]}
                         extra="Official email for business communication."
                       >
-                        <Input placeholder="Business Email" disabled={isLoading || isSaving} />
+                        <Input
+                          placeholder="Business Email"
+                          disabled={isLoading || isSaving}
+                        />
                       </Form.Item>
                     </Col>
                   </Row>
@@ -265,11 +289,17 @@ export default function SettingsPage() {
                         name="companyPhone"
                         label="Phone"
                         rules={[
-                          { required: true, message: "Please enter the phone number." },
+                          {
+                            required: true,
+                            message: "Please enter the phone number.",
+                          },
                         ]}
                         extra="Primary contact number."
                       >
-                        <Input placeholder="Phone Number" disabled={isLoading || isSaving} />
+                        <Input
+                          placeholder="Phone Number"
+                          disabled={isLoading || isSaving}
+                        />
                       </Form.Item>
                     </Col>
                     <Col {...colProps}>
@@ -277,11 +307,17 @@ export default function SettingsPage() {
                         name="companyAddress"
                         label="Address"
                         rules={[
-                          { required: true, message: "Please enter the business address." },
+                          {
+                            required: true,
+                            message: "Please enter the business address.",
+                          },
                         ]}
                         extra="Business address for invoices."
                       >
-                        <Input placeholder="Business Address" disabled={isLoading || isSaving} />
+                        <Input
+                          placeholder="Business Address"
+                          disabled={isLoading || isSaving}
+                        />
                       </Form.Item>
                     </Col>
                   </Row>
@@ -293,7 +329,10 @@ export default function SettingsPage() {
                       type="default"
                       size="large"
                       disabled={isLoading || isSaving}
-                      onClick={() => { businessForm.resetFields(); setBusinessTouched(false); }}
+                      onClick={() => {
+                        businessForm.resetFields();
+                        setBusinessTouched(false);
+                      }}
                       className="transition-all duration-200"
                     >
                       Reset
@@ -355,8 +394,7 @@ export default function SettingsPage() {
         .ant-input,
         .ant-input-password,
         .ant-input-textarea {
-          transition:
-            border-color 0.2s;
+          transition: border-color 0.2s;
         }
         .animate-fade-in {
           animation: fadeIn 0.5s;

@@ -32,9 +32,7 @@ const AddEditOutletDrawer: React.FC<AddEditOutletDrawerProps> = ({
         label: "Outlet Name",
         type: "input",
         placeholder: "Enter outlet name",
-        rules: [
-          { required: true, message: "Please enter outlet name" },
-        ],
+        rules: [{ required: true, message: "Please enter outlet name" }],
       },
       {
         name: "type",
@@ -44,11 +42,12 @@ const AddEditOutletDrawer: React.FC<AddEditOutletDrawerProps> = ({
         options: OUTLET_TYPES.map((type) => ({ label: type, value: type })),
       },
     ],
-    []
+    [],
   );
 
   // Set initial values for edit mode
-  const initialValues = isEditing && outlet ? { name: outlet.name, type: outlet.type } : undefined;
+  const initialValues =
+    isEditing && outlet ? { name: outlet.name, type: outlet.type } : undefined;
 
   const handleSubmit = async (values: OutletInput) => {
     try {
@@ -82,4 +81,4 @@ const AddEditOutletDrawer: React.FC<AddEditOutletDrawerProps> = ({
   );
 };
 
-export default AddEditOutletDrawer; 
+export default AddEditOutletDrawer;

@@ -3,7 +3,11 @@
 import React from "react";
 import { Tag } from "antd";
 import { Icon } from "@iconify/react";
-import { GenericTable, type TableColumn, type TableAction } from "@/components/common";
+import {
+  GenericTable,
+  type TableColumn,
+  type TableAction,
+} from "@/components/common";
 import { Demand } from "./types";
 
 interface DemandTableProps {
@@ -52,9 +56,9 @@ export const DemandTable: React.FC<DemandTableProps> = ({
           <Icon icon="lineicons:package" className="mr-2 text-gray-400" />
           <div>
             <div className="font-medium text-gray-900">
-              {typeof demand.location === 'string' 
-                ? demand.location 
-                : demand.location?.name || 'N/A'}
+              {typeof demand.location === "string"
+                ? demand.location
+                : demand.location?.name || "N/A"}
             </div>
             <div className="text-sm text-gray-500">{demand.locationType}</div>
           </div>
@@ -66,7 +70,9 @@ export const DemandTable: React.FC<DemandTableProps> = ({
       key: "products",
       render: (_, demand: Demand) => (
         <div>
-          <div className="font-medium text-gray-900">{demand.products.length} items</div>
+          <div className="font-medium text-gray-900">
+            {demand.products.length} items
+          </div>
           <div className="text-sm text-gray-500">
             Total Qty: {demand.products.reduce((sum, p) => sum + p.quantity, 0)}
           </div>
@@ -77,9 +83,7 @@ export const DemandTable: React.FC<DemandTableProps> = ({
       title: <span className="font-medium text-base">Status</span>,
       key: "status",
       render: (_, demand: Demand) => (
-        <Tag color={getStatusColor(demand.status)}>
-          {demand.status}
-        </Tag>
+        <Tag color={getStatusColor(demand.status)}>{demand.status}</Tag>
       ),
     },
     {
@@ -135,7 +139,7 @@ export const DemandTable: React.FC<DemandTableProps> = ({
             title: "Delete Demand",
             description: "Are you sure you want to delete this demand?",
           },
-        }
+        },
       );
     }
 

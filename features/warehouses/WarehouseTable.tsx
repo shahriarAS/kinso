@@ -25,7 +25,9 @@ const WarehouseTable: React.FC = () => {
   const [selectedTypeId, setSelectedTypeId] = useState<string>("");
   const { success, error: notifyError } = useNotification();
   const { open, close, isOpen } = useModal("warehouse-drawer");
-  const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null);
+  const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(
+    null,
+  );
 
   const {
     data: warehousesResponse,
@@ -35,10 +37,11 @@ const WarehouseTable: React.FC = () => {
   } = useGetWarehousesQuery({
     page: currentPage,
     limit: pageSize,
-    search: debouncedSearchText
+    search: debouncedSearchText,
   });
 
-  const [deleteWarehouse, { isLoading: isDeleting }] = useDeleteWarehouseMutation();
+  const [deleteWarehouse, { isLoading: isDeleting }] =
+    useDeleteWarehouseMutation();
 
   const handleSearch = (value: string) => {
     setSearchText(value);
@@ -120,11 +123,7 @@ const WarehouseTable: React.FC = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold text-gray-800">Warehouses</h2>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={handleAdd}
-        >
+        <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
           Add Warehouse
         </Button>
       </div>
@@ -136,7 +135,7 @@ const WarehouseTable: React.FC = () => {
           enterButton={<SearchOutlined />}
           size="large"
           onSearch={handleSearch}
-          onChange={e => handleSearch(e.target.value)}
+          onChange={(e) => handleSearch(e.target.value)}
           value={searchText}
           className="flex-1 max-w-md"
         />
@@ -156,7 +155,8 @@ const WarehouseTable: React.FC = () => {
           total: warehousesResponse?.pagination?.total || 0,
           showSizeChanger: true,
           showQuickJumper: true,
-          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`,
           onChange: (page, size) => {
             setCurrentPage(page);
             setPageSize(size || 10);
@@ -174,4 +174,4 @@ const WarehouseTable: React.FC = () => {
   );
 };
 
-export default WarehouseTable; 
+export default WarehouseTable;

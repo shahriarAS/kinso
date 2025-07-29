@@ -1,10 +1,10 @@
 export const PAYMENT_METHODS = [
   "CASH",
-  "BKASH", 
+  "BKASH",
   "ROCKET",
   "NAGAD",
   "BANK",
-  "CARD"
+  "CARD",
 ];
 
 export const PAYMENT_METHOD_OPTIONS = [

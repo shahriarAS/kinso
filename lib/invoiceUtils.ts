@@ -37,8 +37,8 @@ export function mapSaleToInvoiceData(
     date: new Date(sale.saleDate).toLocaleDateString(),
     customer: {
       name: sale.customer?.name || "Walk-in Customer",
-      email: sale.customer?.contactInfo?.email,
-      phone: sale.customer?.contactInfo?.phone || "N/A",
+      email: sale.customer?.email,
+      phone: sale.customer?.phone || "N/A",
     },
     company: {
       name: settings?.companyName || "Kinso",

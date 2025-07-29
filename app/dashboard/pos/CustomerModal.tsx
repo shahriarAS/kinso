@@ -82,17 +82,6 @@ export default function CustomerModal({
           <Input placeholder="Enter phone number" />
         </Form.Item>
 
-        <Form.Item
-          name="status"
-          label="Status"
-          rules={[{ required: true, message: "Please select status" }]}
-        >
-          <Select>
-            <Select.Option value="active">Active</Select.Option>
-            <Select.Option value="inactive">Inactive</Select.Option>
-          </Select>
-        </Form.Item>
-
         <Form.Item name="notes" label="Notes">
           <Input.TextArea rows={3} placeholder="Enter any additional notes" />
         </Form.Item>

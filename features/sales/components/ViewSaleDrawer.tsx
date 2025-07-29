@@ -200,9 +200,9 @@ export default function ViewSaleDrawer({ open, onClose, saleId }: ViewSaleDrawer
                     {sale.customer ? (
                       <div>
                         <div className="font-medium">{sale.customer.name}</div>
-                        {sale.customer.contactInfo?.phone && (
+                        {sale.customer.phone && (
                           <Text type="secondary" className="text-xs">
-                            {sale.customer.contactInfo.phone}
+                            {sale.customer.phone}
                           </Text>
                         )}
                       </div>

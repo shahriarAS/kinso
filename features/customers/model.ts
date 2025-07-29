@@ -2,11 +2,9 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface ICustomer extends Document {
   name: string;
-  contactInfo: {
-    phone?: string;
-    email?: string;
-    address?: string;
-  };
+  phone: string;
+  email: string;
+  address?: string;
   membershipActive: boolean;
   totalPurchaseLastMonth: number;
   totalSales: number;
@@ -18,11 +16,9 @@ export interface ICustomer extends Document {
 const CustomerSchema: Schema = new Schema(
   {
     name: { type: String, required: true, trim: true },
-    contactInfo: {
-      phone: { type: String, trim: true },
-      email: { type: String, trim: true },
-      address: { type: String, trim: true },
-    },
+    phone: { type: String, required: true, trim: true },
+    email: { type: String, required: true, trim: true },
+    address: { type: String, trim: true },
     membershipActive: { type: Boolean, default: false },
     totalPurchaseLastMonth: { type: Number, default: 0 },
     totalSales: { type: Number, default: 0 },
@@ -30,6 +26,5 @@ const CustomerSchema: Schema = new Schema(
   },
   { timestamps: true },
 );
-CustomerSchema.index({ name: 1 });
 
 export default mongoose.models.Customer || mongoose.model<ICustomer>("Customer", CustomerSchema);

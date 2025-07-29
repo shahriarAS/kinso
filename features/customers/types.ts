@@ -1,11 +1,9 @@
 export interface Customer {
   _id: string;
   name: string;
-  contactInfo: {
-    phone?: string;
-    email?: string;
-    address?: string;
-  };
+  phone: string;
+  email: string;
+  address?: string;
   membershipActive: boolean;
   totalPurchaseLastMonth: number;
   totalSales: number;
@@ -14,8 +12,13 @@ export interface Customer {
   updatedAt: string;
 }
 
-export interface CustomerInput
-  extends Omit<Customer, "_id" | "createdAt" | "updatedAt"> {}
+export interface CustomerInput {
+  name: string;
+  phone: string;
+  email: string;
+  address?: string;
+  membershipActive?: boolean;
+}
 
 export interface CustomerFilters {
   search?: string;

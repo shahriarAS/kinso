@@ -46,8 +46,8 @@ export async function handleGet(request: NextRequest) {
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: "i" } },
-        { "contactInfo.phone": { $regex: search, $options: "i" } },
-        { "contactInfo.email": { $regex: search, $options: "i" } },
+        { phone: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
       ];
     }
 
@@ -90,7 +90,7 @@ export async function handlePost(request: NextRequest) {
     await dbConnect();
 
     const body = await request.json();
-    const { name, contactInfo, membershipActive, totalPurchaseLastMonth, totalSales, totalSpent } = body;
+    const { name, phone, email, address, membershipActive } = body;
 
     // Basic validation
     if (!name || name.trim().length === 0) {
@@ -100,18 +100,27 @@ export async function handlePost(request: NextRequest) {
       );
     }
 
+    if (!phone || phone.trim().length === 0) {
+      return NextResponse.json(
+        { success: false, message: "Phone number is required" },
+        { status: 400 },
+      );
+    }
+
+    if (!email || email.trim().length === 0) {
+      return NextResponse.json(
+        { success: false, message: "Email address is required" },
+        { status: 400 },
+      );
+    }
+
     // Create customer
     const customer = await CustomerModel.create({
       name: name.trim(),
-      contactInfo: {
-        phone: contactInfo?.phone?.trim() || undefined,
-        email: contactInfo?.email?.trim() || undefined,
-        address: contactInfo?.address?.trim() || undefined,
-      },
-      membershipActive: membershipActive || false,
-      totalPurchaseLastMonth: totalPurchaseLastMonth || 0,
-      totalSales: totalSales || 0,
-      totalSpent: totalSpent || 0,
+      phone: phone.trim(),
+      email: email.trim(),
+      address: address?.trim() || undefined,
+      membershipActive: membershipActive || false
     });
 
     return createSuccessResponse(customer, undefined, 201);
@@ -183,7 +192,7 @@ export async function handleUpdateById(
     await dbConnect();
 
     const body = await request.json();
-    const { name, contactInfo, membershipActive, totalPurchaseLastMonth, totalSales, totalSpent } = body;
+    const { name, phone, email, address, membershipActive } = body;
 
     // Check if customer exists
     const existingCustomer = await CustomerModel.findById(id);
@@ -199,20 +208,29 @@ export async function handleUpdateById(
       );
     }
 
+    if (!phone || phone.trim().length === 0) {
+      return NextResponse.json(
+        { success: false, message: "Phone number is required" },
+        { status: 400 },
+      );
+    }
+
+    if (!email || email.trim().length === 0) {
+      return NextResponse.json(
+        { success: false, message: "Email address is required" },
+        { status: 400 },
+      );
+    }
+
     // Update customer
     const updatedCustomer = await CustomerModel.findByIdAndUpdate(
       id,
       {
         name: name.trim(),
-        contactInfo: {
-          phone: contactInfo?.phone?.trim() || undefined,
-          email: contactInfo?.email?.trim() || undefined,
-          address: contactInfo?.address?.trim() || undefined,
-        },
+        phone: phone.trim(),
+        email: email.trim(),
+        address: address?.trim() || undefined,
         membershipActive: membershipActive !== undefined ? membershipActive : existingCustomer.membershipActive,
-        totalPurchaseLastMonth: totalPurchaseLastMonth !== undefined ? totalPurchaseLastMonth : existingCustomer.totalPurchaseLastMonth,
-        totalSales: totalSales !== undefined ? totalSales : existingCustomer.totalSales,
-        totalSpent: totalSpent !== undefined ? totalSpent : existingCustomer.totalSpent,
       },
       { new: true, runValidators: true },
     );

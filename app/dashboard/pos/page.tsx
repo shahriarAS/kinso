@@ -33,6 +33,7 @@ export default function POS() {
   const [createSale] = salesApi.useCreateSaleMutation();
   const { data: outletsData } = outletsApi.useGetOutletsQuery({ limit: 100 });
   const { data: settingsData } = useGetSettingsQuery();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const searchInputRef = useRef<any>(null);
   const { success, error } = useNotification();
 
@@ -239,7 +240,7 @@ export default function POS() {
         customer: saleData.customer || undefined,
         items: saleItems,
         paymentMethods: saleData.paymentMethods.map((pm) => ({
-          method: pm.method as any,
+          method: pm.method as any, // eslint-disable-line @typescript-eslint/no-explicit-any
           amount: pm.amount,
         })),
         discountAmount,
@@ -258,6 +259,7 @@ export default function POS() {
       }
 
       handleCheckoutSuccess();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error("Failed to complete sale");
       console.error("Sale completion error:", error);
@@ -286,10 +288,10 @@ export default function POS() {
   return (
     <>
       {/* No modal or PDFDownloadLink needed */}
-      <div className="h-full w-full p-6 px-4 relative overflow-x-hidden flex flex-col gap-4 bg-secondary rounded-xl">
+      <div className="relative flex flex-col w-full h-full gap-4 p-6 px-4 overflow-x-hidden bg-secondary rounded-xl">
         {/* Header */}
-        <div className="flex justify-between items-center mb-2">
-          <h1 className="text-4xl font-bold text-primary tracking-tight">
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-4xl font-bold tracking-tight text-primary">
             Point of Sale
           </h1>
           <div className="flex gap-4">
@@ -321,13 +323,13 @@ export default function POS() {
           {stockLoading && <POSLoadingSkeleton />}
           <div className={stockLoading ? "pointer-events-none opacity-50" : ""}>
             {/* The original grid content */}
-            <div className="gap-4 grid grid-cols-5">
-              <div className="bg-white p-6 rounded-xl col-span-3">
-                <div className="mb-8 flex gap-4 items-center">
+            <div className="grid grid-cols-5 gap-4">
+              <div className="col-span-3 p-6 bg-white rounded-xl">
+                <div className="flex items-center gap-4 mb-8">
                   <Input
                     size="large"
                     placeholder="Search products..."
-                    className="w-full rounded-xl border-gray-300"
+                    className="w-full border-gray-300 rounded-xl"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     allowClear
@@ -335,11 +337,11 @@ export default function POS() {
                   />
                 </div>
                 {stockLoading ? (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="py-8 text-center text-gray-500">
                     Loading products...
                   </div>
                 ) : filteredStocks.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="py-8 text-center text-gray-500">
                     {search
                       ? "No products found matching your search"
                       : "No products available in this outlet"}

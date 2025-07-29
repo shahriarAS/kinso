@@ -117,19 +117,19 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="h-full w-full min-h-screen p-0">
-      <div className="p-6 flex flex-col gap-10">
+    <div className="w-full h-full min-h-screen p-0">
+      <div className="flex flex-col gap-10 p-6">
         <div className="flex items-center gap-4 mb-2">
           <DashboardHeader
             title="Settings"
             subtitle="Manage your system and business settings."
           />
         </div>
-        <Card className="w-full bg-white border border-gray-200 rounded-lg p-0 relative overflow-visible">
+        <Card className="relative w-full p-0 overflow-visible bg-white border border-gray-200 rounded-lg">
           <Tabs
             activeKey={activeTab}
             type="card"
-            className="settings-tabs transition-all duration-300"
+            className="transition-all duration-300 settings-tabs"
             tabBarGutter={32}
             onChange={handleTabChange}
           >
@@ -148,7 +148,7 @@ export default function SettingsPage() {
                     Invoice Settings
                   </Divider>
                   <div className="mb-4">
-                    <div className="font-semibold text-base mb-1 flex items-center">
+                    <div className="flex items-center mb-1 text-base font-semibold">
                       Invoice Footer
                       <Tooltip title="This policy will appear on all customer invoices.">
                         <span className="ml-1 text-gray-400 cursor-pointer">
@@ -194,7 +194,7 @@ export default function SettingsPage() {
                   </div>
                   <div
                     ref={saveButtonRef}
-                    className="flex justify-end gap-2 sticky bottom-0 bg-white py-3 z-10 mt-6"
+                    className="sticky bottom-0 z-10 flex justify-end gap-2 py-3 mt-6 bg-white"
                   >
                     <Button
                       type="default"
@@ -323,7 +323,7 @@ export default function SettingsPage() {
                   </Row>
                   <div
                     ref={saveButtonRef}
-                    className="flex justify-end gap-2 sticky bottom-0 bg-white py-3 z-10 mt-6"
+                    className="sticky bottom-0 z-10 flex justify-end gap-2 py-3 mt-6 bg-white"
                   >
                     <Button
                       type="default"

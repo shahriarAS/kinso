@@ -85,6 +85,7 @@ export default function SalesHistoryPage() {
     [settingsData, userData],
   );
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleFilterChange = (key: keyof SalesHistoryFilters, value: any) => {
     setFilters((prev) => ({
       ...prev,
@@ -93,6 +94,7 @@ export default function SalesHistoryPage() {
     }));
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleDateRangeChange = (dates: any) => {
     if (dates && dates.length === 2) {
       setFilters((prev) => ({

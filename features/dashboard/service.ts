@@ -35,14 +35,14 @@ export async function handleGetStats(request: NextRequest) {
 
     // Total sales
     const totalSales = await Sale.countDocuments();
-    console.log('Total sales count:', totalSales);
+    console.log("Total sales count:", totalSales);
 
     // Total customers
     const totalCustomers = await Customer.countDocuments();
 
     // Total products
     const totalProducts = await Product.countDocuments();
-    console.log('Total products count:', totalProducts);
+    console.log("Total products count:", totalProducts);
 
     // Low stock products (dynamic threshold)
     const products = await Product.find({}, { stock: 1, name: 1 }).lean();
@@ -66,24 +66,24 @@ export async function handleGetStats(request: NextRequest) {
       const recentSales = await Sale.find()
         .sort({ createdAt: -1 })
         .limit(5)
-        .populate('customer', 'name')
+        .populate("customer", "name")
         .select(
           "_id saleId customer totalAmount paymentMethods status createdAt",
         )
         .lean();
-      
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       recentSalesFormatted = recentSales.map((s: any) => ({
         _id: s._id,
         saleId: s.saleId,
-        customerName: s.customer?.name || 'Walk-in Customer',
+        customerName: s.customer?.name || "Walk-in Customer",
         totalAmount: s.totalAmount,
         paymentMethods: s.paymentMethods || [],
-        status: s.status || 'Completed',
+        status: s.status || "Completed",
         createdAt: s.createdAt,
       }));
     } catch (error) {
-      console.error('Error fetching recent sales:', error);
+      console.error("Error fetching recent sales:", error);
       recentSalesFormatted = [];
     }
 
@@ -91,8 +91,10 @@ export async function handleGetStats(request: NextRequest) {
     let topProductsAgg: any[] = [];
     try {
       // First, let's check if we have any sales with items
-      const salesWithItems = await Sale.countDocuments({ items: { $exists: true, $ne: [] } });
-      console.log('Sales with items count:', salesWithItems);
+      const salesWithItems = await Sale.countDocuments({
+        items: { $exists: true, $ne: [] },
+      });
+      console.log("Sales with items count:", salesWithItems);
 
       topProductsAgg = await Sale.aggregate([
         { $match: { items: { $exists: true, $ne: [] } } }, // Ensure items exist
@@ -110,7 +112,9 @@ export async function handleGetStats(request: NextRequest) {
           $group: {
             _id: "$stock.product", // Group by product from stock
             totalSold: { $sum: "$items.quantity" },
-            revenue: { $sum: { $multiply: ["$items.quantity", "$items.unitPrice"] } },
+            revenue: {
+              $sum: { $multiply: ["$items.quantity", "$items.unitPrice"] },
+            },
           },
         },
         { $sort: { totalSold: -1 } },
@@ -143,10 +147,14 @@ export async function handleGetStats(request: NextRequest) {
           },
         },
       ]);
-      
-      console.log('Top products aggregation result:', topProductsAgg.length, 'products found');
+
+      console.log(
+        "Top products aggregation result:",
+        topProductsAgg.length,
+        "products found",
+      );
     } catch (error) {
-      console.error('Error fetching top products:', error);
+      console.error("Error fetching top products:", error);
       topProductsAgg = [];
     }
 
@@ -174,7 +182,7 @@ export async function handleGetStats(request: NextRequest) {
         sales: d.sales,
       }));
     } catch (error) {
-      console.error('Error fetching revenue chart:', error);
+      console.error("Error fetching revenue chart:", error);
       revenueChart = [];
     }
 
@@ -328,17 +336,17 @@ export async function handleGetSalesAnalytics(request: NextRequest) {
     switch (period) {
       case "weekly":
         groupBy = {
-          $dateToString: { format: "%Y-W%U", date: "$createdAt" }
+          $dateToString: { format: "%Y-W%U", date: "$createdAt" },
         };
         break;
       case "monthly":
         groupBy = {
-          $dateToString: { format: "%Y-%m", date: "$createdAt" }
+          $dateToString: { format: "%Y-%m", date: "$createdAt" },
         };
         break;
       default: // daily
         groupBy = {
-          $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
+          $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
         };
     }
 

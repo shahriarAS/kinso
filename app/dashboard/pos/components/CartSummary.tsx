@@ -36,7 +36,7 @@ interface CartSummaryProps {
 const SectionHeader = ({ label }: { label: string }) => (
   <div className="flex items-center my-2">
     <div className="flex-1 h-px bg-gray-200" />
-    <div className="mx-3 px-4 py-1 bg-gray-100 rounded-full text-xs font-semibold text-gray-700 text-center border border-gray-200">
+    <div className="px-4 py-1 mx-3 text-xs font-semibold text-center text-gray-700 bg-gray-100 border border-gray-200 rounded-full">
       {label}
     </div>
     <div className="flex-1 h-px bg-gray-200" />
@@ -46,17 +46,13 @@ const SectionHeader = ({ label }: { label: string }) => (
 export default function CartSummary({
   cart,
   customer,
-  setCustomer,
   discount,
   setDiscount,
   total,
   setCustomTotal,
   computedTotal,
-  customers,
-  onCreateCustomer,
   onCheckoutSuccess,
   onSaleComplete,
-  outlets = [],
   selectedOutlet = "",
 }: CartSummaryProps) {
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
@@ -85,8 +81,6 @@ export default function CartSummary({
 
   const confirmCheckout = async () => {
     try {
-      const selectedCustomer = customers.find((c) => c.value === customer);
-
       if (onSaleComplete) {
         onSaleComplete({
           outlet: selectedOutlet,
@@ -101,6 +95,7 @@ export default function CartSummary({
       success("Sale completed successfully!");
       setCheckoutModalOpen(false);
       onCheckoutSuccess();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       error("Failed to complete sale", err?.message);
     }
@@ -110,7 +105,7 @@ export default function CartSummary({
     <>
       <SectionHeader label="Summary" />
       <Card
-        className="border border-gray-200 mb-2"
+        className="mb-2 border border-gray-200"
         styles={{
           body: { padding: 12 },
         }}
@@ -118,17 +113,17 @@ export default function CartSummary({
         <div className="flex flex-col gap-1">
           <div className="flex justify-between">
             <Typography.Text type="secondary">Items</Typography.Text>
-            <Typography.Text className="font-medium text-base">
+            <Typography.Text className="text-base font-medium">
               {cart.reduce((sum, item) => sum + item.quantity, 0)}
             </Typography.Text>
           </div>
           <div className="flex justify-between">
             <Typography.Text type="secondary">Subtotal</Typography.Text>
-            <Typography.Text className="font-medium text-base">
+            <Typography.Text className="text-base font-medium">
               ৳{subtotal.toFixed(2)}
             </Typography.Text>
           </div>
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <Typography.Text type="secondary">Discount</Typography.Text>
             <Input
               type="number"
@@ -141,7 +136,7 @@ export default function CartSummary({
               prefix="৳"
             />
           </div>
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <Typography.Text type="secondary">Custom Total</Typography.Text>
             <Input
               type="number"
@@ -155,7 +150,7 @@ export default function CartSummary({
             />
           </div>
           <Divider className="my-1" />
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <Typography.Text strong className="text-lg">
               Total
             </Typography.Text>
@@ -168,7 +163,7 @@ export default function CartSummary({
       <Button
         type="primary"
         size="large"
-        className="w-full rounded-xl font-semibold"
+        className="w-full font-semibold rounded-xl"
         onClick={handleCheckout}
         disabled={cart.length === 0 || !customer}
         icon={<Icon icon="mdi:cash-register" className="text-xl" />}
@@ -193,7 +188,7 @@ export default function CartSummary({
       >
         <div className="space-y-6">
           {/* Sale Summary */}
-          <Card size="small" className="bg-gray-50 border-none">
+          <Card size="small" className="border-none bg-gray-50">
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span>Subtotal:</span>
@@ -217,7 +212,7 @@ export default function CartSummary({
 
           {/* Payment Methods */}
           <div>
-            <div className="flex justify-between items-center mb-3">
+            <div className="flex items-center justify-between mb-3">
               <Typography.Title level={5} className="!mb-0">
                 Payment Methods
               </Typography.Title>
@@ -237,7 +232,7 @@ export default function CartSummary({
               {payments.map((payment, index) => (
                 <div
                   key={index}
-                  className="flex gap-2 items-center p-3 bg-white border border-gray-200 rounded-lg"
+                  className="flex items-center gap-2 p-3 bg-white border border-gray-200 rounded-lg"
                 >
                   <Select
                     value={payment.method}
@@ -296,7 +291,7 @@ export default function CartSummary({
             </div>
 
             {/* Payment Summary */}
-            <Card size="small" className="mt-3 bg-blue-50 border-blue-200">
+            <Card size="small" className="mt-3 border-blue-200 bg-blue-50">
               <div className="space-y-1">
                 <div className="flex justify-between text-sm">
                   <span>Total Amount:</span>
@@ -307,7 +302,7 @@ export default function CartSummary({
                   <span className="font-semibold">৳{paid.toFixed(2)}</span>
                 </div>
                 {due > 0 && (
-                  <div className="flex justify-between text-sm border-t border-blue-200 pt-1">
+                  <div className="flex justify-between pt-1 text-sm border-t border-blue-200">
                     <span>Due:</span>
                     <span className="font-semibold text-red-600">
                       ৳{due.toFixed(2)}

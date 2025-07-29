@@ -1,7 +1,5 @@
 export { outletsApi } from "./api";
 export type {
   Outlet,
-  OutletInput,
-  OutletInventory,
-  OutletStats,
+  OutletInput
 } from "./types";

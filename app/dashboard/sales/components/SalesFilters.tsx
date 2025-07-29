@@ -18,7 +18,9 @@ interface SalesFiltersProps {
   setCustomerFilter: (value: string) => void;
   productFilter: string;
   setProductFilter: (value: string) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onFilterChange: (key: keyof SalesHistoryFilters, value: any) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onDateRangeChange: (dates: any) => void;
   outletsData?: { data?: Array<{ _id: string; name: string }> };
   customersData?: {
@@ -48,9 +50,9 @@ export default function SalesFilters({
 }: SalesFiltersProps) {
   return (
     <Card className="border border-gray-200">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <div>
-          <label className="block text-sm font-medium mb-1">Search</label>
+          <label className="block mb-1 text-sm font-medium">Search</label>
           <Input
             placeholder="Search sales..."
             prefix={<SearchOutlined />}
@@ -64,7 +66,7 @@ export default function SalesFilters({
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label className="block mb-1 text-sm font-medium">
             Payment Method
           </label>
           <Select
@@ -86,7 +88,7 @@ export default function SalesFilters({
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Outlet</label>
+          <label className="block mb-1 text-sm font-medium">Outlet</label>
           <Select
             placeholder="Select Outlet"
             value={outletFilter}
@@ -106,7 +108,7 @@ export default function SalesFilters({
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Customer</label>
+          <label className="block mb-1 text-sm font-medium">Customer</label>
           <Select
             placeholder="Select Customer"
             value={customerFilter}
@@ -133,7 +135,7 @@ export default function SalesFilters({
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Product</label>
+          <label className="block mb-1 text-sm font-medium">Product</label>
           <Select
             placeholder="Select Product"
             value={productFilter}
@@ -160,7 +162,7 @@ export default function SalesFilters({
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Date Range</label>
+          <label className="block mb-1 text-sm font-medium">Date Range</label>
           <RangePicker
             onChange={onDateRangeChange}
             className="w-full"

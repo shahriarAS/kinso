@@ -113,7 +113,7 @@ export default function StockPage() {
     try {
       await refetchStock();
       toast.success("Stock data refreshed successfully");
-    } catch (error) {
+    } catch {
       toast.error("Failed to refresh stock data");
     }
   }, [refetchStock]);
@@ -138,7 +138,7 @@ export default function StockPage() {
         content: (
           <div>
             <p>Are you sure you want to delete this stock entry?</p>
-            <div className="mt-2 p-3 bg-gray-50 rounded">
+            <div className="p-3 mt-2 rounded bg-gray-50">
               <strong>Product:</strong> {productName}
               <br />
               <strong>Location:</strong>{" "}
@@ -160,6 +160,7 @@ export default function StockPage() {
             await deleteStock(stock._id).unwrap();
             toast.success("Stock deleted successfully");
             refetchStock();
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } catch (error: any) {
             toast.error(error?.data?.message || "Failed to delete stock");
           }
@@ -190,7 +191,7 @@ export default function StockPage() {
   // Loading state
   if (stockLoading && !stockData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <Spin size="large" />
       </div>
     );
@@ -199,8 +200,8 @@ export default function StockPage() {
   // Error state
   if (stockError) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-7xl mx-auto">
+      <div className="min-h-screen p-6 bg-gray-50">
+        <div className="mx-auto max-w-7xl">
           <Alert
             message="Error Loading Stock Data"
             description="There was an error loading the stock data. Please try refreshing the page."
@@ -218,8 +219,8 @@ export default function StockPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen p-6 bg-gray-50">
+      <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center justify-between">
@@ -227,7 +228,7 @@ export default function StockPage() {
               <h1 className="text-3xl font-bold text-gray-900">
                 Stock Management
               </h1>
-              <p className="text-gray-600 mt-2">
+              <p className="mt-2 text-gray-600">
                 Manage inventory across warehouses and outlets with real-time
                 tracking
               </p>
@@ -271,11 +272,11 @@ export default function StockPage() {
 
         {/* Stock Statistics */}
         {showStats && stockStats && (
-          <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white p-6 rounded-lg border border-gray-200">
+          <div className="grid grid-cols-1 gap-4 mb-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="p-6 bg-white border border-gray-200 rounded-lg">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
                     <BarChartOutlined className="w-4 h-4" />
                   </div>
                 </div>
@@ -290,11 +291,11 @@ export default function StockPage() {
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg  border border-gray-200">
+            <div className="p-6 bg-white border border-gray-200 rounded-lg">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <span className="text-green-600 font-semibold">$</span>
+                  <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
+                    <span className="font-semibold text-green-600">$</span>
                   </div>
                 </div>
                 <div className="ml-4">
@@ -308,7 +309,7 @@ export default function StockPage() {
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg  border border-gray-200">
+            <div className="p-6 bg-white border border-gray-200 rounded-lg">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div
@@ -346,7 +347,7 @@ export default function StockPage() {
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg  border border-gray-200">
+            <div className="p-6 bg-white border border-gray-200 rounded-lg">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div

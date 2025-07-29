@@ -4,7 +4,8 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import User from "@/features/users/model";
 import dbConnect from "@/lib/database";
-import { TokenPayload, Tokens, UserRole } from "@/features/auth";
+import { TokenPayload, Tokens } from "@/features/auth";
+import { UserRole } from "@/types";
 
 // JWT configuration with proper validation
 const JWT_SECRET = process.env.JWT_SECRET;

@@ -23,7 +23,7 @@ const menuItems = [
   {
     icon: "famicons:receipt-outline",
     label: "Sales History",
-    href: "/dashboard/sales/history",
+    href: "/dashboard/sales",
   },
   {
     icon: "lsicon:management-stockout-outline",
@@ -112,7 +112,7 @@ export default function DashboardSidebar() {
         </span>
         <span
           onClick={() => setCollapsed(!collapsed)}
-          className="cursor-pointer p-2 hover:bg-secondary/5 rounded-lg"
+          className="p-2 rounded-lg cursor-pointer hover:bg-secondary/5"
         >
           <Icon
             icon="lineicons:menu-cheesburger"
@@ -120,7 +120,7 @@ export default function DashboardSidebar() {
           />
         </span>
       </div>
-      <div className="flex flex-col gap-2 flex-1">
+      <div className="flex flex-col flex-1 gap-2">
         {menuItems.map((item) => (
           <Link
             key={item.href}
@@ -174,13 +174,13 @@ function ProfileMenu({ collapsed }: { collapsed: boolean }) {
           className="bg-secondary/30"
         />
         <div className="flex flex-col">
-          <span className="text-xs text-white font-medium">{email}</span>
+          <span className="text-xs font-medium text-white">{email}</span>
         </div>
       </div>
       <Button
         type="text"
         icon={<LogoutOutlined />}
-        className="w-full text-left text-red-500 hover:bg-red-50 hover:text-red-700 mt-2"
+        className="w-full mt-2 text-left text-red-500 hover:bg-red-50 hover:text-red-700"
         onClick={handleLogout}
         loading={isLoggingOut}
       >

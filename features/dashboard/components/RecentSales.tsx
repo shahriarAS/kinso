@@ -10,14 +10,14 @@ interface RecentSalesProps {
 const RecentSales: React.FC<RecentSalesProps> = ({ recentSales }) => {
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
-      case 'completed':
-        return 'green';
-      case 'pending':
-        return 'orange';
-      case 'cancelled':
-        return 'red';
+      case "completed":
+        return "green";
+      case "pending":
+        return "orange";
+      case "cancelled":
+        return "red";
       default:
-        return 'default';
+        return "default";
     }
   };
 
@@ -50,7 +50,7 @@ const RecentSales: React.FC<RecentSalesProps> = ({ recentSales }) => {
             dataIndex: "customerName",
             key: "customerName",
             render: (value: string) => (
-              <span className="font-medium">{value || 'Walk-in Customer'}</span>
+              <span className="font-medium">{value || "Walk-in Customer"}</span>
             ),
           },
           {
@@ -97,7 +97,7 @@ const RecentSales: React.FC<RecentSalesProps> = ({ recentSales }) => {
                 </span>
               );
             },
-          }
+          },
         ]}
       />
     </Card>

@@ -15,7 +15,6 @@ import { stockApi } from "@/features/stock";
 import { salesApi } from "@/features/sales";
 import { demandApi } from "@/features/demand";
 import { discountsApi } from "@/features/discounts";
-import { reportsApi } from "@/features/reports";
 
 const store = configureStore({
   reducer: {
@@ -34,8 +33,7 @@ const store = configureStore({
     [stockApi.reducerPath]: stockApi.reducer,
     [salesApi.reducerPath]: salesApi.reducer,
     [demandApi.reducerPath]: demandApi.reducer,
-    [discountsApi.reducerPath]: discountsApi.reducer,
-    [reportsApi.reducerPath]: reportsApi.reducer,
+    [discountsApi.reducerPath]: discountsApi.reducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -57,8 +55,7 @@ const store = configureStore({
       stockApi.middleware,
       salesApi.middleware,
       demandApi.middleware,
-      discountsApi.middleware,
-      reportsApi.middleware,
+      discountsApi.middleware
     ),
 });
 

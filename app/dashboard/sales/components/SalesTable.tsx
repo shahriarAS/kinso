@@ -4,6 +4,7 @@ import { Card, Table, Space, Button, Tag } from "antd";
 import { EyeOutlined, DownloadOutlined } from "@ant-design/icons";
 
 interface SalesTableProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   salesData: any;
   isLoading: boolean;
   currentPage: number;
@@ -39,6 +40,7 @@ export default function SalesTable({
       title: "Customer",
       dataIndex: ["customer", "name"],
       key: "customer",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: (customerName: string, record: any) => {
         if (customerName) {
           return (
@@ -55,6 +57,7 @@ export default function SalesTable({
       title: "Items",
       dataIndex: "items",
       key: "items",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: (items: any[]) => items?.length || 0,
     },
     {
@@ -71,6 +74,7 @@ export default function SalesTable({
       title: "Paid Amount",
       dataIndex: "paymentMethods",
       key: "paidAmount",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: (methods: any[]) => {
         const paidAmount =
           methods?.reduce((sum, method) => sum + (method.amount || 0), 0) || 0;
@@ -84,9 +88,11 @@ export default function SalesTable({
     {
       title: "Due Amount",
       key: "dueAmount",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: (record: any) => {
         const paidAmount =
           record.paymentMethods?.reduce(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (sum: number, method: any) => sum + (method.amount || 0),
             0,
           ) || 0;
@@ -124,6 +130,7 @@ export default function SalesTable({
     {
       title: "Actions",
       key: "actions",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: (_: any, record: any) => (
         <Space>
           <Button
@@ -153,6 +160,7 @@ export default function SalesTable({
         pagination={{
           current: currentPage,
           pageSize,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           total: (salesData as any)?.pagination?.total || 0,
           showSizeChanger: true,
           showQuickJumper: true,

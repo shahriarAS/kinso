@@ -1,5 +1,5 @@
 "use client";
-import { Modal, Form, Input, Button, Select } from "antd";
+import { Modal, Form, Input, Button } from "antd";
 import { useCreateCustomerMutation } from "@/features/customers";
 import type { CustomerInput } from "@/features/customers";
 import { useNotification } from "@/hooks/useNotification";
@@ -36,6 +36,7 @@ export default function CustomerModal({
         form.resetFields();
         onClose();
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       showError("Failed to create customer", error.data?.message);
     }
@@ -87,7 +88,7 @@ export default function CustomerModal({
         </Form.Item>
 
         <Form.Item className="mb-0">
-          <div className="flex gap-2 justify-end">
+          <div className="flex justify-end gap-2">
             <Button onClick={onClose}>Cancel</Button>
             <Button type="primary" htmlType="submit" loading={isLoading}>
               Create Customer

@@ -10,11 +10,7 @@ interface ProductGridProps {
   selectedOutlet: string;
 }
 
-export default function ProductGrid({
-  stocks,
-  onAdd,
-  selectedOutlet,
-}: ProductGridProps) {
+export default function ProductGrid({ stocks, onAdd }: ProductGridProps) {
   const getCategoryName = (
     category: string | { _id: string; name: string },
   ) => {
@@ -34,7 +30,7 @@ export default function ProductGrid({
   const isLowStock = (quantity: number) => quantity <= 5;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+    <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
       {stocks.map((stock) => {
         if (!stock.product) return null;
 
@@ -50,7 +46,7 @@ export default function ProductGrid({
           >
             <div className="flex items-center gap-3 mb-1">
               <div className="flex flex-col flex-1">
-                <span className="font-semibold text-base text-primary line-clamp-3 leading-tight break-words max-w-full">
+                <span className="max-w-full text-base font-semibold leading-tight break-words text-primary line-clamp-3">
                   {product.name}
                 </span>
                 <span className="text-sm text-gray-500">
@@ -94,7 +90,7 @@ export default function ProductGrid({
             <Button
               type="primary"
               size="large"
-              className="w-full flex items-center justify-center gap-2 font-semibold mt-auto py-3 text-lg rounded-sm"
+              className="flex items-center justify-center w-full gap-2 py-3 mt-auto text-lg font-semibold rounded-sm"
               onClick={() => onAdd(stock)}
               icon={<Icon icon="mdi:cart-plus" className="text-2xl" />}
               disabled={stockQuantity === 0}

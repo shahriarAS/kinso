@@ -36,7 +36,7 @@ export default function GenericFilters<T = any>({
   initialValues,
   onFiltersChange,
   gridCols = 4,
-  className = "border border-gray-300 rounded-lg p-4 bg-white",
+  className = "p-4 bg-white border border-gray-300 rounded-lg",
   showReset = false,
   resetText = "Reset",
   onReset,

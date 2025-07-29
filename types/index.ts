@@ -36,6 +36,18 @@ export const DEMAND_STATUSES: DemandStatus[] = [
   "ConvertedToStock",
 ];
 
+// Notification types
+export type NotificationType = "success" | "error" | "warning" | "info";
+
+export interface Notification {
+  _id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  read: boolean;
+  timestamp: string;
+}
+
 // Standard response structures
 export interface ApiResponse<T = any> {
   success: boolean;

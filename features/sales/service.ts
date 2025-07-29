@@ -131,7 +131,7 @@ export async function handlePost(request: NextRequest) {
     });
     
     const sequenceNumber = String(todayCount + 1).padStart(3, '0');
-    const saleId = `S-${year}${month}${day}${hour}${minute}-${sequenceNumber}`;
+    const saleId = `S-${year}${month}${day}-${sequenceNumber}`;
 
     // Get user from auth
     const userId = authResult.user?._id;
